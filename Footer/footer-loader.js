@@ -14,7 +14,7 @@ class FooterLoader {
 
     async loadFooter() {
         try {
-            const response = await fetch('/footer/footer.html');
+            const response = await fetch('../Footer/footer.html');
             const html = await response.text();
             this.footerContainer.innerHTML = html;
         } catch (error) {
@@ -25,11 +25,11 @@ class FooterLoader {
 
     initializeFooterScripts() {
         // Load footer CSS
-        this.loadCSS('/footer/footer.css');
+        this.loadCSS('../Footer/footer.css');
         
         // Load footer JS
         const script = document.createElement('script');
-        script.src = '/footer/footer.js';
+        script.src = '../Footer/footer.js';
         script.onload = () => {
             if (window.footerAPI) {
                 window.footerAPI.init();
