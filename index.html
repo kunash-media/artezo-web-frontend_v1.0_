@@ -10,6 +10,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link rel="stylesheet" href="./Header/header.css" />
+  <link rel="stylesheet" href="./index.css">
 
   <!-- Optional: your Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -476,11 +477,1342 @@
     </section>
   </div>
 
+  <!-- Suggested Products Section -->
+  <section class="-mt-6 py-8 px-4 sm:px-6 lg:px-8">
+    <!-- Curved Container -->
+    <div
+      class="max-w-7xl mx-auto bg-gradient-to-br from-teal-50 via-white to-teal-100 rounded-[32px] border border-teal-100 shadow-sm p-6">
 
+      <!-- Title -->
+      <div class="mb-6">
+        <h2 class="text-xl sm:text-3xl font-normal font-zain text-primary">
+          Suggested <span class="font-bold text-accent">for you</span>
+        </h2>
+      </div>
+
+      <!-- Slider Wrapper -->
+      <div class="relative group">
+
+        <!-- LEFT ARROW -->
+        <button id="scrollLeft"
+          class="hidden sm:flex absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-white border border-gray-200 rounded-full shadow items-center justify-center opacity-0 group-hover:opacity-100 transition hover:bg-accent hover:text-white">
+          <i class="fa-solid fa-chevron-left text-sm"></i>
+        </button>
+
+        <!-- SCROLL CONTAINER -->
+        <div id="suggestedScroll"
+          class="flex gap-4 overflow-x-auto scroll-smooth pb-4 snap-x snap-mandatory scrollbar-hide">
+
+          <!-- PRODUCT CARD -->
+          <!-- Card 1 -->
+          <div
+            class="flex-none w-[170px] sm:w-[190px] lg:w-[210px] bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition snap-start">
+
+            <div class="relative aspect-square overflow-hidden rounded-t-xl bg-gray-50">
+
+              <img src="https://images.unsplash.com/photo-1605647540924-852acf2e6edc?w=500"
+                class="w-full h-full object-cover hover:scale-105 transition duration-500">
+
+              <button
+                class="absolute top-2 right-2 w-7 h-7 bg-white rounded-full shadow flex items-center justify-center">
+                <i class="fa-regular fa-heart text-sm"></i>
+              </button>
+
+              <span class="absolute top-2 left-2 text-xs bg-accent text-white px-2 py-0.5 rounded-full">
+                -40%
+              </span>
+            </div>
+
+            <div class="p-3">
+              <p class="text-xs text-gray-400 uppercase mb-1">
+                Photo Frames
+              </p>
+
+              <h3 class="text-sm font-medium text-primary mb-1 line-clamp-2">
+                Rustic Wooden Photo Frame
+              </h3>
+
+              <div class="flex items-center gap-2 text-sm">
+                <span class="text-accent font-bold">₹499</span>
+                <span class="text-gray-400 line-through text-xs">₹899</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div
+            class="flex-none w-[170px] sm:w-[190px] lg:w-[210px] bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition snap-start">
+            <div class="relative aspect-square overflow-hidden rounded-t-xl bg-gray-50">
+              <img src="https://images.unsplash.com/photo-1563861826100-9cb8680ae9e2?w=500"
+                class="w-full h-full object-cover hover:scale-105 transition">
+              <button
+                class="absolute top-2 right-2 w-7 h-7 bg-white rounded-full shadow flex items-center justify-center">
+                <i class="fa-regular fa-heart"></i>
+              </button>
+            </div>
+            <div class="p-3">
+              <p class="text-xs text-gray-400 uppercase mb-1">Wall Clock</p>
+              <h3 class="text-sm font-medium text-primary mb-1">Minimalist Wall Clock</h3>
+              <div class="flex gap-2 text-sm">
+                <span class="text-accent font-bold">₹1299</span>
+                <span class="text-gray-400 line-through text-xs">₹2499</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div
+            class="flex-none w-[170px] sm:w-[190px] lg:w-[210px] bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition snap-start">
+            <div class="relative aspect-square overflow-hidden rounded-t-xl bg-gray-50">
+              <img src="https://images.unsplash.com/photo-1612196808214-b3c8a9926a1e?w=500"
+                class="w-full h-full object-cover hover:scale-105 transition">
+              <button
+                class="absolute top-2 right-2 w-7 h-7 bg-white rounded-full shadow flex items-center justify-center">
+                <i class="fa-regular fa-heart"></i>
+              </button>
+            </div>
+            <div class="p-3">
+              <p class="text-xs text-gray-400 uppercase mb-1">Vase</p>
+              <h3 class="text-sm font-medium text-primary mb-1">Ceramic Flower Vase</h3>
+              <div class="flex gap-2 text-sm">
+                <span class="text-accent font-bold">₹799</span>
+                <span class="text-gray-400 line-through text-xs">₹1499</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 4 -->
+          <div
+            class="flex-none w-[170px] sm:w-[190px] lg:w-[210px] bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition snap-start">
+            <div class="relative aspect-square overflow-hidden rounded-t-xl bg-gray-50">
+              <img src="https://images.unsplash.com/photo-1616046359529-24ee95cbc5f4?w=500"
+                class="w-full h-full object-cover hover:scale-105 transition">
+              <button
+                class="absolute top-2 right-2 w-7 h-7 bg-white rounded-full shadow flex items-center justify-center">
+                <i class="fa-regular fa-heart"></i>
+              </button>
+            </div>
+            <div class="p-3">
+              <p class="text-xs text-gray-400 uppercase mb-1">Nameplate</p>
+              <h3 class="text-sm font-medium text-primary mb-1">Brass Nameplate</h3>
+              <div class="flex gap-2 text-sm">
+                <span class="text-accent font-bold">₹899</span>
+                <span class="text-gray-400 line-through text-xs">₹1599</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 5 -->
+          <div
+            class="flex-none w-[170px] sm:w-[190px] lg:w-[210px] bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition snap-start">
+            <div class="relative aspect-square overflow-hidden rounded-t-xl bg-gray-50">
+              <img src="https://images.unsplash.com/photo-1603006905003-be475563bc59?w=500"
+                class="w-full h-full object-cover hover:scale-105 transition">
+              <button
+                class="absolute top-2 right-2 w-7 h-7 bg-white rounded-full shadow flex items-center justify-center">
+                <i class="fa-regular fa-heart"></i>
+              </button>
+            </div>
+            <div class="p-3">
+              <p class="text-xs text-gray-400 uppercase mb-1">Candles</p>
+              <h3 class="text-sm font-medium text-primary mb-1">Lavender Candle Set</h3>
+              <div class="flex gap-2 text-sm">
+                <span class="text-accent font-bold">₹1099</span>
+                <span class="text-gray-400 line-through text-xs">₹1999</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 6 -->
+          <div
+            class="flex-none w-[170px] sm:w-[190px] lg:w-[210px] bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition snap-start">
+            <div class="relative aspect-square overflow-hidden rounded-t-xl bg-gray-50">
+              <img src="https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=500"
+                class="w-full h-full object-cover hover:scale-105 transition">
+              <button
+                class="absolute top-2 right-2 w-7 h-7 bg-white rounded-full shadow flex items-center justify-center">
+                <i class="fa-regular fa-heart"></i>
+              </button>
+            </div>
+            <div class="p-3">
+              <p class="text-xs text-gray-400 uppercase mb-1">Wall Art</p>
+              <h3 class="text-sm font-medium text-primary mb-1">Abstract Canvas Art</h3>
+              <div class="flex gap-2 text-sm">
+                <span class="text-accent font-bold">₹2499</span>
+                <span class="text-gray-400 line-through text-xs">₹4999</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 7 -->
+          <div
+            class="flex-none w-[170px] sm:w-[190px] lg:w-[210px] bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition snap-start">
+            <div class="relative aspect-square overflow-hidden rounded-t-xl bg-gray-50">
+              <img src="https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=500"
+                class="w-full h-full object-cover hover:scale-105 transition">
+              <button
+                class="absolute top-2 right-2 w-7 h-7 bg-white rounded-full shadow flex items-center justify-center">
+                <i class="fa-regular fa-heart"></i>
+              </button>
+            </div>
+            <div class="p-3">
+              <p class="text-xs text-gray-400 uppercase mb-1">Trophy</p>
+              <h3 class="text-sm font-medium text-primary mb-1">Corporate Trophy</h3>
+              <div class="flex gap-2 text-sm">
+                <span class="text-accent font-bold">₹3999</span>
+                <span class="text-gray-400 line-through text-xs">₹5999</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 8 -->
+          <div
+            class="flex-none w-[170px] sm:w-[190px] lg:w-[210px] bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition snap-start">
+            <div class="relative aspect-square overflow-hidden rounded-t-xl bg-gray-50">
+              <img src="https://images.unsplash.com/photo-1607083206868-6c7a4659d2c7?w=500"
+                class="w-full h-full object-cover hover:scale-105 transition">
+              <button
+                class="absolute top-2 right-2 w-7 h-7 bg-white rounded-full shadow flex items-center justify-center">
+                <i class="fa-regular fa-heart"></i>
+              </button>
+            </div>
+            <div class="p-3">
+              <p class="text-xs text-gray-400 uppercase mb-1">Gift Box</p>
+              <h3 class="text-sm font-medium text-primary mb-1">Premium Gift Set</h3>
+              <div class="flex gap-2 text-sm">
+                <span class="text-accent font-bold">₹1599</span>
+                <span class="text-gray-400 line-through text-xs">₹2999</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT ARROW -->
+        <button id="scrollRight"
+          class="hidden sm:flex absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-white border border-gray-200 rounded-full shadow items-center justify-center opacity-0 group-hover:opacity-100 transition hover:bg-accent hover:text-white">
+          <i class="fa-solid fa-chevron-right text-sm"></i>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Banner Section -->
+  <section class="py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- Banner 1 -->
+        <a href="/products/photo-frames" class="relative block overflow-hidden rounded-2xl group">
+
+          <img src="./Images/deal1.jpg" alt="Photo Frames"
+            class="w-full h-[220px] sm:h-[260px] lg:h-[300px] object-cover transition duration-500 group-hover:scale-105">
+
+          <!-- Text -->
+          <div class="absolute top-6 left-6 text-white" style="text-shadow:0 2px 6px rgba(0,0,0,0.5)">
+            <h3 class="text-xl sm:text-2xl lg:text-3xl text-[#1D3C4A] font-lexend font-semibold">
+              Corporate Gifting
+            </h3>
+
+            <p class="text-sm sm:text-base text-[#1D3C4A] font-lexend mt-1 max-w-xs">
+              Premium corporate gifts for employees, clients & events
+            </p>
+          </div>
+        </a>
+
+
+        <!-- Banner 2 -->
+        <a href="/products/wall-decor" class="relative block overflow-hidden rounded-2xl group">
+
+          <img src="./Images/deal2.jfif" alt="Wall Decor"
+            class="w-full h-[220px] sm:h-[260px] lg:h-[300px] object-cover transition duration-500 group-hover:scale-105">
+
+          <!-- Text -->
+          <!-- <div class="absolute left-6 bottom-6 text-white">
+
+            <h3 class="text-xl sm:text-2xl lg:text-3xl font-semibold">
+              Elegant Wall Decor
+            </h3>
+
+            <p class="text-sm sm:text-base mt-1">
+              Transform your space with style
+            </p>
+
+          </div> -->
+        </a>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Trending Products Section -->
+  <section class="py-10 bg-gray-50">
+    <!-- HEADER -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
+      <div class="flex items-center gap-4">
+        <!-- Accent Bar -->
+        <div class="w-1 h-10 bg-[#E39F32] rounded"></div>
+        <div>
+          <h2 class="text-4xl sm:text-4xl font-zain font-extrabold text-[#1D3C4A]">
+            Trending Products
+          </h2>
+          <p class="text-sm text-gray-500">
+            Popular picks customers love the most
+          </p>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ROW 1 -->
+    <div class="relative max-w-7xl mx-auto">
+
+      <!-- LEFT ARROW -->
+      <button onclick="scrollRow('row1',-1)"
+        class="absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow border flex items-center justify-center hover:bg-[#1D3C4A] hover:text-white transition">
+
+        <i class="fa-solid fa-chevron-left"></i>
+
+      </button>
+
+      <!-- RIGHT ARROW -->
+      <button onclick="scrollRow('row1',1)"
+        class="absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow border flex items-center justify-center hover:bg-[#1D3C4A] hover:text-white transition">
+
+        <i class="fa-solid fa-chevron-right"></i>
+
+      </button>
+
+      <div id="row1" class="overflow-x-auto scroll-smooth scrollbar-hide">
+        <div class="flex gap-6 w-max px-6">
+
+          <!-- PRODUCT CARD -->
+          <div
+            class="w-[230px] bg-white border border-gray-200 rounded-xl p-4 hover:shadow-xl transition duration-300 flex-shrink-0">
+            <div class="relative">
+              <img src="https://images.unsplash.com/photo-1605647540924-852acf2e6edc?w=400"
+                class="w-full h-[170px] object-cover rounded-lg">
+
+              <span class="absolute top-2 left-2 text-[11px] bg-[#E39F32] text-white px-2 py-0.5 rounded">
+                -30%
+              </span>
+
+              <button
+                class="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow flex items-center justify-center hover:text-red-500 hover:scale-110 transition">
+                <i class="fa-regular fa-heart text-sm"></i>
+              </button>
+            </div>
+
+            <h3 class="text-sm font-semibold text-[#1D3C4A] mt-3">Personalized LED Frame</h3>
+            <p class="text-xs text-gray-500">Photo Frames</p>
+
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-[#1D3C4A] font-semibold text-sm">₹799</span>
+              <span class="text-gray-400 line-through text-xs">₹999</span>
+            </div>
+
+            <button class="mt-3 w-full bg-[#1D3C4A] text-white text-sm py-2 rounded-md hover:bg-[#E39F32] transition">
+              Add to Cart
+            </button>
+          </div>
+
+
+          <!-- CARD -->
+          <div
+            class="w-[230px] bg-white border border-gray-200 rounded-xl p-4 hover:shadow-xl transition duration-300 flex-shrink-0">
+            <div class="relative">
+              <img src="https://images.unsplash.com/photo-1612196808214-b3c8a9926a1e?w=400"
+                class="w-full h-[170px] object-cover rounded-lg">
+
+              <button
+                class="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow flex items-center justify-center hover:text-red-500 hover:scale-110 transition">
+                <i class="fa-regular fa-heart text-sm"></i>
+              </button>
+            </div>
+
+            <h3 class="text-sm font-semibold text-[#1D3C4A] mt-3">Wooden Photo Frame</h3>
+            <p class="text-xs text-gray-500">Photo Frames</p>
+
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-[#1D3C4A] font-semibold text-sm">₹599</span>
+              <span class="text-gray-400 line-through text-xs">₹799</span>
+            </div>
+
+            <button class="mt-3 w-full bg-[#1D3C4A] text-white text-sm py-2 rounded-md hover:bg-[#E39F32] transition">
+              Add to Cart
+            </button>
+          </div>
+
+
+          <!-- CARD -->
+          <div
+            class="w-[230px] bg-white border border-gray-200 rounded-xl p-4 hover:shadow-xl transition duration-300 flex-shrink-0">
+            <div class="relative">
+              <img src="https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=400"
+                class="w-full h-[170px] object-cover rounded-lg">
+
+              <button
+                class="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow flex items-center justify-center hover:text-red-500 hover:scale-110 transition">
+                <i class="fa-regular fa-heart text-sm"></i>
+              </button>
+            </div>
+
+            <h3 class="text-sm font-semibold text-[#1D3C4A] mt-3">Minimal Wall Decor</h3>
+            <p class="text-xs text-gray-500">Wall Decor</p>
+
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-[#1D3C4A] font-semibold text-sm">₹999</span>
+              <span class="text-gray-400 line-through text-xs">₹1299</span>
+            </div>
+
+            <button class="mt-3 w-full bg-[#1D3C4A] text-white text-sm py-2 rounded-md hover:bg-[#E39F32] transition">
+              Add to Cart
+            </button>
+          </div>
+
+
+          <!-- CARD -->
+          <div
+            class="w-[230px] bg-white border border-gray-200 rounded-xl p-4 hover:shadow-xl transition duration-300 flex-shrink-0">
+            <div class="relative">
+              <img src="https://images.unsplash.com/photo-1603006905003-be475563bc59?w=400"
+                class="w-full h-[170px] object-cover rounded-lg">
+
+              <button
+                class="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow flex items-center justify-center hover:text-red-500 hover:scale-110 transition">
+                <i class="fa-regular fa-heart text-sm"></i>
+              </button>
+            </div>
+
+            <h3 class="text-sm font-semibold text-[#1D3C4A] mt-3">Home Decor Vase</h3>
+            <p class="text-xs text-gray-500">Home Decor</p>
+
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-[#1D3C4A] font-semibold text-sm">₹899</span>
+              <span class="text-gray-400 line-through text-xs">₹1199</span>
+            </div>
+
+            <button class="mt-3 w-full bg-[#1D3C4A] text-white text-sm py-2 rounded-md hover:bg-[#E39F32] transition">
+              Add to Cart
+            </button>
+          </div>
+
+
+
+          <!-- CARD -->
+          <div
+            class="w-[230px] bg-white border border-gray-200 rounded-xl p-4 hover:shadow-xl transition duration-300 flex-shrink-0">
+            <div class="relative">
+              <img src="https://images.unsplash.com/photo-1612196808214-b3c8a9926a1e?w=400"
+                class="w-full h-[170px] object-cover rounded-lg">
+
+              <button
+                class="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow flex items-center justify-center hover:text-red-500 hover:scale-110 transition">
+                <i class="fa-regular fa-heart text-sm"></i>
+              </button>
+            </div>
+
+            <h3 class="text-sm font-semibold text-[#1D3C4A] mt-3">Wooden Photo Frame</h3>
+            <p class="text-xs text-gray-500">Photo Frames</p>
+
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-[#1D3C4A] font-semibold text-sm">₹599</span>
+              <span class="text-gray-400 line-through text-xs">₹799</span>
+            </div>
+
+            <button class="mt-3 w-full bg-[#1D3C4A] text-white text-sm py-2 rounded-md hover:bg-[#E39F32] transition">
+              Add to Cart
+            </button>
+          </div>
+
+
+          <!-- CARD -->
+          <div
+            class="w-[230px] bg-white border border-gray-200 rounded-xl p-4 hover:shadow-xl transition duration-300 flex-shrink-0">
+            <div class="relative">
+              <img src="https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=400"
+                class="w-full h-[170px] object-cover rounded-lg">
+
+              <button
+                class="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow flex items-center justify-center hover:text-red-500 hover:scale-110 transition">
+                <i class="fa-regular fa-heart text-sm"></i>
+              </button>
+            </div>
+
+            <h3 class="text-sm font-semibold text-[#1D3C4A] mt-3">Minimal Wall Decor</h3>
+            <p class="text-xs text-gray-500">Wall Decor</p>
+
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-[#1D3C4A] font-semibold text-sm">₹999</span>
+              <span class="text-gray-400 line-through text-xs">₹1299</span>
+            </div>
+
+            <button class="mt-3 w-full bg-[#1D3C4A] text-white text-sm py-2 rounded-md hover:bg-[#E39F32] transition">
+              Add to Cart
+            </button>
+          </div>
+
+
+          <!-- CARD -->
+          <div
+            class="w-[230px] bg-white border border-gray-200 rounded-xl p-4 hover:shadow-xl transition duration-300 flex-shrink-0">
+            <div class="relative">
+              <img src="https://images.unsplash.com/photo-1603006905003-be475563bc59?w=400"
+                class="w-full h-[170px] object-cover rounded-lg">
+
+              <button
+                class="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow flex items-center justify-center hover:text-red-500 hover:scale-110 transition">
+                <i class="fa-regular fa-heart text-sm"></i>
+              </button>
+            </div>
+
+            <h3 class="text-sm font-semibold text-[#1D3C4A] mt-3">Home Decor Vase</h3>
+            <p class="text-xs text-gray-500">Home Decor</p>
+
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-[#1D3C4A] font-semibold text-sm">₹899</span>
+              <span class="text-gray-400 line-through text-xs">₹1199</span>
+            </div>
+
+            <button class="mt-3 w-full bg-[#1D3C4A] text-white text-sm py-2 rounded-md hover:bg-[#E39F32] transition">
+              Add to Cart
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+
+
+    <!-- ROW 2 -->
+    <div class="relative max-w-7xl mx-auto mt-8">
+
+      <!-- LEFT ARROW -->
+      <button onclick="scrollRow('row2',-1)"
+        class="absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow border flex items-center justify-center hover:bg-[#1D3C4A] hover:text-white transition">
+
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+
+      <!-- RIGHT ARROW -->
+      <button onclick="scrollRow('row2',1)"
+        class="absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow border flex items-center justify-center hover:bg-[#1D3C4A] hover:text-white transition">
+
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+
+
+      <div id="row2" class="overflow-x-auto scroll-smooth scrollbar-hide">
+
+        <div class="flex gap-6 w-max px-6">
+
+          <!-- PRODUCT CARD -->
+          <div
+            class="w-[230px] bg-white border border-gray-200 rounded-xl p-4 hover:shadow-xl transition duration-300 flex-shrink-0">
+
+            <div class="relative">
+
+              <img src="https://images.unsplash.com/photo-1563861826100-9cb8680ae9e2?w=400"
+                class="w-full h-[170px] object-cover rounded-lg">
+
+              <!-- Discount -->
+              <span class="absolute top-2 left-2 text-[11px] bg-[#E39F32] text-white px-2 py-0.5 rounded">
+                -25%
+              </span>
+
+              <!-- Wishlist -->
+              <button
+                class="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow flex items-center justify-center hover:text-red-500 hover:scale-110 transition">
+
+                <i class="fa-regular fa-heart text-sm"></i>
+              </button>
+
+            </div>
+
+            <h3 class="text-sm font-semibold text-[#1D3C4A] mt-3">Corporate Gift Box</h3>
+            <p class="text-xs text-gray-500">Corporate Gifts</p>
+
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-[#1D3C4A] font-semibold text-sm">₹999</span>
+              <span class="line-through text-gray-400 text-xs">₹1299</span>
+            </div>
+
+            <button class="mt-3 w-full bg-[#1D3C4A] text-white text-sm py-2 rounded-md hover:bg-[#E39F32] transition">
+              Add to Cart
+            </button>
+
+          </div>
+
+
+          <!-- CARD -->
+          <div
+            class="w-[230px] bg-white border border-gray-200 rounded-xl p-4 hover:shadow-xl transition duration-300 flex-shrink-0">
+
+            <div class="relative">
+
+              <img src="https://images.unsplash.com/photo-1607083206868-6c7a4659d2c7?w=400"
+                class="w-full h-[170px] object-cover rounded-lg">
+
+              <button
+                class="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow flex items-center justify-center hover:text-red-500 hover:scale-110 transition">
+
+                <i class="fa-regular fa-heart text-sm"></i>
+              </button>
+
+            </div>
+
+            <h3 class="text-sm font-semibold text-[#1D3C4A] mt-3">Personalized Gift Frame</h3>
+            <p class="text-xs text-gray-500">Personalized Gifts</p>
+
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-[#1D3C4A] font-semibold text-sm">₹799</span>
+              <span class="line-through text-gray-400 text-xs">₹1099</span>
+            </div>
+
+            <button class="mt-3 w-full bg-[#1D3C4A] text-white text-sm py-2 rounded-md hover:bg-[#E39F32] transition">
+              Add to Cart
+            </button>
+
+          </div>
+
+
+          <!-- CARD -->
+          <div
+            class="w-[230px] bg-white border border-gray-200 rounded-xl p-4 hover:shadow-xl transition duration-300 flex-shrink-0">
+
+            <div class="relative">
+
+              <img src="https://images.unsplash.com/photo-1605647540924-852acf2e6edc?w=400"
+                class="w-full h-[170px] object-cover rounded-lg">
+
+              <button
+                class="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow flex items-center justify-center hover:text-red-500 hover:scale-110 transition">
+
+                <i class="fa-regular fa-heart text-sm"></i>
+              </button>
+
+            </div>
+
+            <h3 class="text-sm font-semibold text-[#1D3C4A] mt-3">Classic Photo Frame</h3>
+            <p class="text-xs text-gray-500">Photo Frames</p>
+
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-[#1D3C4A] font-semibold text-sm">₹599</span>
+              <span class="line-through text-gray-400 text-xs">₹799</span>
+            </div>
+
+            <button class="mt-3 w-full bg-[#1D3C4A] text-white text-sm py-2 rounded-md hover:bg-[#E39F32] transition">
+              Add to Cart
+            </button>
+
+          </div>
+
+
+          <!-- CARD -->
+          <div
+            class="w-[230px] bg-white border border-gray-200 rounded-xl p-4 hover:shadow-xl transition duration-300 flex-shrink-0">
+
+            <div class="relative">
+
+              <img src="https://images.unsplash.com/photo-1607083206868-6c7a4659d2c7?w=400"
+                class="w-full h-[170px] object-cover rounded-lg">
+
+              <button
+                class="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow flex items-center justify-center hover:text-red-500 hover:scale-110 transition">
+
+                <i class="fa-regular fa-heart text-sm"></i>
+              </button>
+
+            </div>
+
+            <h3 class="text-sm font-semibold text-[#1D3C4A] mt-3">Personalized Gift Frame</h3>
+            <p class="text-xs text-gray-500">Personalized Gifts</p>
+
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-[#1D3C4A] font-semibold text-sm">₹799</span>
+              <span class="line-through text-gray-400 text-xs">₹1099</span>
+            </div>
+
+            <button class="mt-3 w-full bg-[#1D3C4A] text-white text-sm py-2 rounded-md hover:bg-[#E39F32] transition">
+              Add to Cart
+            </button>
+
+          </div>
+
+
+          <!-- CARD -->
+          <div
+            class="w-[230px] bg-white border border-gray-200 rounded-xl p-4 hover:shadow-xl transition duration-300 flex-shrink-0">
+
+            <div class="relative">
+
+              <img src="https://images.unsplash.com/photo-1605647540924-852acf2e6edc?w=400"
+                class="w-full h-[170px] object-cover rounded-lg">
+
+              <button
+                class="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow flex items-center justify-center hover:text-red-500 hover:scale-110 transition">
+
+                <i class="fa-regular fa-heart text-sm"></i>
+              </button>
+
+            </div>
+
+            <h3 class="text-sm font-semibold text-[#1D3C4A] mt-3">Classic Photo Frame</h3>
+            <p class="text-xs text-gray-500">Photo Frames</p>
+
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-[#1D3C4A] font-semibold text-sm">₹599</span>
+              <span class="line-through text-gray-400 text-xs">₹799</span>
+            </div>
+
+            <button class="mt-3 w-full bg-[#1D3C4A] text-white text-sm py-2 rounded-md hover:bg-[#E39F32] transition">
+              Add to Cart
+            </button>
+
+          </div>
+
+
+
+          <!-- CARD -->
+          <div
+            class="w-[230px] bg-white border border-gray-200 rounded-xl p-4 hover:shadow-xl transition duration-300 flex-shrink-0">
+
+            <div class="relative">
+
+              <img src="https://images.unsplash.com/photo-1607083206868-6c7a4659d2c7?w=400"
+                class="w-full h-[170px] object-cover rounded-lg">
+
+              <button
+                class="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow flex items-center justify-center hover:text-red-500 hover:scale-110 transition">
+
+                <i class="fa-regular fa-heart text-sm"></i>
+              </button>
+
+            </div>
+
+            <h3 class="text-sm font-semibold text-[#1D3C4A] mt-3">Personalized Gift Frame</h3>
+            <p class="text-xs text-gray-500">Personalized Gifts</p>
+
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-[#1D3C4A] font-semibold text-sm">₹799</span>
+              <span class="line-through text-gray-400 text-xs">₹1099</span>
+            </div>
+
+            <button class="mt-3 w-full bg-[#1D3C4A] text-white text-sm py-2 rounded-md hover:bg-[#E39F32] transition">
+              Add to Cart
+            </button>
+
+          </div>
+
+
+          <!-- CARD -->
+          <div
+            class="w-[230px] bg-white border border-gray-200 rounded-xl p-4 hover:shadow-xl transition duration-300 flex-shrink-0">
+
+            <div class="relative">
+
+              <img src="https://images.unsplash.com/photo-1605647540924-852acf2e6edc?w=400"
+                class="w-full h-[170px] object-cover rounded-lg">
+
+              <button
+                class="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow flex items-center justify-center hover:text-red-500 hover:scale-110 transition">
+
+                <i class="fa-regular fa-heart text-sm"></i>
+              </button>
+
+            </div>
+
+            <h3 class="text-sm font-semibold text-[#1D3C4A] mt-3">Classic Photo Frame</h3>
+            <p class="text-xs text-gray-500">Photo Frames</p>
+
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-[#1D3C4A] font-semibold text-sm">₹599</span>
+              <span class="line-through text-gray-400 text-xs">₹799</span>
+            </div>
+
+            <button class="mt-3 w-full bg-[#1D3C4A] text-white text-sm py-2 rounded-md hover:bg-[#E39F32] transition">
+              Add to Cart
+            </button>
+
+          </div>
+
+
+          <!-- CARD -->
+          <div
+            class="w-[230px] bg-white border border-gray-200 rounded-xl p-4 hover:shadow-xl transition duration-300 flex-shrink-0">
+
+            <div class="relative">
+
+              <img src="https://images.unsplash.com/photo-1607083206868-6c7a4659d2c7?w=400"
+                class="w-full h-[170px] object-cover rounded-lg">
+
+              <button
+                class="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow flex items-center justify-center hover:text-red-500 hover:scale-110 transition">
+
+                <i class="fa-regular fa-heart text-sm"></i>
+              </button>
+
+            </div>
+
+            <h3 class="text-sm font-semibold text-[#1D3C4A] mt-3">Personalized Gift Frame</h3>
+            <p class="text-xs text-gray-500">Personalized Gifts</p>
+
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-[#1D3C4A] font-semibold text-sm">₹799</span>
+              <span class="line-through text-gray-400 text-xs">₹1099</span>
+            </div>
+
+            <button class="mt-3 w-full bg-[#1D3C4A] text-white text-sm py-2 rounded-md hover:bg-[#E39F32] transition">
+              Add to Cart
+            </button>
+
+          </div>
+
+
+          <!-- CARD -->
+          <div
+            class="w-[230px] bg-white border border-gray-200 rounded-xl p-4 hover:shadow-xl transition duration-300 flex-shrink-0">
+
+            <div class="relative">
+
+              <img src="https://images.unsplash.com/photo-1605647540924-852acf2e6edc?w=400"
+                class="w-full h-[170px] object-cover rounded-lg">
+
+              <button
+                class="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow flex items-center justify-center hover:text-red-500 hover:scale-110 transition">
+
+                <i class="fa-regular fa-heart text-sm"></i>
+              </button>
+
+            </div>
+
+            <h3 class="text-sm font-semibold text-[#1D3C4A] mt-3">Classic Photo Frame</h3>
+            <p class="text-xs text-gray-500">Photo Frames</p>
+
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-[#1D3C4A] font-semibold text-sm">₹599</span>
+              <span class="line-through text-gray-400 text-xs">₹799</span>
+            </div>
+
+            <button class="mt-3 w-full bg-[#1D3C4A] text-white text-sm py-2 rounded-md hover:bg-[#E39F32] transition">
+              Add to Cart
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section class="py-8 px-4 sm:px-6 lg:px-8 mt-8 
+bg-[url('./Images/servicebg.jfif')] 
+bg-cover bg-center bg-no-repeat">
+
+    <div class="max-w-7xl mx-auto">
+
+      <!-- Rounded container -->
+      <div class="rounded-2xl bg-white/85 backdrop-blur-md shadow-md px-6 py-5">
+
+        <div class="grid grid-cols-2 md:grid-cols-4">
+
+          <!-- Service -->
+          <div class="flex items-center gap-4 px-5 py-4 border-r border-[#1D3C4A]/50 group hover:scale-105 transition">
+
+            <div class="bg-[#e8f4f7] p-3 rounded-xl text-[#1D3C4A] 
+    group-hover:bg-[#1D3C4A] group-hover:text-white transition">
+              <i class="fa-solid fa-truck text-lg"></i>
+            </div>
+
+            <div>
+              <p class="text-sm font-semibold text-[#1D3C4A]">Free Delivery</p>
+              <p class="text-xs text-gray-500">Orders above ₹499</p>
+            </div>
+
+          </div>
+
+          <!-- Service -->
+          <div
+            class="flex items-center gap-4 px-5 py-4 md:border-r border-[#1D3C4A]/50 group hover:scale-105 transition">
+
+            <div class="bg-[#e8f4f7] p-3 rounded-xl text-[#1D3C4A] 
+    group-hover:bg-[#1D3C4A] group-hover:text-white transition">
+              <i class="fa-solid fa-rotate-left text-lg"></i>
+            </div>
+
+            <div>
+              <p class="text-sm font-semibold text-[#1D3C4A]">Easy Returns</p>
+              <p class="text-xs text-gray-500">7 Day Return Policy</p>
+            </div>
+
+          </div>
+
+          <!-- Service -->
+          <div class="flex items-center gap-4 px-5 py-4 border-r border-[#1D3C4A]/50 group hover:scale-105 transition">
+
+            <div class="bg-[#e8f4f7] p-3 rounded-xl text-[#1D3C4A] 
+    group-hover:bg-[#1D3C4A] group-hover:text-white transition">
+              <i class="fa-solid fa-shield-halved text-lg"></i>
+            </div>
+
+            <div>
+              <p class="text-sm font-semibold text-[#1D3C4A]">Secure Payment</p>
+              <p class="text-xs text-gray-500">100% Safe Checkout</p>
+            </div>
+
+          </div>
+
+          <!-- Service -->
+          <div class="flex items-center gap-4 px-5 py-4 group hover:scale-105 transition">
+
+            <div class="bg-[#e8f4f7] p-3 rounded-xl text-[#1D3C4A] 
+    group-hover:bg-[#1D3C4A] group-hover:text-white transition">
+              <i class="fa-solid fa-headset text-lg"></i>
+            </div>
+
+            <div>
+              <p class="text-sm font-semibold text-[#1D3C4A]">24/7 Support</p>
+              <p class="text-xs text-gray-500">Customer Assistance</p>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- PHOTO FRAMES SECTION -->
+  <section class="-mt-4 py-7 px-4 sm:px-6 lg:px-8">
+
+    <!-- Wider Container -->
+    <div
+      class="max-w-[1450px] mx-auto bg-gradient-to-br from-teal-50 via-white to-teal-100 rounded-[32px] border border-teal-100 shadow-sm p-6">
+      <!-- Title -->
+      <div class="mb-2">
+        <h2 class="text-xl sm:text-3xl font-semibold font-zain text-[#1D3C4A]">
+          Photo <span class="text-[#e39f32]">Frames</span>
+        </h2>
+        <p class="text-gray-500 text-xs mt-0.5">
+          Capture and frame your beautiful memories
+        </p>
+      </div>
+
+      <!-- Slider -->
+      <div class="relative group">
+
+        <!-- LEFT ARROW -->
+        <button id="pfLeft"
+          class="hidden sm:flex absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-white border rounded-full shadow items-center justify-center opacity-0 group-hover:opacity-100 transition hover:bg-[#1D3C4A] hover:text-white">
+          <i class="fa-solid fa-chevron-left text-sm"></i>
+        </button>
+
+        <!-- SCROLL AREA -->
+        <div id="photoFramesContainer" class="flex gap-4 p-4 snap-x overflow-x-hidden">
+
+          <!-- Example Card -->
+          <div
+            class="flex-none w-[170px] sm:w-[200px] lg:w-[220px] bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition snap-start">
+            <div class="relative aspect-[4/3] overflow-hidden rounded-t-xl bg-gray-50">
+              <img src="https://images.unsplash.com/photo-1605647540924-852acf2e6edc?w=500"
+                class="w-full h-full object-cover hover:scale-105 transition duration-500">
+              <button
+                class="absolute top-2 right-2 w-7 h-7 bg-white rounded-full shadow flex items-center justify-center">
+                <i class="fa-regular fa-heart text-xs"></i>
+              </button>
+              <span
+                class="absolute top-2 left-2 text-[10px] bg-[#e39f32] text-white px-2 py-0.5 rounded-full">-40%</span>
+            </div>
+            <div class="p-2.5">
+              <p class="text-[10px] text-gray-400 uppercase mb-1">Photo Frames</p>
+              <h3 class="text-xs font-medium text-[#1D3C4A] mb-1 line-clamp-2">Rustic Wooden Photo Frame</h3>
+              <div class="flex items-center gap-2 text-xs">
+                <span class="text-[#e39f32] font-bold">₹499</span>
+                <span class="text-gray-400 line-through text-[10px]">₹899</span>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- Example Card -->
+          <div
+            class="flex-none w-[170px] sm:w-[200px] lg:w-[220px] bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition snap-start">
+            <div class="relative aspect-[4/3] overflow-hidden rounded-t-xl bg-gray-50">
+              <img src="https://images.unsplash.com/photo-1605647540924-852acf2e6edc?w=500"
+                class="w-full h-full object-cover hover:scale-105 transition duration-500">
+              <button
+                class="absolute top-2 right-2 w-7 h-7 bg-white rounded-full shadow flex items-center justify-center">
+                <i class="fa-regular fa-heart text-xs"></i>
+              </button>
+              <span
+                class="absolute top-2 left-2 text-[10px] bg-[#e39f32] text-white px-2 py-0.5 rounded-full">-40%</span>
+            </div>
+            <div class="p-2.5">
+              <p class="text-[10px] text-gray-400 uppercase mb-1">Photo Frames</p>
+              <h3 class="text-xs font-medium text-[#1D3C4A] mb-1 line-clamp-2">Rustic Wooden Photo Frame</h3>
+              <div class="flex items-center gap-2 text-xs">
+                <span class="text-[#e39f32] font-bold">₹499</span>
+                <span class="text-gray-400 line-through text-[10px]">₹899</span>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- Example Card -->
+          <div
+            class="flex-none w-[170px] sm:w-[200px] lg:w-[220px] bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition snap-start">
+            <div class="relative aspect-[4/3] overflow-hidden rounded-t-xl bg-gray-50">
+              <img src="https://images.unsplash.com/photo-1605647540924-852acf2e6edc?w=500"
+                class="w-full h-full object-cover hover:scale-105 transition duration-500">
+              <button
+                class="absolute top-2 right-2 w-7 h-7 bg-white rounded-full shadow flex items-center justify-center">
+                <i class="fa-regular fa-heart text-xs"></i>
+              </button>
+              <span
+                class="absolute top-2 left-2 text-[10px] bg-[#e39f32] text-white px-2 py-0.5 rounded-full">-40%</span>
+            </div>
+            <div class="p-2.5">
+              <p class="text-[10px] text-gray-400 uppercase mb-1">Photo Frames</p>
+              <h3 class="text-xs font-medium text-[#1D3C4A] mb-1 line-clamp-2">Rustic Wooden Photo Frame</h3>
+              <div class="flex items-center gap-2 text-xs">
+                <span class="text-[#e39f32] font-bold">₹499</span>
+                <span class="text-gray-400 line-through text-[10px]">₹899</span>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- Example Card -->
+          <div
+            class="flex-none w-[170px] sm:w-[200px] lg:w-[220px] bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition snap-start">
+            <div class="relative aspect-[4/3] overflow-hidden rounded-t-xl bg-gray-50">
+              <img src="https://images.unsplash.com/photo-1605647540924-852acf2e6edc?w=500"
+                class="w-full h-full object-cover hover:scale-105 transition duration-500">
+              <button
+                class="absolute top-2 right-2 w-7 h-7 bg-white rounded-full shadow flex items-center justify-center">
+                <i class="fa-regular fa-heart text-xs"></i>
+              </button>
+              <span
+                class="absolute top-2 left-2 text-[10px] bg-[#e39f32] text-white px-2 py-0.5 rounded-full">-40%</span>
+            </div>
+            <div class="p-2.5">
+              <p class="text-[10px] text-gray-400 uppercase mb-1">Photo Frames</p>
+              <h3 class="text-xs font-medium text-[#1D3C4A] mb-1 line-clamp-2">Rustic Wooden Photo Frame</h3>
+              <div class="flex items-center gap-2 text-xs">
+                <span class="text-[#e39f32] font-bold">₹499</span>
+                <span class="text-gray-400 line-through text-[10px]">₹899</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Example Card -->
+          <div
+            class="flex-none w-[170px] sm:w-[200px] lg:w-[220px] bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition snap-start">
+            <div class="relative aspect-[4/3] overflow-hidden rounded-t-xl bg-gray-50">
+              <img src="https://images.unsplash.com/photo-1605647540924-852acf2e6edc?w=500"
+                class="w-full h-full object-cover hover:scale-105 transition duration-500">
+              <button
+                class="absolute top-2 right-2 w-7 h-7 bg-white rounded-full shadow flex items-center justify-center">
+                <i class="fa-regular fa-heart text-xs"></i>
+              </button>
+              <span
+                class="absolute top-2 left-2 text-[10px] bg-[#e39f32] text-white px-2 py-0.5 rounded-full">-40%</span>
+            </div>
+            <div class="p-2.5">
+              <p class="text-[10px] text-gray-400 uppercase mb-1">Photo Frames</p>
+              <h3 class="text-xs font-medium text-[#1D3C4A] mb-1 line-clamp-2">Rustic Wooden Photo Frame</h3>
+              <div class="flex items-center gap-2 text-xs">
+                <span class="text-[#e39f32] font-bold">₹499</span>
+                <span class="text-gray-400 line-through text-[10px]">₹899</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Example Card -->
+          <div
+            class="flex-none w-[170px] sm:w-[200px] lg:w-[220px] bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition snap-start">
+            <div class="relative aspect-[4/3] overflow-hidden rounded-t-xl bg-gray-50">
+              <img src="https://images.unsplash.com/photo-1605647540924-852acf2e6edc?w=500"
+                class="w-full h-full object-cover hover:scale-105 transition duration-500">
+              <button
+                class="absolute top-2 right-2 w-7 h-7 bg-white rounded-full shadow flex items-center justify-center">
+                <i class="fa-regular fa-heart text-xs"></i>
+              </button>
+              <span
+                class="absolute top-2 left-2 text-[10px] bg-[#e39f32] text-white px-2 py-0.5 rounded-full">-40%</span>
+            </div>
+            <div class="p-2.5">
+              <p class="text-[10px] text-gray-400 uppercase mb-1">Photo Frames</p>
+              <h3 class="text-xs font-medium text-[#1D3C4A] mb-1 line-clamp-2">Rustic Wooden Photo Frame</h3>
+              <div class="flex items-center gap-2 text-xs">
+                <span class="text-[#e39f32] font-bold">₹499</span>
+                <span class="text-gray-400 line-through text-[10px]">₹899</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Example Card -->
+          <div
+            class="flex-none w-[170px] sm:w-[200px] lg:w-[220px] bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition snap-start">
+            <div class="relative aspect-[4/3] overflow-hidden rounded-t-xl bg-gray-50">
+              <img src="https://images.unsplash.com/photo-1605647540924-852acf2e6edc?w=500"
+                class="w-full h-full object-cover hover:scale-105 transition duration-500">
+              <button
+                class="absolute top-2 right-2 w-7 h-7 bg-white rounded-full shadow flex items-center justify-center">
+                <i class="fa-regular fa-heart text-xs"></i>
+              </button>
+              <span
+                class="absolute top-2 left-2 text-[10px] bg-[#e39f32] text-white px-2 py-0.5 rounded-full">-40%</span>
+            </div>
+            <div class="p-2.5">
+              <p class="text-[10px] text-gray-400 uppercase mb-1">Photo Frames</p>
+              <h3 class="text-xs font-medium text-[#1D3C4A] mb-1 line-clamp-2">Rustic Wooden Photo Frame</h3>
+              <div class="flex items-center gap-2 text-xs">
+                <span class="text-[#e39f32] font-bold">₹499</span>
+                <span class="text-gray-400 line-through text-[10px]">₹899</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Example Card -->
+          <div
+            class="flex-none w-[170px] sm:w-[200px] lg:w-[220px] bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition snap-start">
+            <div class="relative aspect-[4/3] overflow-hidden rounded-t-xl bg-gray-50">
+              <img src="https://images.unsplash.com/photo-1605647540924-852acf2e6edc?w=500"
+                class="w-full h-full object-cover hover:scale-105 transition duration-500">
+              <button
+                class="absolute top-2 right-2 w-7 h-7 bg-white rounded-full shadow flex items-center justify-center">
+                <i class="fa-regular fa-heart text-xs"></i>
+              </button>
+              <span
+                class="absolute top-2 left-2 text-[10px] bg-[#e39f32] text-white px-2 py-0.5 rounded-full">-40%</span>
+            </div>
+            <div class="p-2.5">
+              <p class="text-[10px] text-gray-400 uppercase mb-1">Photo Frames</p>
+              <h3 class="text-xs font-medium text-[#1D3C4A] mb-1 line-clamp-2">Rustic Wooden Photo Frame</h3>
+              <div class="flex items-center gap-2 text-xs">
+                <span class="text-[#e39f32] font-bold">₹499</span>
+                <span class="text-gray-400 line-through text-[10px]">₹899</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Example Card -->
+          <div
+            class="flex-none w-[170px] sm:w-[200px] lg:w-[220px] bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition snap-start">
+            <div class="relative aspect-[4/3] overflow-hidden rounded-t-xl bg-gray-50">
+              <img src="https://images.unsplash.com/photo-1605647540924-852acf2e6edc?w=500"
+                class="w-full h-full object-cover hover:scale-105 transition duration-500">
+              <button
+                class="absolute top-2 right-2 w-7 h-7 bg-white rounded-full shadow flex items-center justify-center">
+                <i class="fa-regular fa-heart text-xs"></i>
+              </button>
+              <span
+                class="absolute top-2 left-2 text-[10px] bg-[#e39f32] text-white px-2 py-0.5 rounded-full">-40%</span>
+            </div>
+            <div class="p-2.5">
+              <p class="text-[10px] text-gray-400 uppercase mb-1">Photo Frames</p>
+              <h3 class="text-xs font-medium text-[#1D3C4A] mb-1 line-clamp-2">Rustic Wooden Photo Frame</h3>
+              <div class="flex items-center gap-2 text-xs">
+                <span class="text-[#e39f32] font-bold">₹499</span>
+                <span class="text-gray-400 line-through text-[10px]">₹899</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT ARROW -->
+        <button id="pfRight"
+          class="hidden sm:flex absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-white border rounded-full shadow items-center justify-center opacity-0 group-hover:opacity-100 transition hover:bg-[#1D3C4A] hover:text-white">
+          <i class="fa-solid fa-chevron-right text-sm"></i>
+        </button>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Deals Section -->
+  <section class="mt-5 py-6 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto bg-[#eaf4f7] rounded-3xl p-6">
+
+      <!-- DEAL BANNER -->
+      <a href="/deals" class="block mb-8">
+        <div class="relative rounded-2xl overflow-hidden">
+          <img src="./Images/sale.jfif"
+            class="w-full h-[180px] md:h-[220px] lg:h-[260px] object-cover transition-transform duration-500 hover:scale-105"
+            alt="Deals Banner">
+        </div>
+      </a>
+
+      <!-- PRODUCT SLIDER -->
+      <div class="relative group">
+
+        <!-- LEFT ARROW -->
+        <button id="dealLeft"
+          class="hidden sm:flex absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white shadow rounded-full items-center justify-center hover:bg-[#e39f32] hover:text-white transition">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+
+        <!-- PRODUCTS SCROLL -->
+        <div id="dealScroll" class="flex gap-4 overflow-x-auto scroll-smooth scrollbar-hide pb-4">
+
+          <!-- NAMEPLATES -->
+          <div
+            class="flex-none w-[170px] sm:w-[180px] md:w-[200px] bg-white rounded-xl border border-gray-200 p-3 hover:shadow-lg transition-all duration-300">
+            <img src="" class="w-full h-32 object-contain mb-3" alt="Wooden Nameplate">
+            <h3 class="text-sm font-medium text-gray-800 line-clamp-2 mb-1">Wooden Nameplate</h3>
+            <p class="text-xs text-gray-500 mb-2">Custom Engraving</p>
+            <div class="flex items-center gap-2">
+              <span class="text-green-700 font-semibold">₹450</span>
+              <span class="text-gray-400 line-through text-xs">₹600</span>
+              <span class="text-green-600 text-xs">25% Off</span>
+            </div>
+          </div>
+
+          <div
+            class="flex-none w-[170px] sm:w-[180px] md:w-[200px] bg-white rounded-xl border border-gray-200 p-3 hover:shadow-lg transition-all duration-300">
+            <img src="" class="w-full h-32 object-contain mb-3" alt="Acrylic Nameplate">
+            <h3 class="text-sm font-medium text-gray-800 line-clamp-2 mb-1">Acrylic Nameplate</h3>
+            <p class="text-xs text-gray-500 mb-2">Desk & Wall Mount</p>
+            <div class="flex items-center gap-2">
+              <span class="text-green-700 font-semibold">₹350</span>
+              <span class="text-gray-400 line-through text-xs">₹500</span>
+              <span class="text-green-600 text-xs">30% Off</span>
+            </div>
+          </div>
+
+          <div
+            class="flex-none w-[170px] sm:w-[180px] md:w-[200px] bg-white rounded-xl border border-gray-200 p-3 hover:shadow-lg transition-all duration-300">
+            <img src="" class="w-full h-32 object-contain mb-3" alt="Metal Nameplate">
+            <h3 class="text-sm font-medium text-gray-800 line-clamp-2 mb-1">Metal Nameplate</h3>
+            <p class="text-xs text-gray-500 mb-2">Premium Finish</p>
+            <div class="flex items-center gap-2">
+              <span class="text-green-700 font-semibold">₹500</span>
+              <span class="text-gray-400 line-through text-xs">₹650</span>
+              <span class="text-green-600 text-xs">23% Off</span>
+            </div>
+          </div>
+
+          <!-- PERSONALIZED GIFTS -->
+          <div
+            class="flex-none w-[170px] sm:w-[180px] md:w-[200px] bg-white rounded-xl border border-gray-200 p-3 hover:shadow-lg transition-all duration-300">
+            <img src="" class="w-full h-32 object-contain mb-3" alt="Personalized Photo Frame">
+            <h3 class="text-sm font-medium text-gray-800 line-clamp-2 mb-1">Personalized Photo Frame</h3>
+            <p class="text-xs text-gray-500 mb-2">Custom Prints</p>
+            <div class="flex items-center gap-2">
+              <span class="text-green-700 font-semibold">₹700</span>
+              <span class="text-gray-400 line-through text-xs">₹900</span>
+              <span class="text-green-600 text-xs">22% Off</span>
+            </div>
+          </div>
+
+          <div
+            class="flex-none w-[170px] sm:w-[180px] md:w-[200px] bg-white rounded-xl border border-gray-200 p-3 hover:shadow-lg transition-all duration-300">
+            <img src="" class="w-full h-32 object-contain mb-3" alt="Personalized Mug">
+            <h3 class="text-sm font-medium text-gray-800 line-clamp-2 mb-1">Personalized Mug</h3>
+            <p class="text-xs text-gray-500 mb-2">Photo/Name Print</p>
+            <div class="flex items-center gap-2">
+              <span class="text-green-700 font-semibold">₹350</span>
+              <span class="text-gray-400 line-through text-xs">₹450</span>
+              <span class="text-green-600 text-xs">22% Off</span>
+            </div>
+          </div>
+
+          <!-- CORPORATE GIFTS -->
+          <div
+            class="flex-none w-[170px] sm:w-[180px] md:w-[200px] bg-white rounded-xl border border-gray-200 p-3 hover:shadow-lg transition-all duration-300">
+            <img src="" class="w-full h-32 object-contain mb-3" alt="Corporate Gift Hamper">
+            <h3 class="text-sm font-medium text-gray-800 line-clamp-2 mb-1">Corporate Gift Hamper</h3>
+            <p class="text-xs text-gray-500 mb-2">Diwali & New Year</p>
+            <div class="flex items-center gap-2">
+              <span class="text-green-700 font-semibold">₹1200</span>
+              <span class="text-gray-400 line-through text-xs">₹1500</span>
+              <span class="text-green-600 text-xs">20% Off</span>
+            </div>
+          </div>
+
+          <div
+            class="flex-none w-[170px] sm:w-[180px] md:w-[200px] bg-white rounded-xl border border-gray-200 p-3 hover:shadow-lg transition-all duration-300">
+            <img src="" class="w-full h-32 object-contain mb-3" alt="Corporate Awards & Recognition Gifts">
+            <h3 class="text-sm font-medium text-gray-800 line-clamp-2 mb-1">Corporate Awards & Recognition Gifts</h3>
+            <p class="text-xs text-gray-500 mb-2">Employee Appreciation</p>
+            <div class="flex items-center gap-2">
+              <span class="text-green-700 font-semibold">₹900</span>
+              <span class="text-gray-400 line-through text-xs">₹1200</span>
+              <span class="text-green-600 text-xs">25% Off</span>
+            </div>
+          </div>
+
+          <div
+            class="flex-none w-[170px] sm:w-[180px] md:w-[200px] bg-white rounded-xl border border-gray-200 p-3 hover:shadow-lg transition-all duration-300">
+            <img src="" class="w-full h-32 object-contain mb-3" alt="Festival Corporate Gifts">
+            <h3 class="text-sm font-medium text-gray-800 line-clamp-2 mb-1">Festival Corporate Gifts</h3>
+            <p class="text-xs text-gray-500 mb-2">Diwali / New Year</p>
+            <div class="flex items-center gap-2">
+              <span class="text-green-700 font-semibold">₹1100</span>
+              <span class="text-gray-400 line-through text-xs">₹1400</span>
+              <span class="text-green-600 text-xs">21% Off</span>
+            </div>
+          </div>
+
+          <!-- TROPHIES & MEMENTOS -->
+          <div
+            class="flex-none w-[170px] sm:w-[180px] md:w-[200px] bg-white rounded-xl border border-gray-200 p-3 hover:shadow-lg transition-all duration-300">
+            <img src="" class="w-full h-32 object-contain mb-3" alt="Crystal Trophy">
+            <h3 class="text-sm font-medium text-gray-800 line-clamp-2 mb-1">Crystal Trophy</h3>
+            <p class="text-xs text-gray-500 mb-2">Award & Recognition</p>
+            <div class="flex items-center gap-2">
+              <span class="text-green-700 font-semibold">₹1500</span>
+              <span class="text-gray-400 line-through text-xs">₹1800</span>
+              <span class="text-green-600 text-xs">17% Off</span>
+            </div>
+          </div>
+
+          <div
+            class="flex-none w-[170px] sm:w-[180px] md:w-[200px] bg-white rounded-xl border border-gray-200 p-3 hover:shadow-lg transition-all duration-300">
+            <img src="" class="w-full h-32 object-contain mb-3" alt="Glass Trophy">
+            <h3 class="text-sm font-medium text-gray-800 line-clamp-2 mb-1">Glass Trophy</h3>
+            <p class="text-xs text-gray-500 mb-2">Award & Recognition</p>
+            <div class="flex items-center gap-2">
+              <span class="text-green-700 font-semibold">₹1300</span>
+              <span class="text-gray-400 line-through text-xs">₹1600</span>
+              <span class="text-green-600 text-xs">19% Off</span>
+            </div>
+          </div>
+
+          <div
+            class="flex-none w-[170px] sm:w-[180px] md:w-[200px] bg-white rounded-xl border border-gray-200 p-3 hover:shadow-lg transition-all duration-300">
+            <img src="" class="w-full h-32 object-contain mb-3" alt="Metal Trophy">
+            <h3 class="text-sm font-medium text-gray-800 line-clamp-2 mb-1">Metal Trophy</h3>
+            <p class="text-xs text-gray-500 mb-2">Award & Recognition</p>
+            <div class="flex items-center gap-2">
+              <span class="text-green-700 font-semibold">₹1200</span>
+              <span class="text-gray-400 line-through text-xs">₹1500</span>
+              <span class="text-green-600 text-xs">20% Off</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT ARROW -->
+        <button id="dealRight"
+          class="hidden sm:flex absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white shadow rounded-full items-center justify-center hover:bg-[#e39f32] hover:text-white transition">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </section>
+
+   <!-- Footer Container -->
+  <div id="footer-container"></div>
 
   <!-- Load header scripts -->
   <script src="./Header/load-header.js" defer></script>
   <script src="./Header/header.js" defer></script>
+  <script src="../Footer/footer-loader.js"></script>
   <script src="./index.js"></script>
 </body>
 

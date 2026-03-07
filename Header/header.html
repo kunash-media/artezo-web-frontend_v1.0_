@@ -15,7 +15,7 @@
         rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
-    <link rel="stylesheet" href="header.css">
+    <link rel="stylesheet" href="header.css" />
     <script>
         tailwind.config = {
             content: [],
@@ -74,15 +74,12 @@
 
                 <!--center typing-->
                 <div class="flex items-center justify-center">
-
                     <!-- Static Icon -->
                     <span id="typing-icon" class="text-accent text-sm"></span>
 
                     <!-- Typing Text -->
                     <span id="typing-text" class="font-lightfont-lexend tracking-wide"></span>
-
                 </div>
-
 
                 <!-- Quick Links -->
                 <div
@@ -107,8 +104,8 @@
                     <!-- Row 1: Logo + Search + Icons -->
                     <div class="flex items-center justify-between h-16">
                         <!-- Logo (left) -->
-                        <a href="#" class="flex items-center flex-shrink-0">
-                            <img src="../Images/logo.png" alt="Luxe Store Logo" class="h-12 w-auto object-contain" />
+                        <a href="../index.html" class="flex items-center flex-shrink-0">
+                            <img src="../Images/logo.png" alt="Artezo Store Logo" class="h-12 w-auto object-contain" />
                         </a>
 
                         <!-- Center: Search Bar -->
@@ -240,11 +237,11 @@
                         <div class="flex items-center gap-x-7 text-2xl text-primary flex-shrink-0">
                             <!-- Delivery Location Input -->
                             <!-- <div class="hidden lg:flex items-center gap-x-2"> -->
-                                <!-- Icon -->
-                                <!-- <i class="fa-solid fa-location-dot text-lg text-primary"></i> -->
+                            <!-- Icon -->
+                            <!-- <i class="fa-solid fa-location-dot text-lg text-primary"></i> -->
 
-                                <!-- Input Box -->
-                                <!-- <div class="flex flex-col leading-tight">
+                            <!-- Input Box -->
+                            <!-- <div class="flex flex-col leading-tight">
                                     <label class="text-[10px] text-gray-400 uppercase tracking-wider">
                                         Deliver to
                                     </label>
@@ -262,19 +259,19 @@
                             <!-- Wishlist -->
                             <button onclick="toggleWishlist()" class="relative hover:text-accent transition-colors">
                                 <i class="fa-solid fa-heart"></i>
-                                <span id="wishlist-count"
+                                <!-- <span id="wishlist-count"
                                     class="absolute -top-1 -right-1 bg-accent text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center">
                                     3
-                                </span>
+                                </span> -->
                             </button>
 
                             <!-- Cart -->
                             <button id="cart-btn" class="relative hover:text-accent transition-colors">
                                 <i class="fa-solid fa-bag-shopping"></i>
-                                <span id="cart-count"
+                                <!-- <span id="cart-count"
                                     class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center">
                                     4
-                                </span>
+                                </span> -->
                             </button>
 
                             <!-- Account -->
@@ -297,7 +294,8 @@
 
                     <!-- Row 2: Navigation links – updated flat list -->
                     <div class="border-t border-gray-100 py-2.5">
-                      <nav class="flex items-center justify-center gap-x-6 text-sm font-normal font-lexend text-primary px-4 md:flex-nowrap overflow-visible">
+                        <nav
+                            class="flex items-center justify-center gap-x-6 text-sm font-normal font-lexend text-primary px-4 md:flex-nowrap overflow-visible">
                             <!-- <a href="../Product-Details/product-detail.html"
                                 class="hover:text-accent transition-colors whitespace-nowrap">Photo Frames</a>
                             <a href="../products/product.html"
@@ -374,12 +372,9 @@
 
         <!-- LAYER 3: OFFERS STRIP -->
         <div class="bg-accent text-primary font-zain py-1 text-[12px] font-medium overflow-hidden">
-
             <div class="ticker-wrapper">
                 <div class="ticker-track">
-
                     <div class="ticker-inner">
-
                         <!-- ORIGINAL SET -->
                         <div class="ticker-item">
                             <i class="fa-solid fa-truck mr-2"></i>
@@ -425,18 +420,16 @@
                 </div>
             </div>
         </div>
-
     </header>
 
     <!-- MOBILE HAMBURGER MENU -->
     <!-- Google Material Symbols CDN -->
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,300,0,0" />
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600&display=swap" rel="stylesheet" />
 
     <div id="mobile-menu"
         class="fixed inset-0 bg-white z-[999] translate-x-full transition-transform duration-500 flex flex-col shadow-lg">
-
         <!-- Header -->
         <div class="p-6 flex justify-between items-center border-b">
             <a href="#" class="flex items-center">
@@ -451,61 +444,58 @@
 
         <!-- Menu Content -->
         <nav class="flex-1 overflow-auto px-6 py-8 space-y-4 text-lg font-lexend font-medium">
-
             <!-- Each category with pastel yellow background -->
             <a href="../Product-Details/product-detail.html"
                 class="flex items-center gap-3 py-3 px-3 rounded-full bg-[#FFFDF1] border-b border-gray-100 hover:bg-[#ffeab3] transition-colors">
-                <span class="material-symbols-outlined text-2xl" style="color:#e39f32;">bed</span>
-              Photo Frames
+                <span class="material-symbols-outlined text-2xl" style="color: #e39f32">bed</span>
+                Photo Frames
             </a>
 
             <a href="#"
                 class="flex items-center gap-3 py-3 px-3 rounded-full bg-[#FFFDF1] border-b border-gray-100 hover:bg-[#ffeab3] transition-colors">
-                <span class="material-symbols-outlined text-2xl" style="color:#e39f32;">chair</span>
+                <span class="material-symbols-outlined text-2xl" style="color: #e39f32">chair</span>
                 Wall Decor
             </a>
 
             <a href="#"
                 class="flex items-center gap-3 py-3 px-3 rounded-full bg-[#FFFDF1] border-b border-gray-100 hover:bg-[#ffeab3] transition-colors">
-
-                <span class="material-symbols-outlined text-2xl" style="color:#e39f32;">blender</span>
-                
+                <span class="material-symbols-outlined text-2xl" style="color: #e39f32">blender</span>
             </a>
 
             <a href="#"
                 class="flex items-center gap-3 py-3 px-3 rounded-full bg-[#FFFDF1] border-b border-gray-100 hover:bg-[#ffeab3] transition-colors">
-                <span class="material-symbols-outlined text-2xl" style="color:#e39f32;">restaurant</span>
-              Home Decor
+                <span class="material-symbols-outlined text-2xl" style="color: #e39f32">restaurant</span>
+                Home Decor
             </a>
 
             <a href="#"
                 class="flex items-center gap-3 py-3 px-3 rounded-full bg-[#FFFDF1] border-b border-gray-100 hover:bg-[#ffeab3] transition-colors">
-                <span class="material-symbols-outlined text-2xl" style="color:#e39f32;">deck</span>
-               Nameplates
+                <span class="material-symbols-outlined text-2xl" style="color: #e39f32">deck</span>
+                Nameplates
             </a>
 
             <a href="#"
                 class="flex items-center gap-3 py-3 px-3 rounded-full bg-[#FFFDF1] border-b border-gray-100 hover:bg-[#ffeab3] transition-colors">
-                <span class="material-symbols-outlined text-2xl" style="color:#e39f32;">child_care</span>
-               Corporate Gifting
+                <span class="material-symbols-outlined text-2xl" style="color: #e39f32">child_care</span>
+                Corporate Gifting
             </a>
 
             <a href="#"
                 class="flex items-center gap-3 py-3 px-3 rounded-full bg-[#FFFDF1] border-b border-gray-100 hover:bg-[#ffeab3] transition-colors">
-                <span class="material-symbols-outlined text-2xl" style="color:#e39f32;">inventory_2</span>
+                <span class="material-symbols-outlined text-2xl" style="color: #e39f32">inventory_2</span>
                 Personalised Gifts
             </a>
 
             <a href="#"
                 class="flex items-center gap-3 py-3 px-3 rounded-full bg-[#FFFDF1] border-b border-gray-100 hover:bg-[#ffeab3] transition-colors">
-                <span class="material-symbols-outlined text-2xl" style="color:#e39f32;">grid_view</span>
+                <span class="material-symbols-outlined text-2xl" style="color: #e39f32">grid_view</span>
                 Trophies and Mementos
             </a>
 
             <a href="#"
                 class="flex items-center gap-3 py-3 px-3 rounded-full bg-[#FFFDF1] border-b border-gray-100 hover:bg-[#ffeab3] transition-colors">
-                <span class="material-symbols-outlined text-2xl" style="color:#e39f32;">bathtub</span>
-              Trending Products
+                <span class="material-symbols-outlined text-2xl" style="color: #e39f32">bathtub</span>
+                Trending Products
             </a>
 
             <!-- <a href="#"
@@ -525,7 +515,7 @@
 
             <a href="#"
                 class="flex items-center gap-3 py-3 px-3 rounded-full bg-[#FFFDF1] border-b border-gray-100 text-red-600 font-semibold hover:bg-[#ffeab3] hover:text-red-700 transition-colors">
-                <span class="material-symbols-outlined text-2xl" style="color:#e39f32;">replay</span>
+                <span class="material-symbols-outlined text-2xl" style="color: #e39f32">replay</span>
                 Return/Exchange
             </a>
         </nav>
@@ -538,7 +528,6 @@
             </button>
         </div>
     </div>
-
 
     <!-- MOBILE SEARCH OVERLAY -->
     <div id="mobile-search-overlay"

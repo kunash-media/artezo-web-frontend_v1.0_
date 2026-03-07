@@ -14,13 +14,13 @@ const categoryData = {
         "Metal Frames",
         "Collage Frames",
         "Digital Frames",
-         "Wooden Frames",
+        "Wooden Frames",
         "Metal Frames",
         "Collage Frames",
         "Digital Frames",
       ],
       productCategoryRedirect: "/Product-Details/product-detail.html",
-      categoryPathRedirect: "/products/product.html",
+      categoryPathRedirect: "/Product-Details/product-detail.html",
     },
     {
       categoryId: 2,
@@ -31,8 +31,8 @@ const categoryData = {
         "Wall Clocks",
         "Mirrors",
       ],
-      productCategoryRedirect: "/products/product.html",
-      categoryPathRedirect: "/products/product.html",
+      productCategoryRedirect: "Product-Details/product-detail.html",
+      categoryPathRedirect: "Product-Details/product-detail.html",
     },
     {
       categoryId: 3,
@@ -153,7 +153,9 @@ function renderDesktopNavigation(categories) {
           <!-- Dropdown menu -->
         <div class="absolute left-0 top-full invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 z-50">
   <div class="bg-white rounded-lg shadow-xl border border-gray-100 py-4 flex ${
-    category.categoryPath.length <= 4 ? "flex-col gap-1 min-w-[200px]" : "gap-3 min-w-[480px]"
+    category.categoryPath.length <= 4
+      ? "flex-col gap-1 min-w-[200px]"
+      : "gap-3 min-w-[480px]"
   }">
     ${
       category.categoryPath.length <= 4
@@ -164,7 +166,7 @@ function renderDesktopNavigation(categories) {
          class="flex items-center gap-2 px-5 py-2 text-sm hover:bg-zinc-50 hover:text-accent transition-colors">
 <i class="fa-solid fa-tag text-[#E39F32] w-4"></i>       <span>${subcat}</span>
       </a>
-    `
+    `,
             )
             .join("")
         : (() => {
@@ -180,7 +182,7 @@ function renderDesktopNavigation(categories) {
            class="flex items-center gap-2 px-5 py-2.5 text-sm hover:bg-zinc-50 hover:text-accent transition-colors">
 <i class="fa-solid fa-tag text-[#E39F32] w-4"></i>          <span>${subcat}</span>
         </a>
-      `
+      `,
                 )
                 .join("");
 

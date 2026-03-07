@@ -26,3 +26,28 @@ button.relative span.z-10 {
     transform: translateY(-6px);
     opacity: 0.6;
   }
+
+/* Scrollbar Hide */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/*photoframe scrollbar hide*/
+.hide-scrollbar::-webkit-scrollbar {
+    display: none; /* for Chrome, Safari, Edge */
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none; /* for IE and Edge */
+    scrollbar-width: none; /* for Firefox */
+  }
