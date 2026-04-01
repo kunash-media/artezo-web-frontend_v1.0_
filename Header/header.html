@@ -259,20 +259,22 @@
                             </a>
 
                             <!-- Wishlist -->
-                            <button onclick="window.location.href='../Wishlist/wishlist.html'" class="relative hover:text-accent transition-colors group">
+                            <button onclick="window.location.href='../Wishlist/wishlist.html'"
+                                class="relative hover:text-accent transition-colors group">
                                 <i class="fa-solid fa-heart"></i>
-                                <span id="wishlist-count-badge" 
-                                      class="absolute -top-2 -right-2 bg-accent text-white text-[10px] font-bold h-5 min-w-[20px] px-1 rounded-full flex items-center justify-center">
+                                <span id="wishlist-count-badge"
+                                    class="absolute -top-2 -right-2 bg-accent text-white text-[10px] font-bold h-5 min-w-[20px] px-1 rounded-full flex items-center justify-center">
                                     0
                                 </span>
                             </button>
 
 
                             <!-- Cart -->
-                             <button onclick="window.location.href='../Cart/cart.html'" class="relative hover:text-accent transition-colors group">
+                            <button onclick="window.location.href='../Cart/cart.html'"
+                                class="relative hover:text-accent transition-colors group">
                                 <i class="fa-solid fa-bag-shopping"></i>
-                                <span id="cart-count-badge" 
-                                      class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold h-5 min-w-[20px] px-1 rounded-full flex items-center justify-center">
+                                <span id="cart-count-badge"
+                                    class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold h-5 min-w-[20px] px-1 rounded-full flex items-center justify-center">
                                     0
                                 </span>
                             </button>
@@ -295,7 +297,7 @@
                         </div>
                     </div>
 
-                    
+
 
                     <!-- Row 2: Navigation links – updated flat list -->
                     <div class="border-t border-gray-100 py-2.5">
@@ -346,22 +348,24 @@
                         </a>
 
                         <!-- Wishlist -->
-                        <button onclick="toggleWishlist()" class="relative">
+                        <a href="../Wishlist/wishlist.html" class="relative">
                             <i class="fa-solid fa-heart"></i>
+
                             <span id="mobile-wishlist-count"
                                 class="absolute -top-1 -right-1 bg-accent text-white text-[9px] h-4 w-4 rounded-full flex items-center justify-center">
                                 3
                             </span>
-                        </button>
+                        </a>
 
                         <!-- Cart -->
-                        <button id="mobile-cart-btn" class="relative">
+                        <a href="../Cart/cart.html" id="mobile-cart-btn" class="relative p-2">
                             <i class="fa-solid fa-bag-shopping"></i>
+
                             <span id="mobile-cart-count"
                                 class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] h-4 w-4 rounded-full flex items-center justify-center">
                                 4
                             </span>
-                        </button>
+                        </a>
 
                     </div>
                 </div>
@@ -542,7 +546,7 @@
     </div>
 
     <script src="header.js"></script>
-    
+
 </body>
 
 </html>
