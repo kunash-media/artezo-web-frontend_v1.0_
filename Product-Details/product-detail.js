@@ -238,16 +238,17 @@
     />
   </div>
 
-  ${banner.imgDescription
-            ? `
+  ${
+    banner.imgDescription
+      ? `
       <div class="banner-desc">
         <p class="banner-text">
           ${banner.imgDescription}
         </p>
       </div>
       `
-            : ""
-          }
+      : ""
+  }
 
 </div>
       `;
@@ -286,10 +287,11 @@
           </h1>
 
           <p class="text-gray-600 font-lexend text-base md:text-lg leading-relaxed max-w-xl mx-auto">
-            ${safeProductData.aboutItem?.[0] ||
-        safeProductData.description?.[0] ||
-        "Discover thoughtfully curated decor pieces that bring warmth and elegance into your space."
-        }
+            ${
+              safeProductData.aboutItem?.[0] ||
+              safeProductData.description?.[0] ||
+              "Discover thoughtfully curated decor pieces that bring warmth and elegance into your space."
+            }
           </p>
 
         </div>
@@ -361,22 +363,24 @@
               <span class="text-3xl font-bold font-lexend text-[#1D3C4A]">
                 ₹${safeProductData.currentSellingPrice || 0}
               </span>
-              ${safeProductData.currentMrpPrice &&
-        safeProductData.currentMrpPrice >
-        (safeProductData.currentSellingPrice || 0)
-        ? `
+              ${
+                safeProductData.currentMrpPrice &&
+                safeProductData.currentMrpPrice >
+                  (safeProductData.currentSellingPrice || 0)
+                  ? `
               <span class="text-2xl text-gray-400 font-lexend line-through">
                 ₹${safeProductData.currentMrpPrice}
               </span>`
-        : ""
-      }
-              ${getDiscountPercent()
-        ? `
+                  : ""
+              }
+              ${
+                getDiscountPercent()
+                  ? `
               <span class="bg-[#e39f32] text-white font-bold px-4 py-1.5 rounded-2xl text-sm shadow-sm tracking-wide">
                 ${getDiscountPercent()}% OFF
               </span>`
-        : ""
-      }
+                  : ""
+              }
             </div>
           </div>
 
@@ -1347,7 +1351,7 @@
         ((safeProductData.currentMrpPrice -
           safeProductData.currentSellingPrice) /
           (safeProductData.currentMrpPrice || 1)) *
-        100,
+          100,
       ) || 0;
 
     // Get similar products from the database
@@ -1495,12 +1499,12 @@
             <span class="text-sm font-medium text-[#033E59] hidden sm:block sm:mt-4">Variant:</span>
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 w-full" id="colorSwatches">
               ${transformedData.colors
-          .map((c, idx) => {
-            const selected =
-              idx === 0
-                ? "ring-2 ring-[#E6A62C] ring-offset-2"
-                : "ring-1 ring-gray-200 hover:ring-[#E6A62C]";
-            return `
+                .map((c, idx) => {
+                  const selected =
+                    idx === 0
+                      ? "ring-2 ring-[#E6A62C] ring-offset-2"
+                      : "ring-1 ring-gray-200 hover:ring-[#E6A62C]";
+                  return `
                   <button class="group bg-white rounded-xl border border-gray-200 p-3 transition-all duration-300 hover:shadow-md ${selected}" 
                           data-variant-id="${c.variantId}"
                           data-sku="${c.sku}"
@@ -1518,8 +1522,8 @@
                     </div>
                   </button>
                 `;
-          })
-          .join("")}
+                })
+                .join("")}
             </div>
           </div>
         </div>
@@ -1572,12 +1576,12 @@
             <div class="flex gap-2">
               <div class="flex flex-col gap-2 w-12" id="thumbContainer">
                 ${transformedData.mainImages
-        .map(
-          (img, idx) => `
+                  .map(
+                    (img, idx) => `
                   <img src="${img.thumb}" data-full="${img.full}" class="thumbnail-img w-full h-16 object-cover rounded-md ${idx === 0 ? "active" : ""} cursor-pointer" />
                 `,
-        )
-        .join("")}
+                  )
+                  .join("")}
               </div>
               <div class="relative flex-1 bg-white rounded-xl border border-stone-100 shadow-sm flex items-center justify-center p-2 h-[320px]">
                 <img id="mainProductImage" src="${transformedData.mainImages[0]?.full || transformedData.mainImages[0]?.thumb}" alt="Product" class="max-h-full max-w-full object-contain" />
@@ -1733,8 +1737,9 @@
     Only ${transformedData.stock} items left in stock
   </p>
 
-  ${safeProductData.isCustomizable
-        ? `
+  ${
+    safeProductData.isCustomizable
+      ? `
       <span class="text-gray-300">|</span>
 
       <a href="https://wa.me/919876543210"
@@ -1749,8 +1754,8 @@
 
       </a>
       `
-        : ""
-      }
+      : ""
+  }
 
 </div>
 
@@ -2036,34 +2041,40 @@
       : "Buy Now";
 
     sticky.innerHTML = `
-<div class="flex items-center gap-3 whitespace-nowrap">
-  <span class="font-medium font-lexend text-xl" style="color:#e39f32">
-    ₹${transformedData.price.toLocaleString()}
-  </span>
-  <span class="text-gray-500 line-through text-base">
-    ₹${transformedData.originalPrice.toLocaleString()}
-  </span>
-</div>
+<div class="flex flex-wrap md:flex-nowrap items-center md:justify-center justify-between w-full gap-2 md:gap-4">
 
-<div class="flex items-center gap-3">
+  <!-- Price -->
+  <div class="flex items-center gap-2 whitespace-nowrap">
+    <span class="font-medium font-lexend text-lg sm:text-xl" style="color:#e39f32">
+      ₹${transformedData.price.toLocaleString()}
+    </span>
+  <span class="text-gray-500 line-through text-sm md:text-base 
+bg-gray-100 px-2 py-0.5 rounded-md">
+  ₹${transformedData.originalPrice.toLocaleString()}
+</span>
+  </div>
 
-  <button class="border px-4 py-2 rounded-full text-base font-medium font-lexend flex items-center gap-2 transition hover:bg-[#1D3C4A]/10"
-  style="border-color:#1d3c4a;color:#1d3c4a">
-    <i class="fas fa-cart-plus text-sm"></i>
-    Cart
-  </button>
+  <!-- Cart + Buy -->
+  <div class="flex items-center gap-2">
+    <button class="border px-3 md:px-4 py-2 rounded-full text-sm md:text-base font-medium font-lexend flex items-center gap-2 transition hover:bg-[#1D3C4A]/10"
+    style="border-color:#1d3c4a;color:#1d3c4a">
+      <i class="fas fa-cart-plus text-xs md:text-sm"></i>
+      Cart
+    </button>
 
-  <button class="px-5 py-2 rounded-full text-base font-medium font-lexend flex items-center gap-2"
-  style="background-color:#1d3c4a;color:white">
-    Buy
-    <i class="fas fa-arrow-right text-sm"></i>
-  </button>
+    <button class="px-4 md:px-5 py-2 rounded-full text-sm md:text-base font-medium font-lexend flex items-center gap-2"
+    style="background-color:#1d3c4a;color:white">
+      Buy
+      <i class="fas fa-arrow-right text-xs md:text-sm"></i>
+    </button>
+  </div>
 
+  <!-- WhatsApp Video Button -->
   <a href="https://wa.me/+919876543210?text=Hi%2C%20I%27m%20interested%20in%20this%20product.%20Can%20you%20please%20send%20live%20product%20videos%3F"
   target="_blank"
-  class="px-4 py-2 rounded-full text-base font-medium font-lexend flex items-center gap-2 bg-green-600 text-white">
+  class="w-full md:w-auto mt-1 md:mt-0 px-4 py-2 rounded-full text-sm md:text-base font-medium font-lexend flex items-center justify-center gap-2 bg-green-600 text-white">
     <i class="fab fa-whatsapp text-sm"></i>
-    Video
+    Get Live Product Video
   </a>
 
 </div>
