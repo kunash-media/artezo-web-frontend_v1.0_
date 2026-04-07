@@ -1059,10 +1059,6 @@ async function initializeHeader() {
   );
 }
 
-function toggleCartPreview() {
-  alert("Cart preview - " + cartCount + " items");
-}
-
 // Make functions globally available
 window.openMobileMenu = openMobileMenu;
 window.closeMobileMenu = closeMobileMenu;

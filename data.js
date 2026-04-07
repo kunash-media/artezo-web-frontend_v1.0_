@@ -124,7 +124,7 @@ window.artezoData = {
   topRated: [
     {
       image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7",
-      title: "Feltro Sheesham Wood Sofa Bed With Storage",
+      title: "Feltro Sofa Bed With Storage",
       starsHtml: "★★★★☆",
       reviews: "1316",
       price: "₹35,999",
@@ -132,7 +132,7 @@ window.artezoData = {
       discount: "48% OFF"
     },
     {
-      image: "https://images.unsplash.com/photo-1505691938895-1758d7feb511",
+      image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7",
       title: "Oasis L-Shape Sectional Sofa",
       starsHtml: "★★★★☆",
       reviews: "152",
@@ -141,7 +141,7 @@ window.artezoData = {
       discount: "38% OFF"
     },
     {
-      image: "https://images.unsplash.com/photo-1615873968403-89e068629265",
+      image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7",
       title: "Amitava Home Temple (Walnut Finish)",
       starsHtml: "★★★★★",
       reviews: "437",
@@ -151,7 +151,7 @@ window.artezoData = {
     },
     {
       image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7",
-      title: "Feltro Sheesham Wood Sofa Bed With Storage",
+      title: "Feltro Sofa Bed With Storage",
       starsHtml: "★★★★☆",
       reviews: "1316",
       price: "₹35,999",
@@ -159,7 +159,7 @@ window.artezoData = {
       discount: "48% OFF"
     },
     {
-      image: "https://images.unsplash.com/photo-1505691938895-1758d7feb511",
+      image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7",
       title: "Oasis L-Shape Sectional Sofa",
       starsHtml: "★★★★☆",
       reviews: "152",
@@ -168,7 +168,7 @@ window.artezoData = {
       discount: "38% OFF"
     },
     {
-      image: "https://images.unsplash.com/photo-1615873968403-89e068629265",
+      image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7",
       title: "Amitava Home Temple (Walnut Finish)",
       starsHtml: "★★★★★",
       reviews: "437",

@@ -1,339 +1,247 @@
 <!doctype html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Artezo Store • Header</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="stylesheet" href="header.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Zain:ital,wght@0,200;0,300;0,400;0,700;0,800;0,900;1,300;1,400&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
+        href="https://fonts.googleapis.com/css2?family=Zain:ital,wght@0,200;0,300;0,400;0,700;0,800;0,900;1,300;1,400&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
     <link rel="stylesheet" href="header.css" />
     <script>
-      tailwind.config = {
-        content: [],
-        theme: {
-          extend: {
-            colors: {
-              primary: "#033E59",
-              accent: "#E6A62C",
+        tailwind.config = {
+            content: [],
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#033E59",
+                        accent: "#E6A62C",
+                    },
+                    fontFamily: {
+                        lexend: ["Lexend", "sans-serif"],
+                        zain: ["Zain", "sans-serif"],
+                    },
+                },
             },
-            fontFamily: {
-              lexend: ["Lexend", "sans-serif"],
-              zain: ["Zain", "sans-serif"],
-            },
-          },
-        },
-      };
+        };
     </script>
 
     <!-- <style>
         @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700&display=swap");
     </style> -->
-  </head>
+</head>
 
-  <body class="bg-zinc-50">
+<body class="bg-zinc-50">
     <!-- HEADER COMPONENT -->
     <header class="sticky top-0 z-50 bg-white shadow-sm">
-      <!-- LAYER 1: TOP SOCIAL BAR -->
-      <div class="bg-primary font-zain font-light text-white text-xs">
-        <div
-          class="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex items-center justify-between"
-        >
-          <!-- Social Icons -->
-          <div class="flex items-center gap-1.5 sm:gap-2 text-xs">
-            <!-- Facebook -->
-            <a
-              href="#"
-              class="group flex items-center justify-center w-7 h-7 rounded-full bg-white/5 hover:bg-accent/15 border border-white/10 hover:border-accent/40 transition-all duration-200 hover:scale-105"
-              aria-label="Facebook"
-            >
-              <i
-                class="fa-brands fa-facebook-f text-[11px] transition-colors duration-200 group-hover:text-accent"
-              ></i>
-            </a>
+        <!-- LAYER 1: TOP SOCIAL BAR -->
+        <div class="bg-primary font-zain font-light text-white text-xs">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex items-center justify-between">
+                <!-- Social Icons -->
+                <div class="flex items-center gap-1.5 sm:gap-2 text-xs">
+                    <!-- Facebook -->
+                    <a href="#"
+                        class="group flex items-center justify-center w-7 h-7 rounded-full bg-white/5 hover:bg-accent/15 border border-white/10 hover:border-accent/40 transition-all duration-200 hover:scale-105"
+                        aria-label="Facebook">
+                        <i
+                            class="fa-brands fa-facebook-f text-[11px] transition-colors duration-200 group-hover:text-accent"></i>
+                    </a>
 
-            <!-- Twitter / X -->
-            <!-- <a href="#"
+                    <!-- Twitter / X -->
+                    <!-- <a href="#"
                         class="group flex items-center justify-center w-7 h-7 rounded-full bg-white/5 hover:bg-accent/15 border border-white/10 hover:border-accent/40 transition-all duration-200 hover:scale-105"
                         aria-label="Twitter / X">
                         <i
                             class="fa-brands fa-x-twitter text-[11px] transition-colors duration-200 group-hover:text-accent"></i>
                     </a> -->
 
-            <!-- Instagram -->
-            <a
-              href="#"
-              class="group flex items-center justify-center w-7 h-7 rounded-full bg-white/5 hover:bg-accent/15 border border-white/10 hover:border-accent/40 transition-all duration-200 hover:scale-105"
-              aria-label="Instagram"
-            >
-              <i
-                class="fa-brands fa-instagram text-[11px] transition-colors duration-200 group-hover:text-accent"
-              ></i>
-            </a>
-          </div>
-
-          <!--center typing-->
-          <div class="flex items-center justify-center">
-            <!-- Static Icon -->
-            <span id="typing-icon" class="text-accent text-sm"></span>
-
-            <!-- Typing Text -->
-            <span
-              id="typing-text"
-              class="font-lightfont-lexend tracking-wide"
-            ></span>
-          </div>
-
-          <!-- Quick Links -->
-          <div
-            class="flex items-center gap-4 sm:gap-6 uppercase tracking-wider font-medium text-[11px] sm:text-xs"
-          >
-            <a
-              href="#"
-              class="flex items-center gap-1.5 hover:text-accent transition-colors duration-200"
-            >
-              <i class="fa-solid fa-truck-fast text-sm"></i>
-              <span class="hidden sm:inline">Track Order</span>
-            </a>
-
-            <a
-              href="#"
-              class="hover:text-accent transition-colors duration-200"
-            >
-              Support
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <!-- LAYER 2: MAIN NAVBAR -->
-      <div class="border-b border-gray-100">
-        <!-- DESKTOP VERSION -->
-        <div class="hidden md:block">
-          <div class="max-w-7xl mx-auto px-6">
-            <!-- Row 1: Logo + Search + Icons -->
-            <div class="flex items-center justify-between h-16">
-              <!-- Logo (left) -->
-              <a href="../index.html" class="flex items-center flex-shrink-0">
-                <img
-                  src="../Images/logo.jpg"
-                  alt="Artezo Store Logo"
-                  class="h-12 w-auto object-contain"
-                />
-              </a>
-
-              <!-- Center: Search Bar -->
-              <div
-                class="flex-1 max-w-xl mx-auto relative"
-                id="desktop-search-container"
-              >
-                <div class="relative">
-                  <input
-                    id="search-input"
-                    type="text"
-                    class="w-full bg-zinc-100 border border-transparent focus:border-accent focus:bg-white h-12 pl-14 pr-6 rounded-3xl text-sm placeholder:text-gray-400 focus:outline-none transition-all"
-                    placeholder="Search for electronics…"
-                  />
-                  <div
-                    class="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400"
-                  >
-                    <i class="fa-solid fa-magnifying-glass text-lg"></i>
-                  </div>
+                    <!-- Instagram -->
+                    <a href="#"
+                        class="group flex items-center justify-center w-7 h-7 rounded-full bg-white/5 hover:bg-accent/15 border border-white/10 hover:border-accent/40 transition-all duration-200 hover:scale-105"
+                        aria-label="Instagram">
+                        <i
+                            class="fa-brands fa-instagram text-[11px] transition-colors duration-200 group-hover:text-accent"></i>
+                    </a>
                 </div>
 
-                <!-- SEARCH SUGGESTIONS DROPDOWN -->
+                <!--center typing-->
+                <div class="flex items-center justify-center">
+                    <!-- Static Icon -->
+                    <span id="typing-icon" class="text-accent text-sm"></span>
+
+                    <!-- Typing Text -->
+                    <span id="typing-text" class="font-lightfont-lexend tracking-wide"></span>
+                </div>
+
+                <!-- Quick Links -->
                 <div
-                  id="search-suggestions"
-                  class="hidden absolute top-[48px] left-0 w-full bg-white/95 backdrop-blur-md border border-gray-100 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.08)] py-4 z-50 max-h-[420px] overflow-auto"
-                >
-                  <!-- Recent -->
-                  <div class="px-5">
-                    <div class="flex items-center justify-between mb-2">
-                      <span
-                        class="uppercase text-[9px] font-semibold tracking-widest text-gray-400"
-                      >
-                        Recent Searches
-                      </span>
+                    class="flex items-center gap-4 sm:gap-6 uppercase tracking-wider font-medium text-[11px] sm:text-xs">
+                    <a href="#" class="flex items-center gap-1.5 hover:text-accent transition-colors duration-200">
+                        <i class="fa-solid fa-truck-fast text-sm"></i>
+                        <span class="hidden sm:inline">Track Order</span>
+                    </a>
 
-                      <button
-                        onclick="clearRecentSearches()"
-                        class="text-accent text-[11px] hover:opacity-70 transition"
-                      >
-                        Clear
-                      </button>
-                    </div>
-
-                    <div
-                      id="recent-list"
-                      class="flex flex-wrap gap-1.5 text-[12.5px]"
-                    ></div>
-                  </div>
-
-                  <!-- Divider -->
-                  <div
-                    class="my-4 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"
-                  ></div>
-
-                  <!-- Trending -->
-                  <div class="px-5">
-                    <span
-                      class="uppercase text-[9px] font-semibold tracking-widest text-gray-400"
-                    >
-                      Trending Now
-                    </span>
-
-                    <div class="grid grid-cols-2 gap-2 mt-3">
-                      <!-- Item -->
-                      <div
-                        onclick="quickSearch(this)"
-                        class="group bg-zinc-50 hover:bg-white border border-transparent hover:border-accent/30 shadow-sm hover:shadow-md transition-all duration-200 px-3 py-2.5 rounded-xl text-[13px] cursor-pointer flex items-center gap-x-2.5"
-                      >
-                        <span
-                          class="group-hover:text-primary font-lexend font-normal"
-                          >Wooden Photo Frames</span
-                        >
-                      </div>
-
-                      <div
-                        onclick="quickSearch(this)"
-                        class="group bg-zinc-50 hover:bg-white border border-transparent hover:border-accent/30 shadow-sm hover:shadow-md transition-all duration-200 px-3 py-2.5 rounded-xl text-[13px] cursor-pointer flex items-center gap-x-2.5"
-                      >
-                        <span
-                          class="group-hover:text-primary font-lexend font-normal"
-                          >Handcrafted Carpets</span
-                        >
-                      </div>
-
-                      <div
-                        onclick="quickSearch(this)"
-                        class="group bg-zinc-50 hover:bg-white border border-transparent hover:border-accent/30 shadow-sm hover:shadow-md transition-all duration-200 px-3 py-2.5 rounded-xl text-[13px] cursor-pointer flex items-center gap-x-2.5"
-                      >
-                        <span
-                          class="group-hover:text-primary font-lexend font-normal"
-                          >Wall Decor Sets</span
-                        >
-                      </div>
-
-                      <div
-                        onclick="quickSearch(this)"
-                        class="group bg-zinc-50 hover:bg-white border border-transparent hover:border-accent/30 shadow-sm hover:shadow-md transition-all duration-200 px-3 py-2.5 rounded-xl text-[13px] cursor-pointer flex items-center gap-x-2.5"
-                      >
-                        <span
-                          class="group-hover:text-primary font-lexend font-normal"
-                          >Gift Hampers</span
-                        >
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Divider -->
-                  <div
-                    class="my-4 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"
-                  ></div>
-
-                  <!-- Categories -->
-                  <div class="px-5">
-                    <span
-                      class="uppercase text-[9px] font-semibold tracking-widest text-gray-400"
-                    >
-                      Browse Categories
-                    </span>
-
-                    <div class="flex flex-wrap gap-2 mt-3">
-                      <a
-                        href="#"
-                        onclick="
-                          event.preventDefault();
-                          quickSearch(this);
-                        "
-                        class="group bg-white border border-gray-200 font-lexend font-normal hover:border-accent hover:text-accent hover:shadow-sm px-4 py-1.5 rounded-2xl text-[13px] transition-all duration-200"
-                      >
-                        Photo Frames
-                      </a>
-
-                      <a
-                        href="../HomeCategory/homecategory.html"
-                        onclick="
-                          event.preventDefault();
-                          quickSearch(this);
-                        "
-                        class="group bg-white border border-gray-200 font-lexend font-normal hover:border-accent hover:text-accent hover:shadow-sm px-4 py-1.5 rounded-2xl text-[13px] transition-all duration-200"
-                      >
-                        Wall Decor
-                      </a>
-
-                      <a
-                        href="#"
-                        onclick="
-                          event.preventDefault();
-                          quickSearch(this);
-                        "
-                        class="group bg-white border border-gray-200 font-lexend font-normal hover:border-accent hover:text-accent hover:shadow-sm px-4 py-1.5 rounded-2xl text-[13px] transition-all duration-200"
-                      >
-                        Carpets & Dhurries
-                      </a>
-
-                      <a
-                        href="#"
-                        onclick="
-                          event.preventDefault();
-                          quickSearch(this);
-                        "
-                        class="group bg-white border border-gray-200 font-lexend font-normal hover:border-accent hover:text-accent hover:shadow-sm px-4 py-1.5 rounded-2xl text-[13px] transition-all duration-200"
-                      >
-                        Home Furnishings
-                      </a>
-
-                      <a
-                        href="#"
-                        onclick="
-                          event.preventDefault();
-                          quickSearch(this);
-                        "
-                        class="group bg-white border border-gray-200 font-lexend font-normal hover:border-accent hover:text-accent hover:shadow-sm px-4 py-1.5 rounded-2xl text-[13px] transition-all duration-200"
-                      >
-                        Gift Items
-                      </a>
-
-                      <a
-                        href="#"
-                        onclick="
-                          event.preventDefault();
-                          quickSearch(this);
-                        "
-                        class="group bg-white border border-gray-200 font-lexend font-normal hover:border-accent hover:text-accent hover:shadow-sm px-4 py-1.5 rounded-2xl text-[13px] transition-all duration-200"
-                      >
-                        Festive Decor
-                      </a>
-                    </div>
-                  </div>
+                    <a href="#" class="hover:text-accent transition-colors duration-200">
+                        Support
+                    </a>
                 </div>
-              </div>
+            </div>
+        </div>
 
-              <!-- Right: Icons only (no nav here anymore) -->
-              <div
-                class="flex items-center gap-x-7 text-2xl text-primary flex-shrink-0"
-              >
-                <!-- Delivery Location Input -->
-                <!-- <div class="hidden lg:flex items-center gap-x-2"> -->
-                <!-- Icon -->
-                <!-- <i class="fa-solid fa-location-dot text-lg text-primary"></i> -->
+        <!-- LAYER 2: MAIN NAVBAR -->
+        <div class="border-b border-gray-100">
+            <!-- DESKTOP VERSION -->
+            <div class="hidden md:block">
+                <div class="max-w-7xl mx-auto px-6">
+                    <!-- Row 1: Logo + Search + Icons -->
+                    <div class="flex items-center justify-between h-16">
+                        <!-- Logo (left) -->
+                        <a href="../index.html" class="flex items-center flex-shrink-0">
+                            <img src="../Images/logo.jpg" alt="Artezo Store Logo" class="h-12 w-auto object-contain" />
+                        </a>
 
-                <!-- Input Box -->
-                <!-- <div class="flex flex-col leading-tight">
+                        <!-- Center: Search Bar -->
+                        <div class="flex-1 max-w-xl mx-auto relative" id="desktop-search-container">
+                            <div class="relative">
+                                <input id="search-input" type="text"
+                                    class="w-full bg-zinc-100 border border-transparent focus:border-accent focus:bg-white h-12 pl-14 pr-6 rounded-3xl text-sm placeholder:text-gray-400 focus:outline-none transition-all"
+                                    placeholder="Search for electronics…" />
+                                <div class="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400">
+                                    <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                                </div>
+                            </div>
+
+                            <!-- SEARCH SUGGESTIONS DROPDOWN -->
+                            <div id="search-suggestions"
+                                class="hidden absolute top-[48px] left-0 w-full bg-white/95 backdrop-blur-md border border-gray-100 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.08)] py-4 z-50 max-h-[420px] overflow-auto">
+                                <!-- Recent -->
+                                <div class="px-5">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="uppercase text-[9px] font-semibold tracking-widest text-gray-400">
+                                            Recent Searches
+                                        </span>
+
+                                        <button onclick="clearRecentSearches()"
+                                            class="text-accent text-[11px] hover:opacity-70 transition">
+                                            Clear
+                                        </button>
+                                    </div>
+
+                                    <div id="recent-list" class="flex flex-wrap gap-1.5 text-[12.5px]"></div>
+                                </div>
+
+                                <!-- Divider -->
+                                <div class="my-4 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent">
+                                </div>
+
+                                <!-- Trending -->
+                                <div class="px-5">
+                                    <span class="uppercase text-[9px] font-semibold tracking-widest text-gray-400">
+                                        Trending Now
+                                    </span>
+
+                                    <div class="grid grid-cols-2 gap-2 mt-3">
+                                        <!-- Item -->
+                                        <div onclick="quickSearch(this)"
+                                            class="group bg-zinc-50 hover:bg-white border border-transparent hover:border-accent/30 shadow-sm hover:shadow-md transition-all duration-200 px-3 py-2.5 rounded-xl text-[13px] cursor-pointer flex items-center gap-x-2.5">
+                                            <span class="group-hover:text-primary font-lexend font-normal">Wooden Photo
+                                                Frames</span>
+                                        </div>
+
+                                        <div onclick="quickSearch(this)"
+                                            class="group bg-zinc-50 hover:bg-white border border-transparent hover:border-accent/30 shadow-sm hover:shadow-md transition-all duration-200 px-3 py-2.5 rounded-xl text-[13px] cursor-pointer flex items-center gap-x-2.5">
+                                            <span class="group-hover:text-primary font-lexend font-normal">Handcrafted
+                                                Carpets</span>
+                                        </div>
+
+                                        <div onclick="quickSearch(this)"
+                                            class="group bg-zinc-50 hover:bg-white border border-transparent hover:border-accent/30 shadow-sm hover:shadow-md transition-all duration-200 px-3 py-2.5 rounded-xl text-[13px] cursor-pointer flex items-center gap-x-2.5">
+                                            <span class="group-hover:text-primary font-lexend font-normal">Wall Decor
+                                                Sets</span>
+                                        </div>
+
+                                        <div onclick="quickSearch(this)"
+                                            class="group bg-zinc-50 hover:bg-white border border-transparent hover:border-accent/30 shadow-sm hover:shadow-md transition-all duration-200 px-3 py-2.5 rounded-xl text-[13px] cursor-pointer flex items-center gap-x-2.5">
+                                            <span class="group-hover:text-primary font-lexend font-normal">Gift
+                                                Hampers</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Divider -->
+                                <div class="my-4 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent">
+                                </div>
+
+                                <!-- Categories -->
+                                <div class="px-5">
+                                    <span class="uppercase text-[9px] font-semibold tracking-widest text-gray-400">
+                                        Browse Categories
+                                    </span>
+
+                                    <div class="flex flex-wrap gap-2 mt-3">
+                                        <a href="#" onclick="
+                          event.preventDefault();
+                          quickSearch(this);
+                        " class="group bg-white border border-gray-200 font-lexend font-normal hover:border-accent hover:text-accent hover:shadow-sm px-4 py-1.5 rounded-2xl text-[13px] transition-all duration-200">
+                                            Photo Frames
+                                        </a>
+
+                                        <a href="../HomeCategory/homecategory.html" onclick="
+                          event.preventDefault();
+                          quickSearch(this);
+                        " class="group bg-white border border-gray-200 font-lexend font-normal hover:border-accent hover:text-accent hover:shadow-sm px-4 py-1.5 rounded-2xl text-[13px] transition-all duration-200">
+                                            Wall Decor
+                                        </a>
+
+                                        <a href="#" onclick="
+                          event.preventDefault();
+                          quickSearch(this);
+                        " class="group bg-white border border-gray-200 font-lexend font-normal hover:border-accent hover:text-accent hover:shadow-sm px-4 py-1.5 rounded-2xl text-[13px] transition-all duration-200">
+                                            Carpets & Dhurries
+                                        </a>
+
+                                        <a href="#" onclick="
+                          event.preventDefault();
+                          quickSearch(this);
+                        " class="group bg-white border border-gray-200 font-lexend font-normal hover:border-accent hover:text-accent hover:shadow-sm px-4 py-1.5 rounded-2xl text-[13px] transition-all duration-200">
+                                            Home Furnishings
+                                        </a>
+
+                                        <a href="#" onclick="
+                          event.preventDefault();
+                          quickSearch(this);
+                        " class="group bg-white border border-gray-200 font-lexend font-normal hover:border-accent hover:text-accent hover:shadow-sm px-4 py-1.5 rounded-2xl text-[13px] transition-all duration-200">
+                                            Gift Items
+                                        </a>
+
+                                        <a href="#" onclick="
+                          event.preventDefault();
+                          quickSearch(this);
+                        " class="group bg-white border border-gray-200 font-lexend font-normal hover:border-accent hover:text-accent hover:shadow-sm px-4 py-1.5 rounded-2xl text-[13px] transition-all duration-200">
+                                            Festive Decor
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Icons only (no nav here anymore) -->
+                        <div class="flex items-center gap-x-7 text-2xl text-primary flex-shrink-0">
+                            <!-- Delivery Location Input -->
+                            <!-- <div class="hidden lg:flex items-center gap-x-2"> -->
+                            <!-- Icon -->
+                            <!-- <i class="fa-solid fa-location-dot text-lg text-primary"></i> -->
+
+                            <!-- Input Box -->
+                            <!-- <div class="flex flex-col leading-tight">
                                     <label class="text-[10px] text-gray-400 uppercase tracking-wider">
                                         Deliver to
                                     </label>
@@ -343,73 +251,56 @@
                                 </div>
                             </div> -->
 
-                <!-- My Orders -->
-                <a href="../Myorders/orders.html">
-                  <button class="relative hover:text-accent transition-colors">
-                    <i class="fa-solid fa-box"></i>
-                  </button>
-                </a>
+                            <!-- My Orders -->
+                            <a href="../Myorders/orders.html">
+                                <button class="relative hover:text-accent transition-colors">
+                                    <i class="fa-solid fa-box"></i>
+                                </button>
+                            </a>
 
-                <!-- Wishlist -->
-                <button
-                  onclick="window.location.href = '../Wishlist/wishlist.html'"
-                  class="relative hover:text-accent transition-colors group"
-                >
-                  <i class="fa-solid fa-heart"></i>
-                  <span
-                    id="wishlist-count-badge"
-                    class="absolute -top-2 -right-2 bg-accent text-white text-[10px] font-bold h-5 min-w-[20px] px-1 rounded-full flex items-center justify-center"
-                  >
-                    0
-                  </span>
-                </button>
+                            <!-- Wishlist -->
+                            <button onclick="window.location.href = '../Wishlist/wishlist.html'"
+                                class="relative hover:text-accent transition-colors group">
+                                <i class="fa-solid fa-heart"></i>
+                                <span id="wishlist-count-badge"
+                                    class="absolute -top-2 -right-2 bg-accent text-white text-[10px] font-bold h-5 min-w-[20px] px-1 rounded-full flex items-center justify-center">
+                                    0
+                                </span>
+                            </button>
 
-                <!-- Cart -->
-                <button
-                  onclick="window.location.href = '../Cart/cart.html'"
-                  class="relative hover:text-accent transition-colors group"
-                >
-                  <i class="fa-solid fa-bag-shopping"></i>
-                  <span
-                    id="cart-count-badge"
-                    class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold h-5 min-w-[20px] px-1 rounded-full flex items-center justify-center"
-                  >
-                    0
-                  </span>
-                </button>
+                            <!-- Cart -->
+                            <button onclick="window.location.href = '../Cart/cart.html'"
+                                class="relative hover:text-accent transition-colors group">
+                                <i class="fa-solid fa-bag-shopping"></i>
+                                <span id="cart-count-badge"
+                                    class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold h-5 min-w-[20px] px-1 rounded-full flex items-center justify-center">
+                                    0
+                                </span>
+                            </button>
 
-                <!-- Account -->
-                <div class="relative" id="account-wrapper">
-                  <button
-                    id="account-btn"
-                    class="flex items-center gap-x-2 hover:text-accent transition-colors"
-                  >
-                    <div
-                      id="account-avatar"
-                      class="w-8 h-8 rounded-2xl overflow-hidden border border-gray-200"
-                    ></div>
+                            <!-- Account -->
+                            <div class="relative" id="account-wrapper">
+                                <button id="account-btn"
+                                    class="flex items-center gap-x-2 hover:text-accent transition-colors">
+                                    <div id="account-avatar"
+                                        class="w-8 h-8 rounded-2xl overflow-hidden border border-gray-200"></div>
 
-                    <span
-                      id="account-name-mobile"
-                      class="hidden lg:block text-sm font-medium"
-                    >
-                    </span>
-                  </button>
+                                    <span id="account-name-mobile" class="hidden lg:block text-sm font-medium">
+                                    </span>
+                                </button>
 
-                  <div
-                    id="account-dropdown"
-                    class="hidden absolute right-0 top-12 w-80 bg-white rounded-3xl shadow-2xl border border-gray-100 py-2 z-50"
-                  ></div>
-                </div>
-              </div>
-            </div>
+                                <div id="account-dropdown"
+                                    class="hidden absolute right-0 top-12 w-80 bg-white rounded-3xl shadow-2xl border border-gray-100 py-2 z-50">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-            <!-- Row 2: Navigation links – updated flat list -->
-            <div class="border-t border-gray-100 py-2.5">
-              <nav
-                class="flex items-center justify-center gap-x-6 text-sm font-normal font-lexend text-primary px-4 md:flex-nowrap overflow-visible"
-              >
-                <!-- <a href="../Product-Details/product-detail.html"
+                    <!-- Row 2: Navigation links – updated flat list -->
+                    <div class="border-t border-gray-100 py-2.5">
+                        <nav
+                            class="flex items-center justify-center gap-x-6 text-sm font-normal font-lexend text-primary px-4 md:flex-nowrap overflow-visible">
+                            <!-- <a href="../Product-Details/product-detail.html"
                                 class="hover:text-accent transition-colors whitespace-nowrap">Photo Frames</a>
                             <a href="../products/product.html"
                                 class="hover:text-accent transition-colors whitespace-nowrap">Wall Decor</a>
@@ -419,303 +310,240 @@
                             <a href="#" class="hover:text-accent transition-colors whitespace-nowrap">Personalised Gifts</a>
                             <a href="#" class="hover:text-accent transition-colors whitespace-nowrap">Trophies and Mementos</a>
                             <a href="#" class="hover:text-accent transition-colors whitespace-nowrap">Trending Products</a> -->
-                <!-- <a href="#" class="hover:text-accent transition-colors whitespace-nowrap">Bath</a>
+                            <!-- <a href="#" class="hover:text-accent transition-colors whitespace-nowrap">Bath</a>
                             <a href="#" class="hover:text-accent transition-colors whitespace-nowrap">Garden</a>
                             <a href="#" class="hover:text-accent transition-colors whitespace-nowrap">Gifts</a> -->
-                <!-- <a href="#" class="hover:text-accent transition-colors whitespace-nowrap text-red-600 font-medium">Return/Exchange</a> -->
-              </nav>
+                            <!-- <a href="#" class="hover:text-accent transition-colors whitespace-nowrap text-red-600 font-medium">Return/Exchange</a> -->
+                        </nav>
+                    </div>
+                </div>
             </div>
-          </div>
+
+            <!-- MOBILE VERSION – Updated -->
+            <div class="md:hidden">
+                <div class="h-16 px-4 flex items-center justify-between bg-white border-b">
+                    <!-- Left: Hamburger -->
+                    <button id="hamburger-btn" class="text-2xl text-primary">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+
+                    <!-- Center: LOGO (Replaced LUXE Text) -->
+                    <a href="../index.html" class="flex items-center">
+                        <img src="../Images/logo.jpg" alt="Artezo Store Logo" class="h-10 w-auto object-contain" />
+                    </a>
+
+                    <!-- Right: Delivery + All Icons Together -->
+                    <div class="flex items-center gap-x-4 text-xl text-primary">
+                        <!-- Search -->
+                        <button id="mobile-search-btn">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </button>
+
+                        <!-- My Orders -->
+                        <a href="/Myorders/orders.html" class="relative hover:text-accent transition-colors">
+                            <i class="fa-solid fa-box"></i>
+                        </a>
+
+                        <!-- Wishlist -->
+                        <a href="../Wishlist/wishlist.html" class="relative p-2 flex items-center justify-center">
+                            <i class="fa-solid fa-heart"></i>
+
+                            <span id="mobile-wishlist-count"
+                                class="absolute -top-1 -right-1 bg-accent text-white text-[9px] min-w-[16px] h-[16px] px-[3px] rounded-full flex items-center justify-center">
+                                0
+                            </span>
+                        </a>
+
+                        <!-- Cart -->
+                        <a href="../Cart/cart.html" id="mobile-cart-btn"
+                            class="relative p-2 flex items-center justify-center">
+                            <i class="fa-solid fa-bag-shopping text-lg"></i>
+
+                            <!-- Cart Count -->
+                            <span id="mobile-cart-count"
+                                class="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-[3px] bg-red-500 text-white text-[9px] font-medium rounded-full flex items-center justify-center leading-none">
+                                0
+                            </span>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- MOBILE VERSION – Updated -->
-        <div class="md:hidden">
-          <div
-            class="h-16 px-4 flex items-center justify-between bg-white border-b"
-          >
-            <!-- Left: Hamburger -->
-            <button id="hamburger-btn" class="text-2xl text-primary">
-              <i class="fa-solid fa-bars"></i>
-            </button>
+        <!-- LAYER 3: OFFERS STRIP -->
+        <div class="bg-accent text-primary font-zain py-1 text-[12px] font-medium overflow-hidden">
+            <div class="ticker-wrapper">
+                <div class="ticker-track">
+                    <div class="ticker-inner">
+                        <!-- ORIGINAL SET -->
+                        <div class="ticker-item">
+                            <i class="fa-solid fa-truck mr-2"></i>
+                            FREE Shipping on orders above ₹2,999
+                        </div>
 
-            <!-- Center: LOGO (Replaced LUXE Text) -->
-            <a href="../index.html" class="flex items-center">
-              <img
-                src="../Images/logo.jpg"
-                alt="Artezo Store Logo"
-                class="h-10 w-auto object-contain"
-              />
-            </a>
+                        <div class="ticker-item">
+                            <i class="fa-solid fa-rotate mr-2"></i>
+                            30 Days Easy Return
+                        </div>
 
-            <!-- Right: Delivery + All Icons Together -->
-            <div class="flex items-center gap-x-4 text-xl text-primary">
-              <!-- Search -->
-              <button id="mobile-search-btn">
-                <i class="fa-solid fa-magnifying-glass"></i>
-              </button>
+                        <div class="ticker-item">
+                            <i class="fa-solid fa-credit-card mr-2"></i>
+                            COD Available • No Cost EMI
+                        </div>
 
-              <!-- My Orders -->
-              <a
-                href="/Myorders/orders.html"
-                class="relative hover:text-accent transition-colors"
-              >
-                <i class="fa-solid fa-box"></i>
-              </a>
+                        <div class="ticker-item">
+                            <i class="fa-solid fa-gift mr-2"></i>
+                            Up to 70% OFF • Winter Sale
+                        </div>
 
-              <!-- Wishlist -->
-              <a href="../Wishlist/wishlist.html" class="relative">
-                <i class="fa-solid fa-heart"></i>
+                        <!-- DUPLICATE SET -->
+                        <div class="ticker-item">
+                            <i class="fa-solid fa-truck mr-2"></i>
+                            FREE Shipping on orders above ₹2,999
+                        </div>
 
-                <span
-                  id="mobile-wishlist-count"
-                  class="absolute -top-1 -right-1 bg-accent text-white text-[9px] h-4 w-4 rounded-full flex items-center justify-center"
-                >
-                  3
-                </span>
-              </a>
+                        <div class="ticker-item">
+                            <i class="fa-solid fa-rotate mr-2"></i>
+                            30 Days Easy Return
+                        </div>
 
-              <!-- Cart -->
-              <a
-                href="../Cart/cart.html"
-                id="mobile-cart-btn"
-                class="relative p-2 flex items-center justify-center"
-              >
-                <i class="fa-solid fa-bag-shopping text-lg"></i>
+                        <div class="ticker-item">
+                            <i class="fa-solid fa-credit-card mr-2"></i>
+                            COD Available • No Cost EMI
+                        </div>
 
-                <!-- Cart Count -->
-                <span
-                  id="mobile-cart-count"
-                  class="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-[3px] bg-red-500 text-white text-[9px] font-medium rounded-full flex items-center justify-center leading-none"
-                >
-                  4
-                </span>
-              </a>
+                        <div class="ticker-item">
+                            <i class="fa-solid fa-gift mr-2"></i>
+                            Up to 70% OFF • Winter Sale
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
-
-      <!-- LAYER 3: OFFERS STRIP -->
-      <div
-        class="bg-accent text-primary font-zain py-1 text-[12px] font-medium overflow-hidden"
-      >
-        <div class="ticker-wrapper">
-          <div class="ticker-track">
-            <div class="ticker-inner">
-              <!-- ORIGINAL SET -->
-              <div class="ticker-item">
-                <i class="fa-solid fa-truck mr-2"></i>
-                FREE Shipping on orders above ₹2,999
-              </div>
-
-              <div class="ticker-item">
-                <i class="fa-solid fa-rotate mr-2"></i>
-                30 Days Easy Return
-              </div>
-
-              <div class="ticker-item">
-                <i class="fa-solid fa-credit-card mr-2"></i>
-                COD Available • No Cost EMI
-              </div>
-
-              <div class="ticker-item">
-                <i class="fa-solid fa-gift mr-2"></i>
-                Up to 70% OFF • Winter Sale
-              </div>
-
-              <!-- DUPLICATE SET -->
-              <div class="ticker-item">
-                <i class="fa-solid fa-truck mr-2"></i>
-                FREE Shipping on orders above ₹2,999
-              </div>
-
-              <div class="ticker-item">
-                <i class="fa-solid fa-rotate mr-2"></i>
-                30 Days Easy Return
-              </div>
-
-              <div class="ticker-item">
-                <i class="fa-solid fa-credit-card mr-2"></i>
-                COD Available • No Cost EMI
-              </div>
-
-              <div class="ticker-item">
-                <i class="fa-solid fa-gift mr-2"></i>
-                Up to 70% OFF • Winter Sale
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </header>
 
     <!-- MOBILE HAMBURGER MENU -->
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,300,0,0"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,300,0,0" />
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600&display=swap" rel="stylesheet" />
 
-    <div
-      id="mobile-menu"
-      class="fixed inset-0 bg-white z-[999] translate-x-full transition-transform duration-500 flex flex-col shadow-lg"
-    >
-      <!-- Header -->
-      <div class="p-4 flex justify-between items-center border-b">
-        <a href="#" class="flex items-center">
-          <img
-            src="../Images/logo.jpg"
-            alt="Artezo Store Logo"
-            class="h-12 w-auto object-contain"
-          />
-        </a>
+    <div id="mobile-menu"
+        class="fixed inset-0 bg-white z-[999] translate-x-full transition-transform duration-500 flex flex-col shadow-lg">
+        <!-- Header -->
+        <div class="p-4 flex justify-between items-center border-b">
+            <a href="#" class="flex items-center">
+                <img src="../Images/logo.jpg" alt="Artezo Store Logo" class="h-12 w-auto object-contain" />
+            </a>
 
-        <!-- Search and Close in header -->
-        <div class="flex items-center gap-3">
-          <button
-            id="close-menu-btn"
-            class="text-2xl text-gray-400 hover:text-primary"
-          >
-            ✕
-          </button>
-        </div>
-      </div>
-
-      <!-- Menu Content -->
-      <div class="flex-1 overflow-y-auto p-4">
-        <!-- Search Bar inside menu -->
-        <div class="mb-6">
-          <div class="relative">
-            <input
-              type="text"
-              placeholder="Search for 'pillows'"
-              class="w-full h-12 pl-12 pr-4 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
-            />
-            <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-              <i class="fa-solid fa-magnifying-glass"></i>
+            <!-- Search and Close in header -->
+            <div class="flex items-center gap-3">
+                <button id="close-menu-btn" class="text-2xl text-gray-400 hover:text-primary">
+                    ✕
+                </button>
             </div>
-          </div>
         </div>
 
-        <!-- All Categories Title -->
-        <div class="mb-4">
-          <h2 class="text-lg font-semibold text-gray-900">All Categories</h2>
-        </div>
-
-        <!-- Categories Grid with Images -->
-        <div id="categories-grid" class="grid grid-cols-3 gap-4">
-          <!-- Categories will be dynamically populated here -->
-        </div>
-
-        <!-- View All Categories Link -->
-        <div class="mt-6 text-center">
-          <a
-            href="#"
-            class="inline-flex items-center gap-2 text-accent font-medium hover:gap-3 transition-all"
-          >
-            <span>View All Categories</span>
-            <i class="fa-solid fa-arrow-right text-sm"></i>
-          </a>
-        </div>
-
-        <!-- Banner Carousel Section -->
-        <div class="mt-8">
-          <div class="relative">
-            <!-- Carousel Container -->
-            <div id="banner-carousel" class="overflow-hidden rounded-xl">
-              <div
-                id="carousel-track"
-                class="flex transition-transform duration-500 ease-in-out"
-              >
-                <!-- Banner 1 -->
-                <div class="w-full flex-shrink-0 px-1">
-                  <img
-                    src="https://via.placeholder.com/300x150/033E59/ffffff?text=Special+Offer+1"
-                    alt="Banner 1"
-                    class="w-full h-32 object-cover rounded-xl"
-                  />
+        <!-- Menu Content -->
+        <div class="flex-1 overflow-y-auto p-4">
+            <!-- Search Bar inside menu -->
+            <div class="mb-6">
+                <div class="relative">
+                    <input type="text" placeholder="Search for 'pillows'"
+                        class="w-full h-12 pl-12 pr-4 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-accent/50" />
+                    <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
                 </div>
-                <!-- Banner 2 -->
-                <div class="w-full flex-shrink-0 px-1">
-                  <img
-                    src="https://via.placeholder.com/300x150/E6A62C/ffffff?text=Special+Offer+2"
-                    alt="Banner 2"
-                    class="w-full h-32 object-cover rounded-xl"
-                  />
-                </div>
-                <!-- Banner 3 -->
-                <div class="w-full flex-shrink-0 px-1">
-                  <img
-                    src="https://via.placeholder.com/300x150/033E59/ffffff?text=Special+Offer+3"
-                    alt="Banner 3"
-                    class="w-full h-32 object-cover rounded-xl"
-                  />
-                </div>
-              </div>
             </div>
 
-            <!-- Navigation Dots -->
-            <div class="flex justify-center gap-2 mt-4">
-              <button
-                class="carousel-dot w-2 h-2 rounded-full bg-gray-300 data-[active=true]:bg-accent transition-colors"
-                data-index="0"
-              ></button>
-              <button
-                class="carousel-dot w-2 h-2 rounded-full bg-gray-300 data-[active=true]:bg-accent transition-colors"
-                data-index="1"
-              ></button>
-              <button
-                class="carousel-dot w-2 h-2 rounded-full bg-gray-300 data-[active=true]:bg-accent transition-colors"
-                data-index="2"
-              ></button>
+            <!-- All Categories Title -->
+            <div class="mb-4">
+                <h2 class="text-lg font-semibold text-gray-900">All Categories</h2>
             </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Footer with Sign In -->
-      <div class="p-4 border-t">
-        <button
-          onclick="toggleLoginState()"
-          id="mobile-login-btn"
-          class="w-full h-12 bg-primary text-white rounded-full text-sm font-semibold hover:bg-primary/90"
-        >
-          Sign In / Join
-        </button>
-      </div>
+            <!-- Categories Grid with Images -->
+            <div id="categories-grid" class="grid grid-cols-3 gap-4">
+                <!-- Categories will be dynamically populated here -->
+            </div>
+
+            <!-- View All Categories Link -->
+            <div class="mt-6 text-center">
+                <a href="#" class="inline-flex items-center gap-2 text-accent font-medium hover:gap-3 transition-all">
+                    <span>View All Categories</span>
+                    <i class="fa-solid fa-arrow-right text-sm"></i>
+                </a>
+            </div>
+
+            <!-- Banner Carousel Section -->
+            <div class="mt-8">
+                <div class="relative">
+                    <!-- Carousel Container -->
+                    <div id="banner-carousel" class="overflow-hidden rounded-xl">
+                        <div id="carousel-track" class="flex transition-transform duration-500 ease-in-out">
+                            <!-- Banner 1 -->
+                            <div class="w-full flex-shrink-0 px-1">
+                                <img src="https://via.placeholder.com/300x150/033E59/ffffff?text=Special+Offer+1"
+                                    alt="Banner 1" class="w-full h-32 object-cover rounded-xl" />
+                            </div>
+                            <!-- Banner 2 -->
+                            <div class="w-full flex-shrink-0 px-1">
+                                <img src="https://via.placeholder.com/300x150/E6A62C/ffffff?text=Special+Offer+2"
+                                    alt="Banner 2" class="w-full h-32 object-cover rounded-xl" />
+                            </div>
+                            <!-- Banner 3 -->
+                            <div class="w-full flex-shrink-0 px-1">
+                                <img src="https://via.placeholder.com/300x150/033E59/ffffff?text=Special+Offer+3"
+                                    alt="Banner 3" class="w-full h-32 object-cover rounded-xl" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Dots -->
+                    <div class="flex justify-center gap-2 mt-4">
+                        <button
+                            class="carousel-dot w-2 h-2 rounded-full bg-gray-300 data-[active=true]:bg-accent transition-colors"
+                            data-index="0"></button>
+                        <button
+                            class="carousel-dot w-2 h-2 rounded-full bg-gray-300 data-[active=true]:bg-accent transition-colors"
+                            data-index="1"></button>
+                        <button
+                            class="carousel-dot w-2 h-2 rounded-full bg-gray-300 data-[active=true]:bg-accent transition-colors"
+                            data-index="2"></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer with Sign In -->
+        <div class="p-4 border-t">
+            <button onclick="toggleLoginState()" id="mobile-login-btn"
+                class="w-full h-12 bg-primary text-white rounded-full text-sm font-semibold hover:bg-primary/90">
+                Sign In / Join
+            </button>
+        </div>
     </div>
 
     <!-- MOBILE SEARCH OVERLAY -->
-    <div
-      id="mobile-search-overlay"
-      class="hidden fixed inset-0 bg-black/70 z-[999] flex items-start justify-center pt-16"
-    >
-      <div class="w-full max-w-lg px-5">
-        <div class="bg-white rounded-3xl shadow-2xl">
-          <div class="relative">
-            <input
-              id="mobile-search-input"
-              type="text"
-              placeholder="What are you looking for?"
-              class="w-full h-16 pl-16 pr-6 text-lg rounded-3xl focus:outline-none"
-            />
-            <div class="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400">
-              <i class="fa-solid fa-magnifying-glass"></i>
+    <div id="mobile-search-overlay"
+        class="hidden fixed inset-0 bg-black/70 z-[999] flex items-start justify-center pt-16">
+        <div class="w-full max-w-lg px-5">
+            <div class="bg-white rounded-3xl shadow-2xl">
+                <div class="relative">
+                    <input id="mobile-search-input" type="text" placeholder="What are you looking for?"
+                        class="w-full h-16 pl-16 pr-6 text-lg rounded-3xl focus:outline-none" />
+                    <div class="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                    <button onclick="hideMobileSearch()"
+                        class="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 text-2xl">
+                        ✕
+                    </button>
+                </div>
             </div>
-            <button
-              onclick="hideMobileSearch()"
-              class="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 text-2xl"
-            >
-              ✕
-            </button>
-          </div>
         </div>
-      </div>
     </div>
 
     <script src="header.js"></script>
-  </body>
+</body>
+
 </html>

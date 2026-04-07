@@ -255,65 +255,75 @@ function initGlobalUtils() {
   /**
    * Show toast notification (global, works from any page)
    */
-  function showGlobalToast(message, type = 'info') {
-    // Try to use existing toast if available on page
-    if (typeof showToast === 'function') {
-      showToast(message, type);
-      return;
-    }
+ function showGlobalToast(message, type = 'success') {
 
-    // Create simple fallback notification
-    let container = document.getElementById('global-notification-container');
-    if (!container) {
-      container = document.createElement('div');
-      container.id = 'global-notification-container';
-      container.style.cssText = `
-        position: fixed;
-        top: 100px;
-        right: 20px;
-        z-index: 9999;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        max-width: 400px;
-      `;
-      document.body.appendChild(container);
-    }
-
-    const notification = document.createElement('div');
-    const bgColor = type === 'success' ? '#10b981' : 
-                   type === 'error' ? '#ef4444' : 
-                   type === 'loading' ? '#3b82f6' : '#6b7280';
-    
-    notification.style.cssText = `
-      background: ${bgColor};
-      color: white;
-      padding: 12px 16px;
-      border-radius: 6px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      font-size: 14px;
-      animation: slideIn 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    `;
-
-    const icon = type === 'success' ? '✓' : 
-                type === 'error' ? '✕' : 
-                type === 'loading' ? '⏳' : 'ℹ';
-    
-    notification.innerHTML = `<span>${icon}</span><span>${message}</span>`;
-    container.appendChild(notification);
-
-    // Auto remove after 3 seconds (except loading)
-    if (type !== 'loading') {
-      setTimeout(() => {
-        notification.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => notification.remove(), 300);
-      }, 3000);
-    }
+  // If page already has toast system use that
+  if (typeof showToast === 'function') {
+    showToast(message, type);
+    return;
   }
 
+  let container = document.getElementById('global-notification-container');
+
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'global-notification-container';
+    container.style.cssText = `
+      position: fixed;
+      top: 100px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 360px;
+    `;
+    document.body.appendChild(container);
+  }
+
+  const notification = document.createElement('div');
+
+  const colors = {
+    success: '#1D3C4A',
+    error: '#dc2626',
+    info: '#1D3C4A'
+  };
+
+  const icons = {
+    success: 'fa-check',
+    error: 'fa-xmark',
+    info: 'fa-circle-info'
+  };
+
+  notification.style.cssText = `
+    background: white;
+    color: #374151;
+    padding: 14px 16px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    border-left: 4px solid #e39f32;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    font-size: 14px;
+    animation: toastSlideIn 0.25s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: system-ui, sans-serif;
+  `;
+
+  notification.innerHTML = `
+    <i class="fa-solid ${icons[type] || icons.info}" 
+       style="color:${colors[type]}; font-size:14px;"></i>
+    <span style="flex:1;">${message}</span>
+  `;
+
+  container.appendChild(notification);
+
+  setTimeout(() => {
+    notification.style.animation = 'toastSlideOut 0.25s ease';
+    setTimeout(() => notification.remove(), 250);
+  }, 3000);
+}
   /**
    * Update cart count badge in header
    */
