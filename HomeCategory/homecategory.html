@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Artezo Store - Home</title>
+  <title>Artezo Store - Category</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
@@ -16,7 +16,27 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Zain:wght@200;300;400;700;800;900&display=swap"
     rel="stylesheet" />
-  <link rel="stylesheet" href="./homecategory.css" />
+
+  <style>
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    /* Skeleton shimmer */
+    .skeleton-pulse {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+  </style>
 
   <script>
     tailwind.config = {
@@ -34,691 +54,157 @@
       },
     };
   </script>
-
 </head>
 
-<body class="antialiased text-stone-700">
+<body class="antialiased text-stone-700 bg-stone-50">
 
-  <!-- HERO BANNER -->
+  <!-- ═══════════════════════════════════════════════════════════════
+       HEADER (injected by load-header.js)
+  ═══════════════════════════════════════════════════════════════ -->
+  <div id="header-container"></div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       HERO BANNER
+  ═══════════════════════════════════════════════════════════════ -->
   <section class="py-2 flex justify-center">
     <div class="w-full max-w-7xl mx-4 sm:mx-6 lg:mx-8 relative rounded-xl overflow-hidden shadow-lg">
-
-      <!-- Image -->
-      <img src="../Images/banner1.jpg" alt="Furniture Banner"
-        class="w-full h-[240px] sm:h-[280px] md:h-[320px] lg:h-[360px] xl:h-[400px] object-cover object-center">
-
-      <!-- Gradient -->
+      <img src="../Images/banner1.jpg" alt="Category Banner"
+        class="w-full h-[160px] sm:h-[200px] md:h-[240px] lg:h-[280px] object-cover object-center">
       <div class="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent"></div>
-
-      <!-- Text -->
-      <div
-        class="absolute top-1/2 -translate-y-1/2 left-6 sm:left-10 md:left-16 lg:left-20 text-white max-w-full sm:max-w-lg md:max-w-xl lg:max-w-2xl">
-
-        <h1 class="text-lg sm:text-xl md:text-3xl lg:text-4xl font-light leading-snug">
-          Furniture made <span class="italic">to last</span>
+      <div class="absolute top-1/2 -translate-y-1/2 left-6 sm:left-10 md:left-16 text-white">
+        <!-- Breadcrumb -->
+        <nav class="text-xs text-white/70 font-lexend mb-1 flex items-center gap-1">
+          <a href="../index.html" class="hover:text-white transition">Home</a>
+          <span>/</span>
+          <span id="categoryBreadcrumb" class="text-white/90">Category</span>
+        </nav>
+        <h1 id="categoryPageTitle"
+            data-category-title
+            class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-light font-zain text-white">
+          Category
         </h1>
-
-        <h2 class="text-base sm:text-lg md:text-2xl lg:text-3xl mt-1 text-yellow-200 italic">
-          Designs made to love
-        </h2>
-
-        <div class="w-14 h-[2px] bg-white/70 my-3"></div>
-
-        <p class="text-sm sm:text-base md:text-lg lg:text-xl">
-          Starting From <span class="font-semibold">₹498*</span>
-        </p>
-
       </div>
     </div>
   </section>
 
+  <!-- ═══════════════════════════════════════════════════════════════
+       MAIN CONTENT
+  ═══════════════════════════════════════════════════════════════ -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
-  <!-- SHOP BY CATEGORY -->
-  <section
-    class="relative mt-4 py-6 mx-4 sm:mx-6 lg:mx-8 bg-gradient-to-br from-yellow-50 via-white to-teal-50 rounded-xl overflow-hidden">
-    <div class="max-w-7xl mx-auto px-4">
+    <!-- Product count + sort row -->
+    <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+      <p id="categoryProductCount" class="text-sm text-gray-500 font-lexend">Loading…</p>
+    </div>
 
-      <div class="absolute inset-0 opacity-[0.15] 
-bg-[linear-gradient(#e5e7eb_1px,transparent_1px),linear-gradient(90deg,#e5e7eb_1px,transparent_1px)]
-bg-[size:40px_40px]"></div>
+    <!-- Error state -->
+    <div id="categoryError"
+         class="hidden text-center py-16 text-gray-500 font-lexend text-sm bg-white rounded-xl border border-gray-100 shadow-sm">
+    </div>
 
-      <div class="absolute -top-20 -left-20 w-72 h-72 bg-[#1D3C4A]/10 rounded-full blur-3xl"></div>
-      <div class="absolute -bottom-20 -right-20 w-72 h-72 bg-[#e39f32]/10 rounded-full blur-3xl"></div>
-
-      <div class="relative z-10">
-        <div class="flex items-center justify-between mb-10">
-          <h2 class="text-2xl sm:text-4xl font-semibold font-zain text-[#1D3C4A]">
-            Shop by Category
-          </h2>
-
-          <button onclick="toggleCategories()"
-            class="text-md font-medium font-zain text-[#e39f32] hover:text-[#c98725] transition">
-            View More Categories
-          </button>
+    <!-- Skeleton grid -->
+    <div id="categorySkeletonGrid"
+         class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4"
+         style="display: none;">
+      <!-- 8 skeleton cards -->
+      <div class="rounded-xl overflow-hidden bg-white border border-gray-100 shadow-sm">
+        <div class="skeleton-pulse aspect-square"></div>
+        <div class="p-3 space-y-2">
+          <div class="skeleton-pulse h-4 rounded w-3/4"></div>
+          <div class="skeleton-pulse h-3 rounded w-1/2"></div>
+          <div class="skeleton-pulse h-5 rounded w-2/3"></div>
         </div>
-
-        <!-- Grid -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
-
-          <!-- Always visible 6 categories -->
-          <div class="group cursor-pointer">
-            <div class="w-full h-48 rounded-xl overflow-hidden bg-gray-100 border-8 border-amber-50">
-              <img src="https://artstreet.in/cdn/shop/files/81zwmibGpXL_939x939.jpg?v=1739020120"
-                class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-            </div>
-            <p class="mt-3 text-center text-sm font-medium text-gray-700">Photo Frames</p>
-          </div>
-
-          <div class="group cursor-pointer">
-            <div class="w-full h-48 rounded-xl overflow-hidden bg-gray-100 border-8 border-amber-50">
-              <img src="https://images.hindustantimes.com/img/2024/07/20/550x309/su_1721487259942_1721487273730.jpg"
-                class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-            </div>
-            <p class="mt-3 text-center text-sm font-medium text-gray-700">Home Decor</p>
-          </div>
-
-          <a href="../HomeSub/homesubcategory.html" class="group cursor-pointer block">
-            <div class="w-full h-48 rounded-xl overflow-hidden bg-gray-100 border-8 border-amber-50">
-              <img src="https://m.media-amazon.com/images/I/71QRvl555lL._AC_SX679_.jpg"
-                class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-            </div>
-            <p class="mt-3 text-center text-sm font-medium text-gray-700">Wall Decor</p>
-          </a>
-
-          <div class="group cursor-pointer">
-            <div class="w-full h-48 rounded-xl overflow-hidden bg-gray-100 border-8 border-amber-50">
-              <img
-                src="https://rukminim2.flixcart.com/image/1280/1280/xif0q/name-plate/e/r/t/personalized-modern-name-plates-for-home-entrance-outdoor-12x12-original-imagy2zbdnfr73qq.jpeg?q=90"
-                class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-            </div>
-            <p class="mt-3 text-center text-sm font-medium text-gray-700">Nameplates</p>
-          </div>
-
-          <div class="group cursor-pointer">
-            <div class="w-full h-48 rounded-xl overflow-hidden bg-gray-100 border-8 border-amber-50">
-              <img src="https://m.media-amazon.com/images/I/71XU5A1FwaL._SX679_PIbundle-7,TopRight,0,0_AA679SH20_.jpg"
-                class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-            </div>
-            <p class="mt-3 text-center text-sm font-medium text-gray-700">Gifts</p>
-          </div>
-
-          <div class="group cursor-pointer">
-            <div class="w-full h-48 rounded-xl overflow-hidden bg-gray-100 border-8 border-amber-50">
-              <img src="https://trophycreator.in/img/diamond-trophy-supplier-in-India-hm.jpg"
-                class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-            </div>
-            <p class="mt-3 text-center text-sm font-medium text-gray-700">Trophies</p>
-          </div>
-
-          <!-- Extra categories hidden initially -->
-          <div class="group cursor-pointer hidden extra-category">
-            <div class="w-full h-48 rounded-xl overflow-hidden bg-gray-100 border-8 border-amber-50">
-              <img
-                src="https://writingsonthewall.in/cdn/shop/files/Full-Length-Decorative-Wall-Mirror-Set-Writings-On-The-Wall-Wall-Mirror_43354246709527.jpg?v=1753287627&width=1400"
-                class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-            </div>
-            <p class="mt-3 text-center text-sm font-medium text-gray-700">Mirrors</p>
-          </div>
-
-          <div class="group cursor-pointer hidden extra-category">
-            <div class="w-full h-48 rounded-xl overflow-hidden bg-gray-100 border-8 border-amber-50">
-              <img
-                src="https://ii1.pepperfry.com/media/catalog/product/d/e/764x840/designer-ginko-multicolour-metal-analog-wall-clock-designer-ginko-multicolour-metal-analog-wall-cloc-xtizma.jpg"
-                class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-            </div>
-            <p class="mt-3 text-center text-sm font-medium text-gray-700">Clocks</p>
-          </div>
-
+      </div>
+      <div class="rounded-xl overflow-hidden bg-white border border-gray-100 shadow-sm">
+        <div class="skeleton-pulse aspect-square"></div>
+        <div class="p-3 space-y-2">
+          <div class="skeleton-pulse h-4 rounded w-3/4"></div>
+          <div class="skeleton-pulse h-3 rounded w-1/2"></div>
+          <div class="skeleton-pulse h-5 rounded w-2/3"></div>
+        </div>
+      </div>
+      <div class="rounded-xl overflow-hidden bg-white border border-gray-100 shadow-sm">
+        <div class="skeleton-pulse aspect-square"></div>
+        <div class="p-3 space-y-2">
+          <div class="skeleton-pulse h-4 rounded w-3/4"></div>
+          <div class="skeleton-pulse h-3 rounded w-1/2"></div>
+          <div class="skeleton-pulse h-5 rounded w-2/3"></div>
+        </div>
+      </div>
+      <div class="rounded-xl overflow-hidden bg-white border border-gray-100 shadow-sm">
+        <div class="skeleton-pulse aspect-square"></div>
+        <div class="p-3 space-y-2">
+          <div class="skeleton-pulse h-4 rounded w-3/4"></div>
+          <div class="skeleton-pulse h-3 rounded w-1/2"></div>
+          <div class="skeleton-pulse h-5 rounded w-2/3"></div>
+        </div>
+      </div>
+      <div class="rounded-xl overflow-hidden bg-white border border-gray-100 shadow-sm">
+        <div class="skeleton-pulse aspect-square"></div>
+        <div class="p-3 space-y-2">
+          <div class="skeleton-pulse h-4 rounded w-3/4"></div>
+          <div class="skeleton-pulse h-3 rounded w-1/2"></div>
+          <div class="skeleton-pulse h-5 rounded w-2/3"></div>
+        </div>
+      </div>
+      <div class="rounded-xl overflow-hidden bg-white border border-gray-100 shadow-sm">
+        <div class="skeleton-pulse aspect-square"></div>
+        <div class="p-3 space-y-2">
+          <div class="skeleton-pulse h-4 rounded w-3/4"></div>
+          <div class="skeleton-pulse h-3 rounded w-1/2"></div>
+          <div class="skeleton-pulse h-5 rounded w-2/3"></div>
+        </div>
+      </div>
+      <div class="rounded-xl overflow-hidden bg-white border border-gray-100 shadow-sm">
+        <div class="skeleton-pulse aspect-square"></div>
+        <div class="p-3 space-y-2">
+          <div class="skeleton-pulse h-4 rounded w-3/4"></div>
+          <div class="skeleton-pulse h-3 rounded w-1/2"></div>
+          <div class="skeleton-pulse h-5 rounded w-2/3"></div>
+        </div>
+      </div>
+      <div class="rounded-xl overflow-hidden bg-white border border-gray-100 shadow-sm">
+        <div class="skeleton-pulse aspect-square"></div>
+        <div class="p-3 space-y-2">
+          <div class="skeleton-pulse h-4 rounded w-3/4"></div>
+          <div class="skeleton-pulse h-3 rounded w-1/2"></div>
+          <div class="skeleton-pulse h-5 rounded w-2/3"></div>
         </div>
       </div>
     </div>
-  </section>
 
-  <!-- HOME DECOR ITEMS FOR WALL WITH NAVIGATION -->
-  <section class="py-10 bg-white relative">
-    <div class="max-w-7xl mx-auto px-4">
-
-      <!-- Section Title -->
-      <div class="text-center mb-4">
-        <h2 class="text-3xl sm:text-4xl font-semibold font-zain text-[#1D3C4A]">
-          Decor Items for Wall
-        </h2>
-        <p class="text-sm sm:text-base text-gray-500 mt-2">
-          Time to Define Your Wall Story
-        </p>
-      </div>
-
-      <!-- Slider Container -->
-      <div class="relative">
-        <!-- Left Arrow -->
-        <button id="prevBtn"
-          class="absolute left-0 top-1/2 -translate-y-1/2 z-20 p-2 bg-white rounded-full shadow hover:bg-gray-100 transition">
-          &#10094;
-        </button>
-
-        <!-- Right Arrow -->
-        <button id="nextBtn"
-          class="absolute right-0 top-1/2 -translate-y-1/2 z-20 p-2 bg-white rounded-full shadow hover:bg-gray-100 transition">
-          &#10095;
-        </button>
-
-        <!-- Cards Wrapper -->
-        <div id="slider" class="flex overflow-x-auto scroll-smooth gap-6 py-4 scrollbar-hide">
-          <!-- Card 1 -->
-          <div
-            class="min-w-[220px] sm:min-w-[250px] lg:min-w-[280px] group cursor-pointer rounded-xl overflow-hidden shadow hover:shadow-lg transition flex-shrink-0">
-            <img
-              src="https://metalkart.in/cdn/shop/products/eternal-vine-premium-wall-art-52-x-28-inches-132710.jpg?v=1663831977&width=980"
-              alt="Wall Art" class="w-full h-64 object-cover group-hover:scale-105 transition duration-300">
-            <div class="text-center py-4">
-              <h3 class="text-lg font-medium text-gray-800">Wall Art</h3>
-              <p class="text-sm text-gray-500 mt-1">UPTO 55% OFF</p>
-            </div>
-          </div>
-
-          <!-- Card 2 -->
-          <div
-            class="min-w-[220px] sm:min-w-[250px] lg:min-w-[280px] group cursor-pointer rounded-xl overflow-hidden shadow hover:shadow-lg transition flex-shrink-0">
-            <img
-              src="https://media.istockphoto.com/id/1333179849/photo/creative-composition-of-stylish-modern-living-room-interior-with-two-mock-up-poster-frames.jpg?s=1024x1024&w=is&k=20&c=RKFImYeLgDsQnTBPc7J1D5cEfZDbIj3jcvd-MBhJaNw="
-              alt="Wall Paintings" class="w-full h-64 object-cover group-hover:scale-105 transition duration-300">
-            <div class="text-center py-4">
-              <h3 class="text-lg font-medium text-gray-800">Wall Paintings</h3>
-              <p class="text-sm text-gray-500 mt-1">UPTO 75% OFF</p>
-            </div>
-          </div>
-
-          <!-- Card 3 -->
-          <div
-            class="min-w-[220px] sm:min-w-[250px] lg:min-w-[280px] group cursor-pointer rounded-xl overflow-hidden shadow hover:shadow-lg transition flex-shrink-0">
-            <img
-              src="https://cdn11.bigcommerce.com/s-rpzf45a/images/stencil/1280x1280/products/6132/38680/8883-2__19151.1553705732.jpg?c=2"
-              alt="Wall Mirrors" class="w-full h-64 object-cover group-hover:scale-105 transition duration-300">
-            <div class="text-center py-4">
-              <h3 class="text-lg font-medium text-gray-800">Wall Mirrors</h3>
-              <p class="text-sm text-gray-500 mt-1">UPTO 75% OFF</p>
-            </div>
-          </div>
-
-          <!-- Card 4 -->
-          <div
-            class="min-w-[220px] sm:min-w-[250px] lg:min-w-[280px] group cursor-pointer rounded-xl overflow-hidden shadow hover:shadow-lg transition flex-shrink-0">
-            <img src="https://ouchcart.com/cdn/shop/files/AjF39KsW.jpg?v=1744196067&width=800" alt="Wall Clocks"
-              class="w-full h-64 object-cover group-hover:scale-105 transition duration-300">
-            <div class="text-center py-4">
-              <h3 class="text-lg font-medium text-gray-800">Wall Clocks</h3>
-              <p class="text-sm text-gray-500 mt-1">UPTO 70% OFF</p>
-            </div>
-          </div>
-
-          <!-- Additional cards -->
-          <div
-            class="min-w-[220px] sm:min-w-[250px] lg:min-w-[280px] group cursor-pointer rounded-xl overflow-hidden shadow hover:shadow-lg transition flex-shrink-0">
-            <img
-              src="https://www.akway.in/cdn/shop/files/2b_8f40a712-ea40-4bb2-b252-e63ec1971478.jpg?v=1706524656&width=600"
-              alt="Wall Lamps" class="w-full h-64 object-cover group-hover:scale-105 transition duration-300">
-            <div class="text-center py-4">
-              <h3 class="text-lg font-medium text-gray-800">Wall Lamps</h3>
-              <p class="text-sm text-gray-500 mt-1">UPTO 60% OFF</p>
-            </div>
-          </div>
-        </div>
-      </div>
+    <!-- Product grid — populated by homecategory.js -->
+    <div id="categoryProductGrid"
+         class="hidden grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
     </div>
-  </section>
 
-
-  <!-- HOME DECOR UNDER BUDGET -->
-  <section class="py-12 bg-amber-50">
-    <div class="max-w-7xl mx-auto px-4">
-
-      <!-- Title -->
-      <div class="text-center mb-10">
-        <h2 class="text-3xl sm:text-4xl font-semibold font-zain text-[#1D3C4A]">
-          Home Decor Items Under Your Budget!
-        </h2>
-        <p class="text-stone-500 mt-2">
-          Stylish decor pieces without breaking the bank
-        </p>
-      </div>
-
-      <!-- Cards -->
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
-
-        <!-- Card 1 -->
-        <div class="bg-white rounded-lg overflow-hidden shadow hover:shadow-lg transition cursor-pointer">
-          <img src="https://images.unsplash.com/photo-1615874959474-d609969a20ed?w=600"
-            class="w-full h-40 object-cover">
-          <div class="text-center py-3">
-            <h3 class="text-stone-700 font-medium">Under ₹499</h3>
-          </div>
-        </div>
-
-        <!-- Card 2 -->
-        <div class="bg-white rounded-lg overflow-hidden shadow hover:shadow-lg transition cursor-pointer">
-          <img src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=600"
-            class="w-full h-40 object-cover">
-          <div class="text-center py-3">
-            <h3 class="text-stone-700 font-medium">Under ₹999</h3>
-          </div>
-        </div>
-
-        <!-- Card 3 -->
-        <div class="bg-white rounded-lg overflow-hidden shadow hover:shadow-lg transition cursor-pointer">
-          <img src="https://images.unsplash.com/photo-1582582621959-48d27397dc69?w=600"
-            class="w-full h-40 object-cover">
-          <div class="text-center py-3">
-            <h3 class="text-stone-700 font-medium">Under ₹1499</h3>
-          </div>
-        </div>
-
-        <!-- Card 4 -->
-        <div class="bg-white rounded-lg overflow-hidden shadow hover:shadow-lg transition cursor-pointer">
-          <img src="https://images.unsplash.com/photo-1618220179428-22790b461013?w=600"
-            class="w-full h-40 object-cover">
-          <div class="text-center py-3">
-            <h3 class="text-stone-700 font-medium">Under ₹1999</h3>
-          </div>
-        </div>
-
-        <!-- Card 5 -->
-        <div class="bg-white rounded-lg overflow-hidden shadow hover:shadow-lg transition cursor-pointer">
-          <img src="https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=600"
-            class="w-full h-40 object-cover">
-          <div class="text-center py-3">
-            <h3 class="text-stone-700 font-medium">Under ₹2999</h3>
-          </div>
-        </div>
-      </div>
+    <!-- Empty state -->
+    <div id="categoryEmptyState"
+         class="hidden text-center py-20 flex flex-col items-center">
+      <i class="far fa-frown text-5xl mb-4" style="color:#e39f32;"></i>
+      <p class="text-gray-500 text-lg font-lexend">No products found in this category.</p>
+      <a href="../index.html"
+         class="mt-5 px-6 py-2.5 rounded-full text-sm font-medium text-white transition hover:opacity-90"
+         style="background:#1D3C4A;">
+        Back to Home
+      </a>
     </div>
-  </section>
 
+    <!-- Pagination — populated by homecategory.js -->
+    <div id="categoryPagination"></div>
 
-  <!-- NEW ARRIVALS -->
-  <section class="py-8 bg-white">
-    <div class="max-w-7xl mx-auto px-4 relative">
+  </main>
 
-      <!-- Title -->
-      <div class="text-center mb-5">
-        <h2 class="text-4xl font-semibold font-zain text-[#1D3C4A]">
-          Fresh Decor Picks
-        </h2>
-        <p class="text-stone-500 mt-1">Shop Before They Become Old</p>
-      </div>
-
-      <!-- Left Arrow -->
-      <button id="newPrev" class="absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow rounded-full p-2 z-10">
-        &#10094;
-      </button>
-
-      <!-- Right Arrow -->
-      <button id="newNext" class="absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow rounded-full p-2 z-10">
-        &#10095;
-      </button>
-
-      <!-- Slider -->
-      <div id="newSlider" class="flex gap-6 overflow-x-auto scroll-smooth scrollbar-hide">
-
-        <!-- Product -->
-        <div class="min-w-[260px] bg-white rounded-lg overflow-hidden">
-          <img src="https://m.media-amazon.com/images/I/71UMdtNm8PL._SX679_.jpg" class="w-full h-64 object-cover">
-
-          <div class="p-3">
-            <h3 class="text-sm text-gray-800 truncate">
-              Hedwig Wooden Wall Mounted Shelf
-            </h3>
-
-            <div class="flex items-center gap-2 mt-1 text-sm">
-              <span class="font-semibold">₹509</span>
-              <span class="line-through text-gray-400">₹755</span>
-              <span class="text-green-600">33% off</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Product -->
-        <div class="min-w-[260px] bg-white rounded-lg overflow-hidden">
-          <img
-            src="https://media.landmarkshops.in/cdn-cgi/image/h=750,w=750,q=85,fit=cover/homecentre/1000015700525-1000015700524_02-2100.jpg"
-            class="w-full h-64 object-cover">
-
-          <div class="p-3">
-            <h3 class="text-sm text-gray-800 truncate">
-              Bloom Box Glass Vase
-            </h3>
-
-            <div class="flex items-center gap-2 mt-1 text-sm">
-              <span class="font-semibold">₹789</span>
-              <span class="line-through text-gray-400">₹2,099</span>
-              <span class="text-green-600">62% off</span>
-            </div>
-          </div>
-        </div>
-
-
-        <!-- Product -->
-        <div class="min-w-[260px] bg-white rounded-lg overflow-hidden">
-          <img src="https://images.unsplash.com/photo-1618220179428-22790b461013?w=600"
-            class="w-full h-64 object-cover">
-
-          <div class="p-3">
-            <h3 class="text-sm text-gray-800 truncate">
-              Modern Wall Decor Frame
-            </h3>
-
-            <div class="flex items-center gap-2 mt-1 text-sm">
-              <span class="font-semibold">₹699</span>
-              <span class="line-through text-gray-400">₹1,299</span>
-              <span class="text-green-600">46% off</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Product -->
-        <div class="min-w-[260px] bg-white rounded-lg overflow-hidden">
-          <img src="https://i.etsystatic.com/53805367/r/il/efacdb/6526979107/il_1588xN.6526979107_gomz.jpg"
-            class="w-full h-64 object-cover">
-
-          <div class="p-3">
-            <h3 class="text-sm text-gray-800 truncate">
-              Wooden Table Decor Tray
-            </h3>
-
-            <div class="flex items-center gap-2 mt-1 text-sm">
-              <span class="font-semibold">₹1,099</span>
-              <span class="line-through text-gray-400">₹1,699</span>
-              <span class="text-green-600">35% off</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Product -->
-        <div class="min-w-[260px] bg-white rounded-lg overflow-hidden">
-          <img src="https://m.media-amazon.com/images/I/51UWqBTa1rL._SY300_SX300_QL70_FMwebp_.jpg"
-            class="w-full h-64 object-cover">
-
-          <div class="p-3">
-            <h3 class="text-sm text-gray-800 truncate">
-              Decorative Wall Clock
-            </h3>
-
-            <div class="flex items-center gap-2 mt-1 text-sm">
-              <span class="font-semibold">₹899</span>
-              <span class="line-through text-gray-400">₹1,399</span>
-              <span class="text-green-600">36% off</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Product -->
-        <div class="min-w-[260px] bg-white rounded-lg overflow-hidden">
-          <img src="https://m.media-amazon.com/images/I/31TliDzXkxL._SX300_SY300_QL70_FMwebp_.jpg"
-            class="w-full h-64 object-cover">
-
-          <div class="p-3">
-            <h3 class="text-sm text-gray-800 truncate">
-              Elegant Ceramic Vase
-            </h3>
-
-            <div class="flex items-center gap-2 mt-1 text-sm">
-              <span class="font-semibold">₹599</span>
-              <span class="line-through text-gray-400">₹999</span>
-              <span class="text-green-600">40% off</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Product -->
-        <div class="min-w-[260px] bg-white rounded-lg overflow-hidden">
-          <img
-            src="https://ik.imagekit.io/2xkwa8s1i/img/npl_modified_images/npl_images_server/SOFA_WSSFASTFNN2FMSGGB/SOFA_WSSFASTFNN2FMSGGB_1.jpg?tr=w-1200"
-            class="w-full h-64 object-cover">
-
-          <div class="p-3">
-            <h3 class="text-sm text-orange-600 truncate">
-              Bridger Premium Solid Wood Sofa Arm
-            </h3>
-
-            <div class="flex items-center gap-2 mt-1 text-sm">
-              <span class="font-semibold">₹839</span>
-              <span class="line-through text-gray-400">₹1,141</span>
-              <span class="text-green-600">26% off</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Product -->
-        <div class="min-w-[260px] bg-white rounded-lg overflow-hidden">
-          <img
-            src="https://www.woodzhome.com/cdn/shop/files/oak-wall-shelf-with-side-tray-hooks.jpg?v=1762258327&width=1280"
-            class="w-full h-64 object-cover">
-
-          <div class="p-3">
-            <h3 class="text-sm text-gray-800 truncate">
-              Luci Wall Shelf with Key Holders
-            </h3>
-
-            <div class="flex items-center gap-2 mt-1 text-sm">
-              <span class="font-semibold">₹5,299</span>
-              <span class="line-through text-gray-400">₹8,153</span>
-              <span class="text-green-600">35% off</span>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-
-  <!-- DINING DECOR SECTION -->
-  <section class="py-6 bg-yellow-50">
-    <div class="max-w-7xl mx-auto px-6">
-
-      <!-- Title -->
-      <div class="text-center mb-8">
-        <h2 class="text-4xl font-semibold font-zain text-[#1D3C4A]">
-          Dining Decor
-        </h2>
-        <p class="text-gray-500 text-sm mt-1">
-          Gather to Create the Fondest Memories
-        </p>
-      </div>
-
-      <!-- Row 1 (5 Cards) -->
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
-
-        <!-- Card -->
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition">
-          <img
-            src="https://modernquests.com/cdn/shop/files/HerringboneCarvedServingTrayLarge-VintageWhite_2.jpg?v=1723631726&width=1000"
-            class="w-full h-56 object-cover">
-          <div class="text-center py-3">
-            <h3 class="text-md font-medium text-gray-800">Serving Trays</h3>
-            <p class="text-xs text-gray-500">From ₹605</p>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition">
-          <img src="https://trendyorder.in/wp-content/uploads/2024/09/170.webp" class="w-full h-56 object-cover">
-          <div class="text-center py-3">
-            <h3 class="text-md font-medium text-gray-800">Cutlery Holders</h3>
-            <p class="text-xs text-gray-500">From ₹549</p>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition">
-          <img src="https://sashays.co.in/cdn/shop/products/CoffeeHuskMug.jpg?v=1663836440&width=990"
-            class="w-full h-56 object-cover">
-          <div class="text-center py-3">
-            <h3 class="text-md font-medium text-gray-800">Coffee Mugs</h3>
-            <p class="text-xs text-gray-500">From ₹231</p>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition">
-          <img src="https://m.media-amazon.com/images/I/51RNGMVFGsL._SY300_SX300_QL70_FMwebp_.jpg"
-            class="w-full h-56 object-cover">
-          <div class="text-center py-3">
-            <h3 class="text-md font-medium text-gray-800">Teapots</h3>
-            <p class="text-xs text-gray-500">From ₹499</p>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition">
-          <img
-            src="https://brownliving.in/cdn/shop/files/rattan-tissue-box-handwoven-natural-cane-tissue-holder-702r-ardpure-4574463.jpg?v=1764305350&width=1600"
-            class="w-full h-56 object-cover">
-          <div class="text-center py-3">
-            <h3 class="text-md font-medium text-gray-800">Tissue Box</h3>
-            <p class="text-xs text-gray-500">From ₹549</p>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Row 2 (4 Cards Centered) -->
-      <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
-
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition">
-          <img src="https://m.media-amazon.com/images/I/81B8vvRxj1L._SX679_.jpg" class="w-full h-56 object-cover">
-          <div class="text-center py-3">
-            <h3 class="text-md font-medium text-gray-800">Spice Box</h3>
-            <p class="text-xs text-gray-500">From ₹699</p>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition">
-          <img src="https://m.media-amazon.com/images/I/91Ij9ZDfsFL._SX679_.jpg" class="w-full h-56 object-cover">
-          <div class="text-center py-3">
-            <h3 class="text-md font-medium text-gray-800">Coasters</h3>
-            <p class="text-xs text-gray-500">From ₹399</p>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition">
-          <img
-            src="https://nestasia.in/cdn/shop/files/platters_04cadd2b-e64a-4704-b5af-c20cdaa26fea.jpg?v=1712313355&width=2000"
-            class="w-full h-56 object-cover">
-          <div class="text-center py-3">
-            <h3 class="text-md font-medium text-gray-800">Platters</h3>
-            <p class="text-xs text-gray-500">From ₹599</p>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition">
-          <img src="https://nestasia.in/cdn/shop/products/NSA30new16.png?v=1643312877&width=2000"
-            class="w-full h-56 object-cover">
-          <div class="text-center py-3">
-            <h3 class="text-md font-medium text-gray-800">Tableware</h3>
-            <p class="text-xs text-gray-500">From ₹395</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- HOME DECOR INFO GRID -->
-  <section class="py-16 bg-stone-50">
-    <div class="max-w-7xl mx-auto px-6">
-
-      <!-- Heading -->
-      <div class="text-center mb-14">
-        <h2 class="text-3xl md:text-4xl font-semibold font-zain text-[#1D3C4A]">
-          Buy Home Decor Online to Make Your Home Stylish
-        </h2>
-        <p class="text-gray-600 mt-4 max-w-3xl mx-auto">
-          Transform your living space with beautiful and functional home decor items.
-          From wall art and lighting to cushions and tableware, the right decor can
-          elevate the look and feel of your home.
-        </p>
-      </div>
-
-      <!-- Content Layout -->
-      <div class="grid md:grid-cols-2 gap-x-16 gap-y-10">
-
-        <!-- Item -->
-        <div class="border-b pb-6">
-          <h3 class="text-xl font-semibold text-[#1D3C4A] mb-2">
-            Wall Art & Frames
-          </h3>
-          <p class="text-gray-600 text-sm leading-relaxed">
-            Wall decor is one of the easiest ways to add personality to your home.
-            From abstract paintings to photo frames and decorative panels, wall
-            accents transform blank walls into stylish focal points.
-          </p>
-        </div>
-
-        <!-- Item -->
-        <div class="border-b pb-6">
-          <h3 class="text-xl font-semibold text-[#1D3C4A] mb-2">
-            Lighting & Lamps
-          </h3>
-          <p class="text-gray-600 text-sm leading-relaxed">
-            Lighting sets the mood of a space. Table lamps, floor lamps and
-            pendant lights enhance both the aesthetics and functionality of
-            your living room or bedroom.
-          </p>
-        </div>
-
-        <!-- Item -->
-        <div class="border-b pb-6">
-          <h3 class="text-xl font-semibold text-[#1D3C4A] mb-2">
-            Artificial Plants
-          </h3>
-          <p class="text-gray-600 text-sm leading-relaxed">
-            Artificial plants add a refreshing touch of greenery without
-            requiring maintenance. They brighten empty corners, shelves
-            and tables while keeping your interiors lively.
-          </p>
-        </div>
-
-        <!-- Item -->
-        <div class="border-b pb-6">
-          <h3 class="text-xl font-semibold text-[#1D3C4A] mb-2">
-            Curtains & Furnishings
-          </h3>
-          <p class="text-gray-600 text-sm leading-relaxed">
-            Curtains, cushions and rugs enhance comfort and style. The
-            right fabrics, textures and colors can instantly transform
-            the ambiance of your interiors.
-          </p>
-        </div>
-
-        <!-- Item -->
-        <div class="border-b pb-6">
-          <h3 class="text-xl font-semibold text-[#1D3C4A] mb-2">
-            Kitchen & Dining Decor
-          </h3>
-          <p class="text-gray-600 text-sm leading-relaxed">
-            Trays, coasters, mugs and platters add elegance to your dining
-            space while making everyday meals more stylish and organized.
-          </p>
-        </div>
-
-        <!-- Item -->
-        <div class="border-b pb-6">
-          <h3 class="text-xl font-semibold text-[#1D3C4A] mb-2">
-            Decorative Accessories
-          </h3>
-          <p class="text-gray-600 text-sm leading-relaxed">
-            Figurines, candles, lanterns and decorative pieces bring charm
-            and personality to your home. Small accents often create the
-            biggest visual impact.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- FOOTER -->
+  <!-- ═══════════════════════════════════════════════════════════════
+       FOOTER
+  ═══════════════════════════════════════════════════════════════ -->
   <div id="footer-container"></div>
 
+  <!-- Scripts -->
   <script src="../Header/load-header.js" defer></script>
   <script src="../Header/header.js" defer></script>
   <script src="../Footer/footer-loader.js"></script>
   <script src="../HomeCategory/homecategory.js"></script>
 
 </body>
-
 </html>
