@@ -191,7 +191,7 @@
         </nav>
 
         <!-- Header title -->
-        <div class="mb-6 border-l-4 pl-4 py-4 rounded-lg bg-gradient-to-r from-[#fff3d9] via-[#faf7f2] to-stone-50"
+        <div class="mb-6 border-l-4 border border-[#efc480] pl-4 py-4 rounded-lg bg-gradient-to-r from-[#fff3d9] via-[#faf7f2] to-stone-50"
              style="border-color:#e39f32;">
             <h1 id="categoryTitle"
                 class="text-3xl md:text-4xl font-zain font-light tracking-tight"
@@ -213,7 +213,7 @@
 
             <!-- Desktop filter sidebar -->
             <aside class="hidden lg:block w-64 shrink-0">
-                <div class="bg-white rounded-2xl border border-gray-200 p-5 sticky top-28 shadow-sm">
+                <div class="bg-white rounded-2xl border border-gray-300 p-5 sticky top-28 shadow-sm">
                     <h2 class="font-semibold mb-4 text-lg flex items-center gap-2" style="color:#1D3C4A;">
                         <i class="fas fa-arrow-right text-sm" style="color:#e39f32;"></i> Filters
                     </h2>
@@ -272,12 +272,7 @@
     <!-- Footer -->
     <div id="footer-container"></div>
 
-    <!--
-      SCRIPTS:
-      - Removed: product-data.js, cart-wishlist-service.js, global-utils.js, customization.js
-        (no longer needed — this page now fetches real data from the API)
-      - homesubcategory.js now owns all data fetching and rendering
-    -->
+    <script src="/auth.js"></script>
     <script src="../HomeSub/homesubcategory.js"></script>
     <script src="../Header/load-header.js" defer></script>
     <script src="../Header/header.js" defer></script>

@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact Us - Aretzo</title>
+    <link rel="icon" type="image/png" href="../Images/faviconlogo.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+    <!-- Toastify -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Zain:wght@200;300;400;700;800;900&display=swap"
+        rel="stylesheet" />
+
+    <!-- Tailwind config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#1D3C4A",
+                        accent: "#E39F32",
+                    },
+                    fontFamily: {
+                        lexend: ["Lexend", "sans-serif"],
+                        zain: ["Zain", "sans-serif"],
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+
+        .input-field {
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            border-color: #dbbe00;
+            box-shadow: 0 0 0 4px rgba(179, 182, 14, 0.15);
+        }
+
+        /* Loading state for button */
+        .btn-loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+
+    <!-- Contact Hero Banner -->
+    <section class="relative bg-[#EAF2F7] pt-8 pb-10">
+
+        <div class="max-w-[1450px] mx-auto px-6">
+
+            <div
+                class="relative bg-[#1D3557] rounded-3xl py-16 md:py-18 text-center text-white shadow-2xl overflow-hidden">
+                <!-- texture -->
+                <div
+                    class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
+                </div>
+
+                <div class="relative z-10 max-w-3xl mx-auto px-6">
+                    <h1 class="text-4xl font-bold font-lexend md:text-5xl lg:text-5xl font-bold">
+                        We're Here to<span class="text-[#E39F32]"> Assist You</span>
+                    </h1>
+                    <p class="mt-4 text-base md:text-lg text-blue-100">
+                        <a href="../index.html" class="hover:text-yellow-300 transition">Home</a>
+                        <span class="mx-2 text-yellow-400">/</span>
+                        <span class="text-yellow-400 font-medium">Contact Us</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!--section 2 -->
+    <div class="max-w-6xl mx-auto px-6 py-12">
+
+        <!-- Contact Section  -->
+        <section class="bg-gray-50">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="grid lg:grid-cols-2 gap-10 items-start">
+
+                    <!-- LEFT SIDE -->
+                    <div class="space-y-6">
+                        <!-- ABOUT CARD -->
+                        <div class="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+                            <div class="absolute -top-10 -right-10 w-32 h-32 bg-[#e39f32]/10 rounded-full blur-2xl">
+                            </div>
+                            <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-[#1D3C4A]/10 rounded-full blur-2xl">
+                            </div>
+                            <div class="relative z-10">
+                                <h2 class="text-lg font-semibold text-[#1D3C4A] mb-2 flex items-center gap-2">
+                                    <span class="w-1.5 h-5 bg-[#e39f32] rounded"></span>
+                                    About ARTEZO
+                                </h2>
+                                <p class="text-gray-600 text-sm leading-relaxed">
+                                    At ARTEZO, we believe meaningful products deserve meaningful service. From premium
+                                    home décor and personalized gifts to corporate trophies and nameplates, we deliver
+                                    quality craftsmanship with thoughtful support.
+                                </p>
+                                <p class="text-gray-600 text-sm mt-2 leading-relaxed">
+                                    Whether you need assistance with customization, product inquiries, or bulk corporate
+                                    orders, our team ensures prompt communication and reliable service.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- ADDRESS -->
+                        <div class="bg-white border border-gray-200 rounded-xl p-5 flex items-start gap-4 shadow-sm">
+                            <div
+                                class="w-10 h-10 rounded-lg bg-[#e39f32]/20 flex items-center justify-center text-[#e39f32] text-lg">
+                                <i class="fa-solid fa-location-dot"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900 text-sm">Address</p>
+                                <a href="https://www.google.com/maps/search/?api=1&query=1st+floor+MJ+Complex+SH+155+main+bus+stand+road+Patoda+Maharashtra+414204"
+                                    target="_blank" class="text-gray-600 text-sm hover:text-[#e39f32] transition">
+                                    1st floor, M.J. Complex, SH 155, Main Bus Stand Road, Patoda, Maharashtra – 414204
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- PHONE -->
+                        <div class="bg-white border border-gray-200 rounded-xl p-5 flex items-start gap-4 shadow-sm">
+                            <div
+                                class="w-10 h-10 rounded-lg bg-[#e39f32]/20 flex items-center justify-center text-[#e39f32] text-lg">
+                                <i class="fa-solid fa-phone"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900 text-sm">Phone</p>
+                                <a href="tel:+919922236299"
+                                    class="text-gray-600 text-sm hover:text-[#e39f32] transition">
+                                    +91 9922236299
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- EMAIL -->
+                        <div class="bg-white border border-gray-200 rounded-xl p-5 flex items-start gap-4 shadow-sm">
+                            <div
+                                class="w-10 h-10 rounded-lg bg-[#e39f32]/20 flex items-center justify-center text-[#e39f32] text-lg">
+                                <i class="fa-solid fa-envelope"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900 text-sm">Email</p>
+                                <a href="mailto:info@artezo.in"
+                                    class="text-gray-600 text-sm hover:text-[#e39f32] transition">
+                                    info@artezo.in
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT SIDE FORM -->
+                    <div
+                        class="bg-white border border-gray-200 border-t-[6px] border-t-[#e39f32] rounded-2xl p-8 shadow-sm h-full flex flex-col">
+                        <div class="mb-6">
+                            <span class="text-xs font-semibold tracking-widest text-[#e39f32] uppercase">
+                                Get in Touch
+                            </span>
+                            <h3 class="text-2xl font-semibold text-[#1D3C4A] mt-1">
+                                Send Us a Message
+                            </h3>
+                            <p class="text-sm text-gray-500 mt-1">
+                                Fill out the form and our team will contact you shortly.
+                            </p>
+                        </div>
+
+                        <form id="contactForm" class="space-y-5 flex flex-col flex-grow">
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <input id="name" type="text" placeholder="Your Name" required
+                                    class="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:border-[#e39f32] focus:ring-1 focus:ring-[#e39f32] outline-none">
+
+                                <input id="email" type="email" placeholder="Email" required
+                                    class="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:border-[#e39f32] focus:ring-1 focus:ring-[#e39f32] outline-none">
+                            </div>
+
+                            <!-- PHONE FIELD -->
+                            <input id="phone" type="tel" placeholder="Phone Number" required
+                                class="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:border-[#e39f32] focus:ring-1 focus:ring-[#e39f32] outline-none">
+
+                            <textarea id="message" rows="7" placeholder="Write your message..." required
+                                class="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:border-[#e39f32] focus:ring-1 focus:ring-[#e39f32] outline-none resize-none"></textarea>
+
+                            <div class="mt-auto pt-2">
+                                <button type="submit" id="submitBtn"
+                                    class="bg-[#1D3C4A] hover:bg-[#17303a] text-white px-7 py-3 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2">
+                                    <span id="btnText">Send Message</span>
+                                    <i id="spinnerIcon" class="hidden fas fa-spinner fa-spin"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Trust Badges -->
+        <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+
+            <div class="flex gap-4 items-center bg-white p-6 rounded-3xl shadow-sm">
+                <div class="text-4xl text-[#e39f32]">
+                    <i class="fas fa-hand-holding-dollar"></i>
+                </div>
+                <div>
+                    <p class="font-semibold">Reasonable Prices</p>
+                    <p class="text-sm text-slate-500">Quality design at affordable rates</p>
+                </div>
+            </div>
+
+            <div class="flex gap-4 items-center bg-white p-6 rounded-3xl shadow-sm">
+                <div class="text-4xl text-[#e39f32]">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div>
+                    <p class="font-semibold">Timely Project Delivery</p>
+                    <p class="text-sm text-slate-500">On-time delivery guaranteed</p>
+                </div>
+            </div>
+
+            <div class="flex gap-4 items-center bg-white p-6 rounded-3xl shadow-sm">
+                <div class="text-4xl text-[#e39f32]">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div>
+                    <p class="font-semibold">Professional Team</p>
+                    <p class="text-sm text-slate-500">Expert architects, no tricks</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer Container -->
+    <div id="footer-container"></div>
+
+         <script src="/auth.js"></script>
+
+    <script src="../Footer/footer-loader.js"></script>
+
+    <script>
+        // ======================== BACKEND API INTEGRATION ========================
+        const API_BASE_URL = 'http://localhost:8085';
+        const API_ENDPOINT = '/api/contact/submit-form';
+
+        // Show toast message
+        function showToast(message, isError = false) {
+            Toastify({
+                text: message,
+                duration: 4000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: isError ? "#ef4444" : "#10b981",
+                stopOnFocus: true,
+            }).showToast();
+        }
+
+        // Loading state for submit button
+        function setLoadingState(isLoading) {
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const spinnerIcon = document.getElementById('spinnerIcon');
+
+            if (isLoading) {
+                submitBtn.classList.add('btn-loading');
+                submitBtn.disabled = true;
+                btnText.textContent = 'Sending...';
+                spinnerIcon.classList.remove('hidden');
+            } else {
+                submitBtn.classList.remove('btn-loading');
+                submitBtn.disabled = false;
+                btnText.textContent = 'Send Message';
+                spinnerIcon.classList.add('hidden');
+            }
+        }
+
+        // Reset form
+        function resetForm() {
+            document.getElementById('contactForm').reset();
+        }
+
+        // Restrict phone input to digits only (better UX)
+        document.getElementById("phone").addEventListener("input", function () {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+
+        // Form Submission with API Call
+        document.getElementById("contactForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            // Get form values
+            const name = document.getElementById("name").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const phone = document.getElementById("phone").value.trim();
+            const message = document.getElementById("message").value.trim();
+
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const phonePattern = /^[0-9]{10}$/; // ✅ 10 digit number only
+
+            // Validation
+            if (name === "" || email === "" || phone === "" || message === "") {
+                showToast("Please fill all fields", true);
+                return;
+            }
+
+            if (!emailPattern.test(email)) {
+                showToast("Please enter a valid email address", true);
+                return;
+            }
+
+            // ✅ Phone validation added
+            if (!phonePattern.test(phone)) {
+                showToast("Please enter a valid 10-digit phone number (numbers only)", true);
+                return;
+            }
+
+            // Prepare payload exactly as backend expects
+            const payload = {
+                name: name,
+                email: email,
+                phone: phone,
+                message: message
+            };
+
+            // Start loading
+            setLoadingState(true);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}${API_ENDPOINT}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const responseText = await response.text();
+
+                if (response.ok) {
+                    // Success
+                    showToast(responseText || "Thank you for your message!");
+
+                    // Reset form
+                    resetForm();
+
+                    // Optional modal
+                    // document.getElementById("successModal").classList.remove("hidden");
+                } else {
+                    // Server error
+                    showToast(responseText || "Failed to send message. Please try again.", true);
+                }
+
+            } catch (error) {
+                console.error('API Error:', error);
+                showToast("Unable to connect to server. Please try again later.", true);
+            } finally {
+                // Stop loading
+                setLoadingState(false);
+            }
+        });
+
+        // Close success modal (kept for compatibility)
+        function closeModal() {
+            document.getElementById('successModal').classList.add('hidden');
+        }
+    </script>
+</body>
+
+</html>

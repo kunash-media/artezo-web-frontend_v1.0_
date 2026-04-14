@@ -1305,18 +1305,18 @@
     return `
       <span class="trending-badge inline-flex items-center gap-1.5 px-3 py-1 rounded-full
                    text-xs font-semibold text-white
-                   bg-gradient-to-r from-[#e39f32] to-[#e05c2a]
-                   shadow-md shadow-[#e39f32]/30
+                   bg-gradient-to-r from-[#e39f32] to-[#D89F34]
+                   shadow-md shadow-[#D89F34]/30
                    animate-pulse-badge align-middle ml-2">
-        <i class="fas fa-fire text-[10px]"></i>
+        <i class="fas fa-fire text-[10px] text-red-400"></i>
         Trending
       </span>
       <style>
         @keyframes pulse-badge {
           0%,100% { opacity:1; transform:scale(1); }
-          50%      { opacity:.85; transform:scale(1.05); }
+          50%      { opacity:.95; transform:scale(1.15); }
         }
-        .animate-pulse-badge { animation: pulse-badge 2s ease-in-out infinite; }
+        .animate-pulse-badge { animation: pulse-badge 1.5s ease-in-out infinite; }
       </style>`;
   }
 
@@ -1414,11 +1414,11 @@
                             ${(c.sizes || [])
                               .map(
                                 (s) =>
-                                  `<span class="text-[9px] px-1.5 py-[2px] border border-[#D89F34] rounded text-gray-600">${escapeHtml(s)}</span>`
+                                  `<span class="text-[9px] px-1.5 py-[2px] font-semibold border border-[#D89F34] rounded text-gray-600">${escapeHtml(s)}</span>`
                               )
                               .join("")}
                             
-                            <span class="text-[9px] px-1.5 py-[2px] border border-[#D89F34] rounded text-gray-600">₹${c.price}</span>
+                            <span class="text-[9px] px-1.5 py-[2px] font-semibold border border-[#D89F34] rounded text-gray-700">₹${c.price}</span>
                           </div>
                       </div>
                     </button>`;
@@ -1450,22 +1450,22 @@
         value:  v || "N/A",
         accent: k === "material",
       })),
+
       description:
         [...safeProductData.aboutItem, ...safeProductData.description]
           .filter(Boolean)
           .map((item) => `<p>${escapeHtml(item)}</p>`)
           .join("") || "<p>Premium quality product.</p>",
+          
       specifications: Object.entries(safeProductData.specifications).map(([k, v]) => ({
         label: k.split("_").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" "),
         value: v || "N/A",
       })),
+
       additionalInfo: [
-        ...(safeProductData.aboutItem || []),
-        "Premium protective packaging included",
-        "1 year warranty",
-        ...(safeProductData.hsnCode ? [`HSN Code: ${safeProductData.hsnCode}`] : []),
-        ...(safeProductData.weight  ? [`Weight: ${safeProductData.weight} kg`] : []),
+        ...(safeProductData.aboutItem || [])
       ].filter(Boolean),
+
       faqs: Object.entries(safeProductData.faqAns).map(([q, a]) => ({ q, a })),
       stats: [
         { value: "5k+",  label: "Happy Customers", stars: 5 },

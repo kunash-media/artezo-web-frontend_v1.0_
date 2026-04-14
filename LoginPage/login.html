@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <title>Login | Artezo</title>
+  <link rel="icon" type="image/png" href="../Images/faviconlogo.png">
+
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#1D3C4A",
+            accent: "#E39F32",
+          },
+          fontFamily: {
+            lexend: ["Lexend", "sans-serif"],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body {
+      background: url("../Images/login.jpg") center/cover no-repeat fixed;
+      background-size: cover;
+    }
+
+    @media (max-width: 640px) {
+      body {
+        background-position: 30% center;
+      }
+    }
+
+    /* Custom scrollbar */
+    .signup-scroll::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .signup-scroll::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+
+    .signup-scroll::-webkit-scrollbar-thumb {
+      background: #D89F34;
+      border-radius: 10px;
+    }
+
+    .signup-scroll::-webkit-scrollbar-thumb:hover {
+      background: #b87d2a;
+    }
+
+    /* Input overflow handling - critical for long text readability */
+    .scrollable-input {
+      overflow-x: auto;
+      white-space: nowrap;
+      scrollbar-width: thin;
+    }
+
+    .scrollable-input::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    .scrollable-input::-webkit-scrollbar-track {
+      background: #e5e7eb;
+      border-radius: 4px;
+    }
+
+    .scrollable-input::-webkit-scrollbar-thumb {
+      background: #D89F34;
+      border-radius: 4px;
+    }
+
+    /* On focus, ensure text is visible */
+    .scrollable-input:focus {
+      scroll-behavior: smooth;
+    }
+
+    /* Toast animation */
+    @keyframes slideIn {
+      from {
+        transform: translateX(120%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .animate-slideIn {
+      animation: slideIn 0.4s ease;
+    }
+
+    /* OTP styles */
+    .otp-modern {
+      width: clamp(42px, 12vw, 52px);
+      height: clamp(48px, 12vw, 56px);
+      text-align: center;
+      font-size: clamp(1.2rem, 5vw, 1.5rem);
+      font-weight: 600;
+      border-radius: 14px;
+      border: 2px solid #e2e8f0;
+      background-color: #ffffff;
+      transition: all 0.2s ease;
+      font-family: 'Lexend', monospace;
+    }
+
+    .otp-modern:focus {
+      outline: none;
+      border-color: #D89F34;
+      box-shadow: 0 0 0 3px rgba(216, 159, 52, 0.2);
+      transform: scale(1.02);
+    }
+
+    /* Step indicators */
+    .step-modern {
+      width: clamp(30px, 8vw, 36px);
+      height: clamp(30px, 8vw, 36px);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: clamp(0.8rem, 3vw, 0.9rem);
+      transition: all 0.3s ease;
+      background: #e5e7eb;
+      color: #6b7280;
+    }
+
+    .step-modern.active {
+      background: linear-gradient(135deg, #D89F34, #c58a2a);
+      color: white;
+      box-shadow: 0 4px 12px rgba(216, 159, 52, 0.3);
+      transform: scale(1.05);
+    }
+
+    .line-modern {
+      height: 3px;
+      width: clamp(30px, 8vw, 50px);
+      background: #e5e7eb;
+      border-radius: 3px;
+      transition: all 0.3s ease;
+    }
+
+    .line-modern.active {
+      background: linear-gradient(90deg, #D89F34, #f0b84d);
+    }
+
+    /* Modal animation */
+    .modal-modern {
+      animation: modalPop 0.35s cubic-bezier(0.34, 1.2, 0.64, 1) forwards;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    @keyframes modalPop {
+      0% {
+        opacity: 0;
+        transform: scale(0.95) translateY(15px);
+      }
+
+      100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    /* Password strength bar */
+    .strength-bar {
+      transition: width 0.3s ease, background 0.3s ease;
+    }
+
+    /* Section divider styling */
+    .section-divider {
+      position: relative;
+      margin: 1.5rem 0 1rem;
+    }
+
+    .section-divider span {
+      background: white;
+      padding-right: 0.75rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #D89F34;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1024px) {
+      .lg\\:grid-cols-2 {
+        grid-template-columns: 1fr;
+      }
+
+      .lg\\:flex {
+        display: none;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .bg-white {
+        padding: 1.25rem;
+      }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center relative p-4 sm:p-6">
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-[2px]"></div>
+
+  <div class="relative z-10 w-full max-w-6xl grid lg:grid-cols-2 gap-6 sm:gap-10 px-4 sm:px-6">
+    <!-- LEFT TEXT -->
+    <div class="text-white hidden lg:flex flex-col justify-center">
+      <h1 class="text-3xl font-sans sm:text-5xl font-bold leading-tight mb-6 drop-shadow-lg">
+        Personalise Every Gift.<br />
+        Elegant Decor.<br />
+        Memories That Last.
+      </h1>
+
+      <p class="text-gray-100 max-w-md text-base sm:text-lg drop-shadow">
+        Explore beautifully crafted personalised gifts, stylish wall décor,
+        and premium home décor pieces designed to make every moment special.
+      </p>
+    </div>
+
+    <!-- LOGIN / SIGNUP CARD - Fixed height with overflow hidden on parent -->
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-auto flex flex-col border-t-[6px] border-[#D89F34]"
+      style="height: 600px; max-height: 85vh;">
+
+      <!-- Sticky Header -->
+      <div class="p-6 pb-0 flex-shrink-0 bg-white rounded-t-2xl">
+        <div id="loginHeader" class="block">
+          <h2 class="text-2xl sm:text-3xl font-lexend text-[#1D3C4A] font-bold mb-1">Welcome Back!</h2>
+          <p class="text-gray-500 text-sm">Log in to shop premium gifts and decor</p>
+        </div>
+        <div id="signupHeader" class="hidden">
+          <h2 class="text-2xl sm:text-3xl font-lexend text-[#1D3C4A] font-bold mb-1">Create Account</h2>
+          <p class="text-gray-500 text-sm">Join us for exclusive gifts and décor</p>
+        </div>
+      </div>
+
+      <!-- SCROLLABLE CONTENT - ONLY signup form scrolls, parent has overflow-hidden -->
+      <div id="formContainer" class="flex-1 overflow-hidden px-6">
+        <!-- LOGIN FORM (short, no scroll needed) -->
+        <div id="loginForm" class="h-full overflow-y-auto custom-scroll pr-1">
+          <form class="space-y-4 py-8" onsubmit="loginUser(event)">
+            <div class="relative">
+              <i class="fa-solid fa-phone absolute left-3 top-4 text-gray-400"></i>
+              <input type="tel" id="loginPhone" placeholder="Phone Number"
+                class="w-full border border-gray-200 rounded-lg pl-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#D89F34] transition" />
+            </div>
+            <div class="relative">
+              <i class="fa-solid fa-lock absolute left-3 top-4 text-gray-400"></i>
+              <input id="password" type="password" placeholder="Password"
+                class="w-full border border-gray-200 rounded-lg pl-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#D89F34] transition" />
+              <button type="button" onclick="togglePassword('password', 'passwordIcon')"
+                class="absolute right-3 top-3 text-gray-500 hover:text-gray-700">
+                <i id="passwordIcon" class="fa-solid fa-eye"></i>
+              </button>
+            </div>
+            <div class="text-right">
+              <a href="#" onclick="openForgotModal()"
+                class="text-gray-600 hover:text-[#D89F34] transition text-xs font-medium">
+                Forgot Password?
+              </a>
+            </div>
+            <button
+              class="w-full py-3 text-white font-semibold rounded-lg border-2 border-[#D89F34] bg-gradient-to-r from-[#0f3242] via-[#133F53] to-[#1f5d75] hover:shadow-lg transition duration-300">
+              Login
+            </button>
+          </form>
+        </div>
+
+        <!-- SIGNUP FORM - Scrollable with proper overflow handling -->
+        <div id="signupForm" class="hidden h-full overflow-y-auto signup-scroll pr-1 pb-4">
+          <form class="space-y-5 py-2" onsubmit="signupUser(event)">
+            <!-- ===== NAME SECTION ===== -->
+            <div class="section-divider flex items-center">
+              <span><i class="fa-regular fa-user mr-1"></i> Personal Information</span>
+              <div class="flex-1 border-t border-gray-200 ml-3"></div>
+            </div>
+
+            <!-- Name Row: 3 columns on desktop, 1 on mobile -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div class="relative">
+                <i class="fa-solid fa-user absolute left-3 top-4 text-gray-400 text-sm"></i>
+                <input type="text" id="firstName" placeholder="First Name"
+                  class="scrollable-input w-full border border-gray-200 rounded-lg pl-10 py-3 text-sm focus:ring-2 focus:ring-[#D89F34] focus:border-transparent outline-none transition"
+                  style="overflow-x: auto; white-space: nowrap;">
+              </div>
+              <div>
+                <input type="text" id="middleName" placeholder="Middle Name"
+                  class="scrollable-input w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#D89F34] outline-none transition"
+                  style="overflow-x: auto; white-space: nowrap;">
+              </div>
+              <div>
+                <input type="text" id="lastName" placeholder="Last Name"
+                  class="scrollable-input w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#D89F34] outline-none transition"
+                  style="overflow-x: auto; white-space: nowrap;">
+              </div>
+            </div>
+
+            <!-- ===== CONTACT SECTION ===== -->
+            <div class="section-divider flex items-center">
+              <span><i class="fa-regular fa-address-card mr-1"></i> Contact Details</span>
+              <div class="flex-1 border-t border-gray-200 ml-3"></div>
+            </div>
+
+            <!-- Contact Row: Email + Phone (2 columns) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="relative">
+                <i class="fa-solid fa-envelope absolute left-3 top-4 text-gray-400"></i>
+                <input type="email" id="signupEmail" placeholder="Email Address"
+                  class="scrollable-input w-full border border-gray-200 rounded-lg pl-10 py-3 text-sm focus:ring-2 focus:ring-[#D89F34] outline-none transition"
+                  style="overflow-x: auto; white-space: nowrap;">
+              </div>
+              <div class="relative">
+                <i class="fa-solid fa-phone absolute left-3 top-4 text-gray-400"></i>
+                <input type="tel" id="signupPhone" placeholder="Phone Number" maxlength="15"
+                  class="scrollable-input w-full border border-gray-200 rounded-lg pl-10 py-3 text-sm focus:ring-2 focus:ring-[#D89F34] outline-none transition"
+                  style="overflow-x: auto; white-space: nowrap;">
+              </div>
+            </div>
+
+            <!-- ===== PASSWORD SECTION ===== -->
+            <div class="section-divider flex items-center">
+              <span><i class="fa-solid fa-lock mr-1"></i> Security</span>
+              <div class="flex-1 border-t border-gray-200 ml-3"></div>
+            </div>
+
+            <!-- Password Row: 2 columns -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="relative">
+                <i class="fa-solid fa-key absolute left-3 top-4 text-gray-400"></i>
+                <input id="signupPassword" type="password" placeholder="Password"
+                  class="w-full border border-gray-200 rounded-lg pl-10 py-3 text-sm focus:ring-2 focus:ring-[#D89F34] outline-none transition pr-10">
+                <button type="button" onclick="togglePassword('signupPassword', 'signupIcon1')"
+                  class="absolute right-3 top-3 text-gray-400 hover:text-gray-600">
+                  <i id="signupIcon1" class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+              <div class="relative">
+                <i class="fa-solid fa-lock absolute left-3 top-4 text-gray-400"></i>
+                <input id="confirmPassword" type="password" placeholder="Confirm Password"
+                  class="w-full border border-gray-200 rounded-lg pl-10 py-3 text-sm focus:ring-2 focus:ring-[#D89F34] outline-none transition pr-10">
+                <button type="button" onclick="togglePassword('confirmPassword', 'signupIcon2')"
+                  class="absolute right-3 top-3 text-gray-400 hover:text-gray-600">
+                  <i id="signupIcon2" class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Password Strength Indicator -->
+            <div class="mt-1">
+              <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                <div id="signupStrengthBar" class="strength-bar h-1.5 rounded-full w-0"></div>
+              </div>
+              <p id="signupStrengthText" class="text-xs text-gray-400 mt-1">Password strength</p>
+            </div>
+
+            <!-- ===== ADDRESS SECTION ===== -->
+            <div class="section-divider flex items-center">
+              <span><i class="fa-solid fa-location-dot mr-1"></i> Address Information</span>
+              <div class="flex-1 border-t border-gray-200 ml-3"></div>
+            </div>
+
+            <!-- Address (full width - use textarea for better readability) -->
+            <div>
+              <textarea id="address" rows="2" placeholder="Street Address / House No."
+                class="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#D89F34] outline-none transition resize-none"
+                style="overflow-x: auto;"></textarea>
+            </div>
+
+            <!-- Flat No + Landmark (2 columns) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <input type="text" id="flatNo" placeholder="Flat / Apartment No."
+                  class="scrollable-input w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#D89F34] outline-none transition"
+                  style="overflow-x: auto; white-space: nowrap;">
+              </div>
+              <div>
+                <input type="text" id="landmark" placeholder="Landmark (e.g., Near Metro)"
+                  class="scrollable-input w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#D89F34] outline-none transition"
+                  style="overflow-x: auto; white-space: nowrap;">
+              </div>
+            </div>
+
+            <!-- City + State + Pincode (3 columns on desktop) -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <input type="text" id="city" placeholder="City"
+                  class="scrollable-input w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#D89F34] outline-none transition"
+                  style="overflow-x: auto; white-space: nowrap;">
+              </div>
+              <div>
+                <input type="text" id="state" placeholder="State"
+                  class="scrollable-input w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#D89F34] outline-none transition"
+                  style="overflow-x: auto; white-space: nowrap;">
+              </div>
+              <div>
+                <input type="text" id="pincode" placeholder="Pincode" maxlength="6"
+                  class="scrollable-input w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#D89F34] outline-none transition"
+                  style="overflow-x: auto; white-space: nowrap;"
+                  oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,6)">
+              </div>
+            </div>
+
+            <!-- Nearby -->
+            <div>
+              <input type="text" id="nearBy" placeholder="Near By (Optional)"
+                class="scrollable-input w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#D89F34] outline-none transition"
+                style="overflow-x: auto; white-space: nowrap;">
+            </div>
+
+            <!-- SIGNUP BUTTON -->
+            <button type="submit" id="signupSubmitBtn"
+              class="w-full py-3 text-white font-semibold rounded-lg border-2 border-[#D89F34] bg-gradient-to-r from-[#0f3242] via-[#133F53] to-[#1f5d75] hover:shadow-lg hover:scale-[1.02] transition duration-300 mt-2">
+              Create Account
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Sticky Footer -->
+      <div class="p-6 pt-0 flex-shrink-0 bg-white rounded-b-2xl">
+        <div class="flex items-center my-3">
+          <div class="flex-1 border-t"></div>
+          <p class="px-3 text-gray-400 text-xs">Or continue with</p>
+          <div class="flex-1 border-t"></div>
+        </div>
+
+        <!-- <button onclick="showToast('Google login coming soon!', 'info')"
+          class="w-full border border-gray-300 py-2.5 rounded-full flex items-center justify-center gap-2 hover:bg-gray-50 hover:border-[#D89F34] transition text-sm">
+          <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-4" alt="Google" />
+          Continue with Google
+        </button> -->
+
+        <a href="http://localhost:8085/oauth2/authorization/google">
+        <button
+          class="w-full border border-gray-300 py-2.5 rounded-full flex items-center justify-center gap-2 hover:bg-gray-50 hover:border-[#D89F34] transition text-sm">
+            <img src="https://developers.google.com/identity/images/g-logo.png" width="18" />
+            Sign in with Google
+        </button>
+    </a>
+
+        <!-- Toggle Link -->
+        <div class="text-center mt-4">
+          <p id="loginToggleText" class="text-xs text-gray-500">
+            Don't have an account?
+            <a href="#" onclick="toggleAuth()"
+              class="font-medium text-[#1D3C4A] hover:text-[#D89F34] transition underline">
+              Sign up here
+            </a>
+          </p>
+          <p id="signupToggleText" class="hidden text-xs text-gray-500">
+            Already have an account?
+            <a href="#" onclick="toggleAuth()"
+              class="font-medium text-[#1D3C4A] hover:text-[#D89F34] transition underline">
+              Login
+            </a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORGOT PASSWORD MODAL -->
+  <div id="forgotModal" class="fixed inset-0 hidden z-50 items-center justify-center p-3 sm:p-4">
+    <div class="absolute inset-0 bg-black/70 backdrop-blur-md"></div>
+    <div class="relative bg-white w-full max-w-md rounded-2xl shadow-2xl p-5 sm:p-6 modal-modern mx-auto">
+      <button onclick="closeForgotModal()"
+        class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 transition-all w-7 h-7 rounded-full flex items-center justify-center hover:bg-gray-100">
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </button>
+
+      <div class="flex items-center justify-center gap-1 sm:gap-2 mb-6">
+        <div id="stepIndicator1" class="step-modern active">1</div>
+        <div id="line1" class="line-modern"></div>
+        <div id="stepIndicator2" class="step-modern">2</div>
+        <div id="line2" class="line-modern"></div>
+        <div id="stepIndicator3" class="step-modern">3</div>
+      </div>
+
+      <div id="step1" class="transition-all duration-300">
+        <div class="text-center mb-5">
+          <div class="w-14 h-14 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-3">
+            <i class="fa-solid fa-envelope text-2xl text-[#D89F34]"></i>
+          </div>
+          <h2 class="text-xl font-bold text-[#1D3C4A] mb-2">Forgot Password?</h2>
+          <p class="text-gray-500 text-xs">Enter your email to receive OTP</p>
+        </div>
+        <input id="emailInput" type="email" placeholder="Email address"
+          class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#D89F34] outline-none">
+        <p id="emailError" class="text-red-500 text-xs mt-2 hidden"></p>
+        <button onclick="sendOTP()"
+          class="mt-5 w-full py-3 text-white font-semibold rounded-xl bg-gradient-to-r from-[#133F53] to-[#1f5d75] transition">
+          Send OTP
+        </button>
+      </div>
+
+      <div id="step2" class="hidden transition-all duration-300">
+        <div class="text-center mb-5">
+          <div class="w-14 h-14 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-3">
+            <i class="fa-solid fa-key text-2xl text-[#D89F34]"></i>
+          </div>
+          <h2 class="text-xl font-bold text-[#1D3C4A] mb-2">Enter OTP</h2>
+          <p class="text-gray-500 text-xs">OTP sent to <span id="emailDisplay" class="font-medium"></span></p>
+        </div>
+        <div class="flex justify-center gap-1.5 mb-5" id="otpContainer">
+          <input type="text" maxlength="1" class="otp-modern" id="otp0">
+          <input type="text" maxlength="1" class="otp-modern" id="otp1">
+          <input type="text" maxlength="1" class="otp-modern" id="otp2">
+          <input type="text" maxlength="1" class="otp-modern" id="otp3">
+          <input type="text" maxlength="1" class="otp-modern" id="otp4">
+          <input type="text" maxlength="1" class="otp-modern" id="otp5">
+        </div>
+        <p id="otpError" class="text-red-500 text-xs text-center hidden"></p>
+        <button onclick="verifyOTP()"
+          class="w-full py-3 text-white font-semibold rounded-xl bg-gradient-to-r from-[#133F53] to-[#1f5d75] transition">
+          Verify OTP
+        </button>
+        <div class="text-center mt-4">
+          <p class="text-xs text-gray-500">Resend OTP in <span id="timer">30</span>s</p>
+        </div>
+      </div>
+
+      <div id="step3" class="hidden transition-all duration-300">
+        <div class="text-center mb-5">
+          <div class="w-14 h-14 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-3">
+            <i class="fa-solid fa-lock text-2xl text-[#D89F34]"></i>
+          </div>
+          <h2 class="text-xl font-bold text-[#1D3C4A] mb-2">Reset Password</h2>
+        </div>
+        <div class="relative mb-3">
+          <input id="newPassword" type="password" placeholder="New Password" oninput="checkStrength()"
+            class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#D89F34] outline-none pr-12">
+          <button type="button" onclick="togglePassword('newPassword', 'icon1')"
+            class="absolute right-3 top-3 text-gray-400">
+            <i id="icon1" class="fa-solid fa-eye"></i>
+          </button>
+        </div>
+        <div class="h-1.5 bg-gray-100 rounded mb-3">
+          <div id="strengthBar" class="strength-bar h-1.5 rounded w-0"></div>
+        </div>
+        <div class="relative mb-4">
+          <input id="confirmPasswordReset" type="password" placeholder="Confirm Password"
+            class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#D89F34] outline-none pr-12">
+          <button type="button" onclick="togglePassword('confirmPasswordReset', 'icon2')"
+            class="absolute right-3 top-3 text-gray-400">
+            <i id="icon2" class="fa-solid fa-eye"></i>
+          </button>
+        </div>
+        <p id="passError" class="text-red-500 text-xs mb-3 hidden"></p>
+        <button onclick="updatePassword()"
+          class="w-full py-3 text-white font-semibold rounded-xl bg-gradient-to-r from-[#133F53] to-[#1f5d75] transition">
+          Update Password
+        </button>
+      </div>
+
+      <div id="step4" class="hidden text-center">
+        <i class="fa-solid fa-circle-check text-green-500 text-5xl mb-3"></i>
+        <h2 class="text-xl font-bold text-[#1D3C4A]">Password Updated!</h2>
+        <p class="text-gray-500 text-sm mt-2">You can now login with your new password</p>
+        <button onclick="closeForgotModal()"
+          class="mt-5 w-full py-3 bg-gradient-to-r from-[#133F53] to-[#1f5d75] text-white font-semibold rounded-xl">
+          Back to Login
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastContainer" class="fixed top-4 right-4 flex flex-col gap-3 z-50"></div>
+
+  <script>
+    // Global vars for forgot password
+    let currentEmail = '', timerInterval = null, timeLeft = 30;
+
+    function togglePassword(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      if (input.type === "password") {
+        input.type = "text";
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
+      } else {
+        input.type = "password";
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
+      }
+    }
+
+    function toggleAuth() {
+      const loginForm = document.getElementById("loginForm");
+      const signupForm = document.getElementById("signupForm");
+      const loginHeader = document.getElementById("loginHeader");
+      const signupHeader = document.getElementById("signupHeader");
+      const loginToggle = document.getElementById("loginToggleText");
+      const signupToggle = document.getElementById("signupToggleText");
+
+      loginForm.classList.toggle("hidden");
+      signupForm.classList.toggle("hidden");
+      loginHeader.classList.toggle("hidden");
+      signupHeader.classList.toggle("hidden");
+      loginToggle.classList.toggle("hidden");
+      signupToggle.classList.toggle("hidden");
+    }
+
+    // ENHANCED Signup handler with backend API integration (UI unchanged)
+    async function signupUser(event) {
+      event.preventDefault();
+
+      // Get form elements
+      const firstName = document.getElementById("firstName")?.value.trim() || "";
+      const middleName = document.getElementById("middleName")?.value.trim() || "";
+      const lastName = document.getElementById("lastName")?.value.trim() || "";
+      const email = document.getElementById("signupEmail")?.value.trim() || "";
+      const phone = document.getElementById("signupPhone")?.value.trim() || "";
+      const password = document.getElementById("signupPassword")?.value || "";
+      const confirmPass = document.getElementById("confirmPassword")?.value || "";
+      const address = document.getElementById("address")?.value.trim() || "";
+      const flatNo = document.getElementById("flatNo")?.value.trim() || "";
+      const city = document.getElementById("city")?.value.trim() || "";
+      const state = document.getElementById("state")?.value.trim() || "";
+      const pincode = document.getElementById("pincode")?.value.trim() || "";
+      const nearBy = document.getElementById("nearBy")?.value.trim() || "";
+      const landmark = document.getElementById("landmark")?.value.trim() || "";
+
+      // Client-side validation (preserving existing UX)
+      if (!firstName) { showToast("First name is required", "error"); return; }
+      if (!email) { showToast("Email is required", "error"); return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast("Invalid email format", "error"); return; }
+      if (!phone) { showToast("Phone number is required", "error"); return; }
+      if (!password) { showToast("Password is required", "error"); return; }
+      if (password !== confirmPass) { showToast("Passwords do not match", "error"); return; }
+      if (password.length < 6) { showToast("Password must be at least 6 characters", "error"); return; }
+      if (pincode && pincode.length !== 6) { showToast("Pincode must be 6 digits", "error"); return; }
+
+      // Construct exact backend payload
+      const payload = {
+        firstName, middleName, lastName, email, phone, password,
+        address, flatNo, city, state, pincode, nearBy, landmark
+      };
+
+      // Get submit button for loading state
+      const submitBtn = document.getElementById("signupSubmitBtn");
+      const originalBtnText = submitBtn.innerHTML;
+
+      // Set loading state
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Creating Account...';
+      submitBtn.classList.add("opacity-70", "cursor-not-allowed");
+
+      try {
+        // API call to backend
+        const response = await fetch("http://localhost:8085/api/users/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Success
+          showToast(data.message || "Account created successfully!", "success");
+
+          // Optionally clear form
+          document.getElementById("firstName").value = "";
+          document.getElementById("middleName").value = "";
+          document.getElementById("lastName").value = "";
+          document.getElementById("signupEmail").value = "";
+          document.getElementById("signupPhone").value = "";
+          document.getElementById("signupPassword").value = "";
+          document.getElementById("confirmPassword").value = "";
+          document.getElementById("address").value = "";
+          document.getElementById("flatNo").value = "";
+          document.getElementById("city").value = "";
+          document.getElementById("state").value = "";
+          document.getElementById("pincode").value = "";
+          document.getElementById("nearBy").value = "";
+          document.getElementById("landmark").value = "";
+          document.getElementById("signupStrengthBar").style.width = "0%";
+
+          // Auto switch to login after 1.5 seconds
+          setTimeout(() => {
+            toggleAuth(); // Switch to login form
+          }, 1500);
+        } else {
+          // Server error with message
+          const errorMsg = data.message || data.error || "Registration failed. Please try again.";
+          if (errorMsg.toLowerCase().includes("email") || errorMsg.toLowerCase().includes("duplicate")) {
+            showToast("Email already registered. Please use a different email or login.", "error");
+          } else if (errorMsg.toLowerCase().includes("phone")) {
+            showToast("Phone number already registered.", "error");
+          } else {
+            showToast(errorMsg, "error");
+          }
+        }
+      } catch (error) {
+        console.error("Signup API error:", error);
+        // Network or server unreachable error
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+          showToast("Cannot connect to server. Please check if backend is running at http://localhost:8085", "error");
+        } else {
+          showToast("Network error. Please check your connection and try again.", "error");
+        }
+      } finally {
+        // Reset button state
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+        submitBtn.classList.remove("opacity-70", "cursor-not-allowed");
+      }
+    }
+
+    // Enhanced loginUser function with proper response handling
+    async function loginUser(event) {
+      event.preventDefault();
+
+      // Get input values from existing form fields
+      const identifier = document.getElementById("loginPhone").value;
+      const password = document.getElementById("password").value;
+
+      // Validation (preserving existing UX)
+      if (!identifier || !password) {
+        showToast("Please enter email/phone and password", "error");
+        return;
+      }
+
+      // Construct payload as required
+      const payload = {
+        identifier: identifier,
+        password: password
+      };
+
+      try {
+        // API call with session-based credentials (cookies)
+        const response = await fetch("http://localhost:8085/api/users/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload),
+          credentials: "include"  // Mandatory for session-based auth
+        });
+
+        // Check if response has content before parsing JSON
+        const contentType = response.headers.get("content-type");
+        let data = {};
+
+        if (contentType && contentType.includes("application/json")) {
+          const textResponse = await response.text();
+          if (textResponse && textResponse.trim()) {
+            data = JSON.parse(textResponse);
+          }
+        }
+
+                if (response.ok) {
+          // Success - store userId if present in response
+          if (data.userId) {
+            localStorage.setItem("userId", data.userId);
+          }
+
+          // Show success message using existing toast system
+          showToast("Login successful!", "success");
+
+          // ←←← ADD THESE TWO LINES ←←←
+          if (typeof updateMobileLoginButton === "function") {
+            updateMobileLoginButton();   // Update footer button immediately
+          }
+
+          // Redirect to index page
+          setTimeout(() => {
+            window.location.href = "/index.html";
+          }, 1200);
+        } else {
+          // Failed login - show error message from backend or default
+          const errorMessage = data.message || "Invalid credentials";
+          showToast(errorMessage, "error");
+        }
+      } catch (error) {
+        console.error("Login error:", error);
+        // Handle network errors or unreachable backend
+        showToast("Server error. Please try again.", "error");
+      }
+    }
+
+    // Password strength for signup
+    function checkSignupStrength() {
+      const pass = document.getElementById("signupPassword")?.value || "";
+      const bar = document.getElementById("signupStrengthBar");
+      const textEl = document.getElementById("signupStrengthText");
+      let strength = 0;
+      if (pass.length >= 6) strength++;
+      if (/[A-Z]/.test(pass)) strength++;
+      if (/[0-9]/.test(pass)) strength++;
+      if (/[@$!%*?&#]/.test(pass)) strength++;
+
+      if (!pass) {
+        bar.style.width = "0%"; bar.style.background = "#e5e7eb";
+        textEl.innerText = "Password strength"; textEl.className = "text-xs text-gray-400 mt-1";
+      } else if (strength === 1) {
+        bar.style.width = "25%"; bar.style.background = "#ef4444";
+        textEl.innerText = "Weak"; textEl.className = "text-xs text-red-500 mt-1";
+      } else if (strength === 2) {
+        bar.style.width = "50%"; bar.style.background = "#f97316";
+        textEl.innerText = "Fair"; textEl.className = "text-xs text-orange-500 mt-1";
+      } else if (strength === 3) {
+        bar.style.width = "75%"; bar.style.background = "#eab308";
+        textEl.innerText = "Good"; textEl.className = "text-xs text-yellow-600 mt-1";
+      } else {
+        bar.style.width = "100%"; bar.style.background = "#10b981";
+        textEl.innerText = "Strong"; textEl.className = "text-xs text-green-600 mt-1";
+      }
+    }
+
+    document.getElementById("signupPassword")?.addEventListener("input", checkSignupStrength);
+
+    function showToast(message, type) {
+      const container = document.getElementById("toastContainer");
+      const toast = document.createElement("div");
+      const bgColor = type === "success" ? "bg-green-500" : type === "error" ? "bg-red-500" : "bg-blue-500";
+      toast.className = `${bgColor} text-white px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2 animate-slideIn text-sm`;
+      toast.innerHTML = `<i class="fa-solid fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i><span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Forgot password functions
+    function openForgotModal() { document.getElementById("forgotModal").classList.remove("hidden"); document.getElementById("forgotModal").style.display = "flex"; resetForgotSteps(); }
+    function closeForgotModal() { document.getElementById("forgotModal").style.display = "none"; document.getElementById("forgotModal").classList.add("hidden"); if (timerInterval) clearInterval(timerInterval); }
+    function resetForgotSteps() {
+      document.getElementById("step1").style.display = "block"; document.getElementById("step2").style.display = "none";
+      document.getElementById("step3").style.display = "none"; document.getElementById("step4").style.display = "none";
+      updateForgotSteps(1);
+    }
+    function updateForgotSteps(step) {
+      for (let i = 1; i <= 3; i++) {
+        const ind = document.getElementById(`stepIndicator${i}`); const line = document.getElementById(`line${i - 1}`);
+        if (i <= step) { ind.classList.add("active"); if (line) line.classList.add("active"); }
+        else { ind.classList.remove("active"); if (line) line.classList.remove("active"); }
+      }
+    }
+    function sendOTP() {
+      const email = document.getElementById("emailInput").value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { document.getElementById("emailError").innerText = "Valid email required"; document.getElementById("emailError").classList.remove("hidden"); return; }
+      document.getElementById("emailError").classList.add("hidden");
+      currentEmail = email; document.getElementById("emailDisplay").innerText = email;
+      showToast(`OTP sent to ${email}`, "success");
+      document.getElementById("step1").style.display = "none"; document.getElementById("step2").style.display = "block";
+      updateForgotSteps(2); startTimer();
+    }
+    function startTimer() {
+      if (timerInterval) clearInterval(timerInterval); timeLeft = 30; const timerSpan = document.getElementById("timer");
+      timerInterval = setInterval(() => { timeLeft--; if (timerSpan) timerSpan.innerText = timeLeft; if (timeLeft <= 0) clearInterval(timerInterval); }, 1000);
+    }
+    function verifyOTP() {
+      let otp = ""; for (let i = 0; i < 6; i++) otp += document.getElementById(`otp${i}`).value;
+      if (otp.length < 6) { document.getElementById("otpError").innerText = "Enter complete OTP"; document.getElementById("otpError").classList.remove("hidden"); return; }
+      document.getElementById("otpError").classList.add("hidden");
+      if (timerInterval) clearInterval(timerInterval);
+      document.getElementById("step2").style.display = "none"; document.getElementById("step3").style.display = "block";
+      updateForgotSteps(3);
+    }
+    function checkStrength() {
+      const pass = document.getElementById("newPassword").value; const bar = document.getElementById("strengthBar");
+      let s = 0; if (pass.length >= 6) s++; if (/[A-Z]/.test(pass)) s++; if (/[0-9]/.test(pass)) s++; if (/[@$!%*?&#]/.test(pass)) s++;
+      if (s === 1) { bar.style.width = "25%"; bar.style.background = "#ef4444"; }
+      else if (s === 2) { bar.style.width = "50%"; bar.style.background = "#f97316"; }
+      else if (s === 3) { bar.style.width = "75%"; bar.style.background = "#eab308"; }
+      else if (s >= 4) { bar.style.width = "100%"; bar.style.background = "#10b981"; }
+      else { bar.style.width = "0%"; bar.style.background = "#e5e7eb"; }
+    }
+    function updatePassword() {
+      const newPass = document.getElementById("newPassword").value;
+      const confirmPass = document.getElementById("confirmPasswordReset").value;
+      if (newPass.length < 6) { document.getElementById("passError").innerText = "Min 6 characters"; document.getElementById("passError").classList.remove("hidden"); return; }
+      if (newPass !== confirmPass) { document.getElementById("passError").innerText = "Passwords don't match"; document.getElementById("passError").classList.remove("hidden"); return; }
+      document.getElementById("passError").classList.add("hidden");
+      showToast("Password updated!", "success");
+      document.getElementById("step3").style.display = "none"; document.getElementById("step4").style.display = "block";
+      updateForgotSteps(4);
+    }
+    // OTP input setup
+    for (let i = 0; i < 6; i++) {
+      const inp = document.getElementById(`otp${i}`);
+      if (inp) inp.addEventListener("input", (e) => { if (inp.value.length === 1 && i < 5) document.getElementById(`otp${i + 1}`).focus(); });
+    }
+  </script>
+</body>
+
+</html>
