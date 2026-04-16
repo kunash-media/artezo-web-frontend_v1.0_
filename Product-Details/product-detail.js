@@ -6,7 +6,7 @@
   const FALLBACK_IMG = "/Images/product_fallback/artezo_product_fallback_img.png";
 
   // Hardcoded userId until auth system is wired
-  const USER_ID = 1;
+  const USER_ID = localStorage.getItem('userId');
 
   // ─── URL HELPERS ───────────────────────────────────────────────────────────
   function absUrl(path) {

@@ -153,7 +153,7 @@ async function removeFromWishlist(itemId, productId, variantId = '') {
         if (variantId) url += `&variantId=${variantId}`;
 
         const res = await fetch(url, {
-            method: "POST",
+            method: "DELETE",
             headers: { 
                 "Content-Type": "application/json", 
                 ...(token && { Authorization: `Bearer ${token}` }) 

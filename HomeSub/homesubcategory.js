@@ -297,7 +297,6 @@
     // d.variantId and d.sku are already the resolved fallback values
     // written by buildProductCard — no re-derivation needed here.
 
-    const productName = d.productName || d.title || "Artezo Product";   // Strong fallback
 
     const payload = {
       userId:           Number(userId),
@@ -307,11 +306,9 @@
       sku:              d.sku,
       selectedColor:    d.color    || null,
       selectedSize:     d.size     || null,
-      titleName:        productName    || null,
+      titleName:        d.title    || null,
       wishlistedPrice:  Number(d.price) || 0,
       customFieldsJson: null,
-      productImageUrl:  productImageUrl,
-      productName:      productName || 'Artezo Product',
     };
 
     const url = `${BASE_URL}/api/v1/wishlist/add`;
