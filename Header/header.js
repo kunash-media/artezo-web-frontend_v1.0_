@@ -12,6 +12,8 @@ function isUserLoggedIn() {
   return !!localStorage.getItem("userId");
 }
 
+
+
 let cartCount = 4;
 let wishlistCount = 3;
 let showingAllCategories = false;
@@ -1186,6 +1188,88 @@ setTimeout(() => {
   renderAccountDropdown();
 }, 500);
 
+
+// ==================== CART & WISHLIST COUNT SYNC ====================
+
+console.log("=== ArtezoCountSync LOADED from header.js ===");
+
+const BASE_URL_HEADER = "http://localhost:8085";
+const POLL_MS = 60000;
+
+const BADGES = {
+    cart: ["cart-count-badge", "mobile-cart-count"],
+    wishlist: ["wishlist-count-badge", "mobile-wishlist-count"]
+};
+
+let pollTimer = null;
+
+function setBadge(type, count) {
+    const display = count > 99 ? "99+" : String(count);
+    BADGES[type].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) {
+            console.warn(`[CountSync] Badge element not found: #${id}`);
+            return;
+        }
+        el.textContent = display;
+        el.style.display = (count === 0) ? "none" : "flex";
+    });
+}
+
+function syncCounts() {
+    console.log("[CountSync] syncCounts() called");
+
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+        console.log("[CountSync] No userId → skipping (user not logged in)");
+        return;
+    }
+
+    const token = localStorage.getItem("token");
+
+    console.log(`[CountSync] Fetching counts for userId: ${userId}`);
+
+    const headers = {
+        "Content-Type": "application/json"
+    };
+    if (token) headers.Authorization = `Bearer ${token}`;
+
+    Promise.allSettled([
+        fetch(`${BASE_URL_HEADER}/api/v1/cart/count?userId=${userId}`, { headers }),
+        fetch(`${BASE_URL_HEADER}/api/v1/wishlist/count?userId=${userId}`, { headers })
+    ])
+    .then(([cartRes, wishlistRes]) => {
+        if (cartRes.status === "fulfilled" && cartRes.value.ok) {
+            cartRes.value.json().then(data => {
+                if (data.success) setBadge("cart", data.data?.count || 0);
+            });
+        }
+
+        if (wishlistRes.status === "fulfilled" && wishlistRes.value.ok) {
+            wishlistRes.value.json().then(data => {
+                if (data.success) setBadge("wishlist", data.data?.count || 0);
+            });
+        }
+    })
+    .catch(err => console.error("[CountSync] Error:", err));
+}
+
+// Initial call + polling
+function startCountSync() {
+    syncCounts();
+    if (pollTimer) clearInterval(pollTimer);
+    pollTimer = setInterval(syncCounts, POLL_MS);
+}
+
+// Run when header is ready
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("[CountSync] DOM ready → starting count sync");
+    startCountSync();
+});
+
+// Also expose globally so you can call it from anywhere
+window.refreshCartWishlistCount = syncCounts;
+
 // ─── Global Exports ──────────────────────────────────────────────────────────
 window.openMobileMenu = openMobileMenu;
 window.closeMobileMenu = closeMobileMenu;
@@ -1211,6 +1295,35 @@ if (document.readyState === "loading") {
     initializeHeader();
   }
 }
+
+
+//========================================= END  ===============================================//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // // header.js
 // let isLoggedIn = true;

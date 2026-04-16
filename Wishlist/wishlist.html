@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../Header/header.css">
+
     <style>
         body {
             font-family: 'Lexend', sans-serif;
@@ -25,13 +26,8 @@
         }
 
         @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .wishlist-item {
@@ -43,44 +39,17 @@
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
         }
 
-        .move-to-cart-btn {
-            transition: all 0.3s ease;
-        }
-
         .move-to-cart-btn:hover {
             background-color: #1D3C4A !important;
             color: white !important;
-        }
-
-        .remove-wishlist-btn {
-            transition: all 0.3s ease;
         }
 
         .remove-wishlist-btn:hover {
             background-color: #dc2626 !important;
             color: white !important;
         }
-
-        .heart-animation {
-            animation: heartBeat 0.5s ease;
-        }
-
-        @keyframes heartBeat {
-            0% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.2);
-            }
-
-            100% {
-                transform: scale(1);
-            }
-        }
     </style>
 
-    <!-- Tailwind config -->
     <script>
         tailwind.config = {
             theme: {
@@ -91,7 +60,6 @@
                     },
                     fontFamily: {
                         lexend: ["Lexend", "sans-serif"],
-                        zain: ["Zain", "sans-serif"],
                     },
                 },
             },
@@ -100,7 +68,7 @@
 </head>
 
 <body class="bg-gray-50">
-    <!-- Header Container -->
+    <!-- Header will be loaded dynamically -->
     <div id="header-container"></div>
 
     <!-- Main Content -->
@@ -135,8 +103,7 @@
             </div>
             <h3 class="text-xl font-semibold mb-2">Your wishlist is empty</h3>
             <p class="text-gray-500 mb-8">Save your favorite items here to buy them later</p>
-            <a href="/"
-                class="inline-flex items-center gap-2 bg-primary text-white px-8 py-3 rounded-lg hover:bg-primary/90 transition">
+            <a href="../index.html" class="inline-flex items-center gap-2 bg-primary text-white px-8 py-3 rounded-lg hover:bg-primary/90 transition">
                 <i class="fa-solid fa-arrow-left"></i>
                 Continue Shopping
             </a>
@@ -144,15 +111,21 @@
 
         <!-- Wishlist Grid -->
         <div id="wishlist-grid" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <!-- Wishlist items will be dynamically inserted here -->
+            <!-- Items inserted by JS -->
         </div>
 
-        <!-- Move All to Cart Button (only shown when items exist) -->
-        <div id="move-all-container" class="hidden mt-8 flex justify-center">
+        <!-- Action Buttons -->
+        <div id="move-all-container" class="hidden mt-10 flex flex-wrap justify-center gap-4">
             <button id="move-all-to-cart"
                 class="bg-primary text-white px-8 py-3 rounded-lg hover:bg-primary/90 transition flex items-center gap-2">
                 <i class="fa-solid fa-cart-shopping"></i>
                 Move All to Cart
+            </button>
+            
+            <button id="clear-wishlist-btn"
+                class="bg-white border border-red-500 text-red-600 px-8 py-3 rounded-lg hover:bg-red-50 transition flex items-center gap-2">
+                <i class="fa-solid fa-trash"></i>
+                Clear Wishlist
             </button>
         </div>
     </main>
@@ -160,17 +133,11 @@
     <!-- Footer Container -->
     <div id="footer-container"></div>
 
-    <!-- Scripts -->
+    <!-- Scripts - Proper Loading Order -->
     <script src="/auth.js"></script>
-
-    <script src="../services/product-data.js"></script>
-    <script src="../services/cart-wishlist-service.js"></script>
-    <script src="../services/global-utils.js"></script>
-    <script src="../services/customization.js"></script>
     <script src="../Header/load-header.js"></script>
     <script src="../Header/header.js"></script>
-    <script src="../Footer/footer-loader.js"></script>
     <script src="../Wishlist/wishlist.js"></script>
+    <script src="../Footer/footer-loader.js"></script>
 </body>
-
 </html>

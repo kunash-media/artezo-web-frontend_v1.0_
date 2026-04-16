@@ -296,6 +296,9 @@
   async function addToWishlist(userId, productId, d) {
     // d.variantId and d.sku are already the resolved fallback values
     // written by buildProductCard — no re-derivation needed here.
+
+    const productName = d.productName || d.title || "Artezo Product";   // Strong fallback
+
     const payload = {
       userId:           Number(userId),
       wishlistName:     "My Wishlist",
@@ -304,9 +307,11 @@
       sku:              d.sku,
       selectedColor:    d.color    || null,
       selectedSize:     d.size     || null,
-      titleName:        d.title    || null,
+      titleName:        productName    || null,
       wishlistedPrice:  Number(d.price) || 0,
       customFieldsJson: null,
+      productImageUrl:  productImageUrl,
+      productName:      productName || 'Artezo Product',
     };
 
     const url = `${BASE_URL}/api/v1/wishlist/add`;
@@ -513,11 +518,11 @@
           <button
             class="wl-btn absolute top-2 right-2 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow hover:bg-white transition-all duration-200"
             data-product-id="${pid}"
+            data-product-name="${escapeHtml(p.productName || '')}"
             data-variant-id="${escapeHtml(resolvedVariantId)}"
             data-sku="${escapeHtml(resolvedSku)}"
             data-color="${escapeHtml(p.selectedColor || "")}"
             data-size="${escapeHtml(p.selectedSize   || "")}"
-            data-title="${escapeHtml(p.titleName      || "")}"
             data-price="${selling}"
             aria-label="${isWL ? "Remove from wishlist" : "Add to wishlist"}"
             title="${isWL ? "Remove from wishlist" : "Add to wishlist"}">
