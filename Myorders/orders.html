@@ -6,39 +6,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>My Orders · Artezo</title>
 
-    <!-- Tailwind + Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-
-    <!-- Header & Footer CSS -->
-    <link rel="stylesheet" href="../Header/header.css" />
-    <link rel="stylesheet" href="../Footer/footer.css" />
-
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Zain:ital,wght@0,200;0,300;0,400;0,700;0,800;0,900;1,300;1,400&display=swap"
-        rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
+    <link rel="stylesheet" href="../Header/header.css">
+    <link rel="stylesheet" href="../Footer/footer.css">
 
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: {
-                        primary: "#033E59",
-                        accent: "#E6A62C",
-                        cream: "#FFF8EC",
-                        warmgray: "#F9F3E9",
-                        sand: "#F8F8EA",
-                        teal: "#133F53",
-                        warmbrown: "#957A54",
-                    },
-                    fontFamily: {
-                        lexend: ["Lexend", "sans-serif"],
-                        zain: ["Zain", "sans-serif"],
-                    },
+                    colors: { primary: "#033E59", accent: "#E6A62C", cream: "#FFF8EC" },
+                    fontFamily: { lexend: ["Lexend", "sans-serif"] },
                 },
             },
         };
@@ -51,97 +33,58 @@
             box-sizing: border-box;
         }
 
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
-
-        .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
         body {
             background: linear-gradient(135deg, #faf8ef 0%, #f0ebe2 100%);
-            min-height: 100vh;
+            font-family: 'Lexend', sans-serif;
         }
 
-        /* Enhanced Order Card Styling */
         .order-card {
             background: white;
             border-radius: 1.25rem;
             border: 1px solid rgba(230, 166, 44, 0.2);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-            cursor: pointer;
+            transition: all 0.3s;
             padding: 1rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .order-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #E6A62C, #033E59, #E6A62C);
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
-        }
-
-        .order-card:hover::before {
-            transform: scaleX(1);
         }
 
         .order-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 12px 24px -12px rgba(230, 166, 44, 0.25);
-            border-color: rgba(230, 166, 44, 0.4);
         }
 
-        /* Status Badges - Enhanced */
-        .badge-placed,
-        .badge-delivered,
-        .badge-shipped,
-        .badge-processing,
+        .clickable-area {
+            cursor: pointer;
+        }
+
+        .badge-delivered {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+        }
+
         .badge-cancelled {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: white;
+            box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
+        }
+
+        .badge-placed {
+            background: linear-gradient(135deg, #E6A62C, #d4921f);
+            color: white;
+            box-shadow: 0 2px 4px rgba(230, 166, 44, 0.2);
+        }
+
+        .badge-delivered,
+        .badge-cancelled,
+        .badge-placed {
             font-size: 0.65rem;
-            padding: 0.2rem 0.7rem;
+            padding: 0.25rem 0.8rem;
             border-radius: 100px;
             font-weight: 600;
-            letter-spacing: 0.3px;
             display: inline-flex;
             align-items: center;
             gap: 0.3rem;
         }
 
-        .badge-placed {
-            background: #7b5e3b;
-            color: white;
-        }
-
-        .badge-cancelled {
-            background: #dc2626;
-            color: white;
-        }
-
-        .badge-delivered {
-            background: #10b981;
-            color: white;
-        }
-
-        .badge-shipped {
-            background: #f59e0b;
-            color: white;
-        }
-
-        .badge-processing {
-            background: #033E59;
-            color: white;
-        }
-
-        /* Enhanced Overlay */
         .order-overlay {
             display: none;
             position: fixed;
@@ -149,27 +92,25 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.75);
             backdrop-filter: blur(4px);
-            z-index: 1000;
+            z-index: 9999;
             justify-content: center;
             align-items: center;
-            animation: fadeIn 0.2s ease;
         }
 
         .overlay-content {
-            background: white;
-            border-radius: 0.45rem;
-            max-width: 450px;
+            background: linear-gradient(135deg, #ffffff 0%, #fefaf0 100%);
+            border-radius: 1.5rem;
+            max-width: 950px;
             width: 90%;
-            max-height: 85vh;
+            max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
-            animation: slideUp 0.25s ease-out;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
 
         .overlay-content::-webkit-scrollbar {
-            width: 4px;
+            width: 6px;
         }
 
         .overlay-content::-webkit-scrollbar-track {
@@ -182,37 +123,14 @@
             border-radius: 10px;
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Filter Tabs - Enhanced */
         .filter-tab {
             cursor: pointer;
-            transition: all 0.2s ease;
             padding: 0.5rem 0;
             font-size: 0.85rem;
             font-weight: 500;
             color: #6b7280;
             border-bottom: 2px solid transparent;
+            transition: all 0.2s;
         }
 
         .filter-tab:hover {
@@ -222,48 +140,16 @@
         .filter-tab-active {
             color: #E6A62C;
             border-bottom: 2px solid #E6A62C;
-            font-weight: 600;
         }
 
-        /* Product Image Styling */
-        .product-image {
-            width: 52px;
-            height: 52px;
+        .product-img {
+            width: 64px;
+            height: 64px;
             object-fit: cover;
             border-radius: 12px;
-            background: linear-gradient(135deg, #f5f5f5, #eaeaea);
-            border: 1px solid rgba(230, 166, 44, 0.2);
-            transition: transform 0.2s ease;
+            background: #f0f0f0;
         }
 
-        .order-card:hover .product-image {
-            transform: scale(1.02);
-        }
-
-        /* Delivery Banner */
-        .delivery-banner {
-            background: linear-gradient(90deg, #fef3c7, #fffbeb);
-            padding: 0.4rem 0.75rem;
-            font-size: 0.7rem;
-            color: #92400e;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            border-radius: 0.75rem;
-            margin-bottom: 0.75rem;
-            border-left: 3px solid #E6A62C;
-        }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 3rem 1.5rem;
-            background: white;
-            border-radius: 1.5rem;
-            border: 1px solid rgba(230, 166, 44, 0.2);
-        }
-
-        /* Skeleton Loading */
         .skeleton-card {
             background: white;
             border-radius: 1.25rem;
@@ -283,129 +169,208 @@
             }
         }
 
-        /* Button Styles */
         .btn-primary {
-            background: #E6A62C;
+            background: linear-gradient(135deg, #E6A62C, #d4921f);
             color: white;
-            padding: 0.5rem 1rem;
+            padding: 0.6rem 1rem;
             border-radius: 0.75rem;
-            font-weight: 500;
             font-size: 0.75rem;
-            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(230, 166, 44, 0.2);
         }
 
         .btn-primary:hover {
-            background: #d4921f;
-            transform: translateY(-1px);
+            transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(230, 166, 44, 0.3);
         }
 
         .btn-outline {
-            border: 1px solid #E6A62C;
+            border: 1.5px solid #E6A62C;
             background: transparent;
             color: #033E59;
-            padding: 0.5rem 1rem;
+            padding: 0.6rem 1rem;
             border-radius: 0.75rem;
-            font-weight: 500;
             font-size: 0.75rem;
-            transition: all 0.2s ease;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
         }
 
         .btn-outline:hover {
             background: #E6A62C;
             color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(230, 166, 44, 0.2);
         }
 
-        /* Product Row in Overlay */
-        .product-row {
+        .btn-exchange {
+            background: linear-gradient(135deg, #033E59, #022c41);
+            color: white;
+            padding: 0.6rem 1rem;
+            border-radius: 0.75rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(3, 62, 89, 0.2);
+        }
+
+        .btn-exchange:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(3, 62, 89, 0.3);
+        }
+
+        .btn-return {
+            background: linear-gradient(135deg, #6B7280, #4B5563);
+            color: white;
+            padding: 0.6rem 1rem;
+            border-radius: 0.75rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .btn-return:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+        }
+
+        .btn-cancel {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: white;
+            padding: 0.6rem 1rem;
+            border-radius: 0.75rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .btn-cancel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            background: white;
+            border-radius: 1.5rem;
+        }
+
+        .rating-star {
+            font-size: 1.75rem;
+            cursor: pointer;
+            color: #d1d5db;
+            transition: color 0.2s;
+            margin-right: 0.25rem;
+        }
+
+        .rating-star:hover,
+        .rating-star.active {
+            color: #E6A62C;
+        }
+
+        button {
+            position: relative;
+            z-index: 10;
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, #fefaf0, #fff8ec);
+            border-radius: 1rem;
+            padding: 1rem;
+            border: 1px solid rgba(230, 166, 44, 0.3);
+            transition: all 0.2s;
+        }
+
+        .info-card:hover {
+            border-color: #E6A62C;
+            box-shadow: 0 4px 12px rgba(230, 166, 44, 0.1);
+        }
+
+        .info-label {
+            font-size: 0.7rem;
+            color: #957A54;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .info-value {
+            font-size: 0.85rem;
+            color: #033E59;
+            font-weight: 500;
+            margin-top: 0.25rem;
+        }
+
+        .price-breakdown {
+            background: linear-gradient(135deg, #f8f6f0, #fefaf5);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            border: 1px solid rgba(230, 166, 44, 0.2);
+        }
+
+        .price-row {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 0.875rem 0;
-            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.8rem;
+            padding: 0.4rem 0;
         }
 
-        .product-row:last-child {
-            border-bottom: none;
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(230, 166, 44, 0.2);
         }
 
-        /* Responsive Adjustments */
-        @media (max-width: 640px) {
-            .order-card {
-                padding: 0.875rem;
-            }
+        .action-buttons button {
+            flex: 1;
+            min-width: 100px;
+            font-weight: 500;
+        }
 
-            .product-image {
-                width: 44px;
-                height: 44px;
-            }
-
-            .filter-tab {
-                font-size: 0.75rem;
-            }
-
-            .badge-placed,
-            .badge-delivered,
-            .badge-shipped,
-            .badge-processing,
-            .badge-cancelled {
-                font-size: 0.55rem;
-                padding: 0.15rem 0.5rem;
-            }
+        .order-status-banner {
+            background: linear-gradient(135deg, #fefaf0, #fff8ec);
+            border-radius: 1rem;
+            padding: 1rem;
+            border: 1px solid rgba(230, 166, 44, 0.3);
         }
     </style>
 </head>
 
-<body class="text-primary antialiased font-lexend">
-
-    <!-- Header -->
-    <div id="header-container"></div>
-
-    <!-- Main Content -->
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 md:py-10">
-
-        <!-- Header Section -->
+<body>
+    <div class="max-w-3xl mx-auto px-4 py-6">
         <div class="mb-6">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-accent/10 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-shopping-bag text-accent text-xl"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-2xl sm:text-3xl font-bold font-zain text-primary tracking-tight">My Orders</h1>
-                        <p class="text-xs text-warmbrown mt-0.5">Track and manage all your purchases</p>
-                    </div>
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-primary">My Orders</h1>
+                    <p class="text-xs text-gray-500 mt-1">Track and manage all your purchases</p>
                 </div>
                 <div id="order-count-badge"
-                    class="bg-accent text-white px-4 py-1.5 rounded-full text-sm font-semibold inline-flex items-center gap-2 w-fit">
-                    <i class="fas fa-box text-xs"></i>
-                    <span>0 orders</span>
+                    class="bg-accent text-white px-4 py-1.5 rounded-full text-sm font-semibold shadow-sm">
+                    <i class="fas fa-box text-xs"></i> <span>0 orders</span>
                 </div>
             </div>
         </div>
 
-        <!-- Filter Tabs - Enhanced with icons -->
-        <div class="flex flex-wrap gap-4 sm:gap-6 mb-6 border-b border-accent/20 pb-2">
-            <div class="filter-tab filter-tab-active" data-filter="all">
-                <i class="fas fa-list mr-1.5 text-xs"></i>All Orders
-            </div>
-            <div class="filter-tab" data-filter="delivered">
-                <i class="fas fa-check-circle mr-1.5 text-xs"></i>Delivered
-            </div>
-            <div class="filter-tab" data-filter="processing">
-                <i class="fas fa-clock mr-1.5 text-xs"></i>Processing
-            </div>
-            <div class="filter-tab" data-filter="shipped">
-                <i class="fas fa-truck mr-1.5 text-xs"></i>Shipped
-            </div>
-            <div class="filter-tab" data-filter="cancelled">
-                <i class="fas fa-ban mr-1.5 text-xs"></i>Cancelled
-            </div>
+        <div class="flex gap-6 mb-6 border-b border-gray-200 pb-2">
+            <div class="filter-tab filter-tab-active" data-filter="all">All Orders</div>
+            <div class="filter-tab" data-filter="delivered">Delivered</div>
+            <div class="filter-tab" data-filter="cancelled">Cancelled</div>
         </div>
 
-        <!-- Orders List Container -->
         <div id="orders-list-container" class="space-y-3">
-            <!-- Skeleton Loader -->
             <div class="skeleton-card">
                 <div class="h-20 bg-gray-200 rounded-lg"></div>
             </div>
@@ -414,522 +379,1449 @@
             </div>
         </div>
 
-        <!-- Empty State (Hidden by default) -->
         <div id="empty-state" class="empty-state hidden">
             <i class="fas fa-shopping-bag text-5xl text-accent/30 mb-3 block"></i>
-            <h3 class="text-lg font-semibold text-primary mb-1">No orders found</h3>
-            <p class="text-sm text-gray-500 mb-4">You haven't placed any orders in this category yet</p>
+            <h3 class="text-lg font-semibold mb-2">No orders found</h3>
+            <p class="text-sm text-gray-500 mb-4">You haven't placed any orders yet</p>
             <a href="/shop"
-                class="inline-flex items-center gap-2 bg-accent text-white px-5 py-2.5 rounded-xl font-medium hover:bg-accent/90 transition">
-                <i class="fas fa-store"></i>
-                Start Shopping
-            </a>
-        </div>
-
-        <!-- Footer Note -->
-        <div class="mt-8 text-center text-[0.65rem] text-warmbrown border-t border-accent/20 pt-4">
-            <i class="fas fa-leaf text-accent mr-1 text-[0.55rem]"></i>
-            Handcrafted with love in India | Free shipping above ₹799
-            <div class="flex items-center justify-center gap-3 mt-2">
-                <span class="flex items-center gap-1"><i class="fas fa-shield-alt text-accent text-[0.5rem]"></i>Secure
-                    Payments</span>
-                <span class="flex items-center gap-1"><i class="fas fa-undo-alt text-accent text-[0.5rem]"></i>Easy
-                    Returns</span>
-                <span class="flex items-center gap-1"><i class="fas fa-headset text-accent text-[0.5rem]"></i>24/7
-                    Support</span>
-            </div>
+                class="inline-block bg-accent text-white px-6 py-2 rounded-xl hover:bg-accent/90 transition">Start
+                Shopping</a>
         </div>
     </div>
 
-    <!-- Footer -->
     <div id="footer-container"></div>
 
-    <!-- Scripts -->
     <script src="/auth.js"></script>
+    <script src="/Header/load-header.js" defer></script>
+    <script src="/Header/header.js" defer></script>
+    <script src="/Footer/footer-loader.js"></script>
 
-    <script src="../Header/load-header.js" defer></script>
-    <script src="../Header/header.js" defer></script>
-    <script src="../Footer/footer-loader.js" defer></script>
-
-    <!-- Enhanced Order Data and Rendering -->
     <script>
         (function () {
-            // ========== ORDER DATA (Preserved with enhancements) ==========
-            const ordersData = [
-                {
-                    id: "ORD-2104",
-                    date: "12 Feb 26",
-                    status: "delivered",
-                    statusText: "Delivered",
-                    total: 3650,
-                    items: [
-                        { name: "Handmade Terracotta Planter", price: 1250, qty: 1, image: "https://images.pexels.com/photos/5973409/pexels-photo-5973409.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop", variant: "6\" diameter • Natural clay" },
-                        { name: "Cotton Dhurrie (2x3 ft)", price: 2400, qty: 1, image: "https://images.pexels.com/photos/3757059/pexels-photo-3757059.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop", variant: "2x3 ft • Indigo dye" }
-                    ],
-                    paymentMethod: "Razorpay",
-                    deliveryDate: "Delivered on Feb 12, 2026",
-                    address: "Andarud, Phatlan, Satara 415523",
-                    badgeClass: "badge-delivered",
-                    footerLeft: '<i class="fas fa-credit-card mr-1"></i>Razorpay • 2 items',
-                    showDeliveryBanner: false,
-                    actions: ["Reorder", "Rate Products"],
-                    transactionId: "RZP12345678"
-                },
-                {
-                    id: "ORD-2105",
-                    date: "10 Feb 26",
-                    status: "delivered",
-                    statusText: "Delivered",
-                    total: 3740,
-                    items: [
-                        { name: "Stone Coaster Set (4pcs)", price: 890, qty: 1, image: "https://images.pexels.com/photos/4158294/pexels-photo-4158294.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop", variant: "Set of 4 • Etched design" },
-                        { name: "Sheesham Serving Bowl (12\")", price: 2850, qty: 1, image: "https://images.pexels.com/photos/5877082/pexels-photo-5877082.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop", variant: "12\" • Food safe oil" }
-                    ],
-                    paymentMethod: "UPI",
-                    deliveryDate: "Delivered on Feb 10, 2026",
-                    address: "Andarud, Phatlan, Satara 415523",
-                    badgeClass: "badge-delivered",
-                    footerLeft: '<i class="fas fa-credit-card mr-1"></i>UPI • 2 items',
-                    showDeliveryBanner: false,
-                    actions: ["Buy Again", "Write Review"],
-                    transactionId: "UPI12345678"
-                },
-                {
-                    id: "ORD-2289",
-                    date: "16 Feb 26",
-                    status: "shipped",
-                    statusText: "Shipped",
-                    total: 3595,
-                    items: [
-                        { name: "Brass Diya (Lamp) 4\"", price: 1495, qty: 1, image: "https://images.pexels.com/photos/7173475/pexels-photo-7173475.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop", variant: "4\" • Antique finish" },
-                        { name: "Macrame Wall Hanging", price: 2100, qty: 1, image: "https://images.pexels.com/photos/4066092/pexels-photo-4066092.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop", variant: "55x90 cm • Natural beige" }
-                    ],
-                    paymentMethod: "UPI",
-                    deliveryDate: "Expected by Feb 22, 2026",
-                    address: "Andarud, Phatlan, Satara 415523",
-                    badgeClass: "badge-shipped",
-                    footerLeft: '<i class="fas fa-truck mr-1"></i>In Transit',
-                    showDeliveryBanner: true,
-                    deliveryBannerText: "Free Delivery • Expected by Feb 22",
-                    actions: ["Track Order"],
-                    transactionId: null
-                },
-                {
-                    id: "ORD-2552",
-                    date: "18 Feb 26",
-                    status: "processing",
-                    statusText: "Processing",
-                    total: 3130,
-                    items: [
-                        { name: "Ceramic Sip-and-Slow Mug", price: 1150, qty: 1, image: "https://images.pexels.com/photos/1351264/pexels-photo-1351264.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop", variant: "350ml • Matte ochre" },
-                        { name: "Linen Napkin Set (4pcs)", price: 1980, qty: 1, image: "https://images.pexels.com/photos/3757035/pexels-photo-3757035.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop", variant: "Set of 4 • Eco dyed" }
-                    ],
-                    paymentMethod: "Razorpay",
-                    deliveryDate: "Processing • Est. dispatch Feb 20",
-                    address: "Andarud, Phatlan, Satara 415523",
-                    badgeClass: "badge-processing",
-                    footerLeft: '<i class="fas fa-clock mr-1"></i>Payment Verified',
-                    showDeliveryBanner: false,
-                    actions: [],
-                    transactionId: null
-                },
-                {
-                    id: "ORD-2671",
-                    date: "19 Feb 26",
-                    status: "shipped",
-                    statusText: "Shipped",
-                    total: 5090,
-                    items: [
-                        { name: "Terracotta Matka (2.5L)", price: 1890, qty: 1, image: "https://images.pexels.com/photos/5632464/pexels-photo-5632464.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop", variant: "2.5L • Cooling clay" },
-                        { name: "Kalamkari Wall Art (20x30)", price: 3200, qty: 1, image: "https://images.pexels.com/photos/1918290/pexels-photo-1918290.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop", variant: "20x30 inch • Natural dyes" }
-                    ],
-                    paymentMethod: "Razorpay",
-                    deliveryDate: "Shipped • Tracking available",
-                    address: "Andarud, Phatlan, Satara 415523",
-                    badgeClass: "badge-shipped",
-                    footerLeft: '<i class="fas fa-truck mr-1"></i>In Transit',
-                    showDeliveryBanner: false,
-                    actions: ["Track Shipment", "Contact Seller"],
-                    transactionId: null
-                },
-                {
-                    id: "ORD-1903",
-                    date: "05 Feb 26",
-                    status: "delivered",
-                    statusText: "Delivered",
-                    total: 4100,
-                    items: [
-                        { name: "Ceramic Espresso Set", price: 1450, qty: 1, image: "https://images.pexels.com/photos/1351238/pexels-photo-1351238.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop", variant: "Cup+saucer • Two-tone glaze" },
-                        { name: "Hand Coiled Pottery Vase", price: 2650, qty: 1, image: "https://images.pexels.com/photos/9461092/pexels-photo-9461092.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop", variant: "8\" tall • White slip" }
-                    ],
-                    paymentMethod: "Credit Card",
-                    deliveryDate: "Delivered on Feb 05, 2026",
-                    address: "Andarud, Phatlan, Satara 415523",
-                    badgeClass: "badge-delivered",
-                    footerLeft: '<i class="fas fa-check-circle mr-1"></i>Delivered',
-                    showDeliveryBanner: true,
-                    deliveryBannerText: "Free Delivery • Order above ₹799",
-                    actions: ["Shop Similar"],
-                    transactionId: null
-                },
-                {
-                    id: "ORD-1904",
-                    date: "03 Feb 26",
-                    status: "delivered",
-                    statusText: "Delivered",
-                    total: 2010,
-                    items: [
-                        { name: "Carved Wooden Spoons (Set 3)", price: 1120, qty: 1, image: "https://images.pexels.com/photos/4203041/pexels-photo-4203041.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop", variant: "Set of 3 • Mango wood" },
-                        { name: "Stone Coaster Set (4pcs)", price: 890, qty: 1, image: "https://images.pexels.com/photos/4158294/pexels-photo-4158294.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop", variant: "4pcs • Hand etched" }
-                    ],
-                    paymentMethod: "UPI",
-                    deliveryDate: "Delivered on Feb 03, 2026",
-                    address: "Andarud, Phatlan, Satara 415523",
-                    badgeClass: "badge-delivered",
-                    footerLeft: '<i class="fas fa-star mr-1"></i>Rate Products',
-                    showDeliveryBanner: false,
-                    actions: ["Rate Products", "Reorder"],
-                    transactionId: null
-                },
-                {
-                    id: "ORD-2567",
-                    date: "15 Feb 26",
-                    status: "cancelled",
-                    statusText: "Cancelled",
-                    total: 3950,
-                    items: [
-                        { name: "Macrame Wall Hanging (Large)", price: 2450, qty: 1, image: "https://images.pexels.com/photos/4066092/pexels-photo-4066092.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop", variant: "Large • 70x120 cm" },
-                        { name: "Brass Diya Set (2pcs)", price: 1500, qty: 1, image: "https://images.pexels.com/photos/7173475/pexels-photo-7173475.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop", variant: "2 pieces • Traditional" }
-                    ],
-                    paymentMethod: "Razorpay",
-                    deliveryDate: "Cancelled on Feb 15, 2026",
-                    address: "Andarud, Phatlan, Satara 415523",
-                    badgeClass: "badge-cancelled",
-                    footerLeft: '<i class="fas fa-ban mr-1"></i>Payment Failed',
-                    showDeliveryBanner: false,
-                    actions: ["Retry Payment"],
-                    transactionId: null
-                },
-                {
-                    id: "ORD-3001",
-                    date: "22 Feb 26",
-                    status: "processing",
-                    statusText: "Processing",
-                    total: 4275,
-                    items: [
-                        { name: "Handwoven Bamboo Basket", price: 1850, qty: 2, image: "https://images.pexels.com/photos/3186555/pexels-photo-3186555.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop", variant: "Medium • With handles" },
-                        { name: "Cotton Table Runner", price: 1575, qty: 1, image: "https://images.pexels.com/photos/3757059/pexels-photo-3757059.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop", variant: "60 inch • Block print" }
-                    ],
-                    paymentMethod: "PhonePe",
-                    deliveryDate: "Est. dispatch Feb 25",
-                    address: "Gokhale Nagar, Pune 411016",
-                    badgeClass: "badge-processing",
-                    footerLeft: '<i class="fas fa-clock mr-1"></i>Payment Verified',
-                    showDeliveryBanner: false,
-                    actions: [],
-                    transactionId: "PHONEPE998877"
-                },
-                {
-                    id: "ORD-3002",
-                    date: "21 Feb 26",
-                    status: "shipped",
-                    statusText: "Shipped",
-                    total: 1899,
-                    items: [
-                        { name: "Brass Incense Holder", price: 899, qty: 1, image: "https://images.pexels.com/photos/205961/pexels-photo-205961.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop", variant: "4 arms • Polished" },
-                        { name: "Sandalwood Cone Incense", price: 450, qty: 2, image: "https://images.pexels.com/photos/689223/pexels-photo-689223.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop", variant: "Pack of 20 • Natural" }
-                    ],
-                    paymentMethod: "Razorpay",
-                    deliveryDate: "Shipped • In Transit",
-                    address: "M.G. Road, Bangalore 560001",
-                    badgeClass: "badge-shipped",
-                    footerLeft: '<i class="fas fa-truck mr-1"></i>In Transit',
-                    showDeliveryBanner: true,
-                    deliveryBannerText: "Free Delivery • Order above ₹799",
-                    actions: ["Track Shipment"],
-                    transactionId: null
-                },
-                {
-                    id: "ORD-3003",
-                    date: "20 Feb 26",
-                    status: "delivered",
-                    statusText: "Delivered",
-                    total: 3240,
-                    items: [
-                        { name: "Ceramic Planter Pot", price: 1240, qty: 1, image: "https://images.pexels.com/photos/5632464/pexels-photo-5632464.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop", variant: "8\" • Matte white" },
-                        { name: "Macrame Plant Hanger", price: 2000, qty: 1, image: "https://images.pexels.com/photos/4066092/pexels-photo-4066092.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop", variant: "36 inch • Natural cord" }
-                    ],
-                    paymentMethod: "Google Pay",
-                    deliveryDate: "Delivered on Feb 20",
-                    address: "Civil Lines, Delhi 110054",
-                    badgeClass: "badge-delivered",
-                    footerLeft: '<i class="fas fa-check-circle mr-1"></i>Delivered',
-                    showDeliveryBanner: false,
-                    actions: ["Reorder", "Review"],
-                    transactionId: "GPAY11223344"
-                },
-                {
-                    id: "ORD-3004",
-                    date: "19 Feb 26",
-                    status: "cancelled",
-                    statusText: "Cancelled",
-                    total: 5600,
-                    items: [
-                        { name: "Wooden Wall Shelf", price: 3200, qty: 1, image: "https://images.pexels.com/photos/2082090/pexels-photo-2082090.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop", variant: "3-tier • Mango wood" },
-                        { name: "Set of 2 Cushion Covers", price: 2400, qty: 1, image: "https://images.pexels.com/photos/3757028/pexels-photo-3757028.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop", variant: "18x18 • Kantha stitch" }
-                    ],
-                    paymentMethod: "Credit Card",
-                    deliveryDate: "Cancelled on Feb 19",
-                    address: "MG Road, Chennai 600017",
-                    badgeClass: "badge-cancelled",
-                    footerLeft: '<i class="fas fa-ban mr-1"></i>Out of Stock',
-                    showDeliveryBanner: false,
-                    actions: ["Shop Similar"],
-                    transactionId: null
-                },
-                {
-                    id: "ORD-3005",
-                    date: "18 Feb 26",
-                    status: "delivered",
-                    statusText: "Delivered",
-                    total: 1150,
-                    items: [
-                        { name: "Handcrafted Soapstone Box", price: 1150, qty: 1, image: "https://images.pexels.com/photos/1035832/pexels-photo-1035832.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop", variant: "4x3 inch • Floral motif" }
-                    ],
-                    paymentMethod: "UPI",
-                    deliveryDate: "Delivered on Feb 18",
-                    address: "Sadar Bazar, Nagpur 440001",
-                    badgeClass: "badge-delivered",
-                    footerLeft: '<i class="fas fa-check-circle mr-1"></i>Delivered',
-                    showDeliveryBanner: true,
-                    deliveryBannerText: "Free Delivery • Order above ₹799",
-                    actions: ["Rate Product"],
-                    transactionId: "UPI55443322"
-                }
-            ];
+            const API_BASE_URL = 'http://localhost:8085/api';
+            window.ordersData = [];
+            let currentFilter = 'all';
+            let currentOverlayId = null;
 
-            // Update order count badge only
-            function updateOrderCount() {
-                const totalOrders = ordersData.length;
-                document.getElementById('order-count-badge').innerHTML = `<i class="fas fa-box text-xs"></i><span>${totalOrders} orders</span>`;
+            // ========== GLOBAL HELPER FUNCTIONS ==========
+            function formatINR(value) {
+                const num = Number(value);
+                const formatted = num.toLocaleString('en-IN', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 2
+                });
+                return '₹' + formatted;
             }
 
-            let currentFilter = 'all';
+            function escapeHtml(str) {
+                if (!str) return '';
+                return String(str).replace(/[&<>]/g, function (m) {
+                    if (m === '&') return '&amp;';
+                    if (m === '<') return '&lt;';
+                    if (m === '>') return '&gt;';
+                    return m;
+                });
+            }
 
-            // Render orders with filter
+            function formatDateForInvoice(dateStr) {
+                if (!dateStr) return '-';
+                const d = new Date(dateStr);
+                return d.toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });
+            }
+
+            function getAuthHeaders() {
+                let userId = localStorage.getItem('userId');
+                if (!userId) userId = sessionStorage.getItem('userId');
+                if (!userId && window.currentUser?.userId) userId = window.currentUser.userId;
+                if (!userId) userId = '1';  // fallback
+                return { 'X-User-Id': userId, 'Content-Type': 'application/json' };
+            }
+
+            function getLocalPlaceholder() {
+                return 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"%3E%3Crect width="64" height="64" fill="%23E6A62C"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="white" font-size="28"%3E📦%3C/text%3E%3C/svg%3E';
+            }
+
+            async function fetchOrdersFromBackend() {
+                try {
+                    showSkeleton();
+                    const url = `${API_BASE_URL}/orders/user/user-all-orders?page=0&size=50`;
+                    const response = await fetch(url, { method: 'GET', headers: getAuthHeaders(), mode: 'cors' });
+
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    const result = await response.json();
+
+                    if (result.success && result.data) {
+                        const backendOrders = result.data.content || result.data;
+                        window.ordersData = transformBackendOrders(backendOrders);
+                        updateOrderCount();
+                        renderOrders();
+                    } else {
+                        throw new Error(result.message || 'Failed to fetch orders');
+                    }
+                } catch (error) {
+                    console.error('Error fetching orders:', error);
+                    document.getElementById('orders-list-container').innerHTML = `
+                        <div class="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+                            <i class="fas fa-exclamation-triangle text-red-500 text-3xl mb-3 block"></i>
+                            <p class="text-red-600 font-medium mb-2">Cannot connect to backend</p>
+                            <button onclick="location.reload()" class="btn-primary px-4 py-2">Retry</button>
+                        </div>`;
+                }
+            }
+
+            function transformBackendOrders(backendOrders) {
+                if (!backendOrders || !Array.isArray(backendOrders)) return [];
+                return backendOrders.map(order => ({
+                    id: order.orderStrId || order.orderId,
+                    orderPrimeId: order.orderId,
+                    date: order.orderDate ? new Date(order.orderDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' }) : '',
+                    status: (order.orderStatus || '').toLowerCase(),
+                    statusText: order.orderStatus || 'Placed',
+                    total: parseFloat(order.finalAmount || order.subTotal || 0),
+                    subTotal: parseFloat(order.subTotal || 0),
+                    discountAmount: parseFloat(order.discountAmount || 0),
+                    tax: parseFloat(order.tax || 0),
+                    shippingCharges: parseFloat(order.shippingCharges || 0),
+                    customerName: order.customerName || 'Customer',
+                    email: order.customerEmail || '',
+                    phone: order.customerPhone || '',
+                    shippingAddress: `${order.shippingAddress1 || ''} ${order.shippingAddress2 || ''}, ${order.shippingCity || ''}, ${order.shippingState || ''} - ${order.shippingPincode || ''}`,
+                    paymentMethod: order.paymentMethod || 'Not specified',
+                    paymentStatus: order.paymentStatus || 'N/A',
+                    deliveryDate: order.deliveredAt ? new Date(order.deliveredAt).toLocaleDateString() : (order.orderStatus === 'DELIVERED' ? 'Delivered' : ''),
+                    items: (order.orderItems || []).map(item => ({
+                        name: item.productName || 'Product',
+                        price: parseFloat(item.sellingPrice || item.mrpPrice || 0),
+                        originalPrice: parseFloat(item.mrpPrice || 0),
+                        qty: item.quantity || 1,
+                        sku: item.sku || 'N/A',
+                        color: item.color || '-',
+                        productStrId: item.productStrId || null,
+                        variantId: item.variantId || null,
+                        productPrimeId: item.productPrimeId || null,
+                        imageUrl: item.productImageUrl || null
+                    })),
+                    badgeClass: getBadgeClass(order.orderStatus),
+                    footerLeft: `${order.paymentMethod || 'Payment'} • ${order.orderItems?.length || 0} items`
+                }));
+            }
+
+            function getBadgeClass(status) {
+                if (!status) return 'badge-placed';
+                const upperStatus = status.toUpperCase();
+                if (upperStatus === 'DELIVERED') return 'badge-delivered';
+                if (upperStatus === 'CANCELLED') return 'badge-cancelled';
+                return 'badge-placed';
+            }
+
+            function updateOrderCount() {
+                const count = window.ordersData.length;
+                document.getElementById('order-count-badge').innerHTML = `<i class="fas fa-box text-xs"></i> <span>${count} order${count !== 1 ? 's' : ''}</span>`;
+            }
+
+            function showSkeleton() {
+                const container = document.getElementById('orders-list-container');
+                container.innerHTML = `<div class="skeleton-card"><div class="h-20 bg-gray-200 rounded-lg"></div></div><div class="skeleton-card"><div class="h-20 bg-gray-200 rounded-lg"></div></div>`;
+                document.getElementById('empty-state').classList.add('hidden');
+            }
+
+            async function loadProductImage(imgElement, imageUrl) {
+                if (!imageUrl) {
+                    imgElement.src = getLocalPlaceholder();
+                    return;
+                }
+
+                let fullUrl;
+                if (imageUrl.startsWith('http')) {
+                    fullUrl = imageUrl;
+                } else if (imageUrl.startsWith('/api/')) {
+                    const origin = API_BASE_URL.replace('/api', '');
+                    fullUrl = `${origin}${imageUrl}`;
+                } else {
+                    fullUrl = `${API_BASE_URL}${imageUrl}`;
+                }
+
+                try {
+                    const response = await fetch(fullUrl, { headers: getAuthHeaders() });
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        const objectUrl = URL.createObjectURL(blob);
+                        imgElement.src = objectUrl;
+                        imgElement.onload = () => setTimeout(() => URL.revokeObjectURL(objectUrl), 100);
+                    } else {
+                        imgElement.src = getLocalPlaceholder();
+                    }
+                } catch (error) {
+                    imgElement.src = getLocalPlaceholder();
+                }
+            }
+
+            // ========== DOWNLOAD INVOICE ==========
+            window.downloadInvoice = async function (order) {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+
+                const pageW = doc.internal.pageSize.getWidth();
+                const margin = 15;
+                const contentW = pageW - margin * 2;
+
+                const darkBlue = [19, 63, 83];
+                const gold = [216, 159, 52];
+                const lightBg = [248, 248, 234];
+                const textDark = [30, 30, 30];
+                const white = [255, 255, 255];
+
+                function goldBorder(x, y, w, h, r = 2) {
+                    doc.setDrawColor(...gold);
+                    doc.setLineWidth(0.2);
+                    doc.roundedRect(x, y, w, h, r, r, 'S');
+                }
+
+                doc.setFillColor(...darkBlue);
+                doc.rect(0, 0, pageW, 38, 'F');
+
+                doc.setFillColor(...white);
+                doc.roundedRect(margin, 7, 40, 16, 2, 2, 'F');
+                doc.setTextColor(...darkBlue);
+                doc.setFontSize(9);
+                doc.setFont('helvetica', 'bold');
+                doc.text('ARTEZO', margin + 5, 18);
+
+                doc.setTextColor(...white);
+                doc.setFontSize(20);
+                doc.setFont('helvetica', 'bold');
+                doc.text('INVOICE', pageW - margin, 18, { align: 'right' });
+
+                doc.setFontSize(8);
+                doc.setFont('helvetica', 'normal');
+                doc.text('Order: ' + order.id, pageW - margin, 25, { align: 'right' });
+                doc.text('Date: ' + formatDateForInvoice(order.date), pageW - margin, 30, { align: 'right' });
+
+                let y = 46;
+
+                const colW = contentW / 3;
+                doc.setFillColor(...lightBg);
+                doc.roundedRect(margin, y, colW - 3, 35, 2, 2, 'F');
+                goldBorder(margin, y, colW - 3, 35);
+                doc.setTextColor(...darkBlue);
+                doc.setFontSize(7);
+                doc.setFont('helvetica', 'bold');
+                doc.text('BILL TO', margin + 3, y + 6);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(...textDark);
+                doc.setFontSize(8);
+                doc.text(order.customerName || '-', margin + 3, y + 13);
+                doc.setFontSize(7);
+                if (order.email) doc.text(order.email, margin + 3, y + 20);
+                if (order.phone) doc.text(order.phone, margin + 3, y + 27);
+
+                const sx = margin + colW;
+                doc.setFillColor(...lightBg);
+                doc.roundedRect(sx, y, colW - 3, 35, 2, 2, 'F');
+                goldBorder(sx, y, colW - 3, 35);
+                doc.setTextColor(...darkBlue);
+                doc.setFontSize(7);
+                doc.setFont('helvetica', 'bold');
+                doc.text('SHIP TO', sx + 3, y + 6);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(...textDark);
+                doc.setFontSize(7);
+                const addrParts = (order.shippingAddress || '').split(',');
+                const addrLine1 = addrParts.slice(0, 2).join(',') || '-';
+                const addrLine2 = addrParts.slice(2).join(',');
+                doc.text(addrLine1, sx + 3, y + 13, { maxWidth: colW - 8 });
+                if (addrLine2) doc.text(addrLine2, sx + 3, y + 20, { maxWidth: colW - 8 });
+
+                const px = margin + colW * 2;
+                doc.setFillColor(...lightBg);
+                doc.roundedRect(px, y, colW, 35, 2, 2, 'F');
+                goldBorder(px, y, colW, 35);
+                doc.setTextColor(...darkBlue);
+                doc.setFontSize(7);
+                doc.setFont('helvetica', 'bold');
+                doc.text('PAYMENT INFO', px + 3, y + 6);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(...textDark);
+                doc.setFontSize(7);
+                doc.text('Method: ' + (order.paymentMethod || '-'), px + 3, y + 13);
+                doc.text('Status: ' + (order.statusText || '-'), px + 3, y + 20);
+
+                y += 42;
+
+                doc.setTextColor(...darkBlue);
+                doc.setFontSize(8);
+                doc.setFont('helvetica', 'bold');
+                doc.text('ORDER ITEMS', margin, y);
+                y += 4;
+
+                const tableHead = [['#', 'Product', 'SKU', 'Qty', 'Unit Price', 'Total']];
+                const tableBody = order.items.map((item, idx) => [
+                    String(idx + 1),
+                    item.name,
+                    item.sku,
+                    String(item.qty),
+                    formatINR(item.price),
+                    formatINR(item.price * item.qty)
+                ]);
+
+                const tableStartY = y;
+                doc.autoTable({
+                    startY: y,
+                    head: tableHead,
+                    body: tableBody,
+                    theme: 'grid',
+                    styles: { fontSize: 7.5, cellPadding: 2.5, textColor: textDark },
+                    headStyles: { fillColor: darkBlue, textColor: white, fontStyle: 'bold', fontSize: 7.5 },
+                    alternateRowStyles: { fillColor: lightBg },
+                    columnStyles: {
+                        0: { cellWidth: 7 },
+                        3: { halign: 'center', cellWidth: 12 },
+                        4: { halign: 'right', cellWidth: 28 },
+                        5: { halign: 'right', cellWidth: 28 },
+                    },
+                    margin: { left: margin, right: margin },
+                });
+
+                goldBorder(margin, tableStartY, contentW, doc.lastAutoTable.finalY - tableStartY, 2);
+                y = doc.lastAutoTable.finalY + 6;
+
+                const summaryX = pageW - margin - 80;
+                const summaryW = 80;
+                const subtotal = order.items.reduce((sum, i) => sum + (i.price * i.qty), 0);
+                const summaryRows = [
+                    ['Subtotal', formatINR(subtotal)],
+                    ['Shipping', 'FREE'],
+                    ['Total', formatINR(order.total)]
+                ];
+                const rowH = 6;
+                const boxH = summaryRows.length * rowH + 8;
+
+                doc.setFillColor(...lightBg);
+                doc.roundedRect(summaryX, y, summaryW, boxH, 2, 2, 'F');
+                goldBorder(summaryX, y, summaryW, boxH);
+
+                let sy2 = y + 6;
+                summaryRows.forEach(([label, val]) => {
+                    doc.setFontSize(7.5);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setTextColor(...textDark);
+                    doc.text(label, summaryX + 4, sy2);
+                    doc.setTextColor(...textDark);
+                    doc.text(val, summaryX + summaryW - 4, sy2, { align: 'right' });
+                    sy2 += rowH;
+                });
+
+                const totalBoxY = y + boxH + 2;
+                doc.setFillColor(...darkBlue);
+                doc.roundedRect(summaryX, totalBoxY, summaryW, 10, 2, 2, 'F');
+                goldBorder(summaryX, totalBoxY, summaryW, 10);
+                doc.setTextColor(...white);
+                doc.setFontSize(9);
+                doc.setFont('helvetica', 'bold');
+                doc.text('GRAND TOTAL', summaryX + 4, totalBoxY + 6.5);
+                doc.text(formatINR(order.total), summaryX + summaryW - 4, totalBoxY + 6.5, { align: 'right' });
+
+                const footerY = doc.internal.pageSize.getHeight() - 12;
+                doc.setFillColor(...darkBlue);
+                doc.rect(0, footerY - 2, pageW, 14, 'F');
+                doc.setTextColor(...gold);
+                doc.setFontSize(7);
+                doc.setFont('helvetica', 'normal');
+                doc.text('Thank you for shopping with Artezo!', pageW / 2, footerY + 3, { align: 'center' });
+                doc.setTextColor(180, 180, 180);
+                doc.text('Generated on ' + new Date().toLocaleString('en-IN'), pageW / 2, footerY + 7, { align: 'center' });
+
+                doc.save('Invoice_' + order.id + '.pdf');
+                alert('✅ Invoice downloaded successfully!');
+            };
+
+            // ========== CANCEL ORDER FUNCTION ==========
+            window.submitCancel = function (orderId, overlayId) {
+                const reasonSelect = document.getElementById(`cancel_reason_${orderId}`);
+                const selectedReason = reasonSelect?.value || '';
+
+                if (!selectedReason) {
+                    alert('❌ Please select a reason for cancellation');
+                    return;
+                }
+
+                fetch(`${API_BASE_URL}/orders/${orderId}/cancel`, {
+                    method: 'PUT',
+                    headers: getAuthHeaders()
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert(`✅ Order Cancelled Successfully!\n\nOrder: ${orderId}\nReason: ${selectedReason}`);
+                            const overlay = document.getElementById(overlayId);
+                            if (overlay) overlay.style.display = 'none';
+                            document.body.style.overflow = '';
+                            fetchOrdersFromBackend();
+                        } else {
+                            alert('❌ Failed to cancel order: ' + (data.message || 'Unknown error'));
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Cancel API error:', err);
+                        alert('❌ Failed to cancel order. Please try again.');
+                    });
+            };
+
+            // ========== EXCHANGE FUNCTIONS ==========
+            window.submitExchange = function (orderId, overlayId) {
+                const variantSelect = document.getElementById(`exchange_variant_${orderId}`);
+                const reasonSelect = document.getElementById(`exchange_reason_select_${orderId}`);
+                const comments = document.getElementById(`exchange_comments_${orderId}`)?.value || '';
+
+                const selectedVariantText = variantSelect?.options[variantSelect.selectedIndex]?.text || '';
+                const selectedReason = reasonSelect?.value || '';
+
+                if (!variantSelect?.value) {
+                    alert('❌ Please select a replacement variant');
+                    return;
+                }
+
+                if (!selectedReason) {
+                    alert('❌ Please select a reason for exchange');
+                    return;
+                }
+
+                fetch(`${API_BASE_URL}/orders/${orderId}/exchange?reason=${encodeURIComponent(selectedReason)}`, {
+                    method: 'PUT',
+                    headers: getAuthHeaders()
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert(`✅ Exchange Request Submitted Successfully!\n\nOrder: ${orderId}\nReplacement: ${selectedVariantText}\nReason: ${selectedReason}\nComments: ${comments || 'None'}`);
+                            const overlay = document.getElementById(overlayId);
+                            if (overlay) overlay.style.display = 'none';
+                            document.body.style.overflow = '';
+                            fetchOrdersFromBackend();
+                        } else {
+                            alert('❌ Failed to submit exchange request: ' + (data.message || 'Unknown error'));
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Exchange API error:', err);
+                        alert('❌ Failed to submit exchange request. Please try again.');
+                    });
+            };
+
+            // ========== RETURN FUNCTION ==========
+            window.submitReturn = function (orderId, overlayId) {
+                const reasonSelect = document.getElementById(`return_reason_select_${orderId}`);
+                const comments = document.getElementById(`return_comments_${orderId}`)?.value || '';
+
+                const selectedReason = reasonSelect?.value || '';
+
+                if (!selectedReason) {
+                    alert('❌ Please select a reason for return');
+                    return;
+                }
+
+                fetch(`${API_BASE_URL}/orders/${orderId}/return?reason=${encodeURIComponent(selectedReason)}`, {
+                    method: 'PUT',
+                    headers: getAuthHeaders()
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert(`✅ Return Request Submitted Successfully!\n\nOrder: ${orderId}\nReason: ${selectedReason}\nComments: ${comments || 'None'}`);
+                            const overlay = document.getElementById(overlayId);
+                            if (overlay) overlay.style.display = 'none';
+                            document.body.style.overflow = '';
+                            fetchOrdersFromBackend();
+                        } else {
+                            alert('❌ Failed to submit return request: ' + (data.message || 'Unknown error'));
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Return API error:', err);
+                        alert('❌ Failed to submit return request. Please try again.');
+                    });
+            };
+
+// ========== SUBMIT RATING WITH IMAGES & VIDEOS (Backend Compatible) ==========
+window.submitRatingWithMedia = function (orderId, modalId, parentOverlayId) {
+    const order = window.ordersData.find(o => o.id === orderId);
+    
+    // Collect all reviews for each product
+    const reviewPromises = [];
+    let hasError = false;
+    
+    for (let idx = 0; idx < order.items.length; idx++) {
+        const rating = document.getElementById(`rating_val_${orderId}_${idx}`)?.value || '0';
+        const review = document.getElementById(`review_val_${orderId}_${idx}`)?.value || '';
+        
+        if (parseInt(rating) === 0) {
+            alert(`❌ Please rate product: ${order.items[idx].name}`);
+            hasError = true;
+            return;
+        }
+        
+        // Create form data for each product review
+        const formData = new FormData();
+        formData.append('productId', order.items[idx].productPrimeId || '1');
+        formData.append('userId', localStorage.getItem('userId') || '1');
+        formData.append('rating', rating);
+        formData.append('comment', review);
+        formData.append('orderId', order.orderPrimeId);  // ✅ Send number (Long)
+        formData.append('orderItemId', idx);             // ✅ Send number (Integer)
+        
+        // Add images
+        const imageInput = document.getElementById(`review_images_${orderId}_${idx}`);
+        if (imageInput && imageInput.files) {
+            for (let i = 0; i < imageInput.files.length; i++) {
+                formData.append('images', imageInput.files[i]);
+            }
+        }
+        
+        // Add video
+        const videoInput = document.getElementById(`review_video_${orderId}_${idx}`);
+        if (videoInput && videoInput.files[0]) {
+            formData.append('videos', videoInput.files[0]);
+        }
+        
+        reviewPromises.push(
+            fetch(`${API_BASE_URL}/reviews`, {
+                method: 'POST',
+                headers: {
+                    'X-User-Id': getAuthHeaders()['X-User-Id']
+                },
+                body: formData
+            }).then(res => res.json())
+        );
+    }
+    
+    if (hasError) return;
+    
+    // Show loading
+    const submitBtn = document.querySelector(`#${modalId} .btn-primary`);
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Submitting...';
+    submitBtn.disabled = true;
+    
+    // Submit all reviews
+    Promise.all(reviewPromises)
+        .then(results => {
+            const allSuccess = results.every(r => r && r.reviewId);
+            if (allSuccess) {
+                alert(`✅ All reviews submitted successfully!`);
+                document.getElementById(modalId).remove();
+                document.getElementById(parentOverlayId).style.display = 'none';
+                document.body.style.overflow = '';
+            } else {
+                alert('❌ Some reviews failed to submit. Please try again.');
+            }
+        })
+        .catch(err => {
+            console.error('Error submitting reviews:', err);
+            alert('❌ Failed to submit reviews. Please try again.');
+        })
+        .finally(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        });
+};
+
+function createOrderDetailsOverlay(order, ovId) {
+    let itemsHtml = order.items.map((item, idx) => `
+        <div class="flex gap-4 py-4 border-b border-gray-100 hover:bg-cream/30 transition-colors rounded-lg px-2">
+            <img class="product-img w-16 h-16 rounded-xl object-cover bg-gray-100 shadow-sm" 
+                 id="img_${order.id}_${idx}"
+                 src="${getLocalPlaceholder()}"
+                 data-image-url="${item.imageUrl || ''}">
+            <div class="flex-1">
+                <div class="font-semibold text-primary">${escapeHtml(item.name)}</div>
+                <div class="text-xs text-gray-500 mt-1">${escapeHtml(item.color)} • SKU: ${escapeHtml(item.sku)}</div>
+                <div class="flex items-center gap-2 mt-2">
+                    <span class="text-sm font-bold text-primary">${formatINR(item.price)}</span>
+                    ${item.originalPrice ? `<span class="text-xs text-gray-400 line-through">${formatINR(item.originalPrice)}</span>` : ''}
+                    <span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">Qty: ${item.qty}</span>
+                </div>
+            </div>
+            <div class="text-right">
+                <div class="font-bold text-primary text-lg">${formatINR(item.price * item.qty)}</div>
+            </div>
+        </div>
+    `).join('');
+
+    let subtotal = order.items.reduce((sum, i) => sum + (i.price * i.qty), 0);
+    let discount = order.discountAmount || 0;
+    let tax = order.tax || 0;
+    let shipping = order.shippingCharges || 0;
+    let total = order.total;
+
+    let priceBreakdown = `
+        <div class="price-breakdown">
+            <div class="price-row">
+                <span class="text-gray-600">Subtotal</span>
+                <span class="font-medium text-primary">${formatINR(subtotal)}</span>
+            </div>
+            ${discount > 0 ? `
+            <div class="price-row">
+                <span class="text-gray-600">Discount</span>
+                <span class="text-green-600 font-medium">-${formatINR(discount)}</span>
+            </div>` : ''}
+            ${tax > 0 ? `
+            <div class="price-row">
+                <span class="text-gray-600">Tax</span>
+                <span class="text-primary">${formatINR(tax)}</span>
+            </div>` : ''}
+            ${shipping > 0 ? `
+            <div class="price-row">
+                <span class="text-gray-600">Shipping</span>
+                <span class="text-primary">${formatINR(shipping)}</span>
+            </div>` : ''}
+            <div class="price-row pt-2 mt-2 border-t border-accent/20">
+                <span class="font-bold text-primary">Total</span>
+                <span class="font-bold text-primary text-xl">${formatINR(total)}</span>
+            </div>
+        </div>
+    `;
+
+    // ========== CORRECT BUTTON LOGIC ==========
+    let cancelBtn = '';
+    let exchangeBtn = '';
+    let returnBtn = '';
+    let rateBtn = '';
+    let invoiceBtn = '';
+    let cancelExchangeBtn = '';
+    let cancelReturnBtn = '';
+
+    if (order.status === 'cancelled') {
+        // Cancelled orders - No action buttons
+        cancelBtn = '';
+    }
+    else if (order.status === 'exchange_requested') {
+        // Exchange requested orders - Cancel Exchange button
+        cancelExchangeBtn = `<button class="btn-cancel" onclick="event.stopPropagation(); window.cancelExchangeRequest('${order.id}', '${ovId}')">
+            <i class="fas fa-times-circle mr-1"></i> Cancel Exchange
+        </button>`;
+    }
+    else if (order.status === 'return_requested') {
+        // Return requested orders - Cancel Return button
+        cancelReturnBtn = `<button class="btn-cancel" onclick="event.stopPropagation(); window.cancelReturnRequest('${order.id}', '${ovId}')">
+            <i class="fas fa-times-circle mr-1"></i> Cancel Return
+        </button>`;
+    }
+    else if (order.status === 'delivered') {
+        // Delivered orders: Exchange + Return + Rate + Invoice
+        exchangeBtn = `<button class="btn-exchange" onclick="event.stopPropagation(); window.showExchangeOverlay(window.ordersData.find(o => o.id === '${order.id}'), '${ovId}')">
+            <i class="fas fa-exchange-alt mr-1"></i> Exchange
+        </button>`;
+        returnBtn = `<button class="btn-return" onclick="event.stopPropagation(); window.showReturnOverlay(window.ordersData.find(o => o.id === '${order.id}'), '${ovId}')">
+            <i class="fas fa-undo-alt mr-1"></i> Return
+        </button>`;
+        rateBtn = `<button class="btn-primary" onclick="event.stopPropagation(); window.showRatingOverlay(window.ordersData.find(o => o.id === '${order.id}'), '${ovId}')">
+            <i class="fas fa-star mr-1"></i> Rate Products
+        </button>`;
+        invoiceBtn = `<button class="btn-outline" onclick="event.stopPropagation(); window.downloadInvoice(window.ordersData.find(o => o.id === '${order.id}'))">
+            <i class="fas fa-download mr-1"></i> Invoice
+        </button>`;
+    }
+    else {
+        // Non-delivered, non-cancelled orders (PLACED, CONFIRMED, SHIPPED): Only Cancel
+        cancelBtn = `<button class="btn-cancel" onclick="event.stopPropagation(); window.showCancelOverlay(window.ordersData.find(o => o.id === '${order.id}'), '${ovId}')">
+            <i class="fas fa-times-circle mr-1"></i> Cancel Order
+        </button>`;
+    }
+    // ========== END BUTTON LOGIC ==========
+
+    return `
+        <div id="${ovId}" class="order-overlay" onclick="window.closeOrderOverlay(event, '${ovId}')">
+            <div class="overlay-content" onclick="event.stopPropagation()">
+                <div class="sticky top-0 z-10 bg-gradient-to-r from-primary to-primary/90 text-white flex justify-between items-center p-5 rounded-t-2xl">
+                    <div>
+                        <h2 class="text-xl font-bold">Order Details</h2>
+                        <p class="text-xs text-white/80 mt-1">Order #${escapeHtml(order.id)}</p>
+                    </div>
+                    <button onclick="window.closeOrderOverlay(event, '${ovId}')" class="text-2xl text-white/80 hover:text-white transition">&times;</button>
+                </div>
+                
+                <div class="p-6">
+                    <div class="order-status-banner mb-6 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
+                                <i class="fas ${order.status === 'delivered' ? 'fa-check-circle' : order.status === 'cancelled' ? 'fa-ban' : 'fa-clock'} text-accent text-lg"></i>
+                            </div>
+                            <div>
+                                <span class="text-xs text-gray-500">Order Status</span>
+                                <div class="mt-1">
+                                    <span class="${order.badgeClass}">
+                                        <i class="fas ${order.status === 'delivered' ? 'fa-check-circle' : order.status === 'cancelled' ? 'fa-ban' : 'fa-clock'} mr-1"></i>
+                                        ${order.statusText}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs text-gray-500">Placed on</span>
+                            <div class="font-medium text-primary">${order.date}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <h3 class="font-semibold text-primary mb-3 flex items-center">
+                                <i class="fas fa-box text-accent mr-2"></i> Items
+                            </h3>
+                            <div class="space-y-2 max-h-96 overflow-y-auto pr-2">
+                                ${itemsHtml}
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="info-card">
+                                <div class="info-label">
+                                    <i class="fas fa-map-marker-alt text-accent mr-1"></i> Delivery Address
+                                </div>
+                                <div class="info-value">${escapeHtml(order.shippingAddress)}</div>
+                                <div class="text-xs text-gray-500 mt-2 flex items-center gap-2">
+                                    <i class="fas fa-phone-alt text-accent"></i> ${order.phone || 'N/A'}
+                                </div>
+                            </div>
+                            
+                            <div class="info-card">
+                                <div class="info-label">
+                                    <i class="fas fa-credit-card text-accent mr-1"></i> Payment Information
+                                </div>
+                                <div class="info-value text-base">${order.paymentMethod}</div>
+                                <div class="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                                    <span class="w-2 h-2 rounded-full ${order.paymentStatus === 'PAID' ? 'bg-green-500' : 'bg-yellow-500'}"></span>
+                                    Status: ${order.paymentStatus || 'N/A'}
+                                </div>
+                            </div>
+                            
+                            ${priceBreakdown}
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        ${cancelBtn}
+                        ${cancelExchangeBtn}
+                        ${cancelReturnBtn}
+                        ${exchangeBtn}
+                        ${returnBtn}
+                        ${rateBtn}
+                        ${invoiceBtn}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ========== CANCEL EXCHANGE REQUEST (With Backend API Call) ==========
+window.cancelExchangeRequest = function(orderId, overlayId) {
+    if (confirm('Are you sure you want to cancel this exchange request?')) {
+        fetch(`${API_BASE_URL}/orders/${orderId}/cancel-exchange`, {
+            method: 'PUT',
+            headers: getAuthHeaders()
+        })
+        .then(res => {
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return res.json();
+        })
+        .then(data => {
+            if (data.success) {
+                alert('✅ Exchange request cancelled successfully!');
+                document.getElementById(overlayId).style.display = 'none';
+                fetchOrdersFromBackend(); // Refresh orders
+            } else {
+                alert('❌ Failed to cancel exchange request: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(err => {
+            console.error('Error cancelling exchange:', err);
+            alert('❌ Failed to cancel exchange request. Please try again.');
+        });
+    }
+};
+
+// ========== CANCEL RETURN REQUEST (With Backend API Call) ==========
+window.cancelReturnRequest = function(orderId, overlayId) {
+    if (confirm('Are you sure you want to cancel this return request?')) {
+        fetch(`${API_BASE_URL}/orders/${orderId}/cancel-return`, {
+            method: 'PUT',
+            headers: getAuthHeaders()
+        })
+        .then(res => {
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return res.json();
+        })
+        .then(data => {
+            if (data.success) {
+                alert('✅ Return request cancelled successfully!');
+                document.getElementById(overlayId).style.display = 'none';
+                fetchOrdersFromBackend(); // Refresh orders
+            } else {
+                alert('❌ Failed to cancel return request: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(err => {
+            console.error('Error cancelling return:', err);
+            alert('❌ Failed to cancel return request. Please try again.');
+        });
+    }
+};
+
+
+
+            // ========== SHOW CANCEL OVERLAY ==========
+            window.showCancelOverlay = function (order, parentOverlayId) {
+                document.getElementById(parentOverlayId).style.display = 'none';
+
+                const cancelId = `cancel_modal_${order.id}`;
+                const existing = document.getElementById(cancelId);
+                if (existing) existing.remove();
+
+                const cancelHTML = `
+                    <div id="${cancelId}" class="order-overlay" style="display: flex; z-index: 10000;">
+                        <div class="overlay-content" onclick="event.stopPropagation()" style="max-width: 450px;">
+                            <div class="sticky top-0 bg-gradient-to-r from-red-600 to-red-700 text-white flex justify-between p-5 rounded-t-2xl">
+                                <h2 class="font-bold text-lg">Cancel Order</h2>
+                                <button onclick="window.closeCancelModal('${cancelId}', '${parentOverlayId}')" class="text-2xl text-white/80 hover:text-white">&times;</button>
+                            </div>
+                            <div class="p-5">
+                                <p class="text-sm text-gray-600 mb-4">Order: <strong class="text-primary">${escapeHtml(order.id)}</strong></p>
+                                <p class="text-sm mb-4">Are you sure you want to cancel this order?</p>
+                                
+                                <label class="block text-sm font-medium mb-2">Reason for Cancellation:</label>
+                                <select id="cancel_reason_${order.id}" class="w-full p-2 border border-gray-200 rounded-lg mb-5 focus:border-accent focus:ring-1 focus:ring-accent">
+                                    <option value="">Select a reason</option>
+                                    <option value="Changed my mind">Changed my mind</option>
+                                    <option value="Ordered by mistake">Ordered by mistake</option>
+                                    <option value="Found better price elsewhere">Found better price elsewhere</option>
+                                    <option value="Delivery time too long">Delivery time too long</option>
+                                    <option value="Payment issue">Payment issue</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                
+                                <button onclick="window.submitCancelAndClose('${order.id}', '${cancelId}', '${parentOverlayId}')" class="btn-cancel w-full">Confirm Cancellation</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', cancelHTML);
+                document.body.style.overflow = 'hidden';
+            };
+
+            window.closeCancelModal = function (cancelId, parentOverlayId) {
+                document.getElementById(cancelId).remove();
+                document.getElementById(parentOverlayId).style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            };
+
+            window.submitCancelAndClose = function (orderId, cancelId, parentOverlayId) {
+                const reasonSelect = document.getElementById(`cancel_reason_${orderId}`);
+                const selectedReason = reasonSelect?.value || '';
+
+                if (!selectedReason) {
+                    alert('❌ Please select a reason for cancellation');
+                    return;
+                }
+
+                fetch(`${API_BASE_URL}/orders/${orderId}/cancel`, {
+                    method: 'PUT',
+                    headers: getAuthHeaders()
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert(`✅ Order Cancelled Successfully!`);
+                            document.getElementById(cancelId).remove();
+                            document.getElementById(parentOverlayId).style.display = 'none';
+                            document.body.style.overflow = '';
+                            fetchOrdersFromBackend();
+                        } else {
+                            alert('❌ Failed to cancel order: ' + (data.message || 'Unknown error'));
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Cancel API error:', err);
+                        alert('❌ Failed to cancel order. Please try again.');
+                    });
+            };
+
+            // ========== SHOW EXCHANGE OVERLAY (Auto-load variants) ==========
+            window.showExchangeOverlay = function (order, parentOverlayId) {
+                document.getElementById(parentOverlayId).style.display = 'none';
+
+                const exchangeId = `exchange_modal_${order.id}`;
+                const existing = document.getElementById(exchangeId);
+                if (existing) existing.remove();
+
+                const exchangeHTML = `
+        <div id="${exchangeId}" class="order-overlay" style="display: flex; z-index: 10000;">
+            <div class="overlay-content" onclick="event.stopPropagation()" style="max-width: 500px; max-height: 85vh; overflow-y: auto;">
+                <div class="sticky top-0 bg-gradient-to-r from-primary to-primary/90 text-white flex justify-between p-4 rounded-t-2xl">
+                    <h2 class="font-bold text-lg">Exchange Request</h2>
+                    <button onclick="window.closeExchangeModal('${exchangeId}', '${parentOverlayId}')" class="text-2xl text-white/80 hover:text-white">&times;</button>
+                </div>
+                <div class="p-5">
+                    <p class="text-sm text-gray-600 mb-3">Order: <strong class="text-primary">${escapeHtml(order.id)}</strong></p>
+                    
+                    <label class="block text-sm font-medium mb-1">Product:</label>
+                    <div class="w-full p-2 bg-gray-100 rounded-lg mb-3 text-primary font-medium">
+                        ${escapeHtml(order.items[0].name)} - Qty: ${order.items[0].qty}
+                    </div>
+                    <input type="hidden" id="exchange_product_prime_id_${order.id}" value="${order.items[0].productPrimeId || ''}">
+                    
+                    <label class="block text-sm font-medium mb-1">Select Replacement Variant:</label>
+                    <select id="exchange_variant_${order.id}" class="w-full p-2 border border-gray-200 rounded-lg mb-2" disabled>
+                        <option value="">Loading variants...</option>
+                    </select>
+                    
+                    <div id="variant_dimensions_${order.id}" class="text-xs text-gray-500 mt-1 mb-3 p-2 bg-cream rounded-lg hidden">
+                        <i class="fas fa-cube text-accent"></i> <span id="dimensions_text_${order.id}"></span>
+                        <br><i class="fas fa-weight-hanging text-accent"></i> <span id="weight_text_${order.id}"></span>
+                    </div>
+                    
+                    <label class="block text-sm font-medium mb-1">Reason for Exchange:</label>
+                    <select id="exchange_reason_select_${order.id}" class="w-full p-2 border border-gray-200 rounded-lg mb-2">
+                        <option value="">Select a reason</option>
+                        <option value="Size issue">Size issue</option>
+                        <option value="Color mismatch">Color mismatch</option>
+                        <option value="Damaged/Defective">Damaged/Defective</option>
+                        <option value="Wrong product">Wrong product</option>
+                        <option value="Quality issue">Quality issue</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    
+                    <label class="block text-sm font-medium mb-1">Additional Comments:</label>
+                    <textarea id="exchange_comments_${order.id}" rows="2" class="w-full p-2 border border-gray-200 rounded-lg mb-3"></textarea>
+                    
+                    <button onclick="window.submitExchangeAndClose('${order.id}', '${exchangeId}', '${parentOverlayId}')" class="btn-exchange w-full py-2">Submit Exchange Request</button>
+                </div>
+            </div>
+        </div>
+    `;
+                document.body.insertAdjacentHTML('beforeend', exchangeHTML);
+
+                const variantSelect = document.getElementById(`exchange_variant_${order.id}`);
+                const productPrimeId = document.getElementById(`exchange_product_prime_id_${order.id}`).value;
+
+                // Auto-load variants when overlay opens
+                async function loadVariants() {
+                    if (productPrimeId && productPrimeId !== 'null' && productPrimeId !== '') {
+                        variantSelect.innerHTML = '<option value="">Loading variants...</option>';
+                        variantSelect.disabled = true;
+
+                        try {
+                            // ✅ DYNAMIC userId - headers me automatically set ho jayega
+                            const response = await fetch(`${API_BASE_URL}/products/get-by-productPrimeId/${productPrimeId}`, {
+                                headers: getAuthHeaders()  // ✅ Isme automatically userId set hai
+                            });
+                            const productData = await response.json();
+
+                            if (productData && productData.availableVariants && productData.availableVariants.length > 0) {
+                                let options = '<option value="">Select variant</option>';
+                                productData.availableVariants.forEach(v => {
+                                    const stockStatus = (v.stock > 0) ? '✓ In Stock' : '✗ Out of Stock';
+                                    options += `<option value="${v.variantId}" 
+                        data-length="${v.length || ''}" 
+                        data-breadth="${v.breadth || ''}" 
+                        data-height="${v.height || ''}" 
+                        data-weight="${v.weight || ''}"
+                        data-price="${v.price}">
+                        ${v.color || v.titleName || 'Variant'} - ${v.size || 'Standard'} (${formatINR(v.price)}) ${stockStatus}
+                    </option>`;
+                                });
+                                variantSelect.innerHTML = options;
+                                variantSelect.disabled = false;
+                            } else {
+                                variantSelect.innerHTML = '<option value="">No variants available</option>';
+                                variantSelect.disabled = true;
+                            }
+                        } catch (err) {
+                            console.error('Error fetching variants:', err);
+                            variantSelect.innerHTML = '<option value="">Error loading variants</option>';
+                            variantSelect.disabled = true;
+                        }
+                    } else {
+                        variantSelect.innerHTML = '<option value="">Product ID not available</option>';
+                        variantSelect.disabled = true;
+                    }
+                }
+
+                // Load variants
+                loadVariants();
+
+                // Update dimensions when variant changes
+                variantSelect.addEventListener('change', function () {
+                    const selectedOption = this.options[this.selectedIndex];
+                    const length = selectedOption.getAttribute('data-length');
+                    const breadth = selectedOption.getAttribute('data-breadth');
+                    const height = selectedOption.getAttribute('data-height');
+                    const weight = selectedOption.getAttribute('data-weight');
+
+                    const dimDiv = document.getElementById(`variant_dimensions_${order.id}`);
+                    const dimText = document.getElementById(`dimensions_text_${order.id}`);
+                    const weightText = document.getElementById(`weight_text_${order.id}`);
+
+                    let hasInfo = false;
+
+                    if (length && breadth && height && length !== 'null' && length !== '') {
+                        dimText.innerText = `📦 Dimensions: ${length} × ${breadth} × ${height} cm`;
+                        hasInfo = true;
+                    } else {
+                        dimText.innerText = '';
+                    }
+
+                    if (weight && weight !== 'null' && weight !== '') {
+                        weightText.innerText = `⚖️ Weight: ${weight} g`;
+                        hasInfo = true;
+                    } else {
+                        weightText.innerText = '';
+                    }
+
+                    if (hasInfo) {
+                        dimDiv.classList.remove('hidden');
+                    } else {
+                        dimDiv.classList.add('hidden');
+                    }
+                });
+
+                document.body.style.overflow = 'hidden';
+            };
+
+            window.closeExchangeModal = function (modalId, parentOverlayId) {
+                document.getElementById(modalId).remove();
+                document.getElementById(parentOverlayId).style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            };
+
+            window.submitExchangeAndClose = function (orderId, modalId, parentOverlayId) {
+                const variantSelect = document.getElementById(`exchange_variant_${orderId}`);
+                const reasonSelect = document.getElementById(`exchange_reason_select_${orderId}`);
+                const comments = document.getElementById(`exchange_comments_${orderId}`)?.value || '';
+
+                if (!variantSelect?.value) {
+                    alert('❌ Please select a replacement variant');
+                    return;
+                }
+                if (!reasonSelect?.value) {
+                    alert('❌ Please select a reason');
+                    return;
+                }
+
+                fetch(`${API_BASE_URL}/orders/${orderId}/exchange?reason=${encodeURIComponent(reasonSelect.value)}`, {
+                    method: 'PUT',
+                    headers: getAuthHeaders()
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert(`✅ Exchange Request Submitted!`);
+                            document.getElementById(modalId).remove();
+                            document.getElementById(parentOverlayId).style.display = 'none';
+                            document.body.style.overflow = '';
+                            fetchOrdersFromBackend();
+                        } else {
+                            alert('❌ Failed: ' + (data.message || 'Unknown error'));
+                        }
+                    });
+            };
+
+            // ========== SHOW RETURN OVERLAY ==========
+            window.showReturnOverlay = function (order, parentOverlayId) {
+                document.getElementById(parentOverlayId).style.display = 'none';
+
+                const returnId = `return_modal_${order.id}`;
+                const existing = document.getElementById(returnId);
+                if (existing) existing.remove();
+
+                const returnHTML = `
+                    <div id="${returnId}" class="order-overlay" style="display: flex; z-index: 10000;">
+                        <div class="overlay-content" onclick="event.stopPropagation()" style="max-width: 500px;">
+                            <div class="sticky top-0 bg-gradient-to-r from-gray-600 to-gray-700 text-white flex justify-between p-5 rounded-t-2xl">
+                                <h2 class="font-bold text-lg">Return Request</h2>
+                                <button onclick="window.closeReturnModal('${returnId}', '${parentOverlayId}')" class="text-2xl text-white/80 hover:text-white">&times;</button>
+                            </div>
+                            <div class="p-5">
+                                <p class="text-sm text-gray-600 mb-4">Order: <strong class="text-primary">${escapeHtml(order.id)}</strong></p>
+                                
+                                <label class="block text-sm font-medium mb-2">Select Product to Return:</label>
+                                <select id="return_product_${order.id}" class="w-full p-2 border border-gray-200 rounded-lg mb-4 focus:border-accent focus:ring-1 focus:ring-accent">
+                                    ${order.items.map((item, idx) => `<option value="${idx}">${escapeHtml(item.name)} - Qty: ${item.qty}</option>`).join('')}
+                                </select>
+                                
+                                <label class="block text-sm font-medium mb-2">Reason for Return:</label>
+                                <select id="return_reason_select_${order.id}" class="w-full p-2 border border-gray-200 rounded-lg mb-2 focus:border-accent focus:ring-1 focus:ring-accent">
+                                    <option value="">Select a reason</option>
+                                    <option value="Product damaged/defective">Product damaged/defective</option>
+                                    <option value="Wrong product received">Wrong product received</option>
+                                    <option value="Quality issue">Quality issue</option>
+                                    <option value="Size issue">Size issue</option>
+                                    <option value="Color mismatch">Color mismatch</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                
+                                <label class="block text-sm font-medium mb-2">Additional Comments:</label>
+                                <textarea id="return_comments_${order.id}" rows="2" class="w-full p-2 border border-gray-200 rounded-lg mb-4 focus:border-accent focus:ring-1 focus:ring-accent"></textarea>
+                                
+                                <button onclick="window.submitReturnAndClose('${order.id}', '${returnId}', '${parentOverlayId}')" class="btn-return w-full">Submit Return Request</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', returnHTML);
+                document.body.style.overflow = 'hidden';
+            };
+
+            window.closeReturnModal = function (modalId, parentOverlayId) {
+                document.getElementById(modalId).remove();
+                document.getElementById(parentOverlayId).style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            };
+
+            window.submitReturnAndClose = function (orderId, modalId, parentOverlayId) {
+                const reasonSelect = document.getElementById(`return_reason_select_${orderId}`);
+                const comments = document.getElementById(`return_comments_${orderId}`)?.value || '';
+
+                if (!reasonSelect?.value) {
+                    alert('❌ Please select a reason');
+                    return;
+                }
+
+                fetch(`${API_BASE_URL}/orders/${orderId}/return?reason=${encodeURIComponent(reasonSelect.value)}`, {
+                    method: 'PUT',
+                    headers: getAuthHeaders()
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert(`✅ Return Request Submitted!`);
+                            document.getElementById(modalId).remove();
+                            document.getElementById(parentOverlayId).style.display = 'none';
+                            document.body.style.overflow = '';
+                            fetchOrdersFromBackend();
+                        } else {
+                            alert('❌ Failed: ' + (data.message || 'Unknown error'));
+                        }
+                    });
+            };
+
+// ========== SHOW RATING OVERLAY (With Image & Video Upload) ==========
+window.showRatingOverlay = function (order, parentOverlayId) {
+    document.getElementById(parentOverlayId).style.display = 'none';
+    
+    const ratingId = `rating_modal_${order.id}`;
+    const existing = document.getElementById(ratingId);
+    if (existing) existing.remove();
+    
+    let productsHTML = '';
+    order.items.forEach((item, idx) => {
+        productsHTML += `
+            <div class="border-b border-gray-100 pb-4 mb-4" id="product_review_${order.id}_${idx}">
+                <div class="font-medium text-sm mb-2 text-primary">${escapeHtml(item.name)}</div>
+                
+                <!-- Rating Stars -->
+                <div class="flex gap-1 rating-stars-container mb-3" data-product-index="${idx}">
+                    <i class="far fa-star rating-star" data-rating="1"></i>
+                    <i class="far fa-star rating-star" data-rating="2"></i>
+                    <i class="far fa-star rating-star" data-rating="3"></i>
+                    <i class="far fa-star rating-star" data-rating="4"></i>
+                    <i class="far fa-star rating-star" data-rating="5"></i>
+                </div>
+                <input type="hidden" id="rating_val_${order.id}_${idx}" value="0">
+                
+                <!-- Review Text -->
+                <textarea id="review_val_${order.id}_${idx}" rows="2" class="w-full p-2 border border-gray-200 rounded-lg text-sm focus:border-accent focus:ring-1 focus:ring-accent mb-3" placeholder="Write your review..."></textarea>
+                
+                <!-- Image Upload -->
+                <div class="mb-3">
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Upload Images (max 5)</label>
+                    <input type="file" id="review_images_${order.id}_${idx}" class="review-images-input w-full p-1 border border-gray-200 rounded-lg text-sm" accept="image/*" multiple style="display: none;">
+                    <div class="flex items-center gap-2">
+                        <button type="button" class="btn-add-image bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg text-xs hover:bg-accent hover:text-white transition" data-product-index="${idx}">
+                            <i class="fas fa-image mr-1"></i> Add Images
+                        </button>
+                        <span class="text-xs text-gray-400" id="image_count_${order.id}_${idx}">0 files selected</span>
+                    </div>
+                    <div id="image_preview_${order.id}_${idx}" class="flex flex-wrap gap-2 mt-2"></div>
+                </div>
+                
+                <!-- Video Upload -->
+                <div class="mb-2">
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Upload Video (optional, max 1)</label>
+                    <input type="file" id="review_video_${order.id}_${idx}" class="review-video-input w-full p-1 border border-gray-200 rounded-lg text-sm" accept="video/*" style="display: none;">
+                    <div class="flex items-center gap-2">
+                        <button type="button" class="btn-add-video bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg text-xs hover:bg-accent hover:text-white transition" data-product-index="${idx}">
+                            <i class="fas fa-video mr-1"></i> Add Video
+                        </button>
+                        <span class="text-xs text-gray-400" id="video_name_${order.id}_${idx}">No video selected</span>
+                    </div>
+                    <div id="video_preview_${order.id}_${idx}" class="mt-2"></div>
+                </div>
+            </div>
+        `;
+    });
+    
+    const ratingHTML = `
+        <div id="${ratingId}" class="order-overlay" style="display: flex; z-index: 10000;">
+            <div class="overlay-content" onclick="event.stopPropagation()" style="max-width: 550px; max-height: 85vh; overflow-y: auto;">
+                <div class="sticky top-0 bg-gradient-to-r from-accent to-accent/80 text-white flex justify-between p-4 rounded-t-2xl">
+                    <h2 class="font-bold text-lg">Rate Your Products</h2>
+                    <button onclick="window.closeRatingModal('${ratingId}', '${parentOverlayId}')" class="text-2xl text-white/80 hover:text-white">&times;</button>
+                </div>
+                <div class="p-5">
+                    <p class="text-sm text-gray-600 mb-4">Order: <strong class="text-primary">${escapeHtml(order.id)}</strong></p>
+                    <div class="max-h-96 overflow-y-auto pr-2">
+                        ${productsHTML}
+                    </div>
+                    <button onclick="window.submitRatingWithMedia('${order.id}', '${ratingId}', '${parentOverlayId}')" class="btn-primary w-full mt-4 py-2">Submit Ratings & Reviews</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', ratingHTML);
+    
+    // Initialize file upload handlers
+    document.querySelectorAll(`#${ratingId} .btn-add-image`).forEach(btn => {
+        btn.addEventListener('click', function() {
+            const productIndex = this.dataset.productIndex;
+            const fileInput = document.getElementById(`review_images_${order.id}_${productIndex}`);
+            fileInput.click();
+            
+            fileInput.onchange = function(e) {
+                const files = Array.from(e.target.files);
+                const maxFiles = 5;
+                if (files.length > maxFiles) {
+                    alert(`You can only upload up to ${maxFiles} images`);
+                    this.value = '';
+                    return;
+                }
+                
+                document.getElementById(`image_count_${order.id}_${productIndex}`).innerText = `${files.length} file(s) selected`;
+                
+                // Preview images
+                const previewContainer = document.getElementById(`image_preview_${order.id}_${productIndex}`);
+                previewContainer.innerHTML = '';
+                files.forEach((file, idx) => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const imgDiv = document.createElement('div');
+                        imgDiv.className = 'relative w-16 h-16 rounded-lg overflow-hidden border border-gray-200';
+                        imgDiv.innerHTML = `
+                            <img src="${e.target.result}" class="w-full h-full object-cover">
+                            <button type="button" class="remove-image absolute top-0 right-0 bg-red-500 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center" data-file-index="${idx}">&times;</button>
+                        `;
+                        previewContainer.appendChild(imgDiv);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            };
+        });
+    });
+    
+    document.querySelectorAll(`#${ratingId} .btn-add-video`).forEach(btn => {
+        btn.addEventListener('click', function() {
+            const productIndex = this.dataset.productIndex;
+            const fileInput = document.getElementById(`review_video_${order.id}_${productIndex}`);
+            fileInput.click();
+            
+            fileInput.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    document.getElementById(`video_name_${order.id}_${productIndex}`).innerText = file.name;
+                    
+                    const previewContainer = document.getElementById(`video_preview_${order.id}_${productIndex}`);
+                    previewContainer.innerHTML = `
+                        <div class="relative w-32 h-24 rounded-lg overflow-hidden border border-gray-200 bg-gray-100 flex items-center justify-center">
+                            <i class="fas fa-video text-2xl text-gray-400"></i>
+                            <button type="button" class="remove-video absolute top-0 right-0 bg-red-500 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center">&times;</button>
+                        </div>
+                    `;
+                    
+                    previewContainer.querySelector('.remove-video')?.addEventListener('click', () => {
+                        document.getElementById(`review_video_${order.id}_${productIndex}`).value = '';
+                        document.getElementById(`video_name_${order.id}_${productIndex}`).innerText = 'No video selected';
+                        previewContainer.innerHTML = '';
+                    });
+                }
+            };
+        });
+    });
+    
+    // Initialize star rating functionality
+    document.querySelectorAll(`#${ratingId} .rating-stars-container`).forEach(container => {
+        const stars = container.querySelectorAll('.rating-star');
+        const productIndex = container.dataset.productIndex;
+        const hiddenInput = document.getElementById(`rating_val_${order.id}_${productIndex}`);
+        
+        stars.forEach(star => {
+            star.addEventListener('click', function() {
+                const rating = parseInt(this.dataset.rating);
+                hiddenInput.value = rating;
+                stars.forEach((s, i) => {
+                    if (i < rating) {
+                        s.className = 'fas fa-star rating-star active';
+                    } else {
+                        s.className = 'far fa-star rating-star';
+                    }
+                });
+            });
+        });
+    });
+    
+    document.body.style.overflow = 'hidden';
+};
+
+            window.closeRatingModal = function (modalId, parentOverlayId) {
+                document.getElementById(modalId).remove();
+                document.getElementById(parentOverlayId).style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            };
+
+            window.submitRatingAndClose = function (orderId, modalId, parentOverlayId) {
+                const order = window.ordersData.find(o => o.id === orderId);
+                order.items.forEach((_, idx) => {
+                    const rating = document.getElementById(`rating_val_${orderId}_${idx}`)?.value || '0';
+                    const review = document.getElementById(`review_val_${orderId}_${idx}`)?.value || '';
+                    console.log(`Product ${idx}: ${rating} stars, Review: ${review}`);
+                });
+                alert(`✅ Ratings Submitted!\n\n(Connect to your rating API endpoint)`);
+                document.getElementById(modalId).remove();
+                document.getElementById(parentOverlayId).style.display = 'none';
+                document.body.style.overflow = '';
+            };
+
+            function loadOverlayImages() {
+                setTimeout(() => {
+                    document.querySelectorAll('.product-img').forEach(img => {
+                        const imageUrl = img.getAttribute('data-image-url');
+                        if (imageUrl && imageUrl !== 'null' && imageUrl !== '') {
+                            loadProductImage(img, imageUrl);
+                        }
+                    });
+                }, 100);
+            }
+
             function renderOrders() {
                 const container = document.getElementById('orders-list-container');
                 const emptyState = document.getElementById('empty-state');
 
-                let filteredOrders = ordersData;
-                if (currentFilter !== 'all') {
-                    filteredOrders = ordersData.filter(order => order.status === currentFilter);
-                }
+                let filtered = window.ordersData.filter(o => currentFilter === 'all' ? true : o.status === currentFilter);
 
-                if (filteredOrders.length === 0) {
+                if (!filtered.length) {
                     container.innerHTML = '';
                     emptyState.classList.remove('hidden');
+                    document.querySelectorAll('.order-overlay').forEach(el => el.remove());
                     return;
                 }
 
                 emptyState.classList.add('hidden');
+                let cards = '';
 
-                let cardsHtml = '';
-                let overlaysHtml = '';
+                filtered.forEach((order, idx) => {
+                    const ovId = `ov_${order.id}_${idx}`;
 
-                filteredOrders.forEach((order, index) => {
-                    const overlayId = `overlay_${order.id}_${index}`;
+                    let banner = (order.showDeliveryBanner && order.deliveryBannerText) ?
+                        `<div style="background:#fef3c7; padding:0.4rem 0.75rem; font-size:0.7rem; border-radius:0.75rem; margin-bottom:0.75rem; border-left:3px solid #E6A62C;">
+                            <i class="fas fa-truck"></i> ${order.deliveryBannerText}
+                        </div>` : '';
 
-                    // Card HTML
-                    let bannerHtml = '';
-                    if (order.showDeliveryBanner && order.deliveryBannerText) {
-                        bannerHtml = `<div class="delivery-banner"><i class="fas fa-truck text-accent"></i><span>${order.deliveryBannerText}</span></div>`;
-                    }
-
-                    let productsHtml = '';
-                    order.items.forEach(item => {
-                        productsHtml += `
-                            <div class="flex items-center gap-3 py-1.5 border-b border-gray-100 last:border-0">
-                                <img src="${item.image}" class="product-image" alt="${item.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/52x52/E6A62C/FFFFFF?text=📦'">
-                                <div class="flex-1">
-                                    <div class="font-medium text-sm">${item.name}</div>
-                                    <div class="text-[0.6rem] text-warmbrown">${item.variant || ''}</div>
-                                    <div class="flex justify-between items-center mt-1">
-                                        <span class="text-xs font-semibold">₹${item.price}</span>
-                                        <span class="text-[0.55rem] text-gray-400">Qty: ${item.qty}</span>
-                                    </div>
+                    let prodHtml = order.items.map((i, itemIdx) => `
+                        <div class="flex items-center gap-3 py-2 border-b border-gray-100">
+                            <img class="product-img" id="img_${order.id}_${itemIdx}" 
+                                 src="${getLocalPlaceholder()}"
+                                 data-image-url="${i.imageUrl || ''}">
+                            <div class="flex-1">
+                                <div class="font-medium text-sm">${escapeHtml(i.name)}</div>
+                                <div class="text-xs text-gray-500">${escapeHtml(i.color)} • ${escapeHtml(i.sku)}</div>
+                                <div class="flex justify-between mt-1">
+                                    <span class="text-sm font-semibold">${formatINR(i.price)}</span>
+                                    ${i.originalPrice ? `<span class="text-xs text-gray-500 line-through">${formatINR(i.originalPrice)}</span>` : ''}
                                 </div>
                             </div>
-                        `;
-                    });
-
-                    const cardHtml = `
-                        <div class="order-card" onclick="window.openOverlay('${overlayId}')">
-                            ${bannerHtml}
-                            <div class="flex justify-between items-start mb-2">
-                                <div class="flex flex-col gap-1">
-                                    <div class="flex items-center gap-2 flex-wrap">
-                                        <span class="font-bold text-sm text-primary">#${order.id}</span>
-                                        <span class="${order.badgeClass}"><i class="fas ${order.status === 'delivered' ? 'fa-check-circle' : order.status === 'shipped' ? 'fa-truck' : order.status === 'processing' ? 'fa-clock' : 'fa-ban'} text-[0.55rem] mr-1"></i>${order.statusText}</span>
-                                    </div>
-                                    <div class="text-[0.6rem] text-warmbrown flex items-center gap-2">
-                                        <i class="far fa-calendar-alt"></i>
-                                        <span>${order.date}</span>
-                                    </div>
-                                </div>
-                                <div class="text-right">
-                                    <div class="font-bold text-lg text-primary">₹${order.total}</div>
-                                    <div class="text-[0.55rem] text-gray-400">${order.items.length} item${order.items.length > 1 ? 's' : ''}</div>
-                                </div>
-                            </div>
-                            <div class="space-y-1.5 mt-2">
-                                ${productsHtml}
-                            </div>
-                            <div class="flex justify-between items-center mt-3 pt-2 border-t border-gray-100">
-                                <span class="text-[0.6rem] text-warmbrown">${order.footerLeft}</span>
-                                <span class="text-accent text-xs font-medium flex items-center gap-1">
-                                    View Details <i class="fas fa-chevron-right text-[0.6rem]"></i>
-                                </span>
+                            <div class="text-right">
+                                <span class="text-xs">Qty: ${i.qty}</span>
                             </div>
                         </div>
-                    `;
-                    cardsHtml += cardHtml;
+                    `).join('');
 
-                    // Overlay HTML
-                    let overlayBanner = '';
-                    if (order.showDeliveryBanner && order.deliveryBannerText) {
-                        overlayBanner = `<div class="delivery-banner mx-4 mt-3"><i class="fas fa-truck text-accent"></i><span>${order.deliveryBannerText}</span></div>`;
-                    }
-
-                    let overlayProducts = '';
-                    order.items.forEach(item => {
-                        overlayProducts += `
-                            <div class="product-row">
-                                <div class="flex items-center gap-3 flex-1">
-                                    <img src="${item.image}" class="w-14 h-14 rounded-xl object-cover border border-accent/20" alt="${item.name}" onerror="this.src='https://via.placeholder.com/56x56/E6A62C/FFFFFF?text=📦'">
-                                    <div class="flex-1">
-                                        <span class="text-sm font-semibold block">${item.name}</span>
-                                        <div class="text-[0.6rem] text-warmbrown">${item.variant || ''}</div>
-                                        <div class="text-[0.6rem] text-gray-400 mt-0.5">Qty: ${item.qty}</div>
-                                    </div>
-                                </div>
-                                <span class="text-sm font-bold">₹${item.price}</span>
-                            </div>
-                        `;
-                    });
-
-                    let actionButtons = '';
-                    if (order.actions && order.actions.length) {
-                        if (order.actions.length === 1) {
-                            actionButtons = `<button class="btn-primary w-full mt-4">${order.actions[0]}</button>`;
-                        } else {
-                            actionButtons = `<div class="flex gap-2 mt-4"><button class="btn-primary flex-1">${order.actions[0]}</button><button class="btn-outline flex-1">${order.actions[1]}</button></div>`;
-                        }
-                    }
-
-                    let paymentHtml = '';
-                    if (order.status !== 'cancelled') {
-                        paymentHtml = `
-                            <div class="mt-4 p-3 bg-cream rounded-xl">
-                                <div class="flex justify-between text-xs">
-                                    <span class="text-gray-500">Payment Method</span>
-                                    <span class="font-medium">${order.paymentMethod}</span>
-                                </div>
-                                ${order.transactionId ? `<div class="text-[0.6rem] text-warmbrown mt-1">Transaction: ${order.transactionId}</div>` : ''}
-                            </div>
-                        `;
-                    }
-
-                    const overlayHtml = `
-                        <div id="${overlayId}" class="order-overlay" onclick="window.closeOverlay(event, '${overlayId}')">
-                            <div class="overlay-content" onclick="event.stopPropagation()">
-                                <div class="sticky top-0 bg-white z-10 flex justify-between items-center p-4 border-b border-gray-200">
+                    cards += `
+                        <div class="order-card">
+                            ${banner}
+                            <div class="clickable-area" onclick="window.openOrderOverlay('${ovId}')">
+                                <div class="flex justify-between items-start mb-2">
                                     <div>
-                                        <h2 class="text-lg font-bold text-primary">Order ${order.id}</h2>
-                                        <p class="text-[0.6rem] text-warmbrown">${order.deliveryDate}</p>
-                                    </div>
-                                    <button onclick="window.closeOverlay(event, '${overlayId}')" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition">&times;</button>
-                                </div>
-                                ${overlayBanner}
-                                <div class="p-4">
-                                    <h3 class="font-semibold text-sm mb-3 flex items-center gap-2"><i class="fas fa-box text-accent text-xs"></i>Items</h3>
-                                    ${overlayProducts}
-                                    <div class="flex justify-between font-bold text-base mt-4 pt-3 border-t-2 border-gray-200">
-                                        <span>Total</span>
-                                        <span class="text-accent">₹${order.total}</span>
-                                    </div>
-                                    ${paymentHtml}
-                                    <div class="mt-3 p-3 bg-gray-50 rounded-xl">
-                                        <div class="flex items-start gap-2 text-xs">
-                                            <i class="fas fa-map-marker-alt text-accent mt-0.5"></i>
-                                            <span class="text-gray-600">${order.address}</span>
+                                        <span class="font-bold text-sm">#${escapeHtml(order.id)}</span>
+                                        <span class="${order.badgeClass} ml-2">
+                                            <i class="fas ${order.status === 'delivered' ? 'fa-check-circle' : order.status === 'cancelled' ? 'fa-ban' : 'fa-clock'}"></i> 
+                                            ${order.statusText}
+                                        </span>
+                                        <div class="text-xs text-gray-500 mt-1">
+                                            <i class="far fa-calendar-alt"></i> ${order.date}
                                         </div>
                                     </div>
-                                    ${actionButtons}
+                                    <div class="text-right">
+                                        <div class="font-bold text-lg">${formatINR(order.total)}</div>
+                                        <div class="text-xs">${order.items.length} item(s)</div>
+                                    </div>
+                                </div>
+                                <div class="space-y-2 mt-2">${prodHtml}</div>
+                                <div class="flex justify-between items-center mt-3 pt-2 border-t">
+                                    <span class="text-xs text-gray-500">${order.footerLeft}</span>
+                                    <span class="text-accent text-sm">View Details <i class="fas fa-chevron-right text-xs"></i></span>
                                 </div>
                             </div>
                         </div>
                     `;
-                    overlaysHtml += overlayHtml;
                 });
 
-                container.innerHTML = cardsHtml;
+                container.innerHTML = cards;
 
-                // Remove old overlays and add new ones
                 document.querySelectorAll('.order-overlay').forEach(el => el.remove());
-                const overlayContainer = document.createElement('div');
-                overlayContainer.innerHTML = overlaysHtml;
-                document.body.appendChild(overlayContainer);
+                window.ordersData.forEach((order, idx) => {
+                    const ovId = `ov_${order.id}_${idx}`;
+                    const overlayHTML = createOrderDetailsOverlay(order, ovId);
+                    document.body.insertAdjacentHTML('beforeend', overlayHTML);
+                });
+
+                loadOverlayImages();
             }
 
-            // Global functions for overlays
-            window.openOverlay = function (overlayId) {
-                const el = document.getElementById(overlayId);
+            window.openOrderOverlay = function (id) {
+                let el = document.getElementById(id);
                 if (el) {
+                    currentOverlayId = id;
                     el.style.display = 'flex';
                     document.body.style.overflow = 'hidden';
+                    loadOverlayImages();
                 }
             };
 
-            window.closeOverlay = function (event, overlayId) {
-                const overlay = document.getElementById(overlayId);
-                if (overlay && (event.target === overlay || event.target.closest('button'))) {
-                    overlay.style.display = 'none';
+            window.closeOrderOverlay = function (e, id) {
+                let ov = document.getElementById(id);
+                if (ov && (e.target === ov || e.target.closest('button'))) {
+                    ov.style.display = 'none';
                     document.body.style.overflow = '';
+                    if (currentOverlayId === id) currentOverlayId = null;
                 }
             };
 
-            // Filter functionality
-            document.querySelectorAll('.filter-tab').forEach(tab => {
-                tab.addEventListener('click', function () {
-                    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('filter-tab-active'));
+            document.querySelectorAll('.filter-tab').forEach(t => {
+                t.addEventListener('click', function () {
+                    document.querySelectorAll('.filter-tab').forEach(f => f.classList.remove('filter-tab-active'));
                     this.classList.add('filter-tab-active');
-                    currentFilter = this.getAttribute('data-filter');
+                    currentFilter = this.dataset.filter;
                     renderOrders();
                 });
             });
 
-            // Escape key close
-            document.addEventListener('keydown', function (event) {
-                if (event.key === 'Escape') {
-                    document.querySelectorAll('.order-overlay').forEach(overlay => {
-                        if (overlay.style.display === 'flex') {
-                            overlay.style.display = 'none';
-                            document.body.style.overflow = '';
-                        }
-                    });
-                }
-            });
-
-            // Initialize
-            updateOrderCount();
-
-            // Simulate loading then render
-            setTimeout(() => {
-                renderOrders();
-            }, 300);
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => fetchOrdersFromBackend());
+            } else {
+                fetchOrdersFromBackend();
+            }
         })();
     </script>
 </body>
 
 </html>
+
+
