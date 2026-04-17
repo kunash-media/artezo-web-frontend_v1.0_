@@ -28,6 +28,7 @@ let cartService     = null;
 let apiCartData     = null;   // raw API response .data
 let currentUserId   = null;
 let isLoading       = false;
+let pendingDeleteAction = null;
 let initAttempts    = 0;
 const MAX_INIT_ATTEMPTS = 10;
 
@@ -145,6 +146,93 @@ function resolveUserId() {
 
     console.warn('[Cart][Auth] Could not resolve userId — API calls will be skipped');
     return null;
+}
+
+/**
+ * Show delete confirmation modal
+ * @param {string} title - Modal title
+ * @param {string} message - Modal message
+ * @param {Function} onConfirm - Function to execute on confirmation
+ */
+function showDeleteConfirmModal(title, message, onConfirm) {
+    const modal = document.getElementById('deleteConfirmModal');
+    const modalContent = document.getElementById('deleteModalContent');
+    const titleEl = document.getElementById('deleteModalTitle');
+    const messageEl = document.getElementById('deleteModalMessage');
+    const confirmBtn = document.getElementById('confirmDeleteBtn');
+    const cancelBtn = document.getElementById('cancelDeleteBtn');
+    
+    if (!modal || !modalContent) return;
+    
+    // Set modal content
+    if (titleEl) titleEl.textContent = title;
+    if (messageEl) messageEl.textContent = message;
+    
+    // Store the action to execute on confirm
+    pendingDeleteAction = onConfirm;
+    
+    // Show modal with animation
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    
+    // Animate modal content
+    setTimeout(() => {
+        modalContent.classList.remove('scale-95', 'opacity-0');
+        modalContent.classList.add('scale-100', 'opacity-100');
+    }, 10);
+    
+    // Prevent body scroll
+    document.body.style.overflow = 'hidden';
+    
+    // Setup event listeners
+    const closeModal = () => {
+        modalContent.classList.remove('scale-100', 'opacity-100');
+        modalContent.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
+            pendingDeleteAction = null;
+        }, 300);
+    };
+    
+    // Handle confirm button click
+    const handleConfirm = () => {
+        if (pendingDeleteAction && typeof pendingDeleteAction === 'function') {
+            pendingDeleteAction();
+        }
+        closeModal();
+    };
+    
+    // Handle cancel button click
+    const handleCancel = () => {
+        closeModal();
+    };
+    
+    // Handle modal background click
+    const handleBackgroundClick = (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    };
+
+    // Remove old listeners and add new ones
+    confirmBtn.removeEventListener('click', handleConfirm);
+    cancelBtn.removeEventListener('click', handleCancel);
+    modal.removeEventListener('click', handleBackgroundClick);
+    
+    confirmBtn.addEventListener('click', handleConfirm);
+    cancelBtn.addEventListener('click', handleCancel);
+    modal.addEventListener('click', handleBackgroundClick);
+    
+    // Handle Escape key
+    const handleEscape = (e) => {
+        if (e.key === 'Escape') {
+            closeModal();
+            document.removeEventListener('keydown', handleEscape);
+        }
+    };
+    document.addEventListener('keydown', handleEscape);
 }
 
 // ─── API Layer ────────────────────────────────────────────────────────────────
@@ -758,71 +846,76 @@ async function handleRemoveItem(e) {
 }
 
 /**
- * Remove item — optimistic remove from DOM, then hit API
+ * Remove item with confirmation modal
  */
 async function confirmAndRemove(productId, variantId, cartItemEl) {
-    // Optimistic: visually fade out immediately
-    if (cartItemEl) {
-        cartItemEl.style.transition = 'opacity 0.3s, transform 0.3s';
-        cartItemEl.style.opacity = '0.4';
-        cartItemEl.style.pointerEvents = 'none';
-    }
-
-    setCheckoutBtnLoading(true);
-
-    let success = false;
-
-    if (currentUserId) {
-        console.log(`[Cart][API] Removing item from API — userId:${currentUserId}, productId:${productId}, variantId:${variantId}`);
-        success = await apiRemoveItem(currentUserId, productId, variantId);
-    } else {
-        // No API — remove from localStorage only
-        console.warn('[Cart][Remove] No userId — removing from localStorage only');
-        success = removeFromLocalStorage(productId, variantId);
-    }
-
-    setCheckoutBtnLoading(false);
-
-    if (success) {
-        console.log(`[Cart][Remove] Success — refreshing cart`);
-        showToast('Item removed from cart', 'info');
-
-        // Remove DOM element with animation
-        if (cartItemEl) {
-            cartItemEl.style.opacity    = '0';
-            cartItemEl.style.transform  = 'translateX(-20px)';
-            cartItemEl.style.maxHeight  = cartItemEl.scrollHeight + 'px';
-            setTimeout(() => {
-                cartItemEl.style.maxHeight  = '0';
-                cartItemEl.style.padding    = '0';
-                cartItemEl.style.margin     = '0';
-                cartItemEl.style.overflow   = 'hidden';
-            }, 200);
-            setTimeout(() => {
-                cartItemEl.remove();
-                // Check if cart is now empty
-                const remaining = document.querySelectorAll('.cart-item');
-                if (remaining.length === 0) {
-                    if (cartContent)        cartContent.classList.add('hidden');
-                    if (emptyCartMessage)   emptyCartMessage.classList.remove('hidden');
-                    if (recommendedSection) recommendedSection.classList.add('hidden');
-                    updateCartSummaryRaw({ totalAmount: 0, totalMrp: 0, totalDiscount: 0, totalItems: 0 });
+    showDeleteConfirmModal(
+        'Remove Item?',
+        'Are you sure you want to remove this item from your cart? This action cannot be undone.',
+        async () => {
+            // Optimistic: visually fade out immediately
+            if (cartItemEl) {
+                cartItemEl.style.transition = 'opacity 0.3s, transform 0.3s';
+                cartItemEl.style.opacity = '0.4';
+                cartItemEl.style.pointerEvents = 'none';
+            }
+            
+            setCheckoutBtnLoading(true);
+            
+            let success = false;
+            
+            if (currentUserId) {
+                console.log(`[Cart][API] Removing item from API — userId:${currentUserId}, productId:${productId}, variantId:${variantId}`);
+                success = await apiRemoveItem(currentUserId, productId, variantId);
+            } else {
+                // No API — remove from localStorage only
+                console.warn('[Cart][Remove] No userId — removing from localStorage only');
+                success = removeFromLocalStorage(productId, variantId);
+            }
+            
+            setCheckoutBtnLoading(false);
+            
+            if (success) {
+                console.log(`[Cart][Remove] Success — refreshing cart`);
+                showToast('Item removed from cart', 'info');
+                
+                // Remove DOM element with animation
+                if (cartItemEl) {
+                    cartItemEl.style.opacity = '0';
+                    cartItemEl.style.transform = 'translateX(-20px)';
+                    cartItemEl.style.maxHeight = cartItemEl.scrollHeight + 'px';
+                    setTimeout(() => {
+                        cartItemEl.style.maxHeight = '0';
+                        cartItemEl.style.padding = '0';
+                        cartItemEl.style.margin = '0';
+                        cartItemEl.style.overflow = 'hidden';
+                    }, 200);
+                    setTimeout(() => {
+                        cartItemEl.remove();
+                        // Check if cart is now empty
+                        const remaining = document.querySelectorAll('.cart-item');
+                        if (remaining.length === 0) {
+                            if (cartContent) cartContent.classList.add('hidden');
+                            if (emptyCartMessage) emptyCartMessage.classList.remove('hidden');
+                            if (recommendedSection) recommendedSection.classList.add('hidden');
+                            updateCartSummaryRaw({ totalAmount: 0, totalMrp: 0, totalDiscount: 0, totalItems: 0 });
+                        } else {
+                            recalcSummaryFromDom();
+                        }
+                    }, 420);
                 } else {
-                    recalcSummaryFromDom();
+                    await renderCart();
                 }
-            }, 420);
-        } else {
-            await renderCart();
+            } else {
+                console.error('[Cart][Remove] Failed — reverting optimistic update');
+                showToast('Failed to remove item. Please try again.', 'error');
+                if (cartItemEl) {
+                    cartItemEl.style.opacity = '1';
+                    cartItemEl.style.pointerEvents = '';
+                }
+            }
         }
-
-    } else {
-        console.error('[Cart][Remove] Failed — reverting optimistic update');
-        showToast('Failed to remove item. Please try again.', 'error');
-        if (cartItemEl) {
-            cartItemEl.style.opacity = '1';
-            cartItemEl.style.pointerEvents = '';
-        }
-    }
+    );
 }
 
 /**
@@ -863,31 +956,36 @@ function recalcLocalStorageTotals(cart) {
 /**
  * Clear entire cart (with confirmation)
  */
-async function handleClearCart() {
-    if (!confirm('Are you sure you want to clear the entire cart? This action cannot be undone.')) {
-        return;
-    }
-
-    setCheckoutBtnLoading(true);
-
-    let success = false;
-
-    if (currentUserId) {
-        success = await apiClearCart(currentUserId);
-    } else {
-        // LocalStorage only
-        localStorage.removeItem('artezocart');
-        success = true;
-    }
-
-    setCheckoutBtnLoading(false);
-
-    if (success) {
-        showToast('Cart cleared successfully', 'success');
-        await renderCart();   // full refresh
-    } else {
-        showToast('Failed to clear cart. Please try again.', 'error');
-    }
+/**
+ * Clear entire cart (with confirmation modal)
+ */
+function handleClearCart() {
+    showDeleteConfirmModal(
+        'Clear Entire Cart?',
+        'Are you sure you want to remove all items from your cart? This action cannot be undone.',
+        async () => {
+            setCheckoutBtnLoading(true);
+            
+            let success = false;
+            
+            if (currentUserId) {
+                success = await apiClearCart(currentUserId);
+            } else {
+                // LocalStorage only
+                localStorage.removeItem('artezocart');
+                success = true;
+            }
+            
+            setCheckoutBtnLoading(false);
+            
+            if (success) {
+                showToast('Cart cleared successfully', 'success');
+                await renderCart();   // full refresh
+            } else {
+                showToast('Failed to clear cart. Please try again.', 'error');
+            }
+        }
+    );
 }
 
 // ─── Cart Summary ─────────────────────────────────────────────────────────────

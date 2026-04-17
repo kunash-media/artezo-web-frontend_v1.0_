@@ -1301,9 +1301,297 @@ if (document.readyState === "loading") {
 
 
 
+// ═══════════════════════════════════════════════════════════════
+//  LIVE SEARCH AUTOCOMPLETE  —  INTEGRATED VERSION
+//  Depends on: #search-input, #search-suggestions (already in DOM)
+//  API: GET /api/products/search?keyword=xxx&limit=8
+// ═══════════════════════════════════════════════════════════════
 
+console.log('🔍 Live Search script loading...');
 
+// Config
+const SEARCH_API_BASE = 'http://localhost:8085/api/products/search';
+const SEARCH_DEBOUNCE_MS = 300;
+const SEARCH_MIN_CHARS = 2;
+const SEARCH_MAX_RESULTS = 8;
+const SEARCH_DETAIL_BASE = '/Product-Details/product-detail.html';
 
+// DOM refs
+let searchInput = document.getElementById('search-input');
+let suggestions = document.getElementById('search-suggestions');
+
+// State
+let searchDebounceTimer = null;
+let searchActiveIndex = -1;
+let searchLastKeyword = '';
+let searchCurrentResults = [];
+
+// Helper functions
+function formatPrice(price) {
+    if (price == null) return '';
+    return '₹' + Number(price).toLocaleString('en-IN');
+}
+
+function highlightMatch(text, keyword) {
+    if (!keyword || !text) return text || '';
+    const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escaped})`, 'gi');
+    return text.replace(regex, '<mark class="artezo-hl">$1</mark>');
+}
+
+function getDiscountPct(selling, mrp) {
+    if (!mrp || !selling || mrp <= selling) return null;
+    return Math.round(((mrp - selling) / mrp) * 100);
+}
+
+function showSearchSuggestions() { 
+    if (suggestions) suggestions.classList.remove('hidden'); 
+}
+
+function hideSearchSuggestions() {
+    if (suggestions) suggestions.classList.add('hidden');
+    searchActiveIndex = -1;
+}
+
+function updateActiveClass() {
+    if (!suggestions) return;
+    suggestions.querySelectorAll('.artezo-suggestion-item').forEach((el, i) => {
+        el.classList.toggle('is-active', i === searchActiveIndex);
+    });
+}
+
+function attachHoverSync() {
+    if (!suggestions) return;
+    suggestions.querySelectorAll('.artezo-suggestion-item').forEach(el => {
+        el.addEventListener('mouseenter', () => {
+            searchActiveIndex = parseInt(el.dataset.index, 10);
+            updateActiveClass();
+        });
+    });
+}
+
+function renderSearchResults(results, keyword) {
+    searchCurrentResults = results;
+    searchActiveIndex = -1;
+
+    if (!results.length) {
+        suggestions.innerHTML = `
+            <div class="px-5 py-8 text-center text-sm text-gray-400 font-lexend">
+                No products found for <strong class="text-primary">"${keyword}"</strong>
+            </div>`;
+        showSearchSuggestions();
+        return;
+    }
+
+    const items = results.map((p, i) => {
+        const discount = getDiscountPct(p.currentSellingPrice, p.currentMrpPrice);
+        const discBadge = discount
+            ? `<span class="ml-1 text-[10px] bg-green-100 text-green-700 font-semibold px-1.5 py-0.5 rounded-full">${discount}% off</span>`
+            : '';
+        const mrpHtml = (p.currentMrpPrice && p.currentMrpPrice > p.currentSellingPrice)
+            ? `<span class="line-through text-gray-400 text-[11px] ml-1">${formatPrice(p.currentMrpPrice)}</span>`
+            : '';
+        const highlighted = highlightMatch(p.productName, keyword);
+        
+        const imageUrl = p.mainImageUrl || `http://localhost:8085/api/products/${p.productPrimeId}/main`;
+
+        return `
+            <div
+                class="artezo-suggestion-item flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-zinc-50 transition-colors"
+                data-index="${i}"
+                data-id="${p.productPrimeId}"
+                onmousedown="event.preventDefault()"
+                onclick="window.__artezoGoProduct(${p.productPrimeId})">
+                <div class="w-12 h-12 flex-shrink-0 rounded-xl overflow-hidden border border-gray-100 bg-zinc-50">
+                    <img
+                        src="${imageUrl}"
+                        alt="${p.productName}"
+                        class="w-full h-full object-cover"
+                        onerror="this.style.display='none'"
+                    />
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-lexend text-gray-800 truncate leading-tight">
+                        ${highlighted}
+                    </p>
+                    ${p.brandName ? `<p class="text-[11px] text-gray-400 mt-0.5">${p.brandName}</p>` : ''}
+                    <div class="flex items-center mt-1">
+                        <span class="text-sm font-semibold text-primary font-lexend">
+                            ${formatPrice(p.currentSellingPrice)}
+                        </span>
+                        ${mrpHtml}
+                        ${discBadge}
+                    </div>
+                </div>
+                <i class="fa-solid fa-chevron-right text-[10px] text-gray-300 flex-shrink-0"></i>
+            </div>`;
+    }).join('');
+
+    const viewAllHtml = `
+        <div class="px-5 py-2.5 border-t border-gray-100">
+            <button
+                class="w-full text-center text-xs font-medium font-lexend text-accent hover:text-primary transition-colors py-1"
+                onmousedown="event.preventDefault()"
+                onclick="window.__artezoGoSearch('${keyword}')">
+                View all results for "<span class="font-semibold">${keyword}</span>"
+                <i class="fa-solid fa-arrow-right text-[10px] ml-1"></i>
+            </button>
+        </div>`;
+
+    suggestions.innerHTML = `
+        <style>
+            .artezo-hl { background: transparent; color: #E6A62C; font-weight: 600; padding: 0; }
+            .artezo-suggestion-item.is-active { background-color: #f4f4f5; }
+        </style>
+        <div class="py-2">${items}</div>
+        ${viewAllHtml}`;
+
+    showSearchSuggestions();
+    attachHoverSync();
+}
+
+function renderSearchLoading() {
+    suggestions.innerHTML = `
+        <div class="px-5 py-6 flex items-center justify-center gap-2 text-sm text-gray-400 font-lexend">
+            <svg class="animate-spin h-4 w-4 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+            </svg>
+            Searching…
+        </div>`;
+    showSearchSuggestions();
+}
+
+async function fetchSearchSuggestions(keyword) {
+    try {
+        const url = `${SEARCH_API_BASE}?keyword=${encodeURIComponent(keyword)}&limit=${SEARCH_MAX_RESULTS}`;
+        console.log('[Search] Fetching:', url);
+        const response = await fetch(url, { 
+            method: 'GET', 
+            headers: { 'Content-Type': 'application/json' } 
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        console.log('[Search] Results:', data.length);
+        return data;
+    } catch (err) {
+        console.warn('[Search] fetch failed:', err);
+        return null;
+    }
+}
+
+// Keyboard navigation
+function handleSearchKeydown(e) {
+    const items = suggestions.querySelectorAll('.artezo-suggestion-item');
+    if (!items.length) return;
+
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        searchActiveIndex = Math.min(searchActiveIndex + 1, items.length - 1);
+        updateActiveClass();
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        searchActiveIndex = Math.max(searchActiveIndex - 1, 0);
+        updateActiveClass();
+    } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (searchActiveIndex >= 0 && searchCurrentResults[searchActiveIndex]) {
+            window.__artezoGoProduct(searchCurrentResults[searchActiveIndex].productPrimeId);
+        } else {
+            window.__artezoGoSearch(searchInput.value.trim());
+        }
+    } else if (e.key === 'Escape') {
+        hideSearchSuggestions();
+    }
+}
+
+// Input handler
+function handleSearchInput(e) {
+    const keyword = e.target.value.trim();
+    clearTimeout(searchDebounceTimer);
+
+    if (keyword.length < SEARCH_MIN_CHARS) {
+        hideSearchSuggestions();
+        searchLastKeyword = '';
+        return;
+    }
+
+    if (keyword === searchLastKeyword) return;
+
+    renderSearchLoading();
+
+    searchDebounceTimer = setTimeout(async () => {
+        searchLastKeyword = keyword;
+        const results = await fetchSearchSuggestions(keyword);
+
+        if (searchInput.value.trim() !== keyword) return;
+
+        if (results === null) {
+            hideSearchSuggestions();
+            return;
+        }
+
+        renderSearchResults(results, keyword);
+    }, SEARCH_DEBOUNCE_MS);
+}
+
+// Initialize search functionality
+function initSearchFeature() {
+    searchInput = document.getElementById('search-input');
+    suggestions = document.getElementById('search-suggestions');
+    
+    if (!searchInput || !suggestions) {
+        console.warn('[Search] Elements not found, will retry');
+        setTimeout(initSearchFeature, 500);
+        return;
+    }
+    
+    console.log('[Search] Initializing...');
+    
+    // Remove any existing listeners by cloning
+    const newSearchInput = searchInput.cloneNode(true);
+    searchInput.parentNode.replaceChild(newSearchInput, searchInput);
+    searchInput = document.getElementById('search-input');
+    
+    // Add event listeners
+    searchInput.addEventListener('input', handleSearchInput);
+    searchInput.addEventListener('keydown', handleSearchKeydown);
+    searchInput.addEventListener('focus', () => {
+        if (searchInput.value.trim().length >= SEARCH_MIN_CHARS && searchCurrentResults.length) {
+            showSearchSuggestions();
+        }
+    });
+    
+    // Click outside to close
+    document.addEventListener('click', (e) => {
+        const container = document.getElementById('desktop-search-container');
+        if (container && !container.contains(e.target)) {
+            hideSearchSuggestions();
+        }
+    });
+    
+    console.log('[Search] ✅ Initialized successfully');
+}
+
+// Navigation handlers
+window.__artezoGoProduct = function (productPrimeId) {
+    hideSearchSuggestions();
+    window.location.href = `${SEARCH_DETAIL_BASE}?id=${productPrimeId}`;
+};
+
+window.__artezoGoSearch = function (keyword) {
+    hideSearchSuggestions();
+    if (searchInput) searchInput.value = keyword;
+    // Redirect to search results page or trigger search
+    window.location.href = `${SEARCH_DETAIL_BASE}?search=${encodeURIComponent(keyword)}`;
+};
+
+// Initialize after DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSearchFeature);
+} else {
+    initSearchFeature();
+}
 
 
 
