@@ -212,6 +212,44 @@
         grid-template-columns: 1fr;
       }
     }
+
+    @media (max-width: 640px) {
+
+      .col-title {
+        font-size: 13px;
+        margin-bottom: 0.8rem;
+      }
+
+      .footer-link {
+        font-size: 12.5px;
+        padding: 4px 0;
+      }
+
+      .city-pill {
+        font-size: 11px;
+        padding: 4px 10px;
+      }
+
+      .social-btn {
+        width: 34px;
+        height: 34px;
+      }
+
+      .artezo-footer img {
+        max-width: 100%;
+      }
+    }
+
+    @media (max-width: 420px) {
+
+      .grid-cols-2 {
+        grid-template-columns: 1fr;
+      }
+
+      .footer-link {
+        font-size: 12px;
+      }
+    }
   </style>
 </head>
 
@@ -225,7 +263,13 @@
         class="max-w-7xl mx-auto px-6 flex flex-wrap justify-center md:justify-between gap-4 text-center md:text-left">
         <div class="flex items-center gap-2">
           <i class="fas fa-phone-volume text-[var(--accent)]"></i>
-          24/7 Support: <span class="text-[var(--accent)] font-medium">+91 79016 55023</span>
+
+          <span>
+            24/7 Support:
+            <a href="tel:+919922236299" class="text-[var(--accent)] font-medium">
+              +91 9922236299
+            </a>
+          </span>
         </div>
         <div class="flex items-center gap-2">
           <i class="fas fa-truck-fast text-[var(--accent)]"></i>
@@ -239,21 +283,24 @@
     </div>
 
     <!-- Main content -->
-    <div class="max-w-7xl mx-auto px-6 py-14 lg:py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 lg:pt-12 pb-0 overflow-hidden">
       <!-- Top area: logo + description + social + cities + app -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-8 relative">
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 lg:gap-10 mb-8 relative">
 
-        <!-- Vertical Dividers (hidden on mobile) -->
-        <div class="hidden md:block absolute left-1/3 top-0 bottom-0 w-px bg-gray-200 -translate-x-1/2"></div>
-        <div class="hidden md:block absolute left-2/3 top-0 bottom-0 w-px bg-gray-200 -translate-x-1/2"></div>
+        <!-- Vertical Dividers -->
+        <div class="hidden xl:block absolute left-1/3 top-0 bottom-0 w-px bg-white/10 -translate-x-1/2">
+        </div>
+
+        <div class="hidden xl:block absolute left-2/3 top-0 bottom-0 w-px bg-white/10 -translate-x-1/2">
+        </div>
 
         <!-- Column 1: Logo & About (Compact) -->
         <div class="relative">
-          <img src="../Images/footerlogo.png" alt="Artezo" class="h-24 mb-3 object-contain">
+          <img src="../Images/footerlogo.png" alt="Artezo" class="h-16 sm:h-20 mb-3 object-contain">
           <p class="text-gray-100 leading-relaxed text-xs mb-4">
             Curating premium products for modern lifestyles. Delivering joy, quality, and elegance.
           </p>
-          <div class="flex gap-2">
+          <div class="flex flex-wrap gap-2 justify-center md:justify-start">
             <div
               class="w-8 h-8 rounded-full bg-gray-100 text-[#1D3C4A] hover:bg-[#E39F32] hover:text-white flex items-center justify-center text-xs transition cursor-pointer">
               <i class="fab fa-facebook-f"></i>
@@ -278,7 +325,7 @@
           <div class="text-xs uppercase tracking-wider text-gray-200 mb-3">
             <span class="text-[#E39F32]">●</span> We Deliver Across India
           </div>
-          <div class="flex flex-wrap gap-1.5">
+          <div class="flex flex-wrap gap-2">
             <span
               class="px-2 py-1 bg-gray-100 rounded-full text-xs text-[#1D3C4A] hover:bg-[#E39F32] hover:text-white transition cursor-default">Mumbai</span>
             <span
@@ -306,7 +353,7 @@
           </div>
 
           <!-- Cards & UPI - Compact -->
-          <div class="flex flex-wrap items-center gap-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3">
             <!-- Card 1 - Visa -->
             <div class="w-10 h-6 bg-gray-100 rounded flex items-center justify-center hover:scale-110 transition p-1">
               <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1CefFQibodbtysbX6PStx8gLRhlPgfMoLlA&s"
@@ -385,86 +432,141 @@
 
       <!-- Copyright Bar - Compact -->
       <div class="border-t border-gray-200 pt-4 mt-2 text-center">
-
-      </div>
-
-      <!-- Links grid -->
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-10 mb-12">
-        <div>
-          <div class="col-title">Shop</div>
-          <a href="#" class="footer-link">New Arrivals</a>
-          <a href="#" class="footer-link">Best Sellers</a>
-          <a href="#" class="footer-link">Sale & Offers</a>
-          <a href="#" class="footer-link">Gift Ideas</a>
-        </div>
-        <div>
-          <div class="col-title">Support</div>
-          <a href="#" class="footer-link">Help Center</a>
-          <a href="#" class="footer-link">Track Order</a>
-          <a href="#" class="footer-link">Returns</a>
-          <a href="../Conatct/contact.html" class="footer-link">Contact Us</a>
-        </div>
-        <div>
-          <div class="col-title">About</div>
-          <a href="../About/about.html" class="footer-link">Our Story</a>
-          <a href="#" class="footer-link">Blog</a>
-          <a href="#" class="footer-link">Careers</a>
-        </div>
-        <div>
-          <div class="col-title">Partners</div>
-          <a href="#" class="footer-link">Sell on Artezo</a>
-          <a href="#" class="footer-link">Affiliates</a>
-        </div>
-        <div>
-          <div class="col-title">Connect</div>
-          <a href="#" class="footer-link">Newsletter</a>
-          <a href="#" class="footer-link">Wishlist</a>
-        </div>
       </div>
 
 
-      <!-- Bottom Bar - Simple Dark Theme -->
-      <div class="border-t border-gray-700 bg-[#1D3C4A] py-5">
+      <!-- Links Grid -->
+      <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-8 lg:gap-10 mb-4">
+
+        <!-- Categories -->
+        <div>
+          <div class="col-title">Categories</div>
+
+          <a href="../wall-decor/index.html" class="footer-link">Wall Decor</a>
+          <a href="../photo-frames/index.html" class="footer-link">Photo Frames</a>
+          <a href="../home-decor/index.html" class="footer-link">Home Decor</a>
+          <a href="../nameplates/index.html" class="footer-link">Name Plates</a>
+          <a href="../corporate-gifting/index.html" class="footer-link">Corporate Gifting</a>
+          <a href="../personalized-gifting/index.html" class="footer-link">Personalized Gifting</a>
+          <a href="../trophies/index.html" class="footer-link">Trophies & Mementos</a>
+        </div>
+
+        <!-- About -->
+        <div>
+          <div class="col-title">About Artezo</div>
+
+          <a href="../About/about.html" class="footer-link">About Us</a>
+          <a href="../Contact/contact.html" class="footer-link">Contact Us</a>
+          <a href="../privacy.html" class="footer-link">Privacy Policy</a>
+          <a href="../terms-condition.html" class="footer-link">Terms & Conditions</a>
+        </div>
+
+        <!-- Support -->
+        <div>
+          <div class="col-title">Customer Support</div>
+
+          <a href="https://shiprocket.in/" target="_blank" class="footer-link">
+            Track Your Order
+          </a>
+
+          <a href="../return-refund.html" class="footer-link">
+            Returns & Refunds
+          </a>
+
+          <a href="../shipping.html" class="footer-link">
+            Shipping & Delivery
+          </a>
+
+          <a href="../Contact/contact.html" class="footer-link">
+            Customer Assistance
+          </a>
+        </div>
+
+        <!-- Gifting -->
+        <div>
+          <div class="col-title">Gifting Solutions</div>
+
+          <a href="../corporate-gifting/index.html" class="footer-link">
+            Corporate Gifting
+          </a>
+
+          <a href="../personalized-gifting/index.html" class="footer-link">
+            Personalized Gifts
+          </a>
+
+          <a href="../trophies/index.html" class="footer-link">
+            Awards & Mementos
+          </a>
+
+          <a href="../nameplates/index.html" class="footer-link">
+            Custom Name Plates
+          </a>
+        </div>
+
+        <!-- Trust -->
+        <div>
+          <div class="col-title">Why Choose Us</div>
+
+          <div class="footer-link cursor-default">
+            Pan India Delivery
+          </div>
+
+          <div class="footer-link cursor-default">
+            Secure Payment Options
+          </div>
+
+          <div class="footer-link cursor-default">
+            Premium Quality Products
+          </div>
+
+          <div class="footer-link cursor-default">
+            Trusted by Happy Customers
+          </div>
+
+          <!-- Delivery Badge -->
+          <div
+            class="mt-4 inline-flex items-center gap-2 px-3 py-2 rounded-full bg-[#E39F32]/10 border border-[#E39F32]/20 text-[#E39F32] text-[11px] font-medium">
+            <i class="fa-solid fa-truck-fast"></i>
+            Delivering Across India
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Bar -->
+      <div class="border-t border-white/10 bg-[#1D3C4A] py-3 mt-2">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-          <!-- Main Footer Links & Copyright -->
-          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 border-b border-gray-600">
+          <!-- Main Footer Bottom -->
+          <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between text-center md:text-left">
 
-            <!-- Policy Links -->
-            <div class="flex flex-wrap items-center justify-center md:justify-start gap-4 sm:gap-6">
-              <a href="../terms-condition.html"
-                class="text-xs text-gray-300 hover:text-white transition-colors duration-200">Terms & Conditions</a>
-              <span class="text-gray-600 hidden sm:inline">|</span>
-              <a href="../privacy.html"
-                class="text-xs text-gray-300 hover:text-white transition-colors duration-200">Privacy Policy</a>
-              <span class="text-gray-600 hidden sm:inline">|</span>
-              <a href="../return-refund.html"
-                class="text-xs text-gray-300 hover:text-white transition-colors duration-200">Returns & Refunds</a>
-              <span class="text-gray-600 hidden sm:inline">|</span>
-              <a href="../shipping.html"
-                class="text-xs text-gray-300 hover:text-white transition-colors duration-200">Shipping & Delivery</a>
+            <!-- Company Info -->
+            <div class="space-y-1 text-center lg:text-left">
+
+              <p class="text-sm font-semibold text-white tracking-wide">
+                Artezo
+              </p>
+
+              <p class="text-xs text-gray-400 leading-relaxed max-w-md mx-auto md:mx-0">
+                1st Floor, M.J. Complex, SH 155, Main Bus Stand Road,
+                Patoda, Maharashtra - 414204
+              </p>
+
             </div>
 
-            <!-- Copyright -->
-            <div class="text-xs text-gray-400 text-center md:text-right">
-              © 2025 <span class="text-white font-medium">Artezo</span>. All rights reserved.
+            <!-- Developed By -->
+            <div class="text-center lg:text-right">
+              <p class="text-[11px] text-gray-500">
+                Developed By
+                <a href="https://kunashmedia.com/" target="_blank"
+                  class="text-[#E39F32] hover:text-white transition duration-300 font-medium">
+                  Kunash Media Solution
+                </a>
+              </p>
             </div>
           </div>
-
-          <!-- Company Info -->
-          <div class="pt-4 space-y-1">
-            <p class="text-xs text-gray-400 text-center md:text-left">
-              Artezo Furnitures Private Limited | CIN: U36100RJ2015PTC047992
-            </p>
-            <p class="text-xs text-gray-400 text-center md:text-left">
-              Registered Office: 101-104, Luhadia Tower, C Scheme, Jaipur - 302001
-            </p>
-          </div>
-
         </div>
       </div>
-
-    </div>
   </footer>
 
   <script src="../Footer/footer.js"></script>

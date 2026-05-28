@@ -1429,13 +1429,13 @@ function renderSearchResults(results, keyword) {
 
     const viewAllHtml = `
         <div class="px-5 py-2.5 border-t border-gray-100">
-            <button
+           <!-- <button
                 class="w-full text-center text-xs font-medium font-lexend text-accent hover:text-primary transition-colors py-1"
                 onmousedown="event.preventDefault()"
                 onclick="window.__artezoGoSearch('${keyword}')">
                 View all results for "<span class="font-semibold">${keyword}</span>"
                 <i class="fa-solid fa-arrow-right text-[10px] ml-1"></i>
-            </button>
+            </button> -->
         </div>`;
 
     suggestions.innerHTML = `

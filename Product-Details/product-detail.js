@@ -319,6 +319,8 @@
 
     setTimeout(() => {
       setupVariantSelection();
+      setupDynamicVariants(); //#patch 3 - Setup variant selection logic after HTML is rendered
+
       document.querySelectorAll(".add-to-cart-btn")
         .forEach((btn) => btn.addEventListener("click", handleAddToCart));
       document.querySelectorAll(".buy-now-btn")
@@ -334,6 +336,153 @@
       );
     }, 100);
   }
+
+
+  //====================================================//
+  //      PATCH ADDED
+  //=================================================//
+
+
+  // ==================== SETUP FUNCTIONS - #patch-2 ====================
+  function setupDynamicVariants() {
+    const sizeButtons = document.querySelectorAll(".size-btn");
+    const sizeHint = document.getElementById("sizeHint");
+
+    function filterColorsBySize(selectedSize) {
+      const colorButtons = document.querySelectorAll(".color-variant");
+      let count = 0;
+      let firstVisible = null;
+
+      colorButtons.forEach((btn) => {
+        const supportedSizes = btn.dataset.sizes.split(",");
+        if (supportedSizes.includes(selectedSize)) {
+          btn.style.display = "block";
+          count++;
+          if (!firstVisible) firstVisible = btn;
+        } else {
+          btn.style.display = "none";
+        }
+      });
+
+      if (sizeHint)
+        sizeHint.textContent = `${count} color${count > 1 ? "s" : ""} available`;
+
+      if (firstVisible) firstVisible.click();
+    }
+
+    // Size buttons
+    sizeButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        sizeButtons.forEach((b) =>
+          b.classList.remove(
+            "border-[#E6A62C]",
+            "bg-[#fff9ef]",
+            "text-[#033E59]",
+          ),
+        );
+        btn.classList.add("border-[#E6A62C]", "bg-[#fff9ef]", "text-[#033E59]");
+
+        filterColorsBySize(btn.dataset.size);
+      });
+    });
+
+    // Color buttons
+    document.getElementById("variantSection").addEventListener("click", (e) => {
+      const btn = e.target.closest(".color-variant");
+      if (!btn) return;
+
+      document
+        .querySelectorAll(".color-variant")
+        .forEach((b) =>
+          b.classList.remove("ring-2", "ring-[#E6A62C]", "ring-offset-2"),
+        );
+      btn.classList.add("ring-2", "ring-[#E6A62C]", "ring-offset-2");
+
+      // Update main product info
+      document.getElementById("mainProductImage").src = btn.dataset.image;
+      document.querySelector(".price-display").textContent =
+        `₹${parseInt(btn.dataset.price).toLocaleString()}`;
+    });
+
+    // Initialize with first size
+    if (sizeButtons.length > 0) {
+      sizeButtons[0].click();
+    }
+  }
+
+
+
+   // ==================== SHARE FUNCTIONALITY ====================
+
+  function setupShareFunctionality() {
+    const shareButton = document.getElementById("shareButton");
+    const sharePopup = document.getElementById("sharePopup");
+
+    if (!shareButton || !sharePopup) return;
+
+    // Get current product URL and details
+    const currentUrl = window.location.href;
+    const productName =
+      safeProductData?.productName ||
+      transformedData?.name ||
+      "Check out this product";
+    const productPrice = transformedData?.price
+      ? `₹${transformedData.price}`
+      : "";
+    const productImage =
+      transformedData?.mainImages?.[0]?.full ||
+      safeProductData?.mainImage ||
+      "";
+
+    // Toggle popup
+    shareButton.addEventListener("click", function (e) {
+      e.stopPropagation();
+      sharePopup.classList.toggle("hidden");
+    });
+
+    // Close popup when clicking outside
+    document.addEventListener("click", function (e) {
+      if (!shareButton.contains(e.target) && !sharePopup.contains(e.target)) {
+        sharePopup.classList.add("hidden");
+      }
+    });
+
+    // Handle share options
+    document.querySelectorAll(".share-option").forEach((option) => {
+      option.addEventListener("click", function (e) {
+        e.stopPropagation();
+        const shareType = this.dataset.shareType;
+
+        switch (shareType) {
+          case "link":
+            copyToClipboard(currentUrl);
+            showToast("Link copied to clipboard!", "success");
+            break;
+
+          case "email":
+            const emailSubject = encodeURIComponent(`Check out ${productName}`);
+            const emailBody = encodeURIComponent(
+              `Hi,\n\nI thought you might be interested in this product:\n\n${productName}\n${productPrice ? `Price: ${productPrice}\n` : ""}${currentUrl}\n\nRegards`,
+            );
+            window.location.href = `mailto:?subject=${emailSubject}&body=${emailBody}`;
+            break;
+
+          case "whatsapp":
+            const whatsappText = encodeURIComponent(
+              `Check out ${productName}! ${productPrice ? `Price: ${productPrice} ` : ""}${currentUrl}`,
+            );
+            window.open(`https://wa.me/?text=${whatsappText}`, "_blank");
+            break;
+        }
+
+        sharePopup.classList.add("hidden");
+      });
+    });
+  }
+
+
+
+
 
   // ═══════════════════════════════════════════════════════════════════════════
   //  DISCOUNT HELPER
@@ -1540,55 +1689,101 @@
     const buyNowText   = safeProductData.isCustomizable ? "Customize & Buy" : "Buy Now";
 
     // Variant cards HTML
-    let variantCardsHTML = "";
-    if (variantColors.length > 0) {
-      variantCardsHTML = `
-        <div class="space-y-4 mt-4">
-          <div class="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
-            <span class="text-sm font-medium text-[#033E59] hidden sm:block sm:mt-4">Variant:</span>
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 w-full px-1 sm:px-0" id="colorSwatches">
-              ${variantColors
-                .map((c, idx) => {
-                  const sel =
-                    idx === 0
-                      ? "ring-2 ring-[#E6A62C] ring-offset-1"
-                      : "ring-1 ring-gray-200 hover:ring-[#E6A62C]";
-                  return `
-                    <button class="group bg-white rounded-xl border border-gray-200 p-2 sm:p-3 transition-all duration-300 hover:shadow-md hover:-translate-y-[2px] ${sel}"
-                            data-variant-id="${c.variantId}"
-                            data-sku="${c.sku}"
-                            data-price="${c.price}"
-                            data-mrp="${c.mrp}"
-                            data-stock="${c.stock}"
-                            data-image="${c.image}">
-                      <div class="w-full aspect-square rounded-lg overflow-hidden mb-2 sm:mb-3">
-                        <img src="${c.image}"
-                             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                             alt="${escapeHtml(c.name)}"
-                             onerror="this.src='${FALLBACK_IMG}'">
-                      </div>
-                      <div class="text-xs sm:text-sm font-medium text-[#033E59] text-center mb-1">${escapeHtml(c.name)}</div>
-                      <div class="text-[11px] text-gray-500 text-center mb-1">${escapeHtml(c.color)}</div>
-                      <div class="flex justify-center gap-1 flex-wrap border-t border-gray-400">
-                        <div class="mt-1">
-                            ${(c.sizes || [])
-                              .map(
-                                (s) =>
-                                  `<span class="text-[9px] px-1.5 py-[2px] font-semibold border border-[#D89F34] rounded text-gray-600">${escapeHtml(s)}</span>`
-                              )
-                              .join("")}
-                            
-                            <span class="text-[9px] px-1.5 py-[2px] font-semibold border border-[#D89F34] rounded text-gray-700">₹${c.price}</span>
-                          </div>
-                      </div>
-                    </button>`;
-                })
-                .join("")}
-            </div>
-          </div>
-        </div>`;
+    // Variant cards HTML
+let variantCardsHTML = "";
+if (variantColors.length > 0) {
+  // Extract unique sizes across all variants
+  const sizeSet = new Set();
+  variantColors.forEach((c) => {
+    if (c.sizes && Array.isArray(c.sizes) && c.sizes.length > 0) {
+      c.sizes.forEach((s) => sizeSet.add(s));
+    } else if (c.size && c.size !== "Standard") {
+      sizeSet.add(c.size);
     }
+  });
+  const uniqueSizes = Array.from(sizeSet).sort();
 
+  const sizeSection = uniqueSizes.length > 0
+    ? `
+      <!-- SIZE SECTION -->
+      <div>
+        <div class="flex items-center gap-3 mb-3">
+          <span class="text-sm font-semibold text-[#033E59]">Size</span>
+          <div class="h-px bg-gray-200 flex-1"></div>
+        </div>
+        <div class="flex flex-wrap gap-3" id="sizeOptions">
+          ${uniqueSizes
+            .map(
+              (size, idx) => `
+            <button class="size-btn px-6 py-3 text-sm font-medium border-2 rounded-2xl transition-all duration-200
+                           ${idx === 0 ? "border-[#E6A62C] bg-[#fff9ef] text-[#033E59] shadow-sm" : "border-gray-200 hover:border-[#E6A62C]"}"
+                    data-size="${escapeHtml(size)}">
+              ${escapeHtml(size)}
+            </button>`
+            )
+            .join("")}
+        </div>
+      </div>`
+    : "";
+
+  variantCardsHTML = `
+    <div class="mt-6 space-y-6" id="variantSection">
+
+      ${sizeSection}
+
+      <!-- COLOR SECTION -->
+      <div>
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-3">
+            <span class="text-sm font-semibold text-[#033E59]">Color</span>
+            <div class="h-px bg-gray-200 w-16"></div>
+          </div>
+          ${uniqueSizes.length > 0
+            ? `<span id="sizeHint" class="text-xs text-gray-500 font-medium"></span>`
+            : ""}
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 w-full px-1 sm:px-0"
+             id="colorSwatches">
+          ${variantColors
+            .map((c, idx) => {
+              const variantSizes = (c.sizes && c.sizes.length > 0)
+                ? c.sizes
+                : (c.size ? [c.size] : ["Standard"]);
+
+              return `
+                <button class="color-variant group bg-white rounded-xl border border-gray-200 p-2 sm:p-3 transition-all duration-300 hover:shadow-md hover:-translate-y-[2px]
+                               ${idx === 0 ? "ring-2 ring-[#E6A62C] ring-offset-1" : "ring-1 ring-gray-200 hover:ring-[#E6A62C]"}"
+                        data-variant-id="${c.variantId}"
+                        data-sku="${c.sku}"
+                        data-price="${c.price}"
+                        data-mrp="${c.mrp}"
+                        data-stock="${c.stock}"
+                        data-image="${c.image}"
+                        data-sizes="${variantSizes.map((s) => escapeHtml(s)).join(",")}">
+                  <div class="w-full aspect-square rounded-lg overflow-hidden mb-2 sm:mb-3">
+                    <img src="${c.image}"
+                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                         alt="${escapeHtml(c.name)}"
+                         onerror="this.src='${FALLBACK_IMG}'">
+                  </div>
+                  <div class="text-xs sm:text-sm font-medium text-[#033E59] text-center mb-1">
+                    ${escapeHtml(c.name)}
+                  </div>
+                  <div class="text-[11px] text-gray-500 text-center mb-1">
+                    ${escapeHtml(c.color || "")}
+                  </div>
+                  <div class="border-t border-gray-200 pt-1 text-center">
+                    <span class="text-[10px] font-semibold text-[#e39f32]">₹${c.price}</span>
+                  </div>
+                </button>`;
+            })
+            .join("")}
+        </div>
+      </div>
+
+    </div>`;
+}
     // Build the initial thumbnail list for the strip
     const initialThumbItems = buildThumbItemList(initialMedia);
 
@@ -1727,27 +1922,34 @@
                   </span>
                 </div>
               </div>
-              <div class="relative flex-shrink-0" id="shareContainer" style="z-index:30;">
-                <button id="shareButton"
-                        class="w-9 h-9 rounded-full border border-stone-200 flex items-center justify-center hover:bg-stone-100 transition bg-white shadow-sm">
-                  <i class="fa-solid fa-share-nodes text-[#033E59]"></i>
-                </button>
-                <div id="sharePopup" class="absolute right-0 mt-2 w-48 bg-white shadow-xl rounded-xl border p-2 z-40 hidden">
-                  <div class="flex flex-col gap-1 text-sm">
-                    <button class="share-copy-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-yellow-50 w-full text-left">
-                      <i class="fa-solid fa-link text-[#E6A62C]"></i>Copy link
-                    </button>
-                    <button class="share-email flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-yellow-50 w-full text-left">
-                      <i class="fa-solid fa-envelope text-[#E6A62C]"></i>Email
-                    </button>
-                    <a href="https://wa.me/?text=${encodeURIComponent(window.location.href)}" target="_blank"
-                       class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-yellow-50 w-full text-left">
-                      <i class="fa-brands fa-whatsapp text-[#E6A62C]"></i>WhatsApp
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
+
+             <div class="flex items-center gap-2 flex-shrink-0">
+    <!-- Wishlist Button -->
+    <button class="wishlist-icon-btn w-9 h-9 rounded-full border border-stone-200 flex items-center justify-center hover:bg-stone-100 transition bg-white shadow-sm">
+      <i class="fa-regular fa-heart text-[#033E59]"></i>
+    </button>
+    
+    <!-- Share Button -->
+      <div class="relative" id="shareContainer" style="z-index: 30;">
+        <button id="shareButton" class="w-9 h-9 rounded-full border border-stone-200 flex items-center justify-center hover:bg-stone-100 transition bg-white shadow-sm">
+          <i class="fa-solid fa-share-nodes text-[#033E59]"></i>
+        </button>
+        <div id="sharePopup" class="absolute right-0 mt-2 w-48 bg-white shadow-xl rounded-xl border p-2 z-40 hidden">
+          <div class="flex flex-col gap-1 text-sm">
+            <button class="share-option flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-yellow-50 w-full text-left" data-share-type="link">
+              <i class="fa-solid fa-link font-lexend text-[#E6A62C]"></i>Copy link
+            </button>
+            <button class="share-option flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-yellow-50 w-full text-left" data-share-type="email">
+              <i class="fa-solid fa-envelope font-lexend text-[#E6A62C]"></i>Email
+            </button>
+            <button class="share-option flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-yellow-50 w-full text-left" data-share-type="whatsapp">
+              <i class="fa-brands fa-whatsapp font-lexend text-[#E6A62C]"></i>WhatsApp
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
             <!-- SKU / Color info -->
             <div class="flex items-center gap-4 text-xs text-gray-500">
@@ -1850,20 +2052,38 @@
             </div>
 
             <!-- Delivery strip -->
-            <div class="mt-4 px-4 py-3 rounded-lg border border-[#e5e7eb] bg-[#f8fafc]">
-              <div class="flex flex-wrap items-center justify-between gap-4 text-xs text-[#1D3C4A]">
-                <div class="flex items-center gap-2"><i class="fa-solid fa-box text-[#e39f32]"></i><span>Dispatch: <span class="font-medium">24–48h</span></span></div>
-                <div class="w-px h-4 bg-gray-300"></div>
-                <div class="flex items-center gap-2"><i class="fa-solid fa-calendar-check text-[#e39f32]"></i><span>Delivery: <span class="font-medium">4–7d</span></span></div>
-                <div class="w-px h-4 bg-gray-300"></div>
-                <div class="flex items-center gap-2"><i class="fa-solid fa-hand-holding-dollar text-[#e39f32]"></i><span>COD Available</span></div>
-                <div class="w-px h-4 bg-gray-300"></div>
-                <div class="flex items-center gap-2"><i class="fa-solid fa-truck text-[#e39f32]"></i><span>Free Shipping</span></div>
-                <div class="w-px h-4 bg-gray-300"></div>
-                <div class="flex items-center gap-2">
-                  <i class="fa-solid fa-rotate-left text-[#e39f32]"></i>
-                  <span>${safeProductData.returnAvailable ? "Easy Returns" : "No Returns"}</span>
+           <div class="flex flex-wrap items-center justify-center md:justify-between gap-x-4 gap-y-2 text-[11px] sm:text-xs text-[#1D3C4A] bg-[#faf8f4] border border-[#efe5d3] rounded-xl px-3 py-2.5">
+
+                <div class="flex items-center gap-1.5 whitespace-nowrap">
+                  <i class="fa-solid fa-box text-[#e39f32] text-[10px]"></i>
+                  <span>24–48h Dispatch</span>
                 </div>
+
+                <div class="flex items-center gap-1.5 whitespace-nowrap">
+                  <i class="fa-solid fa-calendar-check text-[#e39f32] text-[10px]"></i>
+                  <span>4–7d Delivery</span>
+                </div>
+
+                <div class="flex items-center gap-1.5 whitespace-nowrap">
+                  <i class="fa-solid fa-hand-holding-dollar text-[#e39f32] text-[10px]"></i>
+                  <span>COD Available</span>
+                </div>
+
+                <div class="flex items-center gap-1.5 whitespace-nowrap">
+                  <i class="fa-solid fa-truck text-[#e39f32] text-[10px]"></i>
+                  <span>Free Shipping</span>
+                </div>
+
+                <div class="flex items-center gap-1.5 whitespace-nowrap">
+                  <i class="fa-solid fa-shield-halved text-[#e39f32] text-[10px]"></i>
+                  <span>Secure Payment</span>
+                </div>
+
+                <div class="flex items-center gap-1.5 whitespace-nowrap">
+                  <i class="fa-solid fa-rotate-left text-[#e39f32] text-[10px]"></i>
+                  <span>Easy Returns</span>
+                </div>
+
               </div>
             </div>
 
@@ -1942,86 +2162,152 @@
   //  ACCORDION
   // ═══════════════════════════════════════════════════════════════════════════
 
+  // function fillAccordion() {
+  //   const acc = document.getElementById("accordionContainer");
+  //   if (!acc) return;
+
+  //   let html = "";
+
+  //   html += buildAccordionItem("Highlights", `
+  //     <div class="rounded-lg overflow-hidden bg-white border border-[#edf2f4] shadow-sm">
+  //       <table class="w-full text-left border-collapse"><tbody>
+  //         ${transformedData.highlights
+  //           .map(
+  //             (h) => `
+  //           <tr class="${h.accent ? "bg-[#fff9f2]" : "border-b border-[#f1f5f7] hover:bg-[#f8fbfc]"}">
+  //             <td class="py-3 px-4 font-medium border-r border-[#f1f5f7] w-1/3 text-[#1D3C4A]">${escapeHtml(h.label)}</td>
+  //             <td class="py-3 px-4 ${h.accent ? "text-[#e39f32] font-medium" : "text-[#1D3C4A]/70"}">${escapeHtml(h.value)}</td>
+  //           </tr>`
+  //           )
+  //           .join("")}
+  //       </tbody></table>
+  //     </div>`);
+
+  //   html += buildAccordionItem("Product Description", `
+  //     <div class="text-sm text-[#1D3C4A]/80 leading-relaxed space-y-4">${transformedData.description}</div>`);
+
+  //   html += buildAccordionItem("Specifications", `
+  //     <div class="rounded-lg overflow-hidden bg-white border border-[#edf2f4] shadow-sm">
+  //       <table class="w-full text-left border-collapse"><tbody>
+  //         ${transformedData.specifications
+  //           .map(
+  //             (s) => `
+  //           <tr class="border-b border-[#f1f5f7]">
+  //             <td class="py-3 px-4 font-medium border-r border-[#f1f5f7] w-1/3 text-[#1D3C4A]">${escapeHtml(s.label)}</td>
+  //             <td class="py-3 px-4 text-[#1D3C4A]/70">${escapeHtml(s.value)}</td>
+  //           </tr>`
+  //           )
+  //           .join("")}
+  //       </tbody></table>
+  //     </div>`);
+
+  //   html += buildAccordionItem("Additional Information", `
+  //     <div class="grid gap-3">
+  //       ${transformedData.additionalInfo
+  //         .map(
+  //           (info) => `
+  //         <div class="flex items-start gap-2 p-3 rounded-md bg-[#f8fbfc] border border-[#eef3f6]">
+  //           <div class="w-1.5 h-1.5 mt-2 rounded-full bg-[#e39f32]"></div>
+  //           <p class="text-[#1D3C4A]/75 text-[13px]">${escapeHtml(info)}</p>
+  //         </div>`
+  //         )
+  //         .join("")}
+  //     </div>`);
+
+  //   if (transformedData.faqs.length > 0) {
+  //     html += buildAccordionItem("FAQs", `
+  //       <div class="space-y-4">
+  //         ${transformedData.faqs
+  //           .map(
+  //             (faq) => `
+  //           <div class="p-4 rounded-lg border border-[#eef3f6] bg-white shadow-sm">
+  //             <p class="font-medium text-[#1D3C4A] text-[14px]">${escapeHtml(faq.q)}</p>
+  //             <p class="mt-2 text-[#1D3C4A]/70 text-[13px] leading-relaxed">${escapeHtml(faq.a)}</p>
+  //           </div>`
+  //           )
+  //           .join("")}
+  //       </div>`);
+  //   }
+
+  //   acc.innerHTML = html;
+
+  //   acc.querySelectorAll(".item").forEach((item) => {
+  //     const btn     = item.querySelector(".toggle");
+  //     const content = item.querySelector(".content");
+  //     const icon    = item.querySelector(".icon");
+  //     if (btn && content && icon) {
+  //       btn.addEventListener("click", () => {
+  //         acc.querySelectorAll(".item").forEach((i) => {
+  //           if (i !== item) {
+  //             i.querySelector(".content")?.classList.remove("open");
+  //             const ic = i.querySelector(".icon");
+  //             if (ic) ic.style.transform = "rotate(0deg)";
+  //           }
+  //         });
+  //         content.classList.toggle("open");
+  //         icon.style.transform = content.classList.contains("open")
+  //           ? "rotate(45deg)"
+  //           : "rotate(0deg)";
+  //       });
+  //     }
+  //   });
+  // }
+
+
   function fillAccordion() {
     const acc = document.getElementById("accordionContainer");
     if (!acc) return;
 
-    let html = "";
+    let accHtml = `
+      <div class="item"><button class="toggle w-full flex justify-between items-center px-6 py-4 text-left font-medium font-lexend text-[#1D3C4A]">Highlights<span class="icon text-xl transition-transform duration-300">+</span></button><div class="content"><div class="px-6 pb-6 text-sm"><div class="rounded-lg overflow-hidden bg-white border border-[#edf2f4] shadow-sm"><table class="w-full text-left border-collapse"><tbody>`;
 
-    html += buildAccordionItem("Highlights", `
-      <div class="rounded-lg overflow-hidden bg-white border border-[#edf2f4] shadow-sm">
-        <table class="w-full text-left border-collapse"><tbody>
-          ${transformedData.highlights
-            .map(
-              (h) => `
-            <tr class="${h.accent ? "bg-[#fff9f2]" : "border-b border-[#f1f5f7] hover:bg-[#f8fbfc]"}">
-              <td class="py-3 px-4 font-medium border-r border-[#f1f5f7] w-1/3 text-[#1D3C4A]">${escapeHtml(h.label)}</td>
-              <td class="py-3 px-4 ${h.accent ? "text-[#e39f32] font-medium" : "text-[#1D3C4A]/70"}">${escapeHtml(h.value)}</td>
-            </tr>`
-            )
-            .join("")}
-        </tbody></table>
-      </div>`);
+    transformedData.highlights.forEach((h) => {
+      let rowClass = h.accent
+        ? "bg-[#fff9f2]"
+        : "border-b border-[#f1f5f7] hover:bg-[#f8fbfc] transition";
+      let valClass = h.accent
+        ? "text-[#e39f32] font-medium"
+        : "text-[#1D3C4A]/70";
+      accHtml += `<tr class="${rowClass}"><td class="py-3 px-3 font-medium border-r border-[#f1f5f7] w-1/3 text-[#1D3C4A]">${h.label}<\/td><td class="py-3 px-4 ${valClass}">${h.value}<\/td><\/tr>`;
+    });
 
-    html += buildAccordionItem("Product Description", `
-      <div class="text-sm text-[#1D3C4A]/80 leading-relaxed space-y-4">${transformedData.description}</div>`);
+    accHtml += `</tbody><\/table><\/div><\/div><\/div><\/div>`;
+    accHtml += `<div class="item"><button class="toggle w-full flex justify-between items-center px-6 py-3 text-left font-medium font-lexend">Product Description<span class="icon text-xl transition-transform duration-300">+</span></button><div class="content"><div class="px-6 pb-6 text-sm text-[#1D3C4A]/80 leading-relaxed space-y-4">${transformedData.description}<\/div><\/div><\/div>`;
+    accHtml += `<div class="item"><button class="toggle w-full flex justify-between items-center px-6 py-3 text-left font-medium font-lexend text-[#1D3C4A]">Specifications<span class="icon text-xl transition-transform duration-300">+</span></button><div class="content"><div class="px-6 pb-6 text-sm"><div class="rounded-lg overflow-hidden bg-white border border-[#edf2f4] shadow-sm"><table class="w-full text-left border-collapse"><tbody>`;
 
-    html += buildAccordionItem("Specifications", `
-      <div class="rounded-lg overflow-hidden bg-white border border-[#edf2f4] shadow-sm">
-        <table class="w-full text-left border-collapse"><tbody>
-          ${transformedData.specifications
-            .map(
-              (s) => `
-            <tr class="border-b border-[#f1f5f7]">
-              <td class="py-3 px-4 font-medium border-r border-[#f1f5f7] w-1/3 text-[#1D3C4A]">${escapeHtml(s.label)}</td>
-              <td class="py-3 px-4 text-[#1D3C4A]/70">${escapeHtml(s.value)}</td>
-            </tr>`
-            )
-            .join("")}
-        </tbody></table>
-      </div>`);
+    transformedData.specifications.forEach((s) => {
+      accHtml += `<tr class="border-b border-[#f1f5f7]"><td class="py-3 px-3 font-medium border-r border-[#f1f5f7] w-1/3 text-[#1D3C4A]">${s.label}<\/td><td class="py-3 px-4 text-[#1D3C4A]/70">${s.value}<\/td><\/tr>`;
+    });
 
-    html += buildAccordionItem("Additional Information", `
-      <div class="grid gap-3">
-        ${transformedData.additionalInfo
-          .map(
-            (info) => `
-          <div class="flex items-start gap-2 p-3 rounded-md bg-[#f8fbfc] border border-[#eef3f6]">
-            <div class="w-1.5 h-1.5 mt-2 rounded-full bg-[#e39f32]"></div>
-            <p class="text-[#1D3C4A]/75 text-[13px]">${escapeHtml(info)}</p>
-          </div>`
-          )
-          .join("")}
-      </div>`);
+    accHtml += `</tbody><\/table><\/div><\/div><\/div><\/div>`;
+    accHtml += `<div class="item"><button class="toggle w-full flex justify-between items-center px-6 py-3 text-left font-medium font-lexend text-[#1D3C4A]">Additional Information<span class="icon text-lg transition-transform duration-300">+</span></button><div class="content"><div class="px-6 pb-5 text-sm"><div class="grid gap-3">`;
 
-    if (transformedData.faqs.length > 0) {
-      html += buildAccordionItem("FAQs", `
-        <div class="space-y-4">
-          ${transformedData.faqs
-            .map(
-              (faq) => `
-            <div class="p-4 rounded-lg border border-[#eef3f6] bg-white shadow-sm">
-              <p class="font-medium text-[#1D3C4A] text-[14px]">${escapeHtml(faq.q)}</p>
-              <p class="mt-2 text-[#1D3C4A]/70 text-[13px] leading-relaxed">${escapeHtml(faq.a)}</p>
-            </div>`
-            )
-            .join("")}
-        </div>`);
-    }
+    transformedData.additionalInfo.forEach((info) => {
+      accHtml += `<div class="flex items-start gap-2 p-3 rounded-md bg-[#f8fbfc] border border-[#eef3f6]"><div class="w-1.5 h-1.5 mt-2 rounded-full bg-[#e39f32]"></div><p class="text-[#1D3C4A]/75 text-[13px]">${info}</p></div>`;
+    });
 
-    acc.innerHTML = html;
+    accHtml += `</div></div></div></div>`;
+    accHtml += `<div class="item"><button class="toggle w-full flex justify-between items-center px-6 py-3 text-left font-medium font-lexend text-[#1D3C4A]">FAQs<span class="icon text-lg transition-transform duration-300">+</span></button><div class="content"><div class="px-6 pb-6 text-sm space-y-4">`;
 
-    acc.querySelectorAll(".item").forEach((item) => {
-      const btn     = item.querySelector(".toggle");
+    transformedData.faqs.forEach((faq) => {
+      accHtml += `<div class="p-4 rounded-lg border border-[#eef3f6] bg-white shadow-sm"><p class="font-medium text-[#1D3C4A] text-[14px]">${faq.q}</p><p class="mt-2 text-[#1D3C4A]/70 text-[13px] leading-relaxed">${faq.a}</p></div>`;
+    });
+
+    accHtml += `</div></div></div>`;
+    acc.innerHTML = accHtml;
+
+    // Setup accordion click handlers
+    document.querySelectorAll(".item").forEach((item) => {
+      const btn = item.querySelector(".toggle");
       const content = item.querySelector(".content");
-      const icon    = item.querySelector(".icon");
+      const icon = item.querySelector(".icon");
       if (btn && content && icon) {
         btn.addEventListener("click", () => {
-          acc.querySelectorAll(".item").forEach((i) => {
+          document.querySelectorAll(".item").forEach((i) => {
             if (i !== item) {
               i.querySelector(".content")?.classList.remove("open");
-              const ic = i.querySelector(".icon");
-              if (ic) ic.style.transform = "rotate(0deg)";
+              if (i.querySelector(".icon"))
+                i.querySelector(".icon").style.transform = "rotate(0deg)";
             }
           });
           content.classList.toggle("open");
@@ -2032,6 +2318,8 @@
       }
     });
   }
+
+
 
   function buildAccordionItem(title, bodyHTML) {
     return `
@@ -2471,39 +2759,110 @@
   //  STICKY BAR
   // ═══════════════════════════════════════════════════════════════════════════
 
+  // function fillStickyBar() {
+  //   const sticky = document.getElementById("stickyBar");
+  //   if (!sticky) return;
+
+  //   sticky.innerHTML = `
+  //     <div class="flex flex-wrap md:flex-nowrap items-center md:justify-center justify-between w-full gap-2 md:gap-4">
+  //       <div class="flex items-center gap-2 whitespace-nowrap">
+  //         <span class="font-medium font-lexend text-lg sm:text-xl price-sticky" style="color:#e39f32">
+  //           ₹${safeProductData.currentSellingPrice.toLocaleString("en-IN")}
+  //         </span>
+  //         ${safeProductData.currentMrpPrice > safeProductData.currentSellingPrice
+  //           ? `<span class="text-gray-500 line-through text-sm bg-gray-100 px-2 py-0.5 rounded-md">
+  //               ₹${safeProductData.currentMrpPrice.toLocaleString("en-IN")}
+  //             </span>`
+  //           : ""}
+  //       </div>
+  //       <div class="flex items-center gap-2">
+  //         <button class="add-to-cart-btn border px-3 md:px-4 py-2 rounded-full text-sm md:text-base font-medium font-lexend flex items-center gap-2 transition hover:bg-[#1D3C4A]/10"
+  //                 style="border-color:#1d3c4a;color:#1d3c4a">
+  //           <i class="fas fa-cart-plus text-xs md:text-sm"></i> Cart
+  //         </button>
+  //         <button class="buy-now-btn px-4 md:px-5 py-2 rounded-full text-sm md:text-base font-medium font-lexend flex items-center gap-2"
+  //                 style="background-color:#1d3c4a;color:white">
+  //           Buy <i class="fas fa-arrow-right text-xs md:text-sm"></i>
+  //         </button>
+  //       </div>
+  //       <a href="https://wa.me/+919876543210?text=Hi%2C+I'm+interested+in+this+product.+Can+you+send+a+live+video?"
+  //          target="_blank"
+  //          class="w-full md:w-auto mt-1 md:mt-0 px-4 py-2 rounded-full text-sm md:text-base font-medium font-lexend flex items-center justify-center gap-2 bg-green-600 text-white">
+  //         <i class="fab fa-whatsapp text-sm"></i> Get Live Product Video
+  //       </a>
+  //     </div>`;
+  // }
+
+
   function fillStickyBar() {
     const sticky = document.getElementById("stickyBar");
     if (!sticky) return;
 
+    const addToCartButtonText = safeProductData.isCustomizable
+      ? "Customize"
+      : "Add to Cart";
+    const addToCartButtonIcon = safeProductData.isCustomizable
+      ? '<i class="fas fa-sliders-h"></i>'
+      : '<i class="fas fa-cart-plus"></i>';
+    const buyNowButtonText = safeProductData.isCustomizable
+      ? "Customize & Buy"
+      : "Buy Now";
+
     sticky.innerHTML = `
-      <div class="flex flex-wrap md:flex-nowrap items-center md:justify-center justify-between w-full gap-2 md:gap-4">
-        <div class="flex items-center gap-2 whitespace-nowrap">
-          <span class="font-medium font-lexend text-lg sm:text-xl price-sticky" style="color:#e39f32">
-            ₹${safeProductData.currentSellingPrice.toLocaleString("en-IN")}
-          </span>
-          ${safeProductData.currentMrpPrice > safeProductData.currentSellingPrice
-            ? `<span class="text-gray-500 line-through text-sm bg-gray-100 px-2 py-0.5 rounded-md">
-                ₹${safeProductData.currentMrpPrice.toLocaleString("en-IN")}
-              </span>`
-            : ""}
-        </div>
-        <div class="flex items-center gap-2">
-          <button class="add-to-cart-btn border px-3 md:px-4 py-2 rounded-full text-sm md:text-base font-medium font-lexend flex items-center gap-2 transition hover:bg-[#1D3C4A]/10"
-                  style="border-color:#1d3c4a;color:#1d3c4a">
-            <i class="fas fa-cart-plus text-xs md:text-sm"></i> Cart
-          </button>
-          <button class="buy-now-btn px-4 md:px-5 py-2 rounded-full text-sm md:text-base font-medium font-lexend flex items-center gap-2"
-                  style="background-color:#1d3c4a;color:white">
-            Buy <i class="fas fa-arrow-right text-xs md:text-sm"></i>
-          </button>
-        </div>
-        <a href="https://wa.me/+919876543210?text=Hi%2C+I'm+interested+in+this+product.+Can+you+send+a+live+video?"
-           target="_blank"
-           class="w-full md:w-auto mt-1 md:mt-0 px-4 py-2 rounded-full text-sm md:text-base font-medium font-lexend flex items-center justify-center gap-2 bg-green-600 text-white">
-          <i class="fab fa-whatsapp text-sm"></i> Get Live Product Video
-        </a>
-      </div>`;
+<div class="flex flex-wrap md:flex-nowrap items-center md:justify-center justify-between w-full gap-2 md:gap-4">
+
+  <!-- Price -->
+  <!-- <div class="flex items-center gap-2 whitespace-nowrap"> 
+    <span class="font-medium font-lexend text-lg sm:text-xl" style="color:#e39f32">
+      ₹${transformedData.price.toLocaleString()}
+    </span>
+  <span class="text-gray-500 line-through text-sm md:text-base 
+bg-gray-100 px-2 py-0.5 rounded-md">
+  ₹${transformedData.originalPrice.toLocaleString()}
+</span>
+  </div>-->
+
+  <!-- Cart + Buy -->
+ <div class="flex items-center justify-center gap-2 w-full">
+
+  <!-- ADD TO CART -->
+  <div class="flex-1 md:flex-none bg-[#E39F32] rounded-xl border border-[#1d3c4a] overflow-hidden">
+    <button
+      class="w-full md:min-w-[190px] px-4 md:px-6 py-3 rounded-xl text-sm md:text-base font-medium font-lexend flex items-center justify-center gap-2 transition-all duration-300 hover:bg-[#1D3C4A]/10"
+      style="color:#1d3c4a"
+    >
+      <i class="fas fa-cart-plus text-xs md:text-sm"></i>
+      Add to Cart
+    </button>
+  </div>
+
+  <!-- BUY NOW -->
+  <div class="flex-1 md:flex-none bg-white rounded-xl border border-gray-300 overflow-hidden">
+    <button
+      class="w-full md:min-w-[190px] px-4 md:px-6 py-3 rounded-xl text-sm md:text-base font-medium font-lexend flex items-center justify-center gap-2 transition-all duration-300 hover:bg-gray-50"
+      style="color:#1d3c4a"
+    >
+      Buy Now
+      <i class="fas fa-arrow-right text-xs md:text-sm"></i>
+    </button>
+  </div>
+
+</div>
+
+  <!-- WhatsApp Video Button -->
+ <!-- <a href="https://wa.me/+919876543210?text=Hi%2C%20I%27m%20interested%20in%20this%20product.%20Can%20you%20please%20send%20live%20product%20videos%3F"
+  target="_blank"
+  class="w-full md:w-auto mt-1 md:mt-0 px-4 py-2 rounded-full text-sm md:text-base font-medium font-lexend flex items-center justify-center gap-2 bg-green-600 text-white">
+    <i class="fab fa-whatsapp text-sm"></i>
+    Get Live Product Video
+  </a> -->
+
+</div>
+`;
   }
+
+
+
 
   // ═══════════════════════════════════════════════════════════════════════════
   //  EVENT LISTENERS
