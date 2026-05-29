@@ -1,720 +1,917 @@
 // ============================================================================
-// CHECKOUT PAGE - Complete JavaScript
+// ARTEZO CHECKOUT — Production Grade
+// Senior Architecture: clean state machine, API-first, no dummy data
 // ============================================================================
 
-let currentStep = 1;
-const totalSteps = 4;
-let checkoutData = {
-    address: {},
-    shipping: {},
-    payment: {},
-    cart: {},
+'use strict';
+
+const BASE_URL = 'http://localhost:8085';
+
+// ── State ──────────────────────────────────────────────────────────────────
+const STATE = {
+    currentStep: 1,
+    totalSteps: 4,
+    userId: null,           // resolved from auth
+    cartData: null,         // { cartId, items[], totalAmount, totalMrp, totalDiscount, totalItems }
+    addresses: [],          // fetched from API
+    selectedAddressId: null,
+    editingShippingId: null, // null = new, number = edit
+    shipping: { id: 'standard', name: 'Standard Delivery', description: '5–7 business days', price: 0 },
+    payment: { type: 'PREPAID', mode: 'ONLINE' }, // PREPAID/COD
+    termsAccepted: false,
 };
 
-// Shipping options
-const shippingOptions = [
-    {
-        id: 'standard',
-        name: 'Standard Delivery',
-        description: 'Delivery in 5-7 business days',
-        price: 0,
-        icon: 'fa-truck'
-    },
-    {
-        id: 'express',
-        name: 'Express Delivery',
-        description: 'Delivery in 2-3 business days',
-        price: 99,
-        icon: 'fa-bolt'
-    },
-    {
-        id: 'overnight',
-        name: 'Overnight Delivery',
-        description: 'Next day delivery',
-        price: 299,
-        icon: 'fa-rocket'
+// ── GST Rate ──────────────────────────────────────────────────────────────
+// Per Indian tax norm: GST is INCLUSIVE in MRP. We extract it.
+// GST rate applicable for art supplies / stationery = 12% or 18%.
+// We'll apply 18% GST extraction from the selling price for display parity.
+const GST_RATE = 0.18;
+
+// ── Init ───────────────────────────────────────────────────────────────────
+async function initCheckout() {
+    try {
+        STATE.userId = await resolveUserId();
+        if (!STATE.userId) {
+            toast('Please login to continue', 'error');
+            setTimeout(() => window.location.href = '/Login/login.html', 1500);
+            return;
+        }
+        await Promise.all([loadCart(), loadAddresses()]);
+        selectShipping('standard', 0); // default
+        goToStep(1);
+    } catch (err) {
+        console.error('[Checkout] Init error:', err);
+        toast('Failed to load checkout. Please refresh.', 'error');
     }
-];
-
-// Promo codes
-const promoCodes = {
-    'SAVE10': { discount: 0.10, description: '10% off on orders above ₹500' },
-    'WELCOME20': { discount: 0.20, description: '20% off on first order' },
-    'ARTEZO5': { discount: 0.05, description: '5% off on all orders' },
-    'SHIP50': { discount: 0, shipping: 50, description: '₹50 off on shipping' },
-};
-
-// ============================================================================
-// INITIALIZATION
-// ============================================================================
-
-function initCheckout() {
-    console.log('[Checkout] Initializing...');
-    
-    // Load cart data
-    loadCartData();
-    
-    // Setup event listeners
-    setupEventListeners();
-    
-    // Render shipping options
-    renderShippingOptions();
-    
-    // Render order summary
-    updateOrderSummary();
-    
-    // Set initial step
-    goToStep(1);
-    
-    console.log('[Checkout] Ready!', checkoutData);
 }
 
-function setupEventListeners() {
-    // Payment method change
-    document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
-        radio.addEventListener('change', (e) => {
-            const cardDetails = document.getElementById('card-details');
-            if (e.target.value === 'card') {
-                cardDetails.style.display = 'block';
-            } else {
-                cardDetails.style.display = 'none';
-            }
-        });
+function resolveUserId() {
+    // Try auth service first, then localStorage fallback
+    if (window.authService && window.authService.getUserId) {
+        return Promise.resolve(window.authService.getUserId());
+    }
+    const uid = localStorage.getItem('userId') || sessionStorage.getItem('userId');
+    return Promise.resolve(uid ? parseInt(uid) : null);
+}
+
+// ── Cart ───────────────────────────────────────────────────────────────────
+async function loadCart() {
+    try {
+        const res = await apiFetch(`/api/v1/cart?userId=${STATE.userId}`);
+        if (!res.success || !res.data) throw new Error(res.message || 'Cart load failed');
+        STATE.cartData = res.data;
+        if (!STATE.cartData.items || STATE.cartData.items.length === 0) {
+            toast('Your cart is empty!', 'info');
+            setTimeout(() => window.location.href = '/Cart/cart.html', 1800);
+            return;
+        }
+        renderCartItems();
+        renderSummaryBreakdown();
+    } catch (err) {
+        console.error('[Cart] Load error:', err);
+        toast('Could not load cart. Please try again.', 'error');
+    }
+}
+
+function renderCartItems() {
+    const container = document.getElementById('order-items-list');
+    const clearBtn = document.getElementById('clear-cart-btn');
+    if (!STATE.cartData || !STATE.cartData.items.length) {
+        container.innerHTML = '<p class="text-sm text-gray-400 text-center py-4">Cart is empty</p>';
+        clearBtn.classList.add('hidden');
+        return;
+    }
+    clearBtn.classList.remove('hidden');
+
+    container.innerHTML = STATE.cartData.items.map(item => `
+        <div class="cart-item-row" id="cart-row-${item.itemId}">
+            <img class="cart-item-img"
+                src="${item.productImageUrl ? BASE_URL + item.productImageUrl : '../Images/placeholder.jpg'}"
+                alt="${item.titleName}"
+                onerror="this.src='../Images/placeholder.jpg'">
+            <div class="cart-item-info">
+                <div class="cart-item-name">${item.titleName}</div>
+                <div class="cart-item-meta">
+                    ${[item.selectedColor, item.selectedSize].filter(Boolean).join(' · ')}
+                </div>
+                <div class="flex items-center justify-between mt-1">
+                    <div class="cart-item-qty-controls">
+                        <button class="qty-btn" id="qty-minus-${item.itemId}"
+                            onclick="updateQty(${item.itemId}, ${item.quantity - 1}, '${item.productId}', '${item.variantId || ''}')"
+                            ${item.quantity <= 1 ? 'disabled' : ''}>−</button>
+                        <span class="qty-value" id="qty-val-${item.itemId}">${item.quantity}</span>
+                        <button class="qty-btn" id="qty-plus-${item.itemId}"
+                            onclick="updateQty(${item.itemId}, ${item.quantity + 1}, '${item.productId}', '${item.variantId || ''}')">+</button>
+                        <button class="delete-item-btn" title="Remove item"
+                            onclick="removeItem(${item.productId}, '${item.variantId || ''}', ${item.itemId})">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                    <div class="font-semibold text-sm text-primary">₹${fmtNum(item.itemTotal)}</div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function updateQty(itemId, newQty, productId, variantId) {
+    if (newQty < 1) return;
+    // Disable buttons during update
+    ['minus', 'plus'].forEach(dir => {
+        const btn = document.getElementById(`qty-${dir}-${itemId}`);
+        if (btn) btn.disabled = true;
     });
+    const valEl = document.getElementById(`qty-val-${itemId}`);
+    if (valEl) valEl.innerHTML = '<div class="qty-spinner mx-auto"></div>';
 
-    // Auto-format card number
-    const cardNumberInput = document.getElementById('cardNumber');
-    if (cardNumberInput) {
-        cardNumberInput.addEventListener('input', (e) => {
-            const value = e.target.value.replace(/\s/g, '');
-            const formatted = value.match(/.{1,4}/g)?.join(' ') || value;
-            e.target.value = formatted;
-        });
-    }
-
-    // Auto-format card expiry
-    const cardExpiryInput = document.getElementById('cardExpiry');
-    if (cardExpiryInput) {
-        cardExpiryInput.addEventListener('input', (e) => {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length >= 2) {
-                value = value.substring(0, 2) + '/' + value.substring(2, 4);
-            }
-            e.target.value = value;
-        });
-    }
-
-    // Only allow numbers in CVV
-    const cardCVVInput = document.getElementById('cardCVV');
-    if (cardCVVInput) {
-        cardCVVInput.addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/\D/g, '');
-        });
-    }
-
-    // Only allow numbers in phone
-    const phoneInput = document.getElementById('phone');
-    if (phoneInput) {
-        phoneInput.addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/\D/g, '');
-        });
+    try {
+        const params = new URLSearchParams({ userId: STATE.userId, itemId, quantity: newQty });
+        const res = await apiFetch(`/api/v1/cart/update-quantity?${params}`, { method: 'PATCH' });
+        if (!res.success) throw new Error(res.message);
+        await loadCart(); // re-fetch full cart for accurate totals
+    } catch (err) {
+        console.error('[Cart] Update qty error:', err);
+        toast('Failed to update quantity', 'error');
+        await loadCart(); // revert UI to actual state
     }
 }
 
-// ============================================================================
-// CART DATA
-// ============================================================================
+async function removeItem(productId, variantId, itemId) {
+    const row = document.getElementById(`cart-row-${itemId}`);
+    if (row) { row.style.opacity = '0.4'; row.style.pointerEvents = 'none'; }
 
-function loadCartData() {
-    if (!window.cartWishlistService) {
-        console.error('[Checkout] Cart service not loaded');
+    try {
+        const params = new URLSearchParams({ userId: STATE.userId, productid: productId });
+        if (variantId) params.append('variantId', variantId);
+        const res = await apiFetch(`/api/v1/cart/remove?${params}`, { method: 'DELETE' });
+        if (!res.success) throw new Error(res.message);
+        toast('Item removed', 'info');
+        await loadCart();
+    } catch (err) {
+        console.error('[Cart] Remove error:', err);
+        toast('Failed to remove item', 'error');
+        if (row) { row.style.opacity = '1'; row.style.pointerEvents = ''; }
+    }
+}
+
+async function clearCart() {
+    if (!confirm('Remove all items from cart?')) return;
+    try {
+        const res = await apiFetch(`/api/v1/cart/clear?userId=${STATE.userId}`, { method: 'DELETE' });
+        if (!res.success) throw new Error(res.message);
+        toast('Cart cleared', 'info');
+        setTimeout(() => window.location.href = '/Cart/cart.html', 1200);
+    } catch (err) {
+        console.error('[Cart] Clear error:', err);
+        toast('Failed to clear cart', 'error');
+    }
+}
+
+// ── Summary Calculation ────────────────────────────────────────────────────
+// Indian standard (Flipkart / Amazon IN style):
+//   MRP Total          = sum of all item MRP * qty
+//   Product Discount   = MRP Total - Selling Price Total  (no rounding)
+//   Delivery Charges   = shipping.price  (0 if free)
+//   GST (18%)          = extracted from selling price (already included in price; displayed separately)
+//                        displayed as: round( sellingTotal * GST_RATE / (1 + GST_RATE) )
+//   Total Payable      = Selling Price Total + Delivery Charges
+//   (GST is already included in price, displayed for transparency — like Flipkart)
+
+function calcSummary() {
+    const cart = STATE.cartData;
+    if (!cart) return { mrp: 0, sellingTotal: 0, productDiscount: 0, shipping: 0, gst: 0, total: 0, savings: 0 };
+
+    // Use API-provided values directly — no manual calculation that can drift
+    const mrpTotal       = cart.totalMrp || 0;          // sum of mrpPrice * qty
+    const sellingTotal   = cart.totalAmount || 0;        // sum of unitPrice * qty (post-discount)
+    const productDiscount = Math.max(0, mrpTotal - sellingTotal); // = totalDiscount from API
+
+    const shippingCharge = STATE.shipping.price || 0;
+
+    // GST extraction (inclusive): GST = price * rate / (1 + rate)
+    // We show it for transparency, total stays = sellingTotal + shipping
+    const gstExtracted = Math.round(sellingTotal * GST_RATE / (1 + GST_RATE));
+
+    const totalPayable = sellingTotal + shippingCharge; // GST already in price
+
+    return {
+        mrp: mrpTotal,
+        sellingTotal,
+        productDiscount,
+        shipping: shippingCharge,
+        gst: gstExtracted,          // informational, already in price
+        total: totalPayable,
+        savings: productDiscount + (shippingCharge === 0 && mrpTotal > 0 ? 0 : 0),
+    };
+}
+
+function renderSummaryBreakdown() {
+    const s = calcSummary();
+    const cart = STATE.cartData;
+
+    // Items count
+    const totalQty = cart ? cart.totalItems || 0 : 0;
+    document.getElementById('items-count-badge').textContent = `${totalQty} item${totalQty !== 1 ? 's' : ''}`;
+
+    setText('sum-mrp', `₹${fmtNum(s.mrp)}`);
+
+    const discRow = document.getElementById('sum-discount-row');
+    if (s.productDiscount > 0) {
+        discRow.style.display = 'flex';
+        setText('sum-discount', `-₹${fmtNum(s.productDiscount)}`);
+    } else {
+        discRow.style.display = 'none';
+    }
+
+    const shippingEl = document.getElementById('sum-shipping');
+    shippingEl.textContent = s.shipping === 0 ? 'FREE' : `₹${fmtNum(s.shipping)}`;
+    shippingEl.className = s.shipping === 0 ? 'text-green-600 font-medium' : 'font-medium';
+
+    setText('sum-gst', `₹${fmtNum(s.gst)}`);
+
+    const totalEl = document.getElementById('sum-total');
+    totalEl.textContent = `₹${fmtNum(s.total)}`;
+
+    // Savings message
+    const savingsMsg = document.getElementById('sum-savings-msg');
+    const totalSavings = s.productDiscount;
+    if (totalSavings > 0) {
+        savingsMsg.classList.remove('hidden');
+        setText('sum-savings-amount', `₹${fmtNum(totalSavings)}`);
+    } else {
+        savingsMsg.classList.add('hidden');
+    }
+}
+
+// ── Addresses ──────────────────────────────────────────────────────────────
+async function loadAddresses() {
+    try {
+        const data = await apiFetch(`/api/shipping-addresses/get-user-addresses/${STATE.userId}`);
+        // API returns array directly (not wrapped in .data)
+        STATE.addresses = Array.isArray(data) ? data : (data.data || []);
+        renderAddressCards();
+    } catch (err) {
+        console.error('[Address] Load error:', err);
+        STATE.addresses = [];
+        renderAddressCards();
+    }
+}
+
+function renderAddressCards() {
+    const container = document.getElementById('saved-addresses-container');
+
+    if (!STATE.addresses.length) {
+        container.innerHTML = '<p class="text-sm text-gray-400 mb-4">No saved addresses found. Add one below.</p>';
+        // Auto-select cleared
+        STATE.selectedAddressId = null;
         return;
     }
 
-    checkoutData.cart = window.cartWishlistService.cart;
-    console.log('[Checkout] Cart data loaded:', checkoutData.cart);
-
-    if (!checkoutData.cart.items || checkoutData.cart.items.length === 0) {
-        showAlert('Your cart is empty!', 'error');
-        setTimeout(() => {
-            window.location.href = '/Cart/cart.html';
-        }, 2000);
-    }
-}
-
-function updateOrderSummary() {
-    const itemsContainer = document.getElementById('order-items');
-    const cart = checkoutData.cart;
-
-    let html = '';
-    if (cart.items && cart.items.length > 0) {
-        cart.items.forEach(item => {
-            html += `
-                <div class="product-item-checkout">
-                    <img src="${item.image || '../Images/placeholder.jpg'}" alt="${item.titleName}" 
-                         onerror="this.src='../Images/placeholder.jpg'">
-                    <div class="product-item-checkout-info">
-                        <div class="product-item-checkout-name">${item.titleName}</div>
-                        <div class="product-item-checkout-meta">
-                            ${item.selectedColor ? item.selectedColor : ''}
-                            ${item.selectedSize ? ' • ' + item.selectedSize : ''}
-                        </div>
-                        <div class="product-item-checkout-meta">Qty: ${item.quantity}</div>
-                    </div>
-                    <div class="product-item-checkout-price">
-                        ₹${(item.itemTotal || item.unitPrice * item.quantity).toLocaleString()}
-                    </div>
-                </div>
-            `;
-        });
+    // Auto-select default or first
+    if (!STATE.selectedAddressId) {
+        const def = STATE.addresses.find(a => a.default) || STATE.addresses[0];
+        STATE.selectedAddressId = def.shippingId;
     }
 
-    itemsContainer.innerHTML = html;
-    updatePricingBreakdown();
+    container.innerHTML = STATE.addresses.map(addr => `
+        <div class="address-card ${STATE.selectedAddressId === addr.shippingId ? 'selected' : ''}"
+             id="addr-card-${addr.shippingId}"
+             onclick="selectAddress(${addr.shippingId})">
+            ${addr.default ? '<span class="default-badge"><i class="fa-solid fa-star mr-1" style="font-size:10px"></i>Default</span>' : ''}
+            <button class="edit-btn" onclick="event.stopPropagation(); openAddressModal(${addr.shippingId})">
+                <i class="fa-solid fa-pen-to-square mr-1"></i>Edit
+            </button>
+            <div class="flex items-center gap-2 mb-1">
+                <input type="radio" name="addr_select" ${STATE.selectedAddressId === addr.shippingId ? 'checked' : ''}
+                    style="accent-color:#1D3C4A;width:15px;height:15px;flex-shrink:0;" readonly>
+                <span class="font-semibold text-sm text-gray-900">${addr.customerName}</span>
+                <span class="text-gray-400 text-xs">· ${addr.customerPhone}</span>
+            </div>
+            <div class="text-sm text-gray-600 ml-5 leading-relaxed">
+                ${addr.flatNo ? addr.flatNo + ', ' : ''}${addr.shippingAddress},
+                ${addr.shippingCity}, ${addr.shippingState} – ${addr.shippingPincode}
+                ${addr.landmark ? '<br><span class="text-gray-400">Landmark: ' + addr.landmark + '</span>' : ''}
+            </div>
+        </div>
+    `).join('');
 }
 
-function updatePricingBreakdown() {
-    const cart = checkoutData.cart;
-    const shipping = checkoutData.shipping;
-    
-    const subtotal = cart.totalAmount || 0;
-    const shippingCost = shipping.price || 0;
-    const discount = checkoutData.promoDiscount || 0;
-    const tax = Math.round((subtotal - discount + shippingCost) * 0.18); // 18% GST
-    const total = subtotal - discount + shippingCost + tax;
-
-    document.getElementById('subtotal').textContent = `₹${subtotal.toLocaleString()}`;
-    document.getElementById('discount').textContent = `-₹${discount.toLocaleString()}`;
-    document.getElementById('shipping').textContent = `₹${shippingCost.toLocaleString()}`;
-    document.getElementById('tax').textContent = `₹${tax.toLocaleString()}`;
-    document.getElementById('total-amount').textContent = `₹${total.toLocaleString()}`;
+function selectAddress(shippingId) {
+    STATE.selectedAddressId = shippingId;
+    document.querySelectorAll('.address-card').forEach(el => el.classList.remove('selected'));
+    const card = document.getElementById(`addr-card-${shippingId}`);
+    if (card) card.classList.add('selected');
 }
 
-// ============================================================================
-// SHIPPING OPTIONS
-// ============================================================================
+// ── Address Modal ──────────────────────────────────────────────────────────
+function openAddressModal(shippingId) {
+    clearAddressModalErrors();
+    STATE.editingShippingId = shippingId;
 
-function renderShippingOptions() {
-    const container = document.getElementById('shipping-options');
-    let html = '';
+    document.getElementById('address-modal-title').textContent = shippingId ? 'Edit Address' : 'Add New Address';
+    document.getElementById('save-address-btn-text').textContent = shippingId ? 'Update Address' : 'Save Address';
 
-    shippingOptions.forEach(option => {
-        const isChecked = checkoutData.shipping.id === option.id ? 'checked' : '';
-        html += `
-            <label class="radio-item" onclick="selectShipping('${option.id}')">
-                <input type="radio" name="shipping" value="${option.id}" ${isChecked}>
-                <div class="flex-1">
-                    <div class="font-medium flex items-center gap-2">
-                        <i class="fa-solid ${option.icon}"></i>
-                        ${option.name}
-                    </div>
-                    <div class="text-xs text-gray-500 mt-1">${option.description}</div>
-                </div>
-                <div class="font-semibold">
-                    ${option.price === 0 ? 'FREE' : '₹' + option.price}
-                </div>
-            </label>
-        `;
+    // Clear fields first
+    ['m-name','m-phone','m-email','m-flatno','m-pincode','m-street','m-city','m-state','m-landmark'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
     });
+    document.getElementById('m-default').checked = false;
 
-    container.innerHTML = html;
+    if (shippingId) {
+        // Fetch specific address to populate
+        fetchAndPopulateAddress(shippingId);
+    }
 
-    // Select first option by default
-    if (!checkoutData.shipping.id) {
-        selectShipping(shippingOptions[0].id);
+    document.getElementById('address-modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+async function fetchAndPopulateAddress(shippingId) {
+    try {
+        const data = await apiFetch(`/api/shipping-addresses/${STATE.userId}/${shippingId}`);
+        const addr = data.data || data; // handle both wrapped and unwrapped
+        document.getElementById('m-name').value    = addr.customerName || '';
+        document.getElementById('m-phone').value   = addr.customerPhone || '';
+        document.getElementById('m-email').value   = addr.customerEmail || '';
+        document.getElementById('m-flatno').value  = addr.flatNo || '';
+        document.getElementById('m-pincode').value = addr.shippingPincode || '';
+        document.getElementById('m-street').value  = addr.shippingAddress || '';
+        document.getElementById('m-city').value    = addr.shippingCity || '';
+        document.getElementById('m-state').value   = addr.shippingState || '';
+        document.getElementById('m-landmark').value= addr.landmark || '';
+        document.getElementById('m-default').checked = addr.default || false;
+    } catch (err) {
+        console.error('[Address] Fetch error:', err);
+        toast('Could not load address details', 'error');
     }
 }
 
-function selectShipping(shippingId) {
-    const option = shippingOptions.find(o => o.id === shippingId);
-    if (option) {
-        checkoutData.shipping = option;
-        document.querySelector(`input[value="${shippingId}"]`).checked = true;
-        updatePricingBreakdown();
-        console.log('[Checkout] Shipping selected:', option);
+function closeAddressModal() {
+    document.getElementById('address-modal').classList.remove('open');
+    document.body.style.overflow = '';
+    STATE.editingShippingId = null;
+}
+
+async function saveAddress() {
+    clearAddressModalErrors();
+    const fields = {
+        'm-name':    ['customerName',    'Full name is required'],
+        'm-phone':   ['customerPhone',   'Phone is required'],
+        'm-email':   ['customerEmail',   'Email is required'],
+        'm-flatno':  ['flatNo',          'Flat/House no. is required'],
+        'm-pincode': ['shippingPincode', 'Pincode is required'],
+        'm-street':  ['shippingAddress', 'Street address is required'],
+        'm-city':    ['shippingCity',    'City is required'],
+        'm-state':   ['shippingState',   'State is required'],
+    };
+
+    const payload = {};
+    let hasError = false;
+
+    for (const [id, [key, msg]] of Object.entries(fields)) {
+        const val = document.getElementById(id).value.trim();
+        if (!val) {
+            document.getElementById(`err-${id}`).textContent = msg;
+            hasError = true;
+        } else {
+            payload[key] = val;
+        }
+    }
+
+    // Extra validations
+    const phone = document.getElementById('m-phone').value.trim();
+    if (phone && !/^\d{10}$/.test(phone)) {
+        document.getElementById('err-m-phone').textContent = 'Enter a valid 10-digit phone number';
+        hasError = true;
+    }
+    const email = document.getElementById('m-email').value.trim();
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        document.getElementById('err-m-email').textContent = 'Enter a valid email address';
+        hasError = true;
+    }
+    const pincode = document.getElementById('m-pincode').value.trim();
+    if (pincode && !/^\d{6}$/.test(pincode)) {
+        document.getElementById('err-m-pincode').textContent = 'Enter a valid 6-digit pincode';
+        hasError = true;
+    }
+
+    if (hasError) return;
+
+    payload.nearBy   = document.getElementById('m-landmark').value.trim();
+    payload.landmark = document.getElementById('m-landmark').value.trim();
+    payload.isDefault = document.getElementById('m-default').checked;
+
+    setAddressModalLoading(true);
+
+    try {
+        let res;
+        if (STATE.editingShippingId) {
+            res = await apiFetch(`/api/shipping-addresses/patch/${STATE.userId}/${STATE.editingShippingId}`, {
+                method: 'PATCH',
+                body: JSON.stringify(payload),
+            });
+        } else {
+            res = await apiFetch(`/api/shipping-addresses/create-address/${STATE.userId}`, {
+                method: 'POST',
+                body: JSON.stringify(payload),
+            });
+        }
+
+        if (res && (res.success !== false)) {
+            toast(STATE.editingShippingId ? 'Address updated!' : 'Address saved!', 'success');
+            closeAddressModal();
+            await loadAddresses();
+            // Auto-select the newly created address
+            if (!STATE.editingShippingId && STATE.addresses.length > 0) {
+                const newest = STATE.addresses[STATE.addresses.length - 1];
+                selectAddress(newest.shippingId);
+            }
+        } else {
+            throw new Error(res?.message || 'Failed to save address');
+        }
+    } catch (err) {
+        console.error('[Address] Save error:', err);
+        toast(err.message || 'Failed to save address. Try again.', 'error');
+    } finally {
+        setAddressModalLoading(false);
     }
 }
 
-// ============================================================================
-// STEP NAVIGATION
-// ============================================================================
+function setAddressModalLoading(loading) {
+    const btn = document.getElementById('save-address-btn');
+    const text = document.getElementById('save-address-btn-text');
+    const spinner = document.getElementById('save-address-spinner');
+    btn.disabled = loading;
+    text.textContent = loading ? (STATE.editingShippingId ? 'Updating…' : 'Saving…') : (STATE.editingShippingId ? 'Update Address' : 'Save Address');
+    spinner.classList.toggle('hidden', !loading);
+}
 
+function clearAddressModalErrors() {
+    ['m-name','m-phone','m-email','m-flatno','m-pincode','m-street','m-city','m-state'].forEach(id => {
+        const el = document.getElementById(`err-${id}`);
+        if (el) el.textContent = '';
+    });
+}
+
+// ── Shipping Selection ─────────────────────────────────────────────────────
+function selectShipping(id, price) {
+    const names = {
+        standard: { name: 'Standard Delivery', desc: '5–7 business days' },
+        express:  { name: 'Express Delivery',  desc: '2–3 business days' },
+        overnight:{ name: 'Overnight Delivery', desc: 'Next day delivery' },
+    };
+    STATE.shipping = { id, price, ...names[id] };
+
+    ['standard','express','overnight'].forEach(s => {
+        const el = document.getElementById(`ship-${s}`);
+        if (el) el.classList.toggle('selected', s === id);
+    });
+    document.querySelector(`input[name="shipping"][value="${id}"]`).checked = true;
+    renderSummaryBreakdown();
+}
+
+// ── Payment Selection ──────────────────────────────────────────────────────
+function selectPayment(type, mode) {
+    STATE.payment = { type, mode };
+    ['ONLINE','COD'].forEach(val => {
+        const el = document.querySelector(`input[name="paymentMethod"][value="${val}"]`);
+        if (el) {
+            el.checked = (val === mode);
+            const item = el.closest('.radio-item');
+            if (item) item.classList.toggle('selected', val === mode);
+        }
+    });
+}
+
+// ── Step Navigation ────────────────────────────────────────────────────────
 function goToStep(step) {
-    if (step < 1 || step > totalSteps) return;
+    if (step < 1 || step > STATE.totalSteps) return;
 
-    // Hide all steps
-    document.querySelectorAll('.checkout-step').forEach(el => {
-        el.classList.add('hidden');
-    });
+    document.querySelectorAll('.checkout-step').forEach(el => el.classList.add('hidden'));
+    const stepEl = document.getElementById(`checkout-step-${step}`);
+    if (stepEl) stepEl.classList.remove('hidden');
 
-    // Show current step
-    const stepElement = document.getElementById(`checkout-step-${step}`);
-    if (stepElement) {
-        stepElement.classList.remove('hidden');
-    }
-
-    // Update step indicator
     updateStepIndicator(step);
-
-    // Update buttons
-    updateNavigationButtons(step);
-
-    currentStep = step;
+    updateNavButtons(step);
+    STATE.currentStep = step;
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function updateStepIndicator(step) {
-    for (let i = 1; i <= totalSteps; i++) {
-        const stepEl = document.getElementById(`step-${i}`);
-        const lineEl = document.getElementById(`line-${i}`);
-
-        if (stepEl) {
-            stepEl.classList.remove('active', 'completed');
-            if (i === step) {
-                stepEl.classList.add('active');
-            } else if (i < step) {
-                stepEl.classList.add('completed');
-            }
-        }
-
-        if (lineEl && i < step) {
-            lineEl.classList.add('!bg-green-600');
-        } else if (lineEl) {
-            lineEl.classList.remove('!bg-green-600');
-        }
+    for (let i = 1; i <= STATE.totalSteps; i++) {
+        const ind = document.getElementById(`step-ind-${i}`);
+        if (!ind) continue;
+        ind.classList.remove('active','completed');
+        if (i === step) ind.classList.add('active');
+        else if (i < step) ind.classList.add('completed');
+    }
+    for (let i = 1; i < STATE.totalSteps; i++) {
+        const line = document.getElementById(`line-${i}-${i+1}`);
+        if (line) line.classList.toggle('done', i < step);
     }
 }
 
-function updateNavigationButtons(step) {
-    const btnBack = document.getElementById('btn-back');
-    const btnNext = document.getElementById('btn-next');
+function updateNavButtons(step) {
+    const back = document.getElementById('btn-back');
+    const next = document.getElementById('btn-next');
 
-    if (step === 1) {
-        btnBack.classList.add('hidden');
-    } else {
-        btnBack.classList.remove('hidden');
-    }
+    back.classList.toggle('hidden', step === 1);
 
-    if (step === totalSteps) {
-        btnNext.innerHTML = '<i class="fa-solid fa-check"></i> Place Order';
-        btnNext.classList.add('!bg-green-600');
+    if (step === STATE.totalSteps) {
+        next.innerHTML = STATE.payment.mode === 'COD'
+            ? '<i class="fa-solid fa-check mr-2"></i>Place Order'
+            : '<i class="fa-solid fa-lock mr-2"></i>Proceed to Pay';
+        next.style.background = '#10b981';
+        next.onmouseover = () => next.style.background = '#059669';
+        next.onmouseleave = () => next.style.background = '#10b981';
     } else {
-        btnNext.innerHTML = 'Continue <i class="fa-solid fa-chevron-right"></i>';
-        btnNext.classList.remove('!bg-green-600');
+        next.innerHTML = 'Continue <i class="fa-solid fa-chevron-right ml-1"></i>';
+        next.style.background = '';
+        next.onmouseover = null;
+        next.onmouseleave = null;
     }
 }
 
 function previousStep() {
-    if (currentStep > 1) {
-        goToStep(currentStep - 1);
-    }
+    if (STATE.currentStep > 1) goToStep(STATE.currentStep - 1);
 }
 
 function nextStep() {
-    if (currentStep === totalSteps) {
+    if (STATE.currentStep === STATE.totalSteps) {
         placeOrder();
     } else {
-        // Validate current step
-        if (validateStep(currentStep)) {
-            if (currentStep === 1) {
-                saveAddressData();
-                populateReviewAddress();
-            } else if (currentStep === 2) {
-                populateReviewShipping();
-            } else if (currentStep === 3) {
-                populateReviewPayment();
-            }
-            goToStep(currentStep + 1);
+        if (validateStep(STATE.currentStep)) {
+            if (STATE.currentStep === 2) renderSummaryBreakdown(); // shipping may have changed
+            if (STATE.currentStep === 3) populateReviewStep();
+            goToStep(STATE.currentStep + 1);
         }
     }
 }
 
-// ============================================================================
-// VALIDATION
-// ============================================================================
-
+// ── Validation ─────────────────────────────────────────────────────────────
 function validateStep(step) {
-    clearAllErrors();
-
     if (step === 1) {
-        return validateAddress();
-    } else if (step === 2) {
-        return validateShipping();
-    } else if (step === 3) {
-        return validatePayment();
-    } else if (step === 4) {
-        return validateReview();
-    }
-
-    return true;
-}
-
-function validateAddress() {
-    const fields = ['fullName', 'email', 'phone', 'street', 'city', 'state', 'postalCode', 'country'];
-    let isValid = true;
-
-    fields.forEach(fieldId => {
-        const field = document.getElementById(fieldId);
-        if (!field.value.trim()) {
-            showError(fieldId, 'This field is required');
-            isValid = false;
+        if (!STATE.selectedAddressId) {
+            toast('Please select or add a delivery address', 'error');
+            return false;
         }
-    });
-
-    // Validate email
-    const email = document.getElementById('email').value;
-    if (email && !isValidEmail(email)) {
-        showError('email', 'Please enter a valid email');
-        isValid = false;
+        return true;
     }
-
-    // Validate phone
-    const phone = document.getElementById('phone').value;
-    if (phone && phone.length < 10) {
-        showError('phone', 'Phone number must be at least 10 digits');
-        isValid = false;
+    if (step === 2) {
+        if (!STATE.shipping.id) {
+            toast('Please select a delivery option', 'error');
+            return false;
+        }
+        return true;
     }
-
-    return isValid;
-}
-
-function validateShipping() {
-    const selected = document.querySelector('input[name="shipping"]:checked');
-    if (!selected) {
-        showAlert('Please select a shipping method', 'error');
-        return false;
+    if (step === 3) {
+        // Payment method always has a default; nothing extra to validate
+        return true;
+    }
+    if (step === 4) {
+        const terms = document.getElementById('termsAgree');
+        if (!terms.checked) {
+            document.getElementById('error-termsAgree').textContent = 'Please agree to the Terms & Conditions to continue';
+            return false;
+        }
+        document.getElementById('error-termsAgree').textContent = '';
+        return true;
     }
     return true;
 }
 
-function validatePayment() {
-    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-
-    if (paymentMethod === 'card') {
-        const cardFields = ['cardNumber', 'cardName', 'cardExpiry', 'cardCVV'];
-        let isValid = true;
-
-        cardFields.forEach(fieldId => {
-            const field = document.getElementById(fieldId);
-            if (!field.value.trim()) {
-                showError(fieldId, 'This field is required');
-                isValid = false;
-            }
-        });
-
-        // Validate card number
-        const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
-        if (cardNumber && !isValidCardNumber(cardNumber)) {
-            showError('cardNumber', 'Please enter a valid card number');
-            isValid = false;
-        }
-
-        // Validate expiry
-        const expiry = document.getElementById('cardExpiry').value;
-        if (expiry && !isValidExpiry(expiry)) {
-            showError('cardExpiry', 'Invalid expiry date (use MM/YY)');
-            isValid = false;
-        }
-
-        // Validate CVV
-        const cvv = document.getElementById('cardCVV').value;
-        if (cvv && (cvv.length < 3 || cvv.length > 4)) {
-            showError('cardCVV', 'Invalid CVV');
-            isValid = false;
-        }
-
-        return isValid;
+// ── Review Population ──────────────────────────────────────────────────────
+function populateReviewStep() {
+    // Address
+    const addr = STATE.addresses.find(a => a.shippingId === STATE.selectedAddressId);
+    if (addr) {
+        document.getElementById('review-address').innerHTML = `
+            <strong>${addr.customerName}</strong> · ${addr.customerPhone}<br>
+            ${addr.flatNo ? addr.flatNo + ', ' : ''}${addr.shippingAddress},<br>
+            ${addr.shippingCity}, ${addr.shippingState} – ${addr.shippingPincode}
+            ${addr.landmark ? '<br><span style="color:#6b7280">Near: ' + addr.landmark + '</span>' : ''}
+        `;
     }
 
-    return true;
+    // Shipping
+    document.getElementById('review-shipping').innerHTML =
+        `${STATE.shipping.name} — ${STATE.shipping.desc} &nbsp;
+        <strong>${STATE.shipping.price === 0 ? 'FREE' : '₹' + STATE.shipping.price}</strong>`;
+
+    // Payment
+    document.getElementById('review-payment').innerHTML =
+        STATE.payment.mode === 'COD'
+            ? '💵 Cash on Delivery'
+            : '💳 Online Payment (Razorpay — Cards / UPI / Net Banking / Wallets)';
 }
 
-function validateReview() {
-    const termsCheckbox = document.getElementById('termsAgree');
-    if (!termsCheckbox.checked) {
-        showError('termsAgree', 'You must agree to the terms and conditions');
-        return false;
-    }
-    return true;
-}
+// ── Order Placement ────────────────────────────────────────────────────────
+async function placeOrder() {
+    const nextBtn = document.getElementById('btn-next');
+    nextBtn.disabled = true;
 
-function isValidEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
+    const addr = STATE.addresses.find(a => a.shippingId === STATE.selectedAddressId);
+    if (!addr) { toast('No delivery address selected', 'error'); nextBtn.disabled = false; return; }
 
-function isValidCardNumber(number) {
-    // Luhn algorithm
-    let sum = 0;
-    let isEven = false;
+    const s = calcSummary();
 
-    for (let i = number.length - 1; i >= 0; i--) {
-        let digit = parseInt(number[i], 10);
-
-        if (isEven) {
-            digit *= 2;
-            if (digit > 9) {
-                digit -= 9;
-            }
-        }
-
-        sum += digit;
-        isEven = !isEven;
-    }
-
-    return sum % 10 === 0;
-}
-
-function isValidExpiry(expiry) {
-    const [month, year] = expiry.split('/');
-    if (!month || !year || month > 12 || month < 1) return false;
-
-    const currentYear = new Date().getFullYear() % 100;
-    const currentMonth = new Date().getMonth() + 1;
-
-    const expiryYear = parseInt(year);
-    const expiryMonth = parseInt(month);
-
-    if (expiryYear < currentYear) return false;
-    if (expiryYear === currentYear && expiryMonth < currentMonth) return false;
-
-    return true;
-}
-
-function showError(fieldId, message) {
-    const errorEl = document.getElementById(`error-${fieldId}`);
-    if (errorEl) {
-        errorEl.textContent = message;
+    if (STATE.payment.mode === 'COD') {
+        await placeCODOrder(addr, s, nextBtn);
+    } else {
+        await initiateRazorpay(addr, s, nextBtn);
     }
 }
 
-function clearAllErrors() {
-    document.querySelectorAll('.error-message').forEach(el => {
-        el.textContent = '';
-    });
+async function placeCODOrder(addr, s, nextBtn) {
+    showProcessingOverlay('Placing your order…', 'Securing your art pieces');
+
+    const orderPayload = buildOrderPayload(addr, s, 'COD', 'COD', null, null);
+
+    try {
+        const res = await apiFetch('/api/orders/create', { method: 'POST', body: JSON.stringify(orderPayload) });
+        if (!res || res.success === false) throw new Error(res?.message || 'Order creation failed');
+
+        const orderId = res.data?.orderId || res.orderId || orderPayload.razorpayOrderId;
+        await finishOrder(orderId);
+    } catch (err) {
+        console.error('[Order] COD error:', err);
+        hideProcessingOverlay();
+        toast(err.message || 'Order placement failed. Please try again.', 'error');
+        nextBtn.disabled = false;
+    }
 }
 
-// ============================================================================
-// DATA MANAGEMENT
-// ============================================================================
+async function initiateRazorpay(addr, s, nextBtn) {
+    showProcessingOverlay('Initialising payment…', 'Connecting to secure payment gateway');
 
-function saveAddressData() {
-    checkoutData.address = {
-        fullName: document.getElementById('fullName').value,
-        email: document.getElementById('email').value,
-        phone: document.getElementById('phone').value,
-        street: document.getElementById('street').value,
-        city: document.getElementById('city').value,
-        state: document.getElementById('state').value,
-        postalCode: document.getElementById('postalCode').value,
-        country: document.getElementById('country').value,
+    // Create Razorpay order in DB
+    const paymentPayload = {
+        userId: STATE.userId,
+        amount: s.total,          // in rupees; backend converts to paise
+        currency: 'INR',
+        receipt: `ARTEZO-${Date.now()}`,
+        customerName: addr.customerName,
+        customerEmail: addr.customerEmail,
+        customerPhone: addr.customerPhone,
     };
 
-    console.log('[Checkout] Address saved:', checkoutData.address);
-}
+    try {
+        const payRes = await apiFetch('/api/payments/create-order', {
+            method: 'POST',
+            body: JSON.stringify(paymentPayload),
+        });
 
-function useSavedAddress() {
-    // Load from localStorage if available
-    const savedAddress = localStorage.getItem('savedAddress');
-    if (savedAddress) {
-        const address = JSON.parse(savedAddress);
-        document.getElementById('fullName').value = address.fullName || '';
-        document.getElementById('email').value = address.email || '';
-        document.getElementById('phone').value = address.phone || '';
-        document.getElementById('street').value = address.street || '';
-        document.getElementById('city').value = address.city || '';
-        document.getElementById('state').value = address.state || '';
-        document.getElementById('postalCode').value = address.postalCode || '';
-        document.getElementById('country').value = address.country || '';
-        showAlert('Saved address loaded', 'success');
-    } else {
-        showAlert('No saved address found', 'info');
-    }
-}
+        if (!payRes || payRes.success === false) throw new Error(payRes?.message || 'Payment init failed');
 
-// ============================================================================
-// REVIEW POPULATION
-// ============================================================================
+        const razorpayOrderId = payRes.data?.razorpayOrderId || payRes.razorpayOrderId;
+        const razorpayKeyId   = payRes.data?.keyId           || payRes.keyId;
 
-function populateReviewAddress() {
-    const reviewEl = document.getElementById('review-address');
-    const addr = checkoutData.address;
+        hideProcessingOverlay();
 
-    reviewEl.innerHTML = `
-        <div>
-            <strong>${addr.fullName}</strong><br>
-            ${addr.street}<br>
-            ${addr.city}, ${addr.state} ${addr.postalCode}<br>
-            ${addr.country}<br>
-            <br>
-            Email: ${addr.email}<br>
-            Phone: ${addr.phone}
-        </div>
-    `;
-}
-
-function populateReviewShipping() {
-    const reviewEl = document.getElementById('review-shipping');
-    const ship = checkoutData.shipping;
-
-    reviewEl.textContent = `${ship.name} - ${ship.description} (${ship.price === 0 ? 'FREE' : '₹' + ship.price})`;
-}
-
-function populateReviewPayment() {
-    const reviewEl = document.getElementById('review-payment');
-    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-
-    let paymentText = '';
-    switch (paymentMethod) {
-        case 'card':
-            const lastDigits = document.getElementById('cardNumber').value.slice(-4);
-            paymentText = `Credit/Debit Card ending in ${lastDigits}`;
-            break;
-        case 'upi':
-            paymentText = 'UPI';
-            break;
-        case 'netbanking':
-            paymentText = 'Net Banking';
-            break;
-        case 'wallet':
-            paymentText = 'Digital Wallet';
-            break;
-        case 'cod':
-            paymentText = 'Cash on Delivery';
-            break;
-    }
-
-    reviewEl.textContent = paymentText;
-}
-
-// ============================================================================
-// PROMO CODE
-// ============================================================================
-
-function applyPromo() {
-    const promoCode = document.getElementById('promoCode').value.trim().toUpperCase();
-    const messageEl = document.getElementById('promo-message');
-
-    if (!promoCode) {
-        messageEl.innerHTML = '<div class="alert alert-error mt-2"><i class="fa-solid fa-exclamation-circle"></i>Please enter a promo code</div>';
-        return;
-    }
-
-    if (promoCodes[promoCode]) {
-        const promo = promoCodes[promoCode];
-        const cart = checkoutData.cart;
-
-        if (promo.discount) {
-            checkoutData.promoDiscount = Math.round(cart.totalAmount * promo.discount);
-        } else if (promo.shipping) {
-            checkoutData.promoDiscount = promo.shipping;
-        }
-
-        messageEl.innerHTML = `
-            <div class="alert alert-success mt-2">
-                <i class="fa-solid fa-check-circle"></i>
-                <span>Promo applied! ${promo.description}</span>
-            </div>
-        `;
-
-        document.getElementById('promoCode').disabled = true;
-        document.querySelector('button[onclick="applyPromo()"]').disabled = true;
-
-        updatePricingBreakdown();
-        console.log('[Checkout] Promo applied:', promoCode, promo);
-    } else {
-        messageEl.innerHTML = '<div class="alert alert-error mt-2"><i class="fa-solid fa-exclamation-circle"></i>Invalid promo code</div>';
-    }
-}
-
-// ============================================================================
-// ORDER PLACEMENT
-// ============================================================================
-
-function placeOrder() {
-    console.log('[Checkout] Placing order...');
-
-    const btn = document.getElementById('btn-next');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
-
-    // Simulate order processing
-    setTimeout(() => {
-        // Save address if checkbox is checked
-        if (document.getElementById('saveAddress').checked) {
-            localStorage.setItem('savedAddress', JSON.stringify(checkoutData.address));
-        }
-
-        // Create order object
-        const order = {
-            orderId: generateOrderId(),
-            timestamp: new Date().toISOString(),
-            address: checkoutData.address,
-            shipping: checkoutData.shipping,
-            payment: {
-                method: document.querySelector('input[name="paymentMethod"]:checked').value
+        // Open Razorpay checkout
+        const options = {
+            key: razorpayKeyId,
+            amount: s.total * 100, // paise
+            currency: 'INR',
+            name: 'Artezo',
+            description: `Order for ${STATE.cartData.totalItems} item(s)`,
+            order_id: razorpayOrderId,
+            prefill: {
+                name: addr.customerName,
+                email: addr.customerEmail,
+                contact: addr.customerPhone,
             },
-            items: checkoutData.cart.items,
-            subtotal: checkoutData.cart.totalAmount,
-            discount: checkoutData.promoDiscount || 0,
-            shippingCost: checkoutData.shipping.price,
-            tax: Math.round((checkoutData.cart.totalAmount - (checkoutData.promoDiscount || 0) + checkoutData.shipping.price) * 0.18),
+            theme: { color: '#1D3C4A' },
+            handler: async function (response) {
+                showProcessingOverlay('Confirming payment…', 'Verifying transaction with bank');
+                const orderPayload = buildOrderPayload(
+                    addr, s,
+                    'PREPAID', 'UPI',
+                    response.razorpay_payment_id,
+                    response.razorpay_order_id
+                );
+                try {
+                    const orderRes = await apiFetch('/api/orders/create', { method: 'POST', body: JSON.stringify(orderPayload) });
+                    if (!orderRes || orderRes.success === false) throw new Error(orderRes?.message || 'Order creation failed');
+                    const orderId = orderRes.data?.orderId || orderRes.orderId || response.razorpay_order_id;
+                    await finishOrder(orderId);
+                } catch (err) {
+                    hideProcessingOverlay();
+                    toast('Payment done but order creation failed. Contact support with Payment ID: ' + response.razorpay_payment_id, 'error');
+                    nextBtn.disabled = false;
+                }
+            },
+            modal: {
+                ondismiss: () => {
+                    toast('Payment cancelled', 'info');
+                    nextBtn.disabled = false;
+                }
+            }
         };
 
-        order.total = order.subtotal - order.discount + order.shippingCost + order.tax;
+        const rzp = new window.Razorpay(options);
+        rzp.on('payment.failed', function (response) {
+            toast('Payment failed: ' + (response.error?.description || 'Unknown error'), 'error');
+            nextBtn.disabled = false;
+        });
+        rzp.open();
 
-        // Save order
-        localStorage.setItem('lastOrder', JSON.stringify(order));
-
-        // Clear cart
-        window.cartWishlistService.clearCart();
-
-        console.log('[Checkout] Order placed successfully:', order);
-
-        // Show success message
-        showAlert('Order placed successfully! Redirecting...', 'success');
-
-        // Redirect to success page after 2 seconds
-        setTimeout(() => {
-            window.location.href = `order-confirmation.html?orderId=${order.orderId}`;
-        }, 2000);
-    }, 2000);
-}
-
-function generateOrderId() {
-    return 'ORD-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase();
-}
-
-// ============================================================================
-// UTILITIES
-// ============================================================================
-
-function showAlert(message, type = 'info') {
-    let container = document.getElementById('checkout-alert-container');
-    if (!container) {
-        container = document.createElement('div');
-        container.id = 'checkout-alert-container';
-        container.style.cssText = 'position: fixed; top: 100px; right: 20px; z-index: 9999; max-width: 400px;';
-        document.body.appendChild(container);
+    } catch (err) {
+        hideProcessingOverlay();
+        console.error('[Payment] Init error:', err);
+        toast(err.message || 'Could not initiate payment. Try again.', 'error');
+        nextBtn.disabled = false;
     }
-
-    const alert = document.createElement('div');
-    alert.className = `alert alert-${type}`;
-    alert.innerHTML = `
-        <i class="fa-solid ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
-        <span>${message}</span>
-    `;
-
-    container.appendChild(alert);
-
-    setTimeout(() => {
-        alert.remove();
-    }, 4000);
 }
 
-// ============================================================================
-// INITIALIZATION
-// ============================================================================
+function buildOrderPayload(addr, s, paymentMethod, paymentMode, razorpayPaymentId, razorpayOrderId) {
+    return {
+        customerName:       addr.customerName,
+        customerPhone:      addr.customerPhone,
+        customerEmail:      addr.customerEmail,
+        shippingAddress1:   (addr.flatNo ? addr.flatNo + ', ' : '') + addr.shippingAddress,
+        shippingAddress2:   addr.landmark || addr.nearBy || '',
+        shippingCity:       addr.shippingCity,
+        shippingState:      addr.shippingState,
+        shippingPincode:    addr.shippingPincode,
+        paymentMethod,
+        paymentMode,
+        razorpayPaymentId:  razorpayPaymentId || null,
+        razorpayOrderId:    razorpayOrderId   || null,
+        items: STATE.cartData.items.map(item => ({
+            productStrId: item.productStrId,
+            variantId:    item.variantId || null,
+            quantity:     item.quantity,
+        })),
+        couponCode:      null,
+        couponDiscount:  0,
+        discountAmount:  s.productDiscount,
+        discountPercent: s.mrp > 0 ? parseFloat(((s.productDiscount / s.mrp) * 100).toFixed(2)) : 0,
+        shippingCharges: s.shipping,
+        convenienceFee:  0,
+        tax:             s.gst,
+        giftWrap:        false,
+        giftwrapCharges: 0,
+        orderNotes:      document.getElementById('deliveryNotes')?.value?.trim() || '',
+    };
+}
 
+async function finishOrder(orderId) {
+    // Persist order id
+    localStorage.setItem('lastOrderId', orderId || '');
+
+    // Animate steps
+    updateProcessingText('Order confirmed! 🎉', 'Your art is on its way');
+
+    await sleep(1200);
+    hideProcessingOverlay();
+    launchConfetti();
+    showSuccessOverlay(orderId);
+}
+
+// ── Animations ─────────────────────────────────────────────────────────────
+function showProcessingOverlay(text, sub) {
+    const overlay = document.getElementById('payment-anim-overlay');
+    setText('anim-text', text);
+    setText('anim-sub', sub);
+    overlay.classList.add('show');
+}
+
+function updateProcessingText(text, sub) {
+    setText('anim-text', text);
+    setText('anim-sub', sub);
+}
+
+function hideProcessingOverlay() {
+    document.getElementById('payment-anim-overlay').classList.remove('show');
+}
+
+function showSuccessOverlay(orderId) {
+    document.getElementById('success-order-id').textContent = `Order #${orderId || 'Confirmed'}`;
+    document.getElementById('success-overlay').classList.add('show');
+}
+
+// ── Confetti ───────────────────────────────────────────────────────────────
+function launchConfetti() {
+    const canvas = document.getElementById('confetti-canvas');
+    canvas.style.display = 'block';
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const ctx = canvas.getContext('2d');
+
+    const colors = ['#1D3C4A','#E39F32','#10b981','#6366f1','#ec4899','#f59e0b','#ef4444','#3b82f6'];
+    const particles = Array.from({ length: 180 }, () => ({
+        x: Math.random() * canvas.width,
+        y: -Math.random() * canvas.height,
+        w: Math.random() * 10 + 5,
+        h: Math.random() * 5 + 3,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        vx: (Math.random() - 0.5) * 4,
+        vy: Math.random() * 4 + 2,
+        angle: Math.random() * Math.PI * 2,
+        spin: (Math.random() - 0.5) * 0.2,
+        alpha: 1,
+    }));
+
+    let frame = 0;
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.angle += p.spin;
+            if (frame > 120) p.alpha -= 0.012;
+            p.alpha = Math.max(p.alpha, 0);
+
+            ctx.save();
+            ctx.globalAlpha = p.alpha;
+            ctx.translate(p.x + p.w / 2, p.y + p.h / 2);
+            ctx.rotate(p.angle);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+            ctx.restore();
+        });
+
+        frame++;
+        if (frame < 240 && particles.some(p => p.alpha > 0)) {
+            requestAnimationFrame(draw);
+        } else {
+            canvas.style.display = 'none';
+        }
+    }
+    draw();
+}
+
+// ── API Helper ─────────────────────────────────────────────────────────────
+async function apiFetch(path, options = {}) {
+    const url = path.startsWith('http') ? path : BASE_URL + path;
+    const config = {
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        ...options,
+    };
+    const res = await fetch(url, config);
+    if (!res.ok) {
+        let errMsg = `HTTP ${res.status}`;
+        try { const e = await res.json(); errMsg = e.message || errMsg; } catch(_) {}
+        throw new Error(errMsg);
+    }
+    // Some DELETE endpoints return 204 no content
+    const text = await res.text();
+    return text ? JSON.parse(text) : { success: true };
+}
+
+// function authHeaders() {
+//     const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+//     return token ? { Authorization: `Bearer ${token}` } : {};
+// }
+
+
+function authHeaders() {
+    const token  = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+    const userId = STATE.userId
+                || localStorage.getItem('userId')
+                || sessionStorage.getItem('userId');
+
+    const headers = {};
+    if (token)  headers['Authorization'] = `Bearer ${token}`;
+    if (userId) headers['X-User-Id']     = String(userId);   // ← this is what backend needs
+    return headers;
+}
+
+// ── Toast ──────────────────────────────────────────────────────────────────
+function toast(message, type = 'info') {
+    const container = document.getElementById('toast-container');
+    const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.innerHTML = `<i class="fa-solid ${icons[type] || 'fa-info-circle'}"></i><span>${message}</span>`;
+    container.appendChild(el);
+    setTimeout(() => {
+        el.style.animation = 'slideOutRight 0.3s ease forwards';
+        setTimeout(() => el.remove(), 300);
+    }, type === 'error' ? 5000 : 3500);
+}
+
+// ── Utilities ──────────────────────────────────────────────────────────────
+function fmtNum(n) {
+    if (n === null || n === undefined || isNaN(n)) return '0';
+    return Number(n).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+}
+
+function setText(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// Close modal on backdrop click
+document.getElementById('address-modal')?.addEventListener('click', function(e) {
+    if (e.target === this) closeAddressModal();
+});
+
+// ── Bootstrap ──────────────────────────────────────────────────────────────
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initCheckout);
 } else {
