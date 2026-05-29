@@ -527,7 +527,7 @@ function renderMobileNavigation(categories) {
   mobileNav.innerHTML = `
     <div class="mb-6 px-4">
       <div class="relative">
-        <input type="text" placeholder="Search for 'pillows'"
+        <input type="text" placeholder="Search for 'wall decor'"
                class="w-full h-12 pl-12 pr-4 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-accent/50" />
         <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
           <i class="fa-solid fa-magnifying-glass"></i>

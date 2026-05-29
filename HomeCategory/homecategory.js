@@ -118,40 +118,134 @@
     console.log("[HC] wireGridDelegation() — listener attached to #categoryProductGrid ✅");
 
     grid.addEventListener("click", function (e) {
-      console.log("[HC] grid click fired —", "target:", e.target.tagName, e.target.className);
+    console.log("[HC] grid click fired —", "target:", e.target.tagName, e.target.className);
 
-      // Heart button or the <i> icon child inside it
-      const heartBtn = e.target.closest(".wl-btn");
-      if (heartBtn) {
+    // Heart button or the <i> icon child inside it
+    const heartBtn = e.target.closest(".wl-btn");
+    if (heartBtn) {
         console.log("[HC] 💛 .wl-btn matched — stopping propagation, calling handleHeartClick");
         e.stopPropagation();
         e.preventDefault();
         handleHeartClick(heartBtn);
         return;
-      }
+    }
 
-      // "View Product" CTA button
-      const ctaBtn = e.target.closest(".cta-btn");
-      if (ctaBtn) {
+    // "View Product" CTA button
+    const ctaBtn = e.target.closest(".cta-btn");
+    if (ctaBtn) {
         console.log("[HC] .cta-btn matched, pid:", ctaBtn.dataset.pid);
         e.stopPropagation();
-        if (ctaBtn.dataset.pid) navigateToProduct(ctaBtn.dataset.pid);
+        if (ctaBtn.dataset.pid) {
+            // Get product data from the parent card
+            const card = ctaBtn.closest(".product-card");
+            if (card && card.dataset.brand && card.dataset.productName) {
+                const productData = {
+                    productPrimeId: card.dataset.pid,
+                    brandName: card.dataset.brand,
+                    productName: card.dataset.productName,
+                    productCategory: card.dataset.category,   // ← ADD THIS
+
+                    currentSku: card.dataset.sku
+                };
+                navigateToProduct(ctaBtn.dataset.pid, productData);
+            } else {
+                navigateToProduct(ctaBtn.dataset.pid);
+            }
+        }
         return;
-      }
+    } 
 
-      // Card body — navigate to detail
-      const card = e.target.closest(".product-card");
-      if (card) {
+    // Card body — navigate to detail
+    const card = e.target.closest(".product-card");
+    if (card) {
         console.log("[HC] .product-card matched, pid:", card.dataset.pid);
-        if (card.dataset.pid) navigateToProduct(card.dataset.pid);
-      }
-    });
+        if (card.dataset.pid) {
+            const productData = {
+                productPrimeId: card.dataset.pid,
+                brandName: card.dataset.brand,
+                productName: card.dataset.productName,
+                productCategory: card.dataset.category,   // ← ADD THIS LINE
+                currentSku: card.dataset.sku
+            };
+            navigateToProduct(card.dataset.pid, productData);
+        }
+    }
+});
   }
 
-  function navigateToProduct(pid) {
+
+  // ─── SLUGIFY HELPER (for SEO URLs) ───────────────────────────────────────────
+function slugify(text) {
+    if (!text) return "product";
+    return text
+        .toString()
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')           // Replace spaces with hyphens
+        .replace(/[^\w\-]+/g, '')       // Remove all non-word chars (except hyphens)
+        .replace(/\-\-+/g, '-')         // Replace multiple hyphens with single
+        .replace(/^-+/, '')             // Trim hyphens from start
+        .replace(/-+$/, '');            // Trim hyphens from end
+}
+
+
+// function navigateToProduct(pid, productData = null) {
+//     console.log("[HC] navigating to product id:", pid);
+    
+//     if (productData && productData.brandName && productData.productName) {
+//         // Clean product name
+//         let cleanProductName = productData.productName;
+//         if (cleanProductName.toLowerCase().startsWith(productData.brandName.toLowerCase())) {
+//             cleanProductName = cleanProductName.substring(productData.brandName.length).trim();
+//         }
+        
+//         const brandSlug = slugify(productData.brandName);
+//         const productSlug = slugify(cleanProductName);
+//         const sku = productData.currentSku || `PROD-${pid}`;
+        
+//         // Get variant
+//         const ctaBtn = document.querySelector(`.cta-btn[data-pid="${pid}"]`);
+//         const variantId = ctaBtn?.dataset.variantId || null;
+        
+//         // Build QUERY PARAMETER URL (WORKS WITH LIVE SERVER!)
+//         let url = `../Product-Details/product-detail.html?id=${pid}&sku=${sku}&brand=${brandSlug}&product=${productSlug}`;
+        
+//         if (variantId && variantId !== `VAR-${pid}`) {
+//             url += `&variant=${variantId}`;
+//         }
+        
+//         console.log("[HC] navigating to URL:", url);
+//         window.location.href = url;
+//     } else {
+//         window.location.href = `../Product-Details/product-detail.html?id=${pid}`;
+//     }
+// }
+
+function navigateToProduct(pid, productData = null) {
     console.log("[HC] navigating to product id:", pid);
-    window.location.href = `../Product-Details/product-detail.html?id=${pid}`;
-  }
+
+    if (productData && productData.brandName && productData.productName) {
+        let cleanProductName = productData.productName;
+        if (cleanProductName.toLowerCase().startsWith(productData.brandName.toLowerCase())) {
+            cleanProductName = cleanProductName.substring(productData.brandName.length).trim();
+        }
+
+        const brandSlug    = slugify(productData.brandName);
+        const categorySlug = slugify(productData.productCategory || "products");
+        const productSlug  = slugify(cleanProductName || productData.productName);
+        const sku          = productData.currentSku || `PROD-${pid}`;
+
+        // Navigate to the real HTML file — Live Server serves this fine.
+        // The SEO-pretty URL is written by product-detail.js via history.replaceState after load.
+        let url = `/Product-Details/product-detail.html?id=${pid}&sku=${sku}&brand=${brandSlug}&category=${categorySlug}&product=${productSlug}`;
+
+        console.log("[HC] navigating to file URL:", url);
+        window.location.href = url;
+    } else {
+        window.location.href = `/Product-Details/product-detail.html?id=${pid}`;
+    }
+}
+
 
   // ─── HEART CLICK HANDLER ──────────────────────────────────────────────────────
   async function handleHeartClick(btn) {
@@ -442,14 +536,9 @@
       ? `<span class="absolute top-2 left-2 bg-purple-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10 shadow">CUSTOMIZABLE</span>`
       : discountBadge;
 
-    // ─── KEY FIX ──────────────────────────────────────────────────────────────
-    // Resolve the SAME fallback values that addToWishlist sends to the DB.
-    // Writing these resolved values into data-* attrs guarantees that the
-    // removeFromWishlist call reads "VAR-1" (not "") and matches the DB row.
-    // Rule: fallback logic lives here once — addToWishlist reads from d.variantId
-    // / d.sku which are already resolved, so add and remove are always in sync.
+    // FIX: Use p.currentSku directly, not p.sku
     const resolvedVariantId = p.variantId || `VAR-${pid}`;
-    const resolvedSku       = p.sku       || `PROD-${pid}`;
+    const resolvedSku = p.currentSku || `PROD-${pid}`;  // ← FIXED: Use currentSku
 
     const heartIcon = isWL
       ? `<i class="fa-solid fa-heart" style="color:#e39f32;font-size:14px;"></i>`
@@ -457,7 +546,11 @@
 
     return `
       <div class="product-card bg-white rounded-xl h-[350px] border border-[#fccd81] overflow-hidden shadow-sm hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex flex-col cursor-pointer group"
-           data-pid="${pid}">
+           data-pid="${pid}"
+            data-brand="${escapeHtml(p.brandName || '')}"
+            data-product-name="${escapeHtml(p.productName || '')}"
+            data-category="${escapeHtml(p.productCategory || '')}"
+            data-sku="${escapeHtml(resolvedSku)}">
 
         <div class="relative aspect-square bg-gray-50 overflow-hidden">
           <img src="${imageUrl}" alt="${name}"
@@ -496,13 +589,18 @@
 
         <button
           class="cta-btn w-full py-2.5 border-t border-[#fccd81] text-sm font-medium bg-gray-50 hover:bg-[#1D3C4A] hover:text-white transition-colors duration-200 flex items-center justify-center gap-2"
-          data-pid="${pid}">
+          data-pid="${pid}"
+          data-variant-id="${escapeHtml(resolvedVariantId)}"
+          data-sku="${escapeHtml(resolvedSku)}">   <!-- ← FIXED: Add SKU to button -->
           <i class="fa-solid fa-bag-shopping text-xs" style="color:#e39f32;"></i>
           View Product
         </button>
       </div>
     `;
-  }
+}
+
+
+
 
   // ─── PAGINATION ───────────────────────────────────────────────────────────────
   function renderPagination() {

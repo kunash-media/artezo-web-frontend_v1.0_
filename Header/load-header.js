@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-fetch("../Header/header.html")
+fetch("/Header/header.html")
     .then((response) => {
       if (!response.ok) throw new Error("Header file not found");
       return response.text();
@@ -9,10 +9,10 @@ fetch("../Header/header.html")
       document.body.insertAdjacentHTML("afterbegin", html);
 
       // Make sure header CSS is loaded (if not already linked in <head>)
-      if (!document.querySelector('link[href="./header/header.css"]')) {
+      if (!document.querySelector('link[href="/header/header.css"]')) {
         const link = document.createElement("link");
         link.rel = "stylesheet";
-        link.href = "./header/header.css";
+        link.href = "/header/header.css";
         document.head.appendChild(link);
       }
 

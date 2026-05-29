@@ -147,13 +147,22 @@
         return;
       }
 
-      // "View Product" CTA button
+      // "View Product" CTA button — read product data from parent card
       const ctaBtn = e.target.closest(".cta-btn");
       if (ctaBtn) {
         e.stopPropagation();
-        const pid = ctaBtn.dataset.pid;
+        const pid  = ctaBtn.dataset.pid;
+        const card = ctaBtn.closest(".product-card");
         console.log("[HSC] .cta-btn clicked, pid:", pid);
-        if (pid) navigateToProduct(pid);
+        if (pid) {
+          const productData = card ? {
+            brandName:       card.dataset.brand,
+            productName:     card.dataset.productName,
+            productCategory: card.dataset.category,
+            currentSku:      card.dataset.sku,
+          } : null;
+          navigateToProduct(pid, productData);
+        }
         return;
       }
 
@@ -162,14 +171,44 @@
       if (card) {
         const pid = card.dataset.pid;
         console.log("[HSC] .product-card clicked, pid:", pid);
-        if (pid) navigateToProduct(pid);
+        if (pid) {
+          const productData = {
+            brandName:       card.dataset.brand,
+            productName:     card.dataset.productName,
+            productCategory: card.dataset.category,
+            currentSku:      card.dataset.sku,
+          };
+          navigateToProduct(pid, productData);
+        }
       }
     });
   }
 
-  function navigateToProduct(pid) {
+  // function navigateToProduct(pid) {
+  //   console.log("[HSC] navigating to product:", pid);
+  //   window.location.href = `../Product-Details/product-detail.html?id=${pid}`;
+  // }
+
+  function navigateToProduct(pid, productData) {
     console.log("[HSC] navigating to product:", pid);
-    window.location.href = `../Product-Details/product-detail.html?id=${pid}`;
+
+    if (productData && productData.brandName && productData.productName) {
+      let cleanName = productData.productName;
+      if (cleanName.toLowerCase().startsWith(productData.brandName.toLowerCase())) {
+        cleanName = cleanName.substring(productData.brandName.length).trim();
+      }
+
+      const brandSlug    = slugify(productData.brandName);
+      const categorySlug = slugify(productData.productCategory || "products");
+      const productSlug  = slugify(cleanName || productData.productName);
+      const sku          = productData.currentSku || `PROD-${pid}`;
+
+      const url = `../Product-Details/product-detail.html?id=${pid}&sku=${sku}&brand=${brandSlug}&category=${categorySlug}&product=${productSlug}`;
+      console.log("[HSC] navigating to:", url);
+      window.location.href = url;
+    } else {
+      window.location.href = `../Product-Details/product-detail.html?id=${pid}`;
+    }
   }
 
   // ─── HEART CLICK HANDLER ──────────────────────────────────────────────────────
@@ -494,7 +533,7 @@
     // whatever we write here is exactly what lands in the DB and what remove sends.
     // Result: add sends "VAR-1", remove reads "VAR-1" from the button → keys match.
     const resolvedVariantId = p.variantId || `VAR-${pid}`;
-    const resolvedSku       = p.sku       || `PROD-${pid}`;
+    const resolvedSku       = p.currentSku        || `PROD-${pid}`;
 
     const heartIcon = isWL
       ? `<i class="fa-solid fa-heart" style="color:#e39f32;font-size:14px;"></i>`
@@ -502,7 +541,11 @@
 
     return `
       <div class="product-card bg-white h-[350px] border border-[#e39f32] rounded-xl overflow-hidden flex flex-col shadow-sm group cursor-pointer hover:-translate-y-1 hover:shadow-md transition-all duration-300"
-           data-pid="${pid}">
+           data-pid="${pid}"
+           data-brand="${escapeHtml(p.brandName || '')}"
+           data-product-name="${escapeHtml(p.productName || '')}"
+           data-category="${escapeHtml(p.productCategory || '')}"
+           data-sku="${escapeHtml(resolvedSku)}">
 
         <div class="aspect-square bg-gray-100 relative overflow-hidden">
           <img src="${imageUrl}"
@@ -768,6 +811,20 @@
     const d = document.createElement("div");
     d.textContent = text;
     return d.innerHTML;
+  }
+
+  // ADD after escapeHtml():
+  function slugify(text) {
+    if (!text) return "product";
+    return text
+      .toString()
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, "-")
+      .replace(/[^\w\-]+/g, "")
+      .replace(/\-\-+/g, "-")
+      .replace(/^-+/, "")
+      .replace(/-+$/, "");
   }
 
   // ─── START ────────────────────────────────────────────────────────────────────

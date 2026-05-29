@@ -25,11 +25,11 @@ class FooterLoader {
 
     initializeFooterScripts() {
         // Load footer CSS
-        this.loadCSS('../Footer/footer.css');
+        this.loadCSS('/Footer/footer.css');
         
         // Load footer JS
         const script = document.createElement('script');
-        script.src = '../Footer/footer.js';
+        script.src = '/Footer/footer.js';
         script.onload = () => {
             if (window.footerAPI) {
                 window.footerAPI.init();
