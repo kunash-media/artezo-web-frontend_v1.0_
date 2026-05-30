@@ -1043,12 +1043,12 @@ function updateCartSummaryRaw({ totalAmount, totalMrp, totalDiscount, totalItems
 
     if (cartTotal) cartTotal.innerText = `₹${Math.max(0, total).toLocaleString()}`;
 
-    // Update header badge
-    const badge = document.getElementById('cart-count-badge');
-    if (badge) {
-        badge.textContent     = totalItems || 0;
-        badge.style.display   = (totalItems > 0) ? 'flex' : 'none';
-    }
+    //---------- Update header badge -------------//
+    // const badge = document.getElementById('cart-count-badge');
+    // if (badge) {
+    //     badge.textContent     = totalItems || 0;
+    //     badge.style.display   = (totalItems > 0) ? 'flex' : 'none';
+    // }
 
     // Legacy cart service sync (for header badge fallback)
     if (cartService && typeof cartService.updateBadge === 'function') {
@@ -1146,7 +1146,7 @@ window.addToCartFromRecommended = function(productId) {
 };
 
 window.viewProductDetails = function(productId) {
-    window.location.href = `../Product-Details/product-detail.html?id=${productId}`;
+    window.location.href = `/products/product-detail.html?id=${productId}`;
 };
 
 // ─── Checkout ─────────────────────────────────────────────────────────────────

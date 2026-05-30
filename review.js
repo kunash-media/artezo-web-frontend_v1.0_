@@ -2034,7 +2034,7 @@
     transformedData.similarProducts.forEach((p) => {
       similarHtml += `
       <div class="group relative flex flex-col bg-white rounded-2xl border border-[#e5e7eb] shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 overflow-hidden cursor-pointer" 
-           onclick="window.location.href='../Product-Details/product-detail.html?id=${p.productId}'">
+           onclick="window.location.href='/products/product-detail.html?id=${p.productId}'">
         <button class="wishlist-icon-btn absolute top-3 right-3 z-10 w-9 h-9 flex items-center justify-center bg-white border border-[#e5e7eb] rounded-full shadow-sm hover:border-[#e39f32] transition-all duration-300" 
                 onclick="event.stopPropagation();">
           <i class="fa-regular fa-heart text-[#1D3C4A]"></i>

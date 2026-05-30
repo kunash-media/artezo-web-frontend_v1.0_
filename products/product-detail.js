@@ -160,7 +160,7 @@ function generateProductSEOUrl(product) {
     const sku         = product.currentSku || `PROD-${product.productPrimeId}`;
 
     // Use file path so it works on Live Server + Hostinger without extra rewrite rules
-    return `/Product-Details/product-detail.html?id=${product.productPrimeId}&sku=${sku}&brand=${brandSlug}&category=${categorySlug}&product=${productSlug}`;
+    return `/products/product-detail.html?id=${product.productPrimeId}&sku=${sku}&brand=${brandSlug}&category=${categorySlug}&product=${productSlug}`;
 }
 
 
@@ -345,7 +345,7 @@ function rewriteURLToSEO(variantSku) {
     }
 
     // Result: /Product-Details/product-detail.html?id=1&sku=ART-WPLATE-GLD&brand=artezo&...
-    const newURL = `/Product-Details/product-detail.html?${params.toString()}`;
+    const newURL = `/products/product-detail.html?${params.toString()}`;
     history.replaceState({ productId: safeProductData.productId }, document.title, newURL);
     console.log("[ProductDetail] URL updated to:", newURL);
 }
@@ -743,42 +743,6 @@ async function fetchProductFromAPI(id) {
   // ═══════════════════════════════════════════════════════════════════════════
   //  RENDER PAGE
   // ═══════════════════════════════════════════════════════════════════════════
-
-  // function renderPage() {
-  //   buildCompleteHTML();
-  //   fillAccordion();
-  //   fillSocialProof();
-  //   fillInstallation();
-  //   fillHeroBanner();
-  //   fillStickyBar();
-  //   setupEventListeners();
-
-  //   // Update SEO meta tags
-  //   updateSEOMetaTags();
-
-  //   // Async fills — run in parallel after sync render
-  //   fillBoughtTogether();         // fetches from addon API
-  //   fillRecentAndSuggestions();   // fetches recent views + suggestions
-
-  //   setTimeout(() => {
-  //     setupVariantSelection();
-  //     setupDynamicVariants(); //#patch 3 - Setup variant selection logic after HTML is rendered
-
-  //     document.querySelectorAll(".add-to-cart-btn")
-  //       .forEach((btn) => btn.addEventListener("click", handleAddToCart));
-  //     document.querySelectorAll(".buy-now-btn")
-  //       .forEach((btn) => btn.addEventListener("click", handleBuyNow));
-  //     document.querySelectorAll(".wishlist-btn, .wishlist-icon-btn")
-  //       .forEach((btn) => btn.addEventListener("click", handleWishlistToggle));
-  //     document.querySelectorAll(".apply-coupon-btn").forEach((btn) =>
-  //       btn.addEventListener("click", (e) => {
-  //         e.preventDefault();
-  //         const code = btn.dataset.couponCode;
-  //         if (code) applyCoupon(code);
-  //       })
-  //     );
-  //   }, 100);
-  // }
 
   function renderPage() {
     // Update SEO meta tags with the extracted data
@@ -2974,7 +2938,7 @@ if (variantColors.length > 0) {
     // const url     = `../Product-Details/product-detail.html?id=${p.productPrimeId}`;
 
     // Generate SEO-friendly URL for product cards
-const url = generateProductSEOUrl(p) || `/Product-Details/product-detail.html?id=${p.productPrimeId}`;
+const url = generateProductSEOUrl(p) || `/products/product-detail.html?id=${p.productPrimeId}`;
 
     return `
       <div class="product-card-clickable group relative flex flex-col bg-white rounded-2xl border border-[#e5e7eb] shadow-sm
@@ -3213,7 +3177,7 @@ bg-gray-100 px-2 py-0.5 rounded-md">
   <!-- ADD TO CART -->
   <div class="flex-1 md:flex-none bg-[#E39F32] rounded-xl border border-[#1d3c4a] overflow-hidden">
     <button
-      class="w-full md:min-w-[190px] px-4 md:px-6 py-3 rounded-xl text-sm md:text-base font-medium font-lexend flex items-center justify-center gap-2 transition-all duration-300 hover:bg-[#1D3C4A]/10"
+      class="add-to-cart-btn w-full md:min-w-[190px] px-4 md:px-6 py-3 rounded-xl text-sm md:text-base font-medium font-lexend flex items-center justify-center gap-2 transition-all duration-300 hover:bg-[#1D3C4A]/10"
       style="color:#1d3c4a"
     >
       <i class="fas fa-cart-plus text-xs md:text-sm"></i>
@@ -3224,7 +3188,7 @@ bg-gray-100 px-2 py-0.5 rounded-md">
   <!-- BUY NOW -->
   <div class="flex-1 md:flex-none bg-white rounded-xl border border-gray-300 overflow-hidden">
     <button
-      class="w-full md:min-w-[190px] px-4 md:px-6 py-3 rounded-xl text-sm md:text-base font-medium font-lexend flex items-center justify-center gap-2 transition-all duration-300 hover:bg-gray-50"
+      class="buy-now-btn w-full md:min-w-[190px] px-4 md:px-6 py-3 rounded-xl text-sm md:text-base font-medium font-lexend flex items-center justify-center gap-2 transition-all duration-300 hover:bg-gray-50"
       style="color:#1d3c4a"
     >
       Buy Now

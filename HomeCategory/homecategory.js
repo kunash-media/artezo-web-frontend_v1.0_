@@ -189,38 +189,6 @@ function slugify(text) {
 }
 
 
-// function navigateToProduct(pid, productData = null) {
-//     console.log("[HC] navigating to product id:", pid);
-    
-//     if (productData && productData.brandName && productData.productName) {
-//         // Clean product name
-//         let cleanProductName = productData.productName;
-//         if (cleanProductName.toLowerCase().startsWith(productData.brandName.toLowerCase())) {
-//             cleanProductName = cleanProductName.substring(productData.brandName.length).trim();
-//         }
-        
-//         const brandSlug = slugify(productData.brandName);
-//         const productSlug = slugify(cleanProductName);
-//         const sku = productData.currentSku || `PROD-${pid}`;
-        
-//         // Get variant
-//         const ctaBtn = document.querySelector(`.cta-btn[data-pid="${pid}"]`);
-//         const variantId = ctaBtn?.dataset.variantId || null;
-        
-//         // Build QUERY PARAMETER URL (WORKS WITH LIVE SERVER!)
-//         let url = `../Product-Details/product-detail.html?id=${pid}&sku=${sku}&brand=${brandSlug}&product=${productSlug}`;
-        
-//         if (variantId && variantId !== `VAR-${pid}`) {
-//             url += `&variant=${variantId}`;
-//         }
-        
-//         console.log("[HC] navigating to URL:", url);
-//         window.location.href = url;
-//     } else {
-//         window.location.href = `../Product-Details/product-detail.html?id=${pid}`;
-//     }
-// }
-
 function navigateToProduct(pid, productData = null) {
     console.log("[HC] navigating to product id:", pid);
 
@@ -237,12 +205,12 @@ function navigateToProduct(pid, productData = null) {
 
         // Navigate to the real HTML file — Live Server serves this fine.
         // The SEO-pretty URL is written by product-detail.js via history.replaceState after load.
-        let url = `/Product-Details/product-detail.html?id=${pid}&sku=${sku}&brand=${brandSlug}&category=${categorySlug}&product=${productSlug}`;
+        let url = `/products/product-detail.html?id=${pid}&sku=${sku}&brand=${brandSlug}&category=${categorySlug}&product=${productSlug}`;
 
         console.log("[HC] navigating to file URL:", url);
         window.location.href = url;
     } else {
-        window.location.href = `/Product-Details/product-detail.html?id=${pid}`;
+        window.location.href = `/products/product-detail.html?id=${pid}`;
     }
 }
 
@@ -532,9 +500,13 @@ function navigateToProduct(pid, productData = null) {
     const discountBadge = discount > 0
       ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10 shadow">${discount}% OFF</span>`
       : "";
-    const topBadge = p.isCustomizable
-      ? `<span class="absolute top-2 left-2 bg-purple-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10 shadow">CUSTOMIZABLE</span>`
-      : discountBadge;
+
+    const isOutOfStock = (p.currentStock != null && p.currentStock <= 0);
+const topBadge = isOutOfStock
+    ? `<span class="absolute top-2 left-2 bg-gray-700 text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10 shadow">OUT OF STOCK</span>`
+    : p.isCustomizable
+        ? `<span class="absolute top-2 left-2 bg-purple-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10 shadow">CUSTOMIZABLE</span>`
+        : discountBadge;
 
     // FIX: Use p.currentSku directly, not p.sku
     const resolvedVariantId = p.variantId || `VAR-${pid}`;
@@ -545,7 +517,7 @@ function navigateToProduct(pid, productData = null) {
       : `<i class="fa-regular fa-heart" style="color:#9ca3af;font-size:14px;"></i>`;
 
     return `
-      <div class="product-card bg-white rounded-xl h-[350px] border border-[#fccd81] overflow-hidden shadow-sm hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex flex-col cursor-pointer group"
+      <div class="product-card bg-white rounded-xl h-[350px] border border-[#fccd81] overflow-hidden shadow-sm hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex flex-col cursor-pointer group ${isOutOfStock ? 'grayscale opacity-75' : ''}"
            data-pid="${pid}"
             data-brand="${escapeHtml(p.brandName || '')}"
             data-product-name="${escapeHtml(p.productName || '')}"

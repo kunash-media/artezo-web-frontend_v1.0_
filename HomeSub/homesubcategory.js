@@ -184,10 +184,6 @@
     });
   }
 
-  // function navigateToProduct(pid) {
-  //   console.log("[HSC] navigating to product:", pid);
-  //   window.location.href = `../Product-Details/product-detail.html?id=${pid}`;
-  // }
 
   function navigateToProduct(pid, productData) {
     console.log("[HSC] navigating to product:", pid);
@@ -203,11 +199,11 @@
       const productSlug  = slugify(cleanName || productData.productName);
       const sku          = productData.currentSku || `PROD-${pid}`;
 
-      const url = `../Product-Details/product-detail.html?id=${pid}&sku=${sku}&brand=${brandSlug}&category=${categorySlug}&product=${productSlug}`;
+      const url = `/products/product-detail.html?id=${pid}&sku=${sku}&brand=${brandSlug}&category=${categorySlug}&product=${productSlug}`;
       console.log("[HSC] navigating to:", url);
       window.location.href = url;
     } else {
-      window.location.href = `../Product-Details/product-detail.html?id=${pid}`;
+      window.location.href = `/products/product-detail.html?id=${pid}`;
     }
   }
 
@@ -520,11 +516,14 @@
     const color  = escapeHtml(p.selectedColor      || "");
     const subCat = escapeHtml(p.productSubCategory || "");
 
+    const isOutOfStock = (p.currentStock != null && p.currentStock <= 0);
     let badge = "";
-    if (p.isCustomizable) {
-      badge = `<span class="absolute top-2 left-2 bg-purple-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10 shadow">CUSTOMIZABLE</span>`;
+    if (isOutOfStock) {
+        badge = `<span class="absolute top-2 left-2 bg-gray-700 text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10 shadow">OUT OF STOCK</span>`;
+    } else if (p.isCustomizable) {
+        badge = `<span class="absolute top-2 left-2 bg-purple-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10 shadow">CUSTOMIZABLE</span>`;
     } else if (discount >= 10) {
-      badge = `<span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10 shadow">${discount}% OFF</span>`;
+        badge = `<span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10 shadow">${discount}% OFF</span>`;
     }
 
     // ─── KEY FIX ──────────────────────────────────────────────────────────────
@@ -540,7 +539,7 @@
       : `<i class="fa-regular fa-heart" style="color:#9ca3af;font-size:14px;"></i>`;
 
     return `
-      <div class="product-card bg-white h-[350px] border border-[#e39f32] rounded-xl overflow-hidden flex flex-col shadow-sm group cursor-pointer hover:-translate-y-1 hover:shadow-md transition-all duration-300"
+      <div class="product-card bg-white h-[350px] border border-[#e39f32] rounded-xl overflow-hidden flex flex-col shadow-sm group cursor-pointer hover:-translate-y-1 hover:shadow-md transition-all duration-300 ${isOutOfStock ? 'grayscale opacity-75' : ''}"
            data-pid="${pid}"
            data-brand="${escapeHtml(p.brandName || '')}"
            data-product-name="${escapeHtml(p.productName || '')}"

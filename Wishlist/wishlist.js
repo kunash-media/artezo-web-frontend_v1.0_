@@ -106,7 +106,7 @@ function renderWishlistItems() {
         const imageUrl = item.productImageUrl ||
                         "https://placehold.co/400x300/e2e8f0/475569?text=No+Image";
  
-        const productUrl = `../Product-Details/product-detail.html?id=${item.productId}`;
+        const productUrl = `/products/product-detail.html?id=${item.productId}`;
  
         const discountBadge = discountPercent > 0
             ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full z-10 shadow">${discountPercent}% OFF</span>`

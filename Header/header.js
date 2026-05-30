@@ -1314,7 +1314,7 @@ const SEARCH_API_BASE = 'http://localhost:8085/api/products/search';
 const SEARCH_DEBOUNCE_MS = 300;
 const SEARCH_MIN_CHARS = 2;
 const SEARCH_MAX_RESULTS = 8;
-const SEARCH_DETAIL_BASE = '/Product-Details/product-detail.html';
+const SEARCH_DETAIL_BASE = '/products/product-detail.html';
 
 // DOM refs
 let searchInput = document.getElementById('search-input');
