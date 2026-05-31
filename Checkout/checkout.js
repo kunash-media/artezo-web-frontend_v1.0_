@@ -156,9 +156,9 @@ function renderCartItems() {
     container.innerHTML = STATE.cartData.items.map(item => `
         <div class="cart-item-row" id="cart-row-${item.itemId}">
             <img class="cart-item-img"
-                src="${item.productImageUrl ? BASE_URL + item.productImageUrl : '../Images/placeholder.jpg'}"
+                src="${item.productImageUrl ? BASE_URL + item.productImageUrl : '../Images/product_fallback/artezo_product_fallback_img.png'}"
                 alt="${item.titleName}"
-                onerror="this.src='../Images/placeholder.jpg'">
+                onerror="this.src='../Images/product_fallback/artezo_product_fallback_img.png'">
             <div class="cart-item-info">
                 <div class="cart-item-name">${item.titleName}</div>
                 <div class="cart-item-meta">

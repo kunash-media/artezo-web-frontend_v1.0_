@@ -199,152 +199,152 @@ window.artezoData = {
   // Trending Products
   trendingProducts: {
     row1: [
-      {
-        image: "https://cdn1.igp.com/f_auto,q_auto,t_pnopt12prodlp/products/p-personalized-forever-together-led-acrylic-photo-frame-400595-m.jpg",
-        title: "Personalized LED Frame",
-        category: "Photo Frames",
-        price: "₹799",
-        originalPrice: "₹999",
-        discountPercent: "30"
-      },
-      {
-        image: "https://www.zwende.com/cdn/shop/files/Happy-every-day-Wooden-Round-Floral-Nameplate-pastel-pdp1.jpg?v=1698919913&width=1080",
-        title: "Engraved Wooden Nameplate",
-        category: "Nameplates",
-        price: "₹1,299",
-        originalPrice: "₹1,599",
-        discountPercent: "30"
-      },
-      {
-        image: "https://cdn1.igp.com/f_auto,q_auto,t_pnopt12prodlp/products/p-personalized-forever-together-led-acrylic-photo-frame-400595-m.jpg",
-        title: "Couple Memory Photo Frame",
-        category: "Photo Frames",
-        price: "₹699",
-        originalPrice: "₹899",
-        discountPercent: "30"
-      },
-      {
-        image: "https://m.media-amazon.com/images/I/41XqdoEsprL._SY300_SX300_QL70_FMwebp_.jpg",
-        title: "Minimal Metal Wall Decor",
-        category: "Wall Decor",
-        price: "₹1,499",
-        originalPrice: "₹1,899",
-        discountPercent: "30"
-      },
-      {
-        image: "https://m.media-amazon.com/images/I/61MElNd1UKL.jpg",
-        title: "Personalized Anniversary Gift",
-        category: "Personalised Gifts",
-        price: "₹899",
-        originalPrice: "₹1,099",
-        discountPercent: "30"
-      },
-      {
-        image: "https://5.imimg.com/data5/SELLER/Default/2022/8/DR/YZ/GE/917586/14-1000x1000.jpg",
-        title: "Premium Crystal Trophy",
-        category: "Trophies & Mementos",
-        price: "₹1,799",
-        originalPrice: "₹2,199",
-        discountPercent: "30"
-      },
-      {
-        image: "https://cdn1.igp.com/f_auto,q_auto,t_pnopt12prodlp/products/p-personalized-forever-together-led-acrylic-photo-frame-400595-m.jpg",
-        title: "Personalized LED Frame",
-        category: "Photo Frames",
-        price: "₹799",
-        originalPrice: "₹999",
-        discountPercent: "30"
-      },
-      {
-        image: "https://cdn1.igp.com/f_auto,q_auto,t_pnopt12prodlp/products/p-personalized-forever-together-led-acrylic-photo-frame-400595-m.jpg",
-        title: "Personalized LED Frame",
-        category: "Photo Frames",
-        price: "₹799",
-        originalPrice: "₹999",
-        discountPercent: "30"
-      },
-      {
-        image: "https://cdn1.igp.com/f_auto,q_auto,t_pnopt12prodlp/products/p-customized-wooden-nameplate-with-led-light-359705-m.jpg",
-        title: "Customized LED Nameplate",
-        category: "Nameplates",
-        price: "₹1,299",
-        originalPrice: "₹1,699",
-        discountPercent: "25"
-      }
+      // {
+      //   image: "https://cdn1.igp.com/f_auto,q_auto,t_pnopt12prodlp/products/p-personalized-forever-together-led-acrylic-photo-frame-400595-m.jpg",
+      //   title: "Personalized LED Frame",
+      //   category: "Photo Frames",
+      //   price: "₹799",
+      //   originalPrice: "₹999",
+      //   discountPercent: "30"
+      // },
+      // {
+      //   image: "https://www.zwende.com/cdn/shop/files/Happy-every-day-Wooden-Round-Floral-Nameplate-pastel-pdp1.jpg?v=1698919913&width=1080",
+      //   title: "Engraved Wooden Nameplate",
+      //   category: "Nameplates",
+      //   price: "₹1,299",
+      //   originalPrice: "₹1,599",
+      //   discountPercent: "30"
+      // },
+      // {
+      //   image: "https://cdn1.igp.com/f_auto,q_auto,t_pnopt12prodlp/products/p-personalized-forever-together-led-acrylic-photo-frame-400595-m.jpg",
+      //   title: "Couple Memory Photo Frame",
+      //   category: "Photo Frames",
+      //   price: "₹699",
+      //   originalPrice: "₹899",
+      //   discountPercent: "30"
+      // },
+      // {
+      //   image: "https://m.media-amazon.com/images/I/41XqdoEsprL._SY300_SX300_QL70_FMwebp_.jpg",
+      //   title: "Minimal Metal Wall Decor",
+      //   category: "Wall Decor",
+      //   price: "₹1,499",
+      //   originalPrice: "₹1,899",
+      //   discountPercent: "30"
+      // },
+      // {
+      //   image: "https://m.media-amazon.com/images/I/61MElNd1UKL.jpg",
+      //   title: "Personalized Anniversary Gift",
+      //   category: "Personalised Gifts",
+      //   price: "₹899",
+      //   originalPrice: "₹1,099",
+      //   discountPercent: "30"
+      // },
+      // {
+      //   image: "https://5.imimg.com/data5/SELLER/Default/2022/8/DR/YZ/GE/917586/14-1000x1000.jpg",
+      //   title: "Premium Crystal Trophy",
+      //   category: "Trophies & Mementos",
+      //   price: "₹1,799",
+      //   originalPrice: "₹2,199",
+      //   discountPercent: "30"
+      // },
+      // {
+      //   image: "https://cdn1.igp.com/f_auto,q_auto,t_pnopt12prodlp/products/p-personalized-forever-together-led-acrylic-photo-frame-400595-m.jpg",
+      //   title: "Personalized LED Frame",
+      //   category: "Photo Frames",
+      //   price: "₹799",
+      //   originalPrice: "₹999",
+      //   discountPercent: "30"
+      // },
+      // {
+      //   image: "https://cdn1.igp.com/f_auto,q_auto,t_pnopt12prodlp/products/p-personalized-forever-together-led-acrylic-photo-frame-400595-m.jpg",
+      //   title: "Personalized LED Frame",
+      //   category: "Photo Frames",
+      //   price: "₹799",
+      //   originalPrice: "₹999",
+      //   discountPercent: "30"
+      // },
+      // {
+      //   image: "https://cdn1.igp.com/f_auto,q_auto,t_pnopt12prodlp/products/p-customized-wooden-nameplate-with-led-light-359705-m.jpg",
+      //   title: "Customized LED Nameplate",
+      //   category: "Nameplates",
+      //   price: "₹1,299",
+      //   originalPrice: "₹1,699",
+      //   discountPercent: "25"
+      // }
     ],
     row2: [
-      {
-        image: "https://m.media-amazon.com/images/I/41XqdoEsprL._SY300_SX300_QL70_FMwebp_.jpg",
-        title: "Minimal Metal Wall Decor",
-        category: "Wall Decor",
-        price: "₹1,499",
-        originalPrice: "₹1,899",
-        discountPercent: "30"
-      },
-      {
-        image: "https://m.media-amazon.com/images/I/61MElNd1UKL.jpg",
-        title: "Personalized Anniversary Gift",
-        category: "Personalised Gifts",
-        price: "₹899",
-        originalPrice: "₹1,099",
-        discountPercent: "30"
-      },
-      {
-        image: "https://5.imimg.com/data5/SELLER/Default/2022/8/DR/YZ/GE/917586/14-1000x1000.jpg",
-        title: "Premium Crystal Trophy",
-        category: "Trophies & Mementos",
-        price: "₹1,799",
-        originalPrice: "₹2,199",
-        discountPercent: "30"
-      },
-      {
-        image: "https://cdn1.igp.com/f_auto,q_auto,t_pnopt12prodlp/products/p-personalized-forever-together-led-acrylic-photo-frame-400595-m.jpg",
-        title: "Personalized LED Frame",
-        category: "Photo Frames",
-        price: "₹799",
-        originalPrice: "₹999",
-        discountPercent: "30"
-      },
-      {
-        image: "https://cdn1.igp.com/f_auto,q_auto,t_pnopt12prodlp/products/p-personalized-forever-together-led-acrylic-photo-frame-400595-m.jpg",
-        title: "Personalized LED Frame",
-        category: "Photo Frames",
-        price: "₹799",
-        originalPrice: "₹999",
-        discountPercent: "30"
-      },
-      {
-        image: "https://m.media-amazon.com/images/I/41XqdoEsprL._SY300_SX300_QL70_FMwebp_.jpg",
-        title: "Minimal Metal Wall Decor",
-        category: "Wall Decor",
-        price: "₹1,499",
-        originalPrice: "₹1,899",
-        discountPercent: "30"
-      },
-      {
-        image: "https://m.media-amazon.com/images/I/61MElNd1UKL.jpg",
-        title: "Personalized Anniversary Gift",
-        category: "Personalised Gifts",
-        price: "₹899",
-        originalPrice: "₹1,099",
-        discountPercent: "30"
-      },
-      {
-        image: "https://5.imimg.com/data5/SELLER/Default/2022/8/DR/YZ/GE/917586/14-1000x1000.jpg",
-        title: "Premium Crystal Trophy",
-        category: "Trophies & Mementos",
-        price: "₹1,799",
-        originalPrice: "₹2,199",
-        discountPercent: "30"
-      },
-      {
-        image: "https://cdn1.igp.com/f_auto,q_auto,t_pnopt12prodlp/products/p-personalized-forever-together-led-acrylic-photo-frame-400595-m.jpg",
-        title: "Personalized LED Frame",
-        category: "Photo Frames",
-        price: "₹799",
-        originalPrice: "₹999",
-        discountPercent: "30"
-      }
+      // {
+      //   image: "https://m.media-amazon.com/images/I/41XqdoEsprL._SY300_SX300_QL70_FMwebp_.jpg",
+      //   title: "Minimal Metal Wall Decor",
+      //   category: "Wall Decor",
+      //   price: "₹1,499",
+      //   originalPrice: "₹1,899",
+      //   discountPercent: "30"
+      // },
+      // {
+      //   image: "https://m.media-amazon.com/images/I/61MElNd1UKL.jpg",
+      //   title: "Personalized Anniversary Gift",
+      //   category: "Personalised Gifts",
+      //   price: "₹899",
+      //   originalPrice: "₹1,099",
+      //   discountPercent: "30"
+      // },
+      // {
+      //   image: "https://5.imimg.com/data5/SELLER/Default/2022/8/DR/YZ/GE/917586/14-1000x1000.jpg",
+      //   title: "Premium Crystal Trophy",
+      //   category: "Trophies & Mementos",
+      //   price: "₹1,799",
+      //   originalPrice: "₹2,199",
+      //   discountPercent: "30"
+      // },
+      // {
+      //   image: "https://cdn1.igp.com/f_auto,q_auto,t_pnopt12prodlp/products/p-personalized-forever-together-led-acrylic-photo-frame-400595-m.jpg",
+      //   title: "Personalized LED Frame",
+      //   category: "Photo Frames",
+      //   price: "₹799",
+      //   originalPrice: "₹999",
+      //   discountPercent: "30"
+      // },
+      // {
+      //   image: "https://cdn1.igp.com/f_auto,q_auto,t_pnopt12prodlp/products/p-personalized-forever-together-led-acrylic-photo-frame-400595-m.jpg",
+      //   title: "Personalized LED Frame",
+      //   category: "Photo Frames",
+      //   price: "₹799",
+      //   originalPrice: "₹999",
+      //   discountPercent: "30"
+      // },
+      // {
+      //   image: "https://m.media-amazon.com/images/I/41XqdoEsprL._SY300_SX300_QL70_FMwebp_.jpg",
+      //   title: "Minimal Metal Wall Decor",
+      //   category: "Wall Decor",
+      //   price: "₹1,499",
+      //   originalPrice: "₹1,899",
+      //   discountPercent: "30"
+      // },
+      // {
+      //   image: "https://m.media-amazon.com/images/I/61MElNd1UKL.jpg",
+      //   title: "Personalized Anniversary Gift",
+      //   category: "Personalised Gifts",
+      //   price: "₹899",
+      //   originalPrice: "₹1,099",
+      //   discountPercent: "30"
+      // },
+      // {
+      //   image: "https://5.imimg.com/data5/SELLER/Default/2022/8/DR/YZ/GE/917586/14-1000x1000.jpg",
+      //   title: "Premium Crystal Trophy",
+      //   category: "Trophies & Mementos",
+      //   price: "₹1,799",
+      //   originalPrice: "₹2,199",
+      //   discountPercent: "30"
+      // },
+      // {
+      //   image: "https://cdn1.igp.com/f_auto,q_auto,t_pnopt12prodlp/products/p-personalized-forever-together-led-acrylic-photo-frame-400595-m.jpg",
+      //   title: "Personalized LED Frame",
+      //   category: "Photo Frames",
+      //   price: "₹799",
+      //   originalPrice: "₹999",
+      //   discountPercent: "30"
+      // }
     ]
   },
 

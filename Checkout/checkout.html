@@ -161,8 +161,9 @@
         .btn-primary:hover    { background:#0f2d39; transform:translateY(-1px); box-shadow:0 4px 14px rgba(29,60,74,0.28); }
         .btn-primary:disabled { background:#9ca3af; cursor:not-allowed; transform:none; box-shadow:none; }
         .btn-secondary {
-            background:#fff; color:#1D3C4A; padding:12px 22px;
-            border-radius:8px; border:2px solid #1D3C4A; font-size:14px; font-weight:600;
+            display: flex; align-items: center;
+            background:#fff; color:#1D3C4A; padding:10px 22px;
+            border-radius:8px; border:1px solid #1D3C4A; font-size:14px; font-weight:600;
             cursor:pointer; transition:all 0.2s; font-family:'Lexend',sans-serif;
         }
         .btn-secondary:hover { background:#f0f9ff; }
@@ -432,14 +433,14 @@
                         </label>
 
                         <!-- Delivery notes -->
-                        <div class="form-group mt-2">
+                        <!-- <div class="form-group mt-2">
                             <label class="form-label">
                                 Delivery Instructions
                                 <span class="text-gray-400 font-normal">(Optional)</span>
                             </label>
                             <textarea class="form-textarea" id="deliveryNotes"
                                 placeholder="e.g., Please leave at the door, Ring bell twice…"></textarea>
-                        </div>
+                        </div> -->
 
                         <!-- ── Return / Exchange Policy ── -->
                         <!-- Shown here so customer knows before paying -->
