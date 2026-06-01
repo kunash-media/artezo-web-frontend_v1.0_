@@ -288,8 +288,8 @@
 
     return `
       <div class="w-[180px] sm:w-[200px] md:w-[230px] flex-shrink-0 ${isOOS ? "grayscale opacity-70" : ""}">
-        <div class="bg-white border border-gray-200 rounded-xl overflow-hidden flex flex-col h-full transition hover:shadow-md">
-          <div class="p-1">
+        <div class="bg-white rounded-xl overflow-hidden flex flex-col h-full transition hover:shadow-md">
+          <div class="">
 
            <div class="trending-nav-img relative border border-gray-100 rounded-lg overflow-hidden bg-gray-50 cursor-pointer"
                 data-href="${productUrl}">
@@ -357,16 +357,62 @@
     });
   }
 
-  function trendingInjectCards(products) {
-    const mid  = Math.ceil(products.length / 2);
-    const row1 = products.slice(0, mid);
-    const row2 = products.slice(mid);
+  // function trendingInjectCards(products) {
+  //   const mid  = Math.ceil(products.length / 2);
+  //   const row1 = products.slice(0, mid);
+  //   const row2 = products.slice(mid);
+  //   const inject = (id, prods) => {
+  //     const inner = document.getElementById(id)?.querySelector(".flex.w-max");
+  //     if (inner) inner.innerHTML = prods.map(buildTrendingCard).join("");
+  //   };
+  //   inject("trendingRow1", row1);
+  //   inject("trendingRow2", row2);
+  //   trendingSyncHearts();
+  // }
+
+    function trendingInjectCards(products) {
+    if (!products || products.length === 0) {
+      console.warn("[Trending] No products to render");
+      return;
+    }
+
+    console.log(`[Trending] Total products received: ${products.length}`);
+
+    // === SMART SPLIT LOGIC ===
+    let row1Products = [];
+    let row2Products = [];
+
+    if (products.length <= 5) {
+      // If few products → put ALL in Row 1 (better UX, no empty Row 2)
+      row1Products = products;
+      row2Products = [];
+    } else {
+      // If many products → split evenly
+      const mid = Math.ceil(products.length / 2);
+      row1Products = products.slice(0, mid);
+      row2Products = products.slice(mid);
+    }
+
+    console.log(`[Trending] Row1: ${row1Products.length} | Row2: ${row2Products.length}`);
+
     const inject = (id, prods) => {
-      const inner = document.getElementById(id)?.querySelector(".flex.w-max");
-      if (inner) inner.innerHTML = prods.map(buildTrendingCard).join("");
+      const container = document.getElementById(id);
+      if (!container) return;
+      const inner = container.querySelector(".flex.w-max");
+      if (inner) {
+        inner.innerHTML = prods.map(buildTrendingCard).join("");
+      }
     };
-    inject("trendingRow1", row1);
-    inject("trendingRow2", row2);
+
+    inject("trendingRow1", row1Products);
+    inject("trendingRow2", row2Products);
+
+    // Hide Row 2 completely if empty
+    const row2Section = document.getElementById("trendingRow2");
+    if (row2Section) {
+      row2Section.parentElement.style.display = row2Products.length > 0 ? "block" : "none";
+    }
+
     trendingSyncHearts();
   }
 
@@ -620,11 +666,11 @@
                       <button class="wishlist-btn absolute top-3 right-3 bg-white/90 backdrop-blur rounded-full w-9 h-9 flex items-center justify-center shadow-md hover:scale-110 transition z-20" data-product-id="${prod.id}">
                         <i class="fa-regular fa-heart text-gray-500"></i>
                       </button>
-                      <div class="p-1">
+                      <!-- <div class="">
                         <div class="border border-gray-200 rounded-xl overflow-hidden h-[200px] sm:h-[210px] bg-gray-100">
                           <img src="${prod.image}" class="w-full h-full object-cover" alt="${prod.title}" />
                         </div>
-                      </div>
+                      </div> -->
                       <div class="px-3 pb-4 pt-2">
                         <h3 class="text-sm text-gray-700 line-clamp-2 font-medium leading-tight">${prod.title}</h3>
                         <div class="flex text-orange-500 text-sm mt-2">${prod.starsHtml}<span class="text-gray-400 ml-1.5">(${prod.reviews})</span></div>
@@ -670,6 +716,7 @@
               </div>
             </div>
 
+            <!-- ROW - 1 -->
             <div class="relative max-w-7xl mx-auto">
               <button onclick="scrollRow('trendingRow1', -1)" class="absolute left-2 sm:-left-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow border flex items-center justify-center hover:bg-[#1D3C4A] hover:text-white transition">
                 <i class="fa-solid fa-chevron-left"></i>
@@ -678,10 +725,22 @@
                 <i class="fa-solid fa-chevron-right"></i>
               </button>
               <div id="trendingRow1" class="overflow-x-auto scroll-smooth scrollbar-hide">
+                <div class="flex gap-4 sm:gap-6 w-max p-3 sm:px-6"></div>
+              </div>
+            </div>
+            
+            <!-- ROW 2 (only show when needed) -->
+            <div id="trendingRow2Container" class="relative max-w-7xl mx-auto mt-8">
+              <button onclick="scrollRow('trendingRow2', -1)" class="absolute left-2 sm:-left-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow border flex items-center justify-center hover:bg-[#1D3C4A] hover:text-white transition">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              <button onclick="scrollRow('trendingRow2', 1)" class="absolute right-2 sm:-right-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow border flex items-center justify-center hover:bg-[#1D3C4A] hover:text-white transition">
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+              <div id="trendingRow2" class="overflow-x-auto scroll-smooth scrollbar-hide">
                 <div class="flex gap-4 sm:gap-6 w-max px-4 sm:px-6"></div>
               </div>
             </div>
-
             
           </section>
 

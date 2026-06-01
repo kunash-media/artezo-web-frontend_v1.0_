@@ -15,6 +15,483 @@
     return BASE_URL + path;
   }
 
+
+  // ═══════════════════════════════════════════════════════════════════════════
+//  PATCH 3 — REVIEWS (COMPLETE: image + video, lightbox, aggregate)
+//  API fields used: customerName, rating, comment, imageUrl, videoUrl,
+//                   createdAt, approved
+//  Media endpoint pattern: BASE_URL + /api/reviews/{id}/media/image|video
+//  A review can have both image AND video simultaneously.
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function fetchProductReviews(productPrimeId) {
+  try {
+    const res = await fetch(`${BASE_URL}/api/reviews/product/${productPrimeId}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    // Backend /product/{id} returns only approved per service impl,
+    // but guard here too for safety — newest first
+    return (Array.isArray(data) ? data : [])
+      .filter((r) => r.approved === true)
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  } catch (err) {
+    console.warn("[Reviews] fetch error:", err);
+    return [];
+  }
+}
+
+// ─── Build flat media list from all reviews ────────────────────────────────
+// Each entry: { type: "image"|"video", url, reviewId, customerName, reviewIdx }
+// One review can contribute TWO entries (image + video).
+function buildReviewMediaList(reviews) {
+  const list = [];
+  reviews.forEach((r, reviewIdx) => {
+    if (r.imageUrl) {
+      list.push({
+        type:         "image",
+        url:          `${BASE_URL}${r.imageUrl}`,
+        reviewId:     r.reviewId,
+        customerName: r.customerName || "Customer",
+        reviewIdx,
+      });
+    }
+    if (r.videoUrl) {
+      list.push({
+        type:         "video",
+        url:          `${BASE_URL}${r.videoUrl}`,
+        reviewId:     r.reviewId,
+        customerName: r.customerName || "Customer",
+        reviewIdx,
+      });
+    }
+  });
+  return list;
+}
+
+// ─── Main review section renderer ─────────────────────────────────────────
+async function fillReviews() {
+  const sec = document.getElementById("socialSection");
+  if (!sec) return;
+
+  const reviews   = await fetchProductReviews(safeProductData.productId);
+  const mediaList = buildReviewMediaList(reviews);
+  const total     = reviews.length;
+  const avgRating = total
+    ? (reviews.reduce((s, r) => s + (r.rating || 0), 0) / total).toFixed(1)
+    : "0.0";
+
+  const starCounts = [5, 4, 3, 2, 1].map((star) => ({
+    star,
+    count: reviews.filter((r) => Math.round(r.rating) === star).length,
+  }));
+
+  let html = `
+    <div class="mb-6">
+      <h2 class="text-2xl md:text-3xl font-semibold font-zain text-[#1D3C4A]">
+        Customer Reviews
+      </h2>
+    </div>`;
+
+  if (!total) {
+    html += `
+      <div class="text-center py-16 border border-[#e5e7eb] rounded-2xl bg-white">
+        <i class="fa-regular fa-star text-4xl text-gray-300 mb-3 block"></i>
+        <p class="text-gray-400 font-lexend">No reviews yet. Be the first to review!</p>
+      </div>`;
+    sec.innerHTML = html;
+    return;
+  }
+
+  // ── Aggregate block ────────────────────────────────────────────────────
+  html += `
+    <div class="flex flex-col sm:flex-row gap-6 bg-white border border-[#e5e7eb]
+                rounded-2xl p-6 mb-6 shadow-sm">
+      <div class="flex flex-col items-center justify-center min-w-[120px]
+                  border-b sm:border-b-0 sm:border-r border-[#e5e7eb]
+                  pb-4 sm:pb-0 sm:pr-6">
+        <span class="text-5xl font-bold font-zain text-[#1D3C4A]">${avgRating}</span>
+        <div class="flex text-[#e39f32] gap-0.5 mt-1 text-sm">
+          ${renderStars(parseFloat(avgRating))}
+        </div>
+        <span class="text-xs text-gray-400 mt-1 font-lexend">
+          ${total} review${total > 1 ? "s" : ""}
+        </span>
+      </div>
+      <div class="flex-1 space-y-2">
+        ${starCounts.map(({ star, count }) => {
+          const pct = total ? Math.round((count / total) * 100) : 0;
+          return `
+            <div class="flex items-center gap-3">
+              <span class="text-xs font-lexend text-[#1D3C4A] w-3 text-right shrink-0">${star}</span>
+              <i class="fa-solid fa-star text-[#e39f32] text-[10px] shrink-0"></i>
+              <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div class="h-full bg-[#e39f32] rounded-full transition-all duration-500"
+                     style="width:${pct}%"></div>
+              </div>
+              <span class="text-xs text-gray-400 font-lexend w-5 shrink-0">${count}</span>
+            </div>`;
+        }).join("")}
+      </div>
+    </div>`;
+
+  // ── All media strip (images + videos combined) ─────────────────────────
+  if (mediaList.length > 0) {
+    html += `
+      <div class="mb-6">
+        <h3 class="text-sm font-semibold font-lexend text-[#1D3C4A] mb-3">
+          Customer photos &amp; videos (${mediaList.length})
+        </h3>
+        <div class="flex gap-2 overflow-x-auto pb-2"
+             style="scrollbar-width:thin;scrollbar-color:#e39f32 #f1f1f1">
+          ${mediaList.map((item, idx) => {
+            if (item.type === "video") {
+              return `
+                <div class="review-strip-media relative flex-shrink-0 h-20 w-20 rounded-xl
+                            border border-[#e5e7eb] overflow-hidden cursor-pointer
+                            hover:border-[#e39f32] transition-all group"
+                     data-media-idx="${idx}">
+                  <video src="${item.url}"
+                         class="w-full h-full object-cover"
+                         muted preload="metadata"></video>
+                  <div class="absolute inset-0 flex items-center justify-center
+                              bg-black/40 group-hover:bg-black/50 transition-all">
+                    <i class="fa-solid fa-play text-white text-lg"></i>
+                  </div>
+                </div>`;
+            }
+            return `
+              <img src="${item.url}"
+                   class="review-strip-media flex-shrink-0 h-20 w-20 object-cover rounded-xl
+                          border border-[#e5e7eb] cursor-pointer
+                          hover:opacity-90 hover:border-[#e39f32] transition-all"
+                   data-media-idx="${idx}"
+                   alt="Review media"
+                   onerror="this.parentElement?.remove()"/>`;
+          }).join("")}
+        </div>
+      </div>`;
+  }
+
+  // ── Individual review cards ────────────────────────────────────────────
+  html += `<div class="space-y-4">`;
+
+  reviews.forEach((r) => {
+    const name    = escapeHtml(r.customerName || "Anonymous");
+    const initials = name.slice(0, 2).toUpperCase();
+    const rating  = r.rating || 0;
+    const comment = escapeHtml(r.comment || "");
+    const dateStr = r.createdAt
+      ? new Date(r.createdAt).toLocaleDateString("en-IN", {
+          day: "numeric", month: "short", year: "numeric",
+        })
+      : "";
+
+    // Find media indices for this review's image/video in the global mediaList
+    const imgMediaIdx = mediaList.findIndex(
+      (m) => m.type === "image" && m.reviewId === r.reviewId
+    );
+    const vidMediaIdx = mediaList.findIndex(
+      (m) => m.type === "video" && m.reviewId === r.reviewId
+    );
+
+    html += `
+      <div class="bg-white border border-[#e5e7eb] rounded-2xl p-5 hover:shadow-sm
+                  transition-shadow">
+
+        <!-- Reviewer header -->
+        <div class="flex items-start gap-3 mb-3">
+          <div class="w-10 h-10 rounded-full bg-[#1D3C4A] flex items-center justify-center
+                      text-white text-sm font-semibold font-lexend flex-shrink-0">
+            ${initials}
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <span class="font-semibold font-lexend text-[#1D3C4A] text-sm">${name}</span>
+              ${dateStr
+                ? `<span class="text-xs text-gray-400 font-lexend">${dateStr}</span>`
+                : ""}
+            </div>
+            <div class="flex items-center gap-1 mt-0.5">
+              <div class="flex text-[#e39f32] text-xs gap-0.5">${renderStars(rating)}</div>
+              <span class="text-xs text-gray-400 font-lexend">${rating}/5</span>
+            </div>
+          </div>
+          <span class="flex items-center gap-1 text-[10px] font-lexend text-green-700
+                       bg-green-50 border border-green-200 px-2 py-0.5 rounded-full flex-shrink-0">
+            <i class="fa-solid fa-circle-check text-[9px]"></i> Verified
+          </span>
+        </div>
+
+        <!-- Comment -->
+        ${comment
+          ? `<p class="text-sm text-[#1D3C4A]/80 font-lexend leading-relaxed mb-3">
+               ${comment}
+             </p>`
+          : ""}
+
+        <!-- Per-card media thumbnails -->
+        ${(r.imageUrl || r.videoUrl) ? `
+          <div class="flex gap-2 mt-2 flex-wrap">
+            ${r.imageUrl && imgMediaIdx >= 0 ? `
+              <img src="${BASE_URL}${r.imageUrl}"
+                   class="review-card-media h-20 w-20 object-cover rounded-xl border
+                          border-[#e5e7eb] cursor-pointer hover:opacity-90
+                          hover:border-[#e39f32] transition-all"
+                   data-media-idx="${imgMediaIdx}"
+                   alt="Review image"
+                   onerror="this.style.display='none'"/>
+            ` : ""}
+            ${r.videoUrl && vidMediaIdx >= 0 ? `
+              <div class="review-card-media relative h-20 w-20 rounded-xl border
+                          border-[#e5e7eb] overflow-hidden cursor-pointer
+                          hover:border-[#e39f32] transition-all group"
+                   data-media-idx="${vidMediaIdx}">
+                <video src="${BASE_URL}${r.videoUrl}"
+                       class="w-full h-full object-cover"
+                       muted preload="metadata"></video>
+                <div class="absolute inset-0 flex items-center justify-center
+                            bg-black/40 group-hover:bg-black/50 transition-all">
+                  <i class="fa-solid fa-play text-white text-base"></i>
+                </div>
+              </div>
+            ` : ""}
+          </div>` : ""}
+
+      </div>`;
+  });
+
+  html += `</div>`; // close cards list
+
+  sec.innerHTML = html;
+
+  // Build and wire lightbox after DOM is ready
+  if (mediaList.length > 0) {
+    buildReviewLightbox(mediaList);
+    wireReviewLightbox(mediaList);
+  }
+}
+
+// ─── Lightbox builder ──────────────────────────────────────────────────────
+function buildReviewLightbox(mediaList) {
+  // Remove stale instance if re-rendered
+  document.getElementById("reviewLightbox")?.remove();
+
+  const thumbsHTML = mediaList.map((item, idx) => {
+    if (item.type === "video") {
+      return `
+        <div class="lb-thumb-wrap relative flex-shrink-0 h-12 w-12 rounded-lg overflow-hidden
+                    cursor-pointer border-2 border-transparent hover:border-[#e39f32]
+                    transition-all opacity-60"
+             data-lb-idx="${idx}">
+          <video src="${item.url}" class="w-full h-full object-cover"
+                 muted preload="metadata"></video>
+          <div class="absolute inset-0 flex items-center justify-center bg-black/40">
+            <i class="fa-solid fa-play text-white text-[10px]"></i>
+          </div>
+        </div>`;
+    }
+    return `
+      <img class="lb-thumb-wrap flex-shrink-0 h-12 w-12 object-cover rounded-lg
+                  cursor-pointer border-2 border-transparent hover:border-[#e39f32]
+                  transition-all opacity-60"
+           src="${item.url}"
+           data-lb-idx="${idx}"
+           onerror="this.style.display='none'"/>`;
+  }).join("");
+
+  document.body.insertAdjacentHTML("beforeend", `
+    <div id="reviewLightbox"
+         class="fixed inset-0 z-[9999] hidden items-center justify-center"
+         style="background:rgba(0,0,0,0.92)">
+
+      <!-- Close -->
+      <button id="lbClose"
+              class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10
+                     hover:bg-white/25 flex items-center justify-center
+                     transition text-white z-10">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <!-- Prev -->
+      <button id="lbPrev"
+              class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full
+                     bg-white/10 hover:bg-white/25 flex items-center justify-center
+                     transition text-white z-10">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+
+      <!-- Next -->
+      <button id="lbNext"
+              class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full
+                     bg-white/10 hover:bg-white/25 flex items-center justify-center
+                     transition text-white z-10">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+
+      <!-- Content area -->
+      <div class="flex flex-col items-center gap-4 w-full max-w-xl px-16"
+           id="lbContentArea">
+
+        <!-- Media display -->
+        <div id="lbMediaWrap"
+             class="w-full flex items-center justify-center"
+             style="max-height:65vh">
+          <!-- Swapped by renderLightboxSlide() -->
+        </div>
+
+        <!-- Reviewer + counter -->
+        <div class="text-center">
+          <p id="lbReviewerName"
+             class="text-white text-sm font-lexend font-medium"></p>
+          <p id="lbCounter"
+             class="text-white/50 text-xs font-lexend mt-0.5"></p>
+        </div>
+
+        <!-- Thumb strip inside lightbox -->
+        <div id="lbThumbStrip"
+             class="flex gap-2 overflow-x-auto max-w-full pb-1"
+             style="scrollbar-width:thin;scrollbar-color:#e39f32 transparent">
+          ${thumbsHTML}
+        </div>
+
+      </div>
+    </div>`);
+}
+
+// ─── Lightbox wiring ───────────────────────────────────────────────────────
+function wireReviewLightbox(mediaList) {
+  if (!mediaList.length) return;
+
+  let currentIdx = 0;
+
+  // ── Open / close ─────────────────────────────────────────────────────────
+  function openLightbox(idx) {
+    currentIdx = Math.max(0, Math.min(idx, mediaList.length - 1));
+    const lb = document.getElementById("reviewLightbox");
+    lb.classList.remove("hidden");
+    lb.classList.add("flex");
+    document.body.style.overflow = "hidden";
+    renderSlide();
+  }
+
+  function closeLightbox() {
+    const lb = document.getElementById("reviewLightbox");
+    // Pause any playing video before closing
+    lb.querySelector("video")?.pause();
+    lb.classList.add("hidden");
+    lb.classList.remove("flex");
+    document.body.style.overflow = "";
+  }
+
+  // ── Render current slide ──────────────────────────────────────────────────
+  function renderSlide() {
+    const item      = mediaList[currentIdx];
+    const wrap      = document.getElementById("lbMediaWrap");
+    const nameEl    = document.getElementById("lbReviewerName");
+    const counterEl = document.getElementById("lbCounter");
+
+    if (!wrap) return;
+
+    // Pause any existing video before swapping
+    wrap.querySelector("video")?.pause();
+
+    // Swap media element
+    if (item.type === "video") {
+      wrap.innerHTML = `
+        <video src="${item.url}"
+               controls
+               autoplay
+               class="max-h-[65vh] max-w-full rounded-xl outline-none"
+               style="background:#000">
+        </video>`;
+    } else {
+      wrap.innerHTML = `
+        <img src="${item.url}"
+             alt="Review photo"
+             class="max-h-[65vh] max-w-full object-contain rounded-xl"
+             onerror="this.alt='Image unavailable'"/>`;
+    }
+
+    // Meta
+    if (nameEl)    nameEl.textContent    = item.customerName;
+    if (counterEl) counterEl.textContent = `${currentIdx + 1} / ${mediaList.length}`;
+
+    // Sync thumb strip
+    document.querySelectorAll(".lb-thumb-wrap").forEach((t, i) => {
+      const isActive = i === currentIdx;
+      t.classList.toggle("border-[#e39f32]", isActive);
+      t.classList.toggle("opacity-100",      isActive);
+      t.classList.toggle("opacity-60",       !isActive);
+    });
+
+    // Scroll active thumb into view
+    document.querySelector(`.lb-thumb-wrap[data-lb-idx="${currentIdx}"]`)
+      ?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+
+    // Prev / next visibility
+    const prev = document.getElementById("lbPrev");
+    const next = document.getElementById("lbNext");
+    if (prev) prev.style.visibility = currentIdx === 0                     ? "hidden" : "visible";
+    if (next) next.style.visibility = currentIdx === mediaList.length - 1  ? "hidden" : "visible";
+  }
+
+  // ── Strip clicks (top media strip in review section) ─────────────────────
+  document.querySelectorAll(".review-strip-media").forEach((el) => {
+    el.addEventListener("click", () => openLightbox(parseInt(el.dataset.mediaIdx)));
+  });
+
+  // ── Per-card media clicks ─────────────────────────────────────────────────
+  document.querySelectorAll(".review-card-media").forEach((el) => {
+    el.addEventListener("click", () => openLightbox(parseInt(el.dataset.mediaIdx)));
+  });
+
+  // ── Lightbox controls ─────────────────────────────────────────────────────
+  document.getElementById("lbClose")
+    ?.addEventListener("click", closeLightbox);
+
+  document.getElementById("lbPrev")
+    ?.addEventListener("click", () => {
+      if (currentIdx > 0) { currentIdx--; renderSlide(); }
+    });
+
+  document.getElementById("lbNext")
+    ?.addEventListener("click", () => {
+      if (currentIdx < mediaList.length - 1) { currentIdx++; renderSlide(); }
+    });
+
+  // ── Lightbox thumb strip ──────────────────────────────────────────────────
+  document.getElementById("lbThumbStrip")
+    ?.addEventListener("click", (e) => {
+      const thumb = e.target.closest(".lb-thumb-wrap");
+      if (thumb) openLightbox(parseInt(thumb.dataset.lbIdx));
+    });
+
+  // ── Backdrop click → close ────────────────────────────────────────────────
+  document.getElementById("reviewLightbox")
+    ?.addEventListener("click", (e) => {
+      if (e.target.id === "reviewLightbox") closeLightbox();
+    });
+
+  // ── Keyboard nav ──────────────────────────────────────────────────────────
+  document.addEventListener("keydown", (e) => {
+    if (document.getElementById("reviewLightbox")?.classList.contains("hidden")) return;
+    if (e.key === "ArrowLeft"  && currentIdx > 0)                         { currentIdx--; renderSlide(); }
+    if (e.key === "ArrowRight" && currentIdx < mediaList.length - 1)      { currentIdx++; renderSlide(); }
+    if (e.key === "Escape") closeLightbox();
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  END PATCH 3
+// ═══════════════════════════════════════════════════════════════════════════
+
+
+
+
+
 //============================================================//
   //================ PATCH FUNCTIONS ADDED =====================//
   //============================================================//
@@ -295,6 +772,8 @@ async function fetchProductBySKU(sku, variantId) {
         showFatalError(`Product not found. Please check the link or try again. (SKU: ${sku})`);
     }
 }
+
+
 // ─── UPDATE CANONICAL URL ─────────────────────────────────────────────────────
 function updateCanonicalURL(sku, variantId) {
     let canonicalUrl = window.location.origin + window.location.pathname;
@@ -552,7 +1031,7 @@ async function fetchProductFromAPI(id) {
       addonKeys.map(async (key) => {
         try {
           const res = await fetch(
-            `${BASE_URL}/api/products/get-by-addon?addonKey=${encodeURIComponent(key)}&page=0&size=8`,
+            `${BASE_URL}/api/products/get-by-addon?addonKey=${encodeURIComponent(key)}&page=0&size=5`,
             { method: "GET", headers: { "Content-Type": "application/json" } }
           );
           if (!res.ok) return;
@@ -758,7 +1237,7 @@ async function fetchProductFromAPI(id) {
     
     buildCompleteHTML();
     fillAccordion();
-    fillSocialProof();
+    // fillSocialProof();
     fillInstallation();
     fillHeroBanner();
     fillStickyBar();
@@ -767,6 +1246,8 @@ async function fetchProductFromAPI(id) {
     // Async fills
     fillBoughtTogether();
     fillRecentAndSuggestions();
+    fillReviews(); // PATCH 3 — async, non-blocking
+
 
     setTimeout(() => {
         setupVariantSelection();
@@ -1137,6 +1618,106 @@ async function fetchProductFromAPI(id) {
     });
   }
 
+
+
+  /**
+ * PATCH 1A — Out-of-stock CTA guard.
+ * Disables Add-to-Cart and Buy-Now buttons when stock <= 0.
+ * Called on initial render and every variant switch.
+ */
+// function applyStockState(stock) {
+//   const isOOS = !stock || stock <= 0;
+
+//   // All CTA buttons on page (main + sticky bar)
+//   const cartBtns    = document.querySelectorAll(".add-to-cart-btn");
+//   const buyNowBtns  = document.querySelectorAll(".buy-now-btn");
+
+//   cartBtns.forEach((btn) => {
+//     btn.disabled = isOOS;
+//     btn.classList.toggle("opacity-40",   isOOS);
+//     btn.classList.toggle("cursor-not-allowed", isOOS);
+//     btn.classList.toggle("pointer-events-none", isOOS);
+//     if (isOOS) {
+//       btn.dataset.originalText = btn.innerHTML;
+//       btn.innerHTML = `<i class="fas fa-ban"></i> <span class="text-sm">Out of Stock</span>`;
+//     } else if (btn.dataset.originalText) {
+//       btn.innerHTML = btn.dataset.originalText;
+//     }
+//   });
+
+//   buyNowBtns.forEach((btn) => {
+//     btn.disabled = isOOS;
+//     btn.classList.toggle("opacity-40",   isOOS);
+//     btn.classList.toggle("cursor-not-allowed", isOOS);
+//     btn.classList.toggle("pointer-events-none", isOOS);
+//   });
+
+//   // Qty controls
+//   const incBtn = document.getElementById("increaseBtn");
+//   if (incBtn) {
+//     incBtn.disabled = isOOS;
+//     incBtn.classList.toggle("opacity-40", isOOS);
+//     incBtn.classList.toggle("cursor-not-allowed", isOOS);
+//   }
+// }
+
+
+// ─── PATCH 2: SINGLE SOURCE OF TRUTH FOR STOCK STATE ──────────────────────────
+// Called from exactly two places: initial render + variant switch.
+// Owns: CTA buttons, qty controls, stockInfo label, sticky bar.
+// Never use applyStockState or inline stock checks anywhere else.
+
+function syncStockUI(stock) {
+
+  console.log("[syncStockUI] called with stock:", stock, "| isOOS:", !stock || stock <= 0);
+  const isOOS   = !stock || stock <= 0;
+  const remaining = Math.max(0, stock || 0);
+
+  // ── 1. CTA buttons (main + sticky bar) ──────────────────────────────────
+  document.querySelectorAll(".add-to-cart-btn, .buy-now-btn").forEach((btn) => {
+    btn.disabled = isOOS;
+    btn.setAttribute("aria-disabled", String(isOOS));
+    btn.classList.toggle("opacity-50",        isOOS);
+    btn.classList.toggle("cursor-not-allowed", isOOS);
+
+    if (btn.classList.contains("add-to-cart-btn")) {
+      const isCustom = safeProductData?.isCustomizable;
+      btn.innerHTML = isOOS
+        ? `<i class="fas fa-ban"></i><span class="text-sm ml-1">Out of Stock</span>`
+        : isCustom
+          ? `<i class="fas fa-sliders-h"></i><span class="text-sm ml-1">Customize</span>`
+          : `<i class="fa-solid fa-cart-shopping"></i><span class="text-sm ml-1">Add to Cart</span>`;
+    }
+    // buy-now-btn has no text change — disable state alone is sufficient
+  });
+
+  // ── 2. Qty increase button ───────────────────────────────────────────────
+  const incBtn = document.getElementById("increaseBtn");
+  if (incBtn) {
+    incBtn.disabled = isOOS;
+    incBtn.classList.toggle("opacity-40", isOOS);
+    incBtn.classList.toggle("cursor-not-allowed", isOOS);
+  }
+
+  // ── 3. stockInfo label ───────────────────────────────────────────────────
+  const stockEl = document.getElementById("stockInfo");
+  if (stockEl) {
+    if (isOOS) {
+      stockEl.textContent = "Out of stock";
+      stockEl.className   = "text-xs text-red-600 font-semibold";
+    } else {
+      // Re-read current qty from DOM to calculate remaining
+      const qty = parseInt(document.getElementById("quantity")?.textContent || 1);
+      const rem = stock - qty;
+      stockEl.textContent = rem > 0 ? `Only ${rem} items left in stock` : "Out of stock";
+      stockEl.className   = rem > 0
+        ? "text-xs text-green-600 font-semibold"
+        : "text-xs text-red-600 font-semibold";
+    }
+  }
+}
+// ─── END PATCH 2 STOCK FUNCTION ───────────────────────────────────────────────
+
   /**
    * Full product display update on variant switch.
    * Covers: media strip, price, stock, sku, color, size — everything visible.
@@ -1168,17 +1749,20 @@ async function fetchProductFromAPI(id) {
     });
 
     // ── 4. Stock ───────────────────────────────────────────────────────────
-    const qty      = parseInt(document.getElementById("quantity")?.textContent || 1);
-    const stockEl  = document.getElementById("stockInfo");
-    const remaining = currentVariant.stock - qty;
-    if (stockEl) {
-      stockEl.textContent = remaining > 0
-        ? `Only ${remaining} items left in stock`
-        : "Out of stock";
-      stockEl.className = remaining > 0
-        ? "text-xs text-green-600 font-semibold"
-        : "text-xs text-red-600 font-semibold";
-    }
+    // const qty      = parseInt(document.getElementById("quantity")?.textContent || 1);
+    // const stockEl  = document.getElementById("stockInfo");
+    // const remaining = currentVariant.stock - qty;
+    // if (stockEl) {
+    //   stockEl.textContent = remaining > 0
+    //     ? `Only ${remaining} items left in stock`
+    //     : "Out of stock";
+    //   stockEl.className = remaining > 0
+    //     ? "text-xs text-green-600 font-semibold"
+    //     : "text-xs text-red-600 font-semibold";
+    // }
+
+    // ── 4. Stock — delegate entirely to syncStockUI (PATCH 2) ─────────────
+    syncStockUI(currentVariant.stock);
 
     // ── 5. SKU / Color label ───────────────────────────────────────────────
     const skuEl = document.getElementById("currentSkuLabel");
@@ -2204,7 +2788,7 @@ if (variantColors.length > 0) {
       ${sizeSection}
 
       <!-- COLOR SECTION -->
-      <div>
+      <div class="p-2">
         <div class="flex items-center justify-between mb-3">
           <div class="flex items-center gap-3">
             <span class="text-sm font-semibold text-[#033E59]">Color</span>
@@ -2278,11 +2862,12 @@ if (variantColors.length > 0) {
         accent: k === "material",
       })),
 
+      // PATCH 1B — No fallback text; render empty string when no description exists
       description:
         [...safeProductData.aboutItem, ...safeProductData.description]
           .filter(Boolean)
           .map((item) => `<p>${escapeHtml(item)}</p>`)
-          .join("") || "<p>Premium quality product.</p>",
+          .join(""),
           
       specifications: Object.entries(safeProductData.specifications).map(([k, v]) => ({
         label: k.split("_").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" "),
@@ -2642,6 +3227,11 @@ if (variantColors.length > 0) {
     let accHtml = `
       <div class="item"><button class="toggle w-full flex justify-between items-center px-6 py-4 text-left font-medium font-lexend text-[#1D3C4A]">Highlights<span class="icon text-xl transition-transform duration-300">+</span></button><div class="content"><div class="px-6 pb-6 text-sm"><div class="rounded-lg overflow-hidden bg-white border border-[#edf2f4] shadow-sm"><table class="w-full text-left border-collapse"><tbody>`;
 
+    // PATCH 1B — Only render description accordion if content exists
+    if (transformedData.description) {
+      accHtml += `<div class="item"><button class="toggle w-full flex justify-between items-center px-6 py-3 text-left font-medium font-lexend">Product Description<span class="icon text-xl transition-transform duration-300">+</span></button><div class="content"><div class="px-6 pb-6 text-sm text-[#1D3C4A]/80 leading-relaxed space-y-4">${transformedData.description}<\/div><\/div><\/div>`;
+    }
+
     transformedData.highlights.forEach((h) => {
       let rowClass = h.accent
         ? "bg-[#fff9f2]"
@@ -2726,6 +3316,9 @@ if (variantColors.length > 0) {
 
     const addonProducts = await fetchAddonProducts(safeProductData.addonKeys);
 
+     // PATCH 1C — Cap at 4 items max regardless of API response
+     const cappedProducts = addonProducts.slice(0, 4);
+
     if (!addonProducts.length) {
       // Nothing to show — hide entire section cleanly
       if (section) section.style.display = "none";
@@ -2734,7 +3327,7 @@ if (variantColors.length > 0) {
 
     if (section) section.style.display = "block";
 
-    let html = addonProducts
+    let html = cappedProducts
       .map((p) => {
         const img        = absUrl(p.mainImage) || FALLBACK_IMG;
         const price      = p.currentSellingPrice;
@@ -3053,6 +3646,345 @@ const url = generateProductSEOUrl(p) || `/products/product-detail.html?id=${p.pr
     sec.innerHTML = html;
   }
 
+  // ─── PATCH 3: REVIEWS RENDERER ────────────────────────────────────────────────
+// Amazon-style layout:
+//   • Star aggregate breakdown at top
+//   • All review photos in a horizontal strip (click → lightbox)
+//   • Individual review cards below
+// Called async after renderPage() — does not block initial render.
+
+async function fillReviews() {
+  const sec = document.getElementById("socialSection");
+  if (!sec) return;
+
+  const reviews = await fetchProductReviews(safeProductData.productId);
+
+  // ── Aggregate stats ──────────────────────────────────────────────────────
+  const total     = reviews.length;
+  const avgRating = total
+    ? (reviews.reduce((s, r) => s + (r.rating || 0), 0) / total).toFixed(1)
+    : "0.0";
+
+  // Count per star level 5→1
+  const starCounts = [5, 4, 3, 2, 1].map((star) => ({
+    star,
+    count: reviews.filter((r) => Math.round(r.rating) === star).length,
+  }));
+
+  // ── All images for top strip ─────────────────────────────────────────────
+  const reviewsWithImages = reviews.filter((r) => r.imageUrl);
+
+  // ── Build HTML ───────────────────────────────────────────────────────────
+  let html = "";
+
+  // Section heading
+  html += `
+    <div class="mb-6">
+      <h2 class="text-2xl md:text-3xl font-semibold font-zain text-[#1D3C4A]">
+        Customer Reviews
+      </h2>
+    </div>`;
+
+  if (!total) {
+    html += `
+      <div class="text-center py-16 border border-[#e5e7eb] rounded-2xl bg-white">
+        <i class="fa-regular fa-star text-4xl text-gray-300 mb-3 block"></i>
+        <p class="text-gray-400 font-lexend">No reviews yet. Be the first to review!</p>
+      </div>`;
+    sec.innerHTML = html;
+    return;
+  }
+
+  // ── Rating aggregate block ───────────────────────────────────────────────
+  html += `
+    <div class="flex flex-col sm:flex-row gap-6 bg-white border border-[#e5e7eb] rounded-2xl p-6 mb-6">
+
+      <!-- Average score -->
+      <div class="flex flex-col items-center justify-center min-w-[120px] border-b sm:border-b-0 sm:border-r border-[#e5e7eb] pb-4 sm:pb-0 sm:pr-6">
+        <span class="text-5xl font-bold font-zain text-[#1D3C4A]">${avgRating}</span>
+        <div class="flex text-[#e39f32] gap-0.5 mt-1">${renderStars(parseFloat(avgRating))}</div>
+        <span class="text-xs text-gray-400 mt-1 font-lexend">${total} review${total > 1 ? "s" : ""}</span>
+      </div>
+
+      <!-- Star breakdown bars -->
+      <div class="flex-1 space-y-2">
+        ${starCounts.map(({ star, count }) => {
+          const pct = total ? Math.round((count / total) * 100) : 0;
+          return `
+            <div class="flex items-center gap-3">
+              <span class="text-xs font-lexend text-[#1D3C4A] w-4 text-right shrink-0">${star}</span>
+              <i class="fa-solid fa-star text-[#e39f32] text-[10px] shrink-0"></i>
+              <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div class="h-full bg-[#e39f32] rounded-full transition-all duration-500"
+                     style="width:${pct}%"></div>
+              </div>
+              <span class="text-xs text-gray-400 font-lexend w-6 shrink-0">${count}</span>
+            </div>`;
+        }).join("")}
+      </div>
+
+    </div>`;
+
+  // ── All photos strip ─────────────────────────────────────────────────────
+  if (reviewsWithImages.length > 0) {
+    html += `
+      <div class="mb-6">
+        <h3 class="text-sm font-semibold font-lexend text-[#1D3C4A] mb-3">
+          Photos from customers (${reviewsWithImages.length})
+        </h3>
+        <div class="flex gap-2 overflow-x-auto pb-2 review-photo-strip"
+             style="scrollbar-width:thin;scrollbar-color:#e39f32 #f1f1f1">
+          ${reviewsWithImages.map((r, idx) => `
+            <img src="${BASE_URL}${r.imageUrl}"
+                 class="review-strip-thumb h-20 w-20 object-cover rounded-xl border border-[#e5e7eb]
+                        flex-shrink-0 cursor-pointer hover:opacity-90 hover:border-[#e39f32] transition-all"
+                 data-review-idx="${idx}"
+                 data-lightbox="review-photos"
+                 alt="Review photo by ${escapeHtml(r.customerName || "customer")}"
+                 onerror="this.style.display='none'"/>
+          `).join("")}
+        </div>
+      </div>`;
+  }
+
+  // ── Individual review cards ──────────────────────────────────────────────
+  html += `<div class="space-y-4" id="reviewCardsList">`;
+
+  reviews.forEach((r) => {
+    const name      = escapeHtml(r.customerName || "Anonymous");
+    const initials  = name.slice(0, 2).toUpperCase();
+    const rating    = r.rating || 0;
+    const comment   = escapeHtml(r.comment || "");
+    const dateStr   = r.createdAt
+      ? new Date(r.createdAt).toLocaleDateString("en-IN", {
+          day: "numeric", month: "short", year: "numeric",
+        })
+      : "";
+
+    html += `
+      <div class="bg-white border border-[#e5e7eb] rounded-2xl p-5 hover:shadow-sm transition-shadow">
+
+        <!-- Reviewer row -->
+        <div class="flex items-start gap-3 mb-3">
+          <!-- Avatar -->
+          <div class="w-10 h-10 rounded-full bg-[#1D3C4A] flex items-center justify-center
+                      text-white text-sm font-semibold font-lexend flex-shrink-0">
+            ${initials}
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <span class="font-semibold font-lexend text-[#1D3C4A] text-sm">${name}</span>
+              ${r.createdAt
+                ? `<span class="text-xs text-gray-400 font-lexend">${dateStr}</span>`
+                : ""}
+            </div>
+            <!-- Stars -->
+            <div class="flex items-center gap-1 mt-0.5">
+              <div class="flex text-[#e39f32] text-xs gap-0.5">${renderStars(rating)}</div>
+              <span class="text-xs text-gray-400 font-lexend">${rating}/5</span>
+            </div>
+          </div>
+          <!-- Verified badge -->
+          <span class="flex items-center gap-1 text-[10px] font-lexend text-green-700
+                       bg-green-50 border border-green-200 px-2 py-0.5 rounded-full flex-shrink-0">
+            <i class="fa-solid fa-circle-check text-[9px]"></i> Verified
+          </span>
+        </div>
+
+        <!-- Comment -->
+        ${comment
+          ? `<p class="text-sm text-[#1D3C4A]/80 font-lexend leading-relaxed mb-3">${comment}</p>`
+          : ""}
+
+        <!-- Review image thumbnail (if present) -->
+        ${r.imageUrl
+          ? `<div class="mt-2">
+               <img src="${BASE_URL}${r.imageUrl}"
+                    class="h-24 w-24 object-cover rounded-xl border border-[#e5e7eb] cursor-pointer
+                           hover:opacity-90 hover:border-[#e39f32] transition-all review-card-img"
+                    data-full-src="${BASE_URL}${r.imageUrl}"
+                    data-reviewer="${name}"
+                    alt="Review image"
+                    onerror="this.style.display='none'"/>
+             </div>`
+          : ""}
+
+      </div>`;
+  });
+
+  html += `</div>`; // close reviewCardsList
+
+  sec.innerHTML = html;
+
+  // ── Wire lightbox ────────────────────────────────────────────────────────
+  buildReviewLightbox(reviewsWithImages);
+  wireReviewLightbox(reviewsWithImages);
+}
+// ─── END PATCH 3 RENDERER ─────────────────────────────────────────────────────
+
+
+// ─── PATCH 3: LIGHTBOX ────────────────────────────────────────────────────────
+function buildReviewLightbox(reviewsWithImages) {
+  if (document.getElementById("reviewLightbox")) return;
+
+  document.body.insertAdjacentHTML("beforeend", `
+    <div id="reviewLightbox"
+         class="fixed inset-0 z-[999] hidden flex items-center justify-center"
+         style="background:rgba(0,0,0,0.88)">
+
+      <!-- Close -->
+      <button id="lbClose"
+              class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20
+                     flex items-center justify-center transition text-white text-xl z-10">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <!-- Prev -->
+      <button id="lbPrev"
+              class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full
+                     bg-white/10 hover:bg-white/25 flex items-center justify-center
+                     transition text-white z-10">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+
+      <!-- Next -->
+      <button id="lbNext"
+              class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full
+                     bg-white/10 hover:bg-white/25 flex items-center justify-center
+                     transition text-white z-10">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+
+      <!-- Main image -->
+      <div class="flex flex-col items-center gap-4 max-w-lg w-full px-16">
+        <img id="lbMainImg"
+             src=""
+             alt="Review photo"
+             class="max-h-[70vh] max-w-full object-contain rounded-xl"/>
+        <div class="text-center">
+          <p id="lbReviewerName" class="text-white text-sm font-lexend font-medium"></p>
+          <p id="lbCounter"      class="text-white/50 text-xs font-lexend mt-0.5"></p>
+        </div>
+
+        <!-- Thumbnail strip inside lightbox -->
+        <div class="flex gap-2 overflow-x-auto max-w-full pb-1"
+             id="lbThumbStrip"
+             style="scrollbar-width:thin;scrollbar-color:#e39f32 transparent">
+          ${reviewsWithImages.map((r, idx) => `
+            <img src="${BASE_URL}${r.imageUrl}"
+                 class="lb-thumb h-12 w-12 object-cover rounded-lg flex-shrink-0 cursor-pointer
+                        border-2 border-transparent hover:border-[#e39f32] transition-all opacity-60"
+                 data-lb-idx="${idx}"
+                 onerror="this.style.display='none'"/>
+          `).join("")}
+        </div>
+      </div>
+
+    </div>
+  `);
+}
+
+function wireReviewLightbox(reviewsWithImages) {
+  if (!reviewsWithImages.length) return;
+
+  let currentIdx = 0;
+
+  function openLightbox(idx) {
+    currentIdx = idx;
+    renderLightboxSlide();
+    document.getElementById("reviewLightbox").classList.remove("hidden");
+    document.getElementById("reviewLightbox").classList.add("flex");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeLightbox() {
+    document.getElementById("reviewLightbox").classList.add("hidden");
+    document.getElementById("reviewLightbox").classList.remove("flex");
+    document.body.style.overflow = "";
+  }
+
+  function renderLightboxSlide() {
+    const r         = reviewsWithImages[currentIdx];
+    const mainImg   = document.getElementById("lbMainImg");
+    const nameEl    = document.getElementById("lbReviewerName");
+    const counterEl = document.getElementById("lbCounter");
+
+    if (mainImg)   mainImg.src         = `${BASE_URL}${r.imageUrl}`;
+    if (nameEl)    nameEl.textContent  = r.customerName || "Customer";
+    if (counterEl) counterEl.textContent = `${currentIdx + 1} / ${reviewsWithImages.length}`;
+
+    // Highlight active thumb in strip
+    document.querySelectorAll(".lb-thumb").forEach((t, i) => {
+      t.classList.toggle("border-[#e39f32]", i === currentIdx);
+      t.classList.toggle("opacity-100",      i === currentIdx);
+      t.classList.toggle("opacity-60",       i !== currentIdx);
+    });
+
+    // Scroll active thumb into view
+    const activeThumb = document.querySelector(`.lb-thumb[data-lb-idx="${currentIdx}"]`);
+    activeThumb?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+
+    // Show/hide prev-next
+    const prev = document.getElementById("lbPrev");
+    const next = document.getElementById("lbNext");
+    if (prev) prev.style.visibility = currentIdx === 0 ? "hidden" : "visible";
+    if (next) next.style.visibility = currentIdx === reviewsWithImages.length - 1 ? "hidden" : "visible";
+  }
+
+  // ── Strip thumbnails in review section ──────────────────────────────────
+  document.querySelectorAll(".review-strip-thumb").forEach((img) => {
+    img.addEventListener("click", () => {
+      openLightbox(parseInt(img.dataset.reviewIdx));
+    });
+  });
+
+  // ── Individual card images ───────────────────────────────────────────────
+  document.querySelectorAll(".review-card-img").forEach((img) => {
+    img.addEventListener("click", () => {
+      // Find index in reviewsWithImages by matching src
+      const fullSrc = img.dataset.fullSrc;
+      const idx = reviewsWithImages.findIndex(
+        (r) => `${BASE_URL}${r.imageUrl}` === fullSrc
+      );
+      openLightbox(idx >= 0 ? idx : 0);
+    });
+  });
+
+  // ── Lightbox controls ────────────────────────────────────────────────────
+  document.getElementById("lbClose")?.addEventListener("click", closeLightbox);
+
+  document.getElementById("lbPrev")?.addEventListener("click", () => {
+    if (currentIdx > 0) { currentIdx--; renderLightboxSlide(); }
+  });
+
+  document.getElementById("lbNext")?.addEventListener("click", () => {
+    if (currentIdx < reviewsWithImages.length - 1) { currentIdx++; renderLightboxSlide(); }
+  });
+
+  // Keyboard nav
+  document.addEventListener("keydown", (e) => {
+    const lb = document.getElementById("reviewLightbox");
+    if (lb?.classList.contains("hidden")) return;
+    if (e.key === "ArrowLeft"  && currentIdx > 0)                          { currentIdx--; renderLightboxSlide(); }
+    if (e.key === "ArrowRight" && currentIdx < reviewsWithImages.length - 1) { currentIdx++; renderLightboxSlide(); }
+    if (e.key === "Escape") closeLightbox();
+  });
+
+  // Click backdrop to close
+  document.getElementById("reviewLightbox")?.addEventListener("click", (e) => {
+    if (e.target === document.getElementById("reviewLightbox")) closeLightbox();
+  });
+
+  // Lightbox strip thumbs
+  document.querySelectorAll(".lb-thumb").forEach((thumb) => {
+    thumb.addEventListener("click", () => {
+      openLightbox(parseInt(thumb.dataset.lbIdx));
+    });
+  });
+}
+// ─── END PATCH 3 LIGHTBOX ────────────────────────────────────────────────────
+
+
   // ═══════════════════════════════════════════════════════════════════════════
   //  INSTALLATION
   // ═══════════════════════════════════════════════════════════════════════════
@@ -3242,9 +4174,9 @@ bg-gray-100 px-2 py-0.5 rounded-md">
     }, 100);
 
     // Quantity
-    let qty     = 1;
-    const qtyEl  = document.getElementById("quantity");
-    const stockEl = document.getElementById("stockInfo");
+    // ── Quantity — PATCH 2: qty only manages count; stock label via syncStockUI ──
+    let qty    = 1;
+    const qtyEl = document.getElementById("quantity");
 
     function getStock() {
       return (getSelectedVariant()?.stock ?? safeProductData.currentStock) || 0;
@@ -3252,25 +4184,20 @@ bg-gray-100 px-2 py-0.5 rounded-md">
 
     function updateQtyUI() {
       if (qtyEl) qtyEl.textContent = qty;
-      const stock     = getStock();
-      const remaining = stock - qty;
-      if (stockEl) {
-        stockEl.textContent = remaining > 0
-          ? `Only ${remaining} items left in stock`
-          : "Out of stock";
-        stockEl.className = remaining > 0
-          ? "text-xs text-green-600 font-semibold"
-          : "text-xs text-red-600 font-semibold";
-      }
+      // Delegate ALL stock-related DOM to syncStockUI — single owner
+      syncStockUI(getStock());
     }
 
     document.getElementById("increaseBtn")?.addEventListener("click", () => {
-      if (qty < getStock()) { qty++; updateQtyUI(); }
+      const stock = getStock();
+      if (stock <= 0) return;           // OOS guard — belt-and-suspenders
+      if (qty < stock) { qty++; updateQtyUI(); }
     });
     document.getElementById("decreaseBtn")?.addEventListener("click", () => {
       if (qty > 1) { qty--; updateQtyUI(); }
     });
     updateQtyUI();
+    // ── END PATCH 2 qty block ────────────────────────────────────────────────
 
     // Countdown timer
     function updateTimer() {
