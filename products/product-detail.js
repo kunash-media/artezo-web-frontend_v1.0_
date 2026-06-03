@@ -1130,27 +1130,87 @@ async function fetchProductFromAPI(id) {
    * for a given variant — applying product-level fallbacks where variant
    * fields are absent.
    */
+  // function getVariantMedia(variant) {
+  //   return {
+  //     mainImage:       variant.mainImage,
+  //     mockupImages:    variant.mockupImages !== null
+  //       ? variant.mockupImages
+  //       : safeProductData.mockupImages,   // inherit product-level mockups
+  //     productVideoUrl: variant.productVideoUrl || safeProductData.productVideoUrl || null,
+  //   };
+  // }
+
+  // PATCH 4 — Media resolver with proper merge logic
+  // Rule: variant mainImage null → use product mainImage
+  // Rule: mockups = variant mockups first, then product mockups (deduped)
   function getVariantMedia(variant) {
+    if (!variant) return {
+      mainImage:       safeProductData.mainImage,
+      mockupImages:    safeProductData.mockupImages,
+      productVideoUrl: safeProductData.productVideoUrl || null,
+    };
+
+    // Resolve main image
+    const mainImage = variant.mainImage || safeProductData.mainImage || FALLBACK_IMG;
+
+    // Merge mockups: variant first, then product-level, deduped by URL
+    const variantMockups = Array.isArray(variant.mockupImages) ? variant.mockupImages : [];
+    const productMockups = safeProductData.mockupImages || [];
+    const seen           = new Set();
+    const mergedMockups  = [];
+    [...variantMockups, ...productMockups].forEach((url) => {
+      if (url && !seen.has(url)) { seen.add(url); mergedMockups.push(url); }
+    });
+
     return {
-      mainImage:       variant.mainImage,
-      mockupImages:    variant.mockupImages !== null
-        ? variant.mockupImages
-        : safeProductData.mockupImages,   // inherit product-level mockups
+      mainImage,
+      mockupImages:    mergedMockups,
       productVideoUrl: variant.productVideoUrl || safeProductData.productVideoUrl || null,
     };
   }
+  // END PATCH 4 media resolver
 
-  function buildSafeProductData(p) {
+ function buildSafeProductData(p) {
     let customFields = [];
     if (p.customFields) {
       try { customFields = JSON.parse(p.customFields); }
       catch (e) { console.warn("[ProductDetail] customFields parse error:", e); }
     }
 
+    // ── 1. Normalise API variants first ───────────────────────────────────
     const variants = (p.availableVariants || []).map((v) =>
       normaliseVariant(v, p)
     );
 
+    // ── 2. PATCH 4 — Synthesize base product as first variant ─────────────
+    // Must be declared BEFORE safeProductData assignment so [baseVariant, ...variants]
+    // reference below is valid. Base uses root-level product fields.
+    const baseVariant = {
+      variantId:       "__base__",
+      color:           p.selectedColor       || "Default",
+      sku:             p.currentSku,
+      price:           p.currentSellingPrice,
+      mrp:             p.currentMrpPrice,
+      stock:           p.currentStock        || 0,
+      mainImage:       absUrl(p.mainImage)   || FALLBACK_IMG,
+      mockupImages:    null,                  // null = inherit product-level mockups
+      productVideoUrl: absUrl(p.productVideoUrl) || null,
+      size:            p.productSize         || "",
+      sizes:           p.productSize         ? [p.productSize] : [],
+      titleName:       p.selectedColor       || "Default",
+      name:            p.selectedColor       || "Default",
+      weight:          p.weight,
+      length:          p.length,
+      breadth:         p.breadth,
+      height:          p.height,
+      mfgDate:         null,
+      isBase:          true,
+    };
+
+    // ── 3. Full variant list = base first, then API variants ──────────────
+    const allVariants = [baseVariant, ...variants];
+
+    // ── 4. Build remaining data needed for safeProductData ────────────────
     const heroBanners = (p.heroBanners || []).map((b) => ({
       bannerId:       b.bannerId,
       bannerImg:      absUrl(b.bannerImg),
@@ -1166,46 +1226,48 @@ async function fetchProductFromAPI(id) {
       videoUrl:         absUrl(s.videoUrl),
     }));
 
-    // Product-level mockups (used as fallback when variant has none)
+    // Product-level mockups (fallback when variant has none)
     const mockupImages = (p.mockupImages || []).map((img) => absUrl(img)).filter(Boolean);
 
-    const faqAns = p.faq || {};
-    const availabeCoupons = p.availableCoupons || [];
+    const faqAns         = p.faq               || {};
+    const availabeCoupons = p.availableCoupons  || [];
 
+    // ── 5. Assign safeProductData — baseVariant and allVariants are ready ─
     safeProductData = {
       productId:           p.productPrimeId,
-      productStrId:        p.productStrId || String(p.productPrimeId), // ← for SR checkout & confirm-buynow
+      productStrId:        p.productStrId       || String(p.productPrimeId),
       productName:         p.productName,
       brandName:           p.brandName          || "Artezo",
       currentSku:          p.currentSku,
-      selectedColor:       p.selectedColor       || "",
+      selectedColor:       p.selectedColor      || "",
       currentSellingPrice: p.currentSellingPrice,
       currentMrpPrice:     p.currentMrpPrice,
-      currentStock:        p.currentStock        || 0,
-      mainImage:           absUrl(p.mainImage)   || FALLBACK_IMG,
+      currentStock:        p.currentStock       || 0,
+      mainImage:           absUrl(p.mainImage)  || FALLBACK_IMG,
       mockupImages,
       productVideoUrl:     absUrl(p.productVideoUrl) || null,
       hero_banners:        heroBanners,
-      availableVariants:   variants,
-      productReviews:      p.productReviews       || [],
-      specifications:      p.specifications       || {},
-      aboutItem:           Array.isArray(p.aboutItem) ? p.aboutItem : [],
-      description:         Array.isArray(p.description) ? p.description : [],
+      availableVariants:   allVariants,          // base + API variants
+      productSize:         p.productSize        || "",
+      productReviews:      p.productReviews     || [],
+      specifications:      p.specifications     || {},
+      aboutItem:           Array.isArray(p.aboutItem)     ? p.aboutItem     : [],
+      description:         Array.isArray(p.description)   ? p.description   : [],
       faqAns,
+      additionalInfo: p.additionalInfo || {},
       installationSteps,
       availabeCoupons,
-      isCustomizable:      p.isCustomizable       || false,
+      isCustomizable:      p.isCustomizable     || false,
       customFields,
       productCategory:     p.productCategory,
       productSubCategory:  p.productSubCategory,
       subcategory:         p.productSubCategory,
-      globalTags:          p.globalTags           || [],
+      globalTags:          p.globalTags         || [],
       isExchange:          p.isExchange,
       returnAvailable:     p.returnAvailable,
-      youtubeUrl:          p.youtubeUrl            || "",
-      addonKeys:           p.addonKeys             || [],
-      underTrendCategory:  p.underTrendCategory    || false,
-      // Dimensions
+      youtubeUrl:          p.youtubeUrl         || "",
+      addonKeys:           p.addonKeys          || [],
+      underTrendCategory:  p.underTrendCategory || false,
       weight:              p.weight,
       length:              p.length,
       breadth:             p.breadth,
@@ -1214,7 +1276,8 @@ async function fetchProductFromAPI(id) {
       hasVariants:         p.hasVariants,
     };
 
-    currentVariant = variants[0] || null;
+    // ── 6. Set initial active variant — always base first ─────────────────
+    currentVariant = allVariants[0];
 
     document.title = `Artezo · ${safeProductData.productName}`;
   }
@@ -1276,71 +1339,71 @@ async function fetchProductFromAPI(id) {
 
 
   // ==================== SETUP FUNCTIONS - #patch-2 ====================
-  function setupDynamicVariants() {
-    const sizeButtons = document.querySelectorAll(".size-btn");
-    const sizeHint = document.getElementById("sizeHint");
+  // function setupDynamicVariants() {
+  //   const sizeButtons = document.querySelectorAll(".size-btn");
+  //   const sizeHint = document.getElementById("sizeHint");
 
-    function filterColorsBySize(selectedSize) {
-      const colorButtons = document.querySelectorAll(".color-variant");
-      let count = 0;
-      let firstVisible = null;
+  //   function filterColorsBySize(selectedSize) {
+  //     const colorButtons = document.querySelectorAll(".color-variant");
+  //     let count = 0;
+  //     let firstVisible = null;
 
-      colorButtons.forEach((btn) => {
-        const supportedSizes = btn.dataset.sizes.split(",");
-        if (supportedSizes.includes(selectedSize)) {
-          btn.style.display = "block";
-          count++;
-          if (!firstVisible) firstVisible = btn;
-        } else {
-          btn.style.display = "none";
-        }
-      });
+  //     colorButtons.forEach((btn) => {
+  //       const supportedSizes = btn.dataset.sizes.split(",");
+  //       if (supportedSizes.includes(selectedSize)) {
+  //         btn.style.display = "block";
+  //         count++;
+  //         if (!firstVisible) firstVisible = btn;
+  //       } else {
+  //         btn.style.display = "none";
+  //       }
+  //     });
 
-      if (sizeHint)
-        sizeHint.textContent = `${count} color${count > 1 ? "s" : ""} available`;
+  //     if (sizeHint)
+  //       sizeHint.textContent = `${count} color${count > 1 ? "s" : ""} available`;
 
-      if (firstVisible) firstVisible.click();
-    }
+  //     if (firstVisible) firstVisible.click();
+  //   }
 
-    // Size buttons
-    sizeButtons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        sizeButtons.forEach((b) =>
-          b.classList.remove(
-            "border-[#E6A62C]",
-            "bg-[#fff9ef]",
-            "text-[#033E59]",
-          ),
-        );
-        btn.classList.add("border-[#E6A62C]", "bg-[#fff9ef]", "text-[#033E59]");
+  //   // Size buttons
+  //   sizeButtons.forEach((btn) => {
+  //     btn.addEventListener("click", () => {
+  //       sizeButtons.forEach((b) =>
+  //         b.classList.remove(
+  //           "border-[#E6A62C]",
+  //           "bg-[#fff9ef]",
+  //           "text-[#033E59]",
+  //         ),
+  //       );
+  //       btn.classList.add("border-[#E6A62C]", "bg-[#fff9ef]", "text-[#033E59]");
 
-        filterColorsBySize(btn.dataset.size);
-      });
-    });
+  //       filterColorsBySize(btn.dataset.size);
+  //     });
+  //   });
 
-    // Color buttons
-    document.getElementById("variantSection").addEventListener("click", (e) => {
-      const btn = e.target.closest(".color-variant");
-      if (!btn) return;
+  //   // Color buttons
+  //   document.getElementById("variantSection").addEventListener("click", (e) => {
+  //     const btn = e.target.closest(".color-variant");
+  //     if (!btn) return;
 
-      document
-        .querySelectorAll(".color-variant")
-        .forEach((b) =>
-          b.classList.remove("ring-2", "ring-[#E6A62C]", "ring-offset-2"),
-        );
-      btn.classList.add("ring-2", "ring-[#E6A62C]", "ring-offset-2");
+  //     document
+  //       .querySelectorAll(".color-variant")
+  //       .forEach((b) =>
+  //         b.classList.remove("ring-2", "ring-[#E6A62C]", "ring-offset-2"),
+  //       );
+  //     btn.classList.add("ring-2", "ring-[#E6A62C]", "ring-offset-2");
 
-      // Update main product info
-      document.getElementById("mainProductImage").src = btn.dataset.image;
-      document.querySelector(".price-display").textContent =
-        `₹${parseInt(btn.dataset.price).toLocaleString()}`;
-    });
+  //     // Update main product info
+  //     document.getElementById("mainProductImage").src = btn.dataset.image;
+  //     document.querySelector(".price-display").textContent =
+  //       `₹${parseInt(btn.dataset.price).toLocaleString()}`;
+  //   });
 
-    // Initialize with first size
-    if (sizeButtons.length > 0) {
-      sizeButtons[0].click();
-    }
-  }
+  //   // Initialize with first size
+  //   if (sizeButtons.length > 0) {
+  //     sizeButtons[0].click();
+  //   }
+  // }
 
 
 
@@ -1592,32 +1655,85 @@ async function fetchProductFromAPI(id) {
     return currentVariant;
   }
 
-  function setupVariantSelection() {
-    const variantCards = document.querySelectorAll("[data-variant-id]");
-    if (!variantCards.length) return;
+  // ─── PATCH 4: AMAZON-STYLE VARIANT SELECTION ──────────────────────────────
+// Replaces both setupVariantSelection() and setupDynamicVariants().
+// Single unified handler — size pills filter color cards,
+// color card click updates all product display.
 
-    variantCards.forEach((card) => {
-      card.addEventListener("click", function (e) {
-        e.stopPropagation();
-        variantCards.forEach((c) => {
-          c.classList.remove("selected", "ring-2", "ring-offset-2", "ring-[#E6A62C]");
-          c.classList.add("ring-1", "ring-gray-200");
-        });
-        this.classList.add("selected", "ring-2", "ring-offset-2", "ring-[#E6A62C]");
-        this.classList.remove("ring-1", "ring-gray-200");
+function setupVariantSelection() {
+  const sizePills  = document.querySelectorAll(".size-pill");
+  const variantSection = document.getElementById("variantSection");
+  if (!sizePills.length || !variantSection) return;
 
-        const variantId  = this.dataset.variantId;
-        const newVariant = safeProductData.availableVariants.find(
-          (v) => v.variantId === variantId
-        );
-        if (newVariant) {
-          currentVariant = newVariant;
-          updateProductDisplay();
-        }
+  // ── Wire size pills ────────────────────────────────────────────────────
+  sizePills.forEach((pill) => {
+    pill.addEventListener("click", function () {
+      const selectedSize = this.dataset.size;
+
+      // Update pill active state
+      sizePills.forEach((p) => {
+        p.classList.remove("border-[#1D3C4A]", "bg-[#1D3C4A]", "text-white", "shadow-sm");
+        p.classList.add("border-gray-200", "text-gray-600");
       });
-    });
-  }
+      this.classList.add("border-[#1D3C4A]", "bg-[#1D3C4A]", "text-white", "shadow-sm");
+      this.classList.remove("border-gray-200", "text-gray-600");
 
+      // Update active size label
+      const activeSizeLabel = document.getElementById("activeSizeLabel");
+      if (activeSizeLabel) activeSizeLabel.textContent = selectedSize;
+
+      // Show only cards matching this size
+      const allCards = document.querySelectorAll(".variant-card");
+      let firstVisible = null;
+      allCards.forEach((card) => {
+        const matches = card.dataset.size === selectedSize;
+        card.style.display = matches ? "" : "none";
+        if (matches && !firstVisible) firstVisible = card;
+      });
+
+      // Auto-select first visible color card
+      if (firstVisible) firstVisible.click();
+    });
+  });
+
+  // ── Wire color cards via delegation ───────────────────────────────────
+  variantSection.addEventListener("click", function (e) {
+    const card = e.target.closest(".variant-card");
+    if (!card) return;
+
+    // Active ring
+    document.querySelectorAll(".variant-card").forEach((c) => {
+      c.classList.remove("border-[#1D3C4A]", "shadow-md");
+      c.classList.add("border-gray-200");
+    });
+    card.classList.add("border-[#1D3C4A]", "shadow-md");
+    card.classList.remove("border-gray-200");
+
+    // Find variant
+    const variantId  = card.dataset.variantId;
+    const newVariant = safeProductData.availableVariants.find(
+      (v) => v.variantId === variantId
+    );
+
+    if (!newVariant) return;
+
+    currentVariant = newVariant;
+
+    // Update active color label
+    const activeColorLabel = document.getElementById("activeColorLabel");
+    if (activeColorLabel) activeColorLabel.textContent = newVariant.color;
+
+    // Full display update
+    updateProductDisplay();
+  });
+
+  // ── Auto-trigger first size pill on init ──────────────────────────────
+  if (sizePills[0]) sizePills[0].click();
+}
+
+// setupDynamicVariants is now a no-op — PATCH 4 handles everything above
+function setupDynamicVariants() {}
+// ─── END PATCH 4 VARIANT SELECTION ────────────────────────────────────────
 
 
   /**
@@ -2746,100 +2862,97 @@ function syncStockUI(stock) {
 
     // Variant cards HTML
     // Variant cards HTML
+// ─── PATCH 4: AMAZON-STYLE VARIANT SELECTOR ───────────────────────────────
 let variantCardsHTML = "";
-if (variantColors.length > 0) {
-  // Extract unique sizes across all variants
-  const sizeSet = new Set();
-  variantColors.forEach((c) => {
-    if (c.sizes && Array.isArray(c.sizes) && c.sizes.length > 0) {
-      c.sizes.forEach((s) => sizeSet.add(s));
-    } else if (c.size && c.size !== "Standard") {
-      sizeSet.add(c.size);
-    }
-  });
-  const uniqueSizes = Array.from(sizeSet).sort();
 
-  const sizeSection = uniqueSizes.length > 0
-    ? `
-      <!-- SIZE SECTION -->
-      <div>
-        <div class="flex items-center gap-3 mb-3">
-          <span class="text-sm font-semibold text-[#033E59]">Size</span>
-          <div class="h-px bg-gray-200 flex-1"></div>
-        </div>
-        <div class="flex flex-wrap gap-3" id="sizeOptions">
-          ${uniqueSizes
-            .map(
-              (size, idx) => `
-            <button class="size-btn px-6 py-3 text-sm font-medium border-2 rounded-2xl transition-all duration-200
-                           ${idx === 0 ? "border-[#E6A62C] bg-[#fff9ef] text-[#033E59] shadow-sm" : "border-gray-200 hover:border-[#E6A62C]"}"
-                    data-size="${escapeHtml(size)}">
-              ${escapeHtml(size)}
-            </button>`
-            )
-            .join("")}
-        </div>
-      </div>`
-    : "";
+if (safeProductData.availableVariants.length > 1) {
+
+  // ── Collect unique sizes preserving order (base first) ──────────────────
+  const sizeOrder = [];
+  safeProductData.availableVariants.forEach((v) => {
+    if (v.size && !sizeOrder.includes(v.size)) sizeOrder.push(v.size);
+  });
+
+  // ── Size → variants map ──────────────────────────────────────────────────
+  const sizeMap = {};
+  sizeOrder.forEach((s) => {
+    sizeMap[s] = safeProductData.availableVariants.filter((v) => v.size === s);
+  });
+
+  // ── Default: first size, first color of that size ───────────────────────
+  const defaultSize    = sizeOrder[0];
+  const defaultVariant = sizeMap[defaultSize][0];
 
   variantCardsHTML = `
-    <div class="mt-6 space-y-6" id="variantSection">
+    <div class="mt-5 space-y-5" id="variantSection">
 
-      ${sizeSection}
-
-      <!-- COLOR SECTION -->
-      <div class="p-2">
-        <div class="flex items-center justify-between mb-3">
-          <div class="flex items-center gap-3">
-            <span class="text-sm font-semibold text-[#033E59]">Color</span>
-            <div class="h-px bg-gray-200 w-16"></div>
-          </div>
-          ${uniqueSizes.length > 0
-            ? `<span id="sizeHint" class="text-xs text-gray-500 font-medium"></span>`
-            : ""}
+      <!-- SIZE SELECTOR -->
+      <div>
+        <p class="text-xs font-semibold font-lexend text-gray-500 uppercase
+                  tracking-widest mb-2">
+          Size:
+          <span id="activeSizeLabel" class="text-[#1D3C4A] normal-case tracking-normal
+                                            text-sm ml-1">${escapeHtml(defaultSize)}</span>
+        </p>
+        <div class="flex flex-wrap gap-2" id="sizePills">
+          ${sizeOrder.map((size, idx) => `
+            <button class="size-pill px-4 py-2 rounded-lg border-2 text-sm font-lexend
+                           font-medium transition-all duration-200
+                           ${idx === 0
+                             ? "border-[#1D3C4A] bg-[#1D3C4A] text-white shadow-sm"
+                             : "border-gray-200 text-gray-600 hover:border-[#1D3C4A]"}"
+                    data-size="${escapeHtml(size)}">
+              ${escapeHtml(size)}
+            </button>`).join("")}
         </div>
+      </div>
 
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 w-full px-1 sm:px-0"
-             id="colorSwatches">
-          ${variantColors
-            .map((c, idx) => {
-              const variantSizes = (c.sizes && c.sizes.length > 0)
-                ? c.sizes
-                : (c.size ? [c.size] : ["Standard"]);
-
-              return `
-                <button class="color-variant group bg-white rounded-xl border border-gray-200 p-2 sm:p-3 transition-all duration-300 hover:shadow-md hover:-translate-y-[2px]
-                               ${idx === 0 ? "ring-2 ring-[#E6A62C] ring-offset-1" : "ring-1 ring-gray-200 hover:ring-[#E6A62C]"}"
-                        data-variant-id="${c.variantId}"
-                        data-sku="${c.sku}"
-                        data-price="${c.price}"
-                        data-mrp="${c.mrp}"
-                        data-stock="${c.stock}"
-                        data-image="${c.image}"
-                        data-sizes="${variantSizes.map((s) => escapeHtml(s)).join(",")}">
-                  <div class="w-full aspect-square rounded-lg overflow-hidden mb-2 sm:mb-3">
-                    <img src="${c.image}"
-                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                         alt="${escapeHtml(c.name)}"
-                         onerror="this.src='${FALLBACK_IMG}'">
-                  </div>
-                  <div class="text-xs sm:text-sm font-medium text-[#033E59] text-center mb-1">
-                    ${escapeHtml(c.name)}
-                  </div>
-                  <div class="text-[11px] text-gray-500 text-center mb-1">
-                    ${escapeHtml(c.color || "")}
-                  </div>
-                  <div class="border-t border-gray-200 pt-1 text-center">
-                    <span class="text-[10px] font-semibold text-[#e39f32]">₹${c.price}</span>
-                  </div>
-                </button>`;
-            })
-            .join("")}
+      <!-- COLOR / VARIANT CARDS -->
+      <div>
+        <p class="text-xs font-semibold font-lexend text-gray-500 uppercase
+                  tracking-widest mb-2">
+          Color:
+          <span id="activeColorLabel" class="text-[#1D3C4A] normal-case tracking-normal
+                                             text-sm ml-1">
+            ${escapeHtml(defaultVariant.color)}
+          </span>
+        </p>
+        <div class="flex flex-wrap gap-3" id="colorCards">
+          ${safeProductData.availableVariants.map((v, idx) => {
+            const thumbImg = v.mainImage || FALLBACK_IMG;
+            const isDefault = idx === 0;
+            return `
+              <button class="variant-card group flex flex-col items-center gap-1.5
+                             rounded-xl border-2 p-2 transition-all duration-200
+                             w-[80px] cursor-pointer
+                             ${isDefault
+                               ? "border-[#1D3C4A] shadow-md"
+                               : "border-gray-200 hover:border-[#1D3C4A]"}"
+                      data-variant-id="${escapeHtml(v.variantId)}"
+                      data-size="${escapeHtml(v.size || "")}"
+                      style="${!isDefault ? "display:none" : ""}">
+                <div class="w-full aspect-square rounded-lg overflow-hidden bg-gray-50">
+                  <img src="${thumbImg}"
+                       class="w-full h-full object-cover transition-transform
+                              duration-300 group-hover:scale-105"
+                       alt="${escapeHtml(v.color)}"
+                       onerror="this.src='${FALLBACK_IMG}'"/>
+                </div>
+                <span class="text-[10px] font-lexend text-center text-[#1D3C4A]
+                             leading-tight line-clamp-2 w-full">
+                  ${escapeHtml(v.color)}
+                </span>
+                <span class="text-[10px] font-lexend font-semibold text-[#e39f32]">
+                  ₹${v.price.toLocaleString("en-IN")}
+                </span>
+              </button>`;
+          }).join("")}
         </div>
       </div>
 
     </div>`;
 }
+// ─── END PATCH 4 VARIANT CARDS HTML ──────────────────────────────────────
     // Build the initial thumbnail list for the strip
     const initialThumbItems = buildThumbItemList(initialMedia);
 
@@ -2856,11 +2969,12 @@ if (variantColors.length > 0) {
       originalPrice:  safeProductData.currentMrpPrice,
       discountPercent,
       stock:          safeProductData.currentStock,
-      highlights:     Object.entries(safeProductData.specifications).map(([k, v]) => ({
-        label:  k.split("_").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" "),
-        value:  v || "N/A",
-        accent: k === "material",
-      })),
+
+      // highlights:     Object.entries(safeProductData.specifications).map(([k, v]) => ({
+      //   label:  k.split("_").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" "),
+      //   value:  v || "N/A",
+      //   accent: k === "material",
+      // })),
 
       // PATCH 1B — No fallback text; render empty string when no description exists
       description:
@@ -2960,7 +3074,7 @@ if (variantColors.length > 0) {
 
         <!-- RIGHT: Details -->
         <div class="md:col-span-7">
-          <div class="overflow-y-auto max-h-[calc(100vh-5rem)] pr-2 space-y-3 hide-scrollbar">
+          <div class=" pr-2 space-y-3 hide-scrollbar">
 
             <!-- Product name + Trending badge -->
             <h1 class="text-3xl md:text-4xl font-normal font-zain leading-tight text-[#033E59]">
@@ -3224,69 +3338,187 @@ if (variantColors.length > 0) {
     const acc = document.getElementById("accordionContainer");
     if (!acc) return;
 
-    let accHtml = `
-      <div class="item"><button class="toggle w-full flex justify-between items-center px-6 py-4 text-left font-medium font-lexend text-[#1D3C4A]">Highlights<span class="icon text-xl transition-transform duration-300">+</span></button><div class="content"><div class="px-6 pb-6 text-sm"><div class="rounded-lg overflow-hidden bg-white border border-[#edf2f4] shadow-sm"><table class="w-full text-left border-collapse"><tbody>`;
+    let accHtml = "";
 
-    // PATCH 1B — Only render description accordion if content exists
-    if (transformedData.description) {
-      accHtml += `<div class="item"><button class="toggle w-full flex justify-between items-center px-6 py-3 text-left font-medium font-lexend">Product Description<span class="icon text-xl transition-transform duration-300">+</span></button><div class="content"><div class="px-6 pb-6 text-sm text-[#1D3C4A]/80 leading-relaxed space-y-4">${transformedData.description}<\/div><\/div><\/div>`;
+    // ── 1. About This Item (fromm payload aboutItem array) ─────────────────
+    // Renders each bullet point as-is — no label transform, no fallback
+    const aboutItems = (safeProductData.aboutItem || []).filter(Boolean);
+    if (aboutItems.length > 0) {
+      accHtml += `
+        <div class="item">
+          <button class="toggle w-full flex justify-between items-center px-6 py-4
+                         text-left font-medium font-lexend text-[#1D3C4A]">
+            About This Item
+            <span class="icon text-xl transition-transform duration-300">+</span>
+          </button>
+          <div class="content">
+            <div class="px-6 pb-6 text-sm">
+              <ul class="space-y-3">
+                ${aboutItems.map((item) => `
+                  <li class="flex items-start gap-2">
+                    <div class="w-1.5 h-1.5 mt-2 rounded-full bg-[#e39f32] flex-shrink-0"></div>
+                    <p class="text-[#1D3C4A]/80 leading-relaxed">${escapeHtml(item)}</p>
+                  </li>`).join("")}
+              </ul>
+            </div>
+          </div>
+        </div>`;
     }
 
-    transformedData.highlights.forEach((h) => {
-      let rowClass = h.accent
-        ? "bg-[#fff9f2]"
-        : "border-b border-[#f1f5f7] hover:bg-[#f8fbfc] transition";
-      let valClass = h.accent
-        ? "text-[#e39f32] font-medium"
-        : "text-[#1D3C4A]/70";
-      accHtml += `<tr class="${rowClass}"><td class="py-3 px-3 font-medium border-r border-[#f1f5f7] w-1/3 text-[#1D3C4A]">${h.label}<\/td><td class="py-3 px-4 ${valClass}">${h.value}<\/td><\/tr>`;
-    });
+    // ── 2. Product Description (from payload description array) ────────────
+    // Only render if at least one non-empty string exists
+    const descItems = (safeProductData.description || []).filter(Boolean);
+    if (descItems.length > 0) {
+      const descHTML = descItems.map((d) => `<p>${escapeHtml(d)}</p>`).join("");
+      accHtml += `
+        <div class="item">
+          <button class="toggle w-full flex justify-between items-center px-6 py-4
+                         text-left font-medium font-lexend text-[#1D3C4A]">
+            Product Description
+            <span class="icon text-xl transition-transform duration-300">+</span>
+          </button>
+          <div class="content">
+            <div class="px-6 pb-6 text-sm text-[#1D3C4A]/80 leading-relaxed space-y-3">
+              ${descHTML}
+            </div>
+          </div>
+        </div>`;
+    }
 
-    accHtml += `</tbody><\/table><\/div><\/div><\/div><\/div>`;
-    accHtml += `<div class="item"><button class="toggle w-full flex justify-between items-center px-6 py-3 text-left font-medium font-lexend">Product Description<span class="icon text-xl transition-transform duration-300">+</span></button><div class="content"><div class="px-6 pb-6 text-sm text-[#1D3C4A]/80 leading-relaxed space-y-4">${transformedData.description}<\/div><\/div><\/div>`;
-    accHtml += `<div class="item"><button class="toggle w-full flex justify-between items-center px-6 py-3 text-left font-medium font-lexend text-[#1D3C4A]">Specifications<span class="icon text-xl transition-transform duration-300">+</span></button><div class="content"><div class="px-6 pb-6 text-sm"><div class="rounded-lg overflow-hidden bg-white border border-[#edf2f4] shadow-sm"><table class="w-full text-left border-collapse"><tbody>`;
+    // ── 3. Specifications (from payload specifications object) ─────────────
+    // Keys rendered exactly as-is from payload — no transform, no split("_")
+    const specEntries = Object.entries(safeProductData.specifications || {})
+      .filter(([, v]) => v !== null && v !== undefined && v !== "");
+    if (specEntries.length > 0) {
+      accHtml += `
+        <div class="item">
+          <button class="toggle w-full flex justify-between items-center px-6 py-4
+                         text-left font-medium font-lexend text-[#1D3C4A]">
+            Specifications
+            <span class="icon text-xl transition-transform duration-300">+</span>
+          </button>
+          <div class="content">
+            <div class="px-6 pb-6 text-sm">
+              <div class="rounded-lg overflow-hidden bg-white border border-[#edf2f4] shadow-sm">
+                <table class="w-full text-left border-collapse">
+                  <tbody>
+                    ${specEntries.map(([key, val], idx) => `
+                      <tr class="${idx % 2 === 0
+                        ? "bg-white"
+                        : "bg-[#f8fbfc]"} border-b border-[#f1f5f7]
+                          hover:bg-[#fff9f2] transition">
+                        <td class="py-3 px-4 font-medium border-r border-[#f1f5f7]
+                                   w-2/5 text-[#1D3C4A] text-xs uppercase tracking-wide">
+                          ${escapeHtml(key)}
+                        </td>
+                        <td class="py-3 px-4 text-[#1D3C4A]/70">
+                          ${escapeHtml(String(val))}
+                        </td>
+                      </tr>`).join("")}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    }
 
-    transformedData.specifications.forEach((s) => {
-      accHtml += `<tr class="border-b border-[#f1f5f7]"><td class="py-3 px-3 font-medium border-r border-[#f1f5f7] w-1/3 text-[#1D3C4A]">${s.label}<\/td><td class="py-3 px-4 text-[#1D3C4A]/70">${s.value}<\/td><\/tr>`;
-    });
+    // ── 4. Additional Information (from payload additionalInfo object) ──────
+    // payload additionalInfo is Map<String,String> or null — render as table
+    // NOT aboutItem — those are in section 1 above
+    const addInfoEntries = Object.entries(safeProductData.additionalInfo || {})
+      .filter(([, v]) => v !== null && v !== undefined && v !== "");
+    if (addInfoEntries.length > 0) {
+      accHtml += `
+        <div class="item">
+          <button class="toggle w-full flex justify-between items-center px-6 py-4
+                         text-left font-medium font-lexend text-[#1D3C4A]">
+            Additional Information
+            <span class="icon text-lg transition-transform duration-300">+</span>
+          </button>
+          <div class="content">
+            <div class="px-6 pb-6 text-sm">
+              <div class="rounded-lg overflow-hidden bg-white border border-[#edf2f4] shadow-sm">
+                <table class="w-full text-left border-collapse">
+                  <tbody>
+                    ${addInfoEntries.map(([key, val], idx) => `
+                      <tr class="${idx % 2 === 0
+                        ? "bg-white"
+                        : "bg-[#f8fbfc]"} border-b border-[#f1f5f7]
+                          hover:bg-[#fff9f2] transition">
+                        <td class="py-3 px-4 font-medium border-r border-[#f1f5f7]
+                                   w-2/5 text-[#1D3C4A] text-xs uppercase tracking-wide">
+                          ${escapeHtml(key)}
+                        </td>
+                        <td class="py-3 px-4 text-[#1D3C4A]/70">
+                          ${escapeHtml(String(val))}
+                        </td>
+                      </tr>`).join("")}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    }
 
-    accHtml += `</tbody><\/table><\/div><\/div><\/div><\/div>`;
-    accHtml += `<div class="item"><button class="toggle w-full flex justify-between items-center px-6 py-3 text-left font-medium font-lexend text-[#1D3C4A]">Additional Information<span class="icon text-lg transition-transform duration-300">+</span></button><div class="content"><div class="px-6 pb-5 text-sm"><div class="grid gap-3">`;
+    // ── 5. FAQs (from payload faq object) ──────────────────────────────────
+    // Keys = questions, values = answers — rendered exactly as-is
+    const faqEntries = Object.entries(safeProductData.faqAns || {})
+      .filter(([q, a]) => q && a);
+    if (faqEntries.length > 0) {
+      accHtml += `
+        <div class="item">
+          <button class="toggle w-full flex justify-between items-center px-6 py-4
+                         text-left font-medium font-lexend text-[#1D3C4A]">
+            FAQs
+            <span class="icon text-lg transition-transform duration-300">+</span>
+          </button>
+          <div class="content">
+            <div class="px-6 pb-6 text-sm space-y-4">
+              ${faqEntries.map(([q, a]) => `
+                <div class="p-4 rounded-lg border border-[#eef3f6] bg-white shadow-sm">
+                  <p class="font-medium text-[#1D3C4A] text-[14px]">
+                    ${escapeHtml(q)}
+                  </p>
+                  <p class="mt-2 text-[#1D3C4A]/70 text-[13px] leading-relaxed">
+                    ${escapeHtml(a)}
+                  </p>
+                </div>`).join("")}
+            </div>
+          </div>
+        </div>`;
+    }
 
-    transformedData.additionalInfo.forEach((info) => {
-      accHtml += `<div class="flex items-start gap-2 p-3 rounded-md bg-[#f8fbfc] border border-[#eef3f6]"><div class="w-1.5 h-1.5 mt-2 rounded-full bg-[#e39f32]"></div><p class="text-[#1D3C4A]/75 text-[13px]">${info}</p></div>`;
-    });
+    // ── Fallback: nothing to show ──────────────────────────────────────────
+    if (!accHtml) {
+      acc.style.display = "none";
+      return;
+    }
 
-    accHtml += `</div></div></div></div>`;
-    accHtml += `<div class="item"><button class="toggle w-full flex justify-between items-center px-6 py-3 text-left font-medium font-lexend text-[#1D3C4A]">FAQs<span class="icon text-lg transition-transform duration-300">+</span></button><div class="content"><div class="px-6 pb-6 text-sm space-y-4">`;
-
-    transformedData.faqs.forEach((faq) => {
-      accHtml += `<div class="p-4 rounded-lg border border-[#eef3f6] bg-white shadow-sm"><p class="font-medium text-[#1D3C4A] text-[14px]">${faq.q}</p><p class="mt-2 text-[#1D3C4A]/70 text-[13px] leading-relaxed">${faq.a}</p></div>`;
-    });
-
-    accHtml += `</div></div></div>`;
     acc.innerHTML = accHtml;
 
-    // Setup accordion click handlers
-    document.querySelectorAll(".item").forEach((item) => {
-      const btn = item.querySelector(".toggle");
+    // ── Accordion click handlers ───────────────────────────────────────────
+    acc.querySelectorAll(".item").forEach((item) => {
+      const btn     = item.querySelector(".toggle");
       const content = item.querySelector(".content");
-      const icon = item.querySelector(".icon");
-      if (btn && content && icon) {
-        btn.addEventListener("click", () => {
-          document.querySelectorAll(".item").forEach((i) => {
-            if (i !== item) {
-              i.querySelector(".content")?.classList.remove("open");
-              if (i.querySelector(".icon"))
-                i.querySelector(".icon").style.transform = "rotate(0deg)";
-            }
-          });
-          content.classList.toggle("open");
-          icon.style.transform = content.classList.contains("open")
-            ? "rotate(45deg)"
-            : "rotate(0deg)";
+      const icon    = item.querySelector(".icon");
+      if (!btn || !content || !icon) return;
+
+      btn.addEventListener("click", () => {
+        // Close all others
+        acc.querySelectorAll(".item").forEach((other) => {
+          if (other === item) return;
+          other.querySelector(".content")?.classList.remove("open");
+          const otherIcon = other.querySelector(".icon");
+          if (otherIcon) otherIcon.style.transform = "rotate(0deg)";
         });
-      }
+        // Toggle this one
+        content.classList.toggle("open");
+        icon.style.transform = content.classList.contains("open")
+          ? "rotate(45deg)"
+          : "rotate(0deg)";
+      });
     });
   }
 
@@ -4141,9 +4373,6 @@ bg-gray-100 px-2 py-0.5 rounded-md">
 </div>
 `;
   }
-
-
-
 
   // ═══════════════════════════════════════════════════════════════════════════
   //  EVENT LISTENERS
