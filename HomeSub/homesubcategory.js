@@ -10,6 +10,10 @@
   const FALLBACK_IMG = "/Images/product_fallback/artezo_product_fallback_img.png";
   const PAGE_SIZE    = 12;
 
+  // ─── CART STATE ───────────────────────────────────────────────────────────────
+const addedToCartSet = new Set();
+const cartInFlight   = new Set();
+
   // ─── WISHLIST STATE ───────────────────────────────────────────────────────────
   const wishlistSet = new Set();  // Set<productId (number)> — populated once on load
   const inFlight    = new Set();  // debounce: ignore rapid double-clicks per productId
@@ -99,6 +103,16 @@
     return null;
   }
 
+
+  function getAuthHeaders() {
+    const token  = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+    const userId = getUserId();
+    const h = { "Content-Type": "application/json" };
+    if (token)  h["Authorization"] = `Bearer ${token}`;
+    if (userId) h["X-User-Id"]     = String(userId);
+    return h;
+  }
+
   // ─── INIT ─────────────────────────────────────────────────────────────────────
   async function init() {
     console.log("[HSC] ========== init() start ==========");
@@ -144,6 +158,19 @@
         e.stopPropagation();
         e.preventDefault();
         handleHeartClick(heartBtn);
+        return;
+      }
+
+      // Add to Cart button
+      const cartBtn = e.target.closest(".cart-btn");
+      if (cartBtn) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (cartBtn.dataset.added === "true") {
+          window.location.href = "/Cart/cart.html";
+          return;
+        }
+        handleCartClick(cartBtn);
         return;
       }
 
@@ -272,6 +299,61 @@
       console.groupEnd();
     }
   }
+
+  // ─── ADD TO CART ─────────────────────────────────────────────────────────────
+async function handleCartClick(btn) {
+  const userId = getUserId();
+  if (!userId) {
+    showToast("Please log in to add items to cart.");
+    return;
+  }
+
+  const pid = Number(btn.dataset.pid);
+  if (!pid || cartInFlight.has(pid)) return;
+
+  cartInFlight.add(pid);
+  const orig    = btn.innerHTML;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i> Adding…';
+  btn.disabled  = true;
+
+  const payload = {
+    userId,
+    productId:     pid,
+    variantId:     btn.dataset.variantId || `VAR-${pid}`,
+    sku:           btn.dataset.sku       || `PROD-${pid}`,
+    selectedColor: btn.dataset.color     || null,
+    selectedSize:  btn.dataset.size      || null,
+    titleName:     btn.dataset.title     || null,
+    unitPrice:     Number(btn.dataset.price)    || 0,
+    mrpPrice:      Number(btn.dataset.mrpPrice)  || 0,
+    quantity:      1
+  };
+
+  try {
+    const res = await fetch(`${BASE_URL}/api/v1/cart/add`, {
+      method:  "POST",
+      headers: getAuthHeaders(),
+      body:    JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    addedToCartSet.add(pid);
+    showToast("Added to cart 🛒");
+
+    btn.innerHTML        = '<i class="fa-solid fa-bag-shopping text-xs"></i> Go to Cart';
+    btn.disabled         = false;
+    btn.dataset.added    = "true";
+    btn.style.background = "#e39f32";
+    btn.style.color      = "#1D3C4A";
+    btn.style.fontWeight = "600";
+  } catch (err) {
+    showToast("Could not add to cart. Please try again.");
+    btn.innerHTML = orig;
+    btn.disabled  = false;
+  } finally {
+    cartInFlight.delete(pid);
+  }
+}
 
   // ─── WISHLIST: LOAD ONCE ──────────────────────────────────────────────────────
   async function loadWishlist() {
@@ -534,6 +616,15 @@
     const resolvedVariantId = p.variantId || `VAR-${pid}`;
     const resolvedSku       = p.currentSku        || `PROD-${pid}`;
 
+    // Replace old cta-btn button entirely
+    const isAdded = addedToCartSet.has(pid);
+    const cartBtnContent = isOutOfStock
+      ? `<i class="fa-solid fa-ban text-xs opacity-60"></i> Out of Stock`
+      : isAdded
+        ? `<i class="fa-solid fa-bag-shopping text-xs"></i> Go to Cart`
+        : `<i class="fa-solid fa-cart-shopping text-xs" style="color:#e39f32;"></i> Add to Cart`;
+    const cartBtnStyle = isAdded ? `background:#e39f32;color:#1D3C4A;font-weight:600;` : "";
+
     const heartIcon = isWL
       ? `<i class="fa-solid fa-heart" style="color:#e39f32;font-size:14px;"></i>`
       : `<i class="fa-regular fa-heart" style="color:#9ca3af;font-size:14px;"></i>`;
@@ -593,12 +684,21 @@
           </div>
         </div>
 
-        <button
-          class="cta-btn border-t border-[#e39f32] mt-auto w-full bg-gray-100 hover:bg-[#1D3C4A] hover:text-white transition-all duration-300 text-gray-800 text-sm py-2.5 rounded-b-xl flex items-center justify-center gap-2 font-medium"
-          data-pid="${pid}">
-          <i class="fas fa-bag-shopping text-xs" style="color:#e39f32;"></i>
-          View Product
-        </button>
+       <button
+  class="cart-btn border-t border-[#e39f32] mt-auto w-full bg-gray-100 hover:bg-[#1D3C4A] hover:text-white transition-all duration-300 text-gray-800 text-sm py-2.5 rounded-b-xl flex items-center justify-center gap-2 font-medium"
+  style="${cartBtnStyle}"
+  data-pid="${pid}"
+  data-variant-id="${escapeHtml(resolvedVariantId)}"
+  data-sku="${escapeHtml(resolvedSku)}"
+  data-color="${escapeHtml(p.selectedColor || "")}"
+  data-size="${escapeHtml(p.selectedSize   || "")}"
+  data-title="${escapeHtml(p.productName   || "")}"
+  data-price="${selling}"
+  data-mrp-price="${mrp}"
+  data-added="${isAdded ? "true" : "false"}"
+  ${isOutOfStock ? "disabled" : ""}>
+  ${cartBtnContent}
+</button>
       </div>
     `;
   }

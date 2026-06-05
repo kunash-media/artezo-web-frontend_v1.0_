@@ -239,65 +239,204 @@ async function clearCart() {
     }
 }
 
-// ── Summary Calculation ───────────────────────────────────────────────────────
-// Indian ecom standard (Flipkart / Amazon IN):
-//   MRP Total       = API totalMrp  (server-computed, no drift)
-//   Selling Total   = API totalAmount
-//   Discount        = max(0, MRP - Selling)  — never negative
-//   GST (18%)       = extracted from selling price (inclusive), shown for transparency
-//                     formula: round( selling * 0.18 / 1.18 )
-//   Delivery        = STATE.shipping.price (always 0 since delivery step removed)
-//   Total Payable   = Selling + Delivery  (GST already inside price)
+
+// ── Summary Calculation (UPDATED) ───────────────────────────────────────────
+// function calcSummary() {
+//     const cart = STATE.cartData;
+//     if (!cart) return { mrp: 0, sellingTotal: 0, productDiscount: 0, shipping: 0, codFee: 0, gst: 0, total: 0 };
+
+//     const mrpTotal        = Number(cart.totalMrp)    || 0;
+//     const sellingTotal    = Number(cart.totalAmount)  || 0;
+//     const productDiscount = Math.max(0, mrpTotal - sellingTotal);
+//     const shippingCharge  = STATE.shipping.price      || 0;
+    
+//     // COD Convenience Fee
+//     const codFee = (STATE.payment.mode === 'COD') ? 100 : 0;
+
+//     const gstExtracted    = Math.round(sellingTotal * GST_RATE / (1 + GST_RATE));
+//     const totalPayable    = sellingTotal + shippingCharge + codFee;
+
+//     return { 
+//         mrp: mrpTotal, 
+//         sellingTotal, 
+//         productDiscount, 
+//         shipping: shippingCharge, 
+//         codFee,
+//         gst: gstExtracted, 
+//         total: totalPayable 
+//     };
+// }
+
+
 function calcSummary() {
     const cart = STATE.cartData;
-    if (!cart) return { mrp: 0, sellingTotal: 0, productDiscount: 0, shipping: 0, gst: 0, total: 0 };
+    if (!cart) return { 
+        mrp: 0, sellingTotal: 0, productDiscount: 0, 
+        shipping: 0, codFee: 0, gst: 0, total: 0 
+    };
 
-    const mrpTotal        = Number(cart.totalMrp)    || 0;
-    const sellingTotal    = Number(cart.totalAmount)  || 0;
-    const productDiscount = Math.max(0, mrpTotal - sellingTotal);
-    const shippingCharge  = STATE.shipping.price      || 0;
-    const gstExtracted    = Math.round(sellingTotal * GST_RATE / (1 + GST_RATE));
-    const totalPayable    = sellingTotal + shippingCharge;
+    // ✅ MRP and selling totals from cart
+    const mrpTotal        = Number(cart.totalMrp)    || 0;  // 2199.00
+    const sellingTotal    = Number(cart.totalAmount)  || 0;  // 898.99
+    
+    // ✅ Display only — never subtract
+    const productDiscount = Math.max(0, mrpTotal - sellingTotal);  // 1300.01 (for display)
+    
+    // ✅ Shipping
+    const shippingCharge = STATE.shipping.price || 0;
+    
+    // ✅ COD fee only if payment is COD
+    const codFee = (STATE.payment.mode === 'COD') ? 100 : 0;
 
-    return { mrp: mrpTotal, sellingTotal, productDiscount, shipping: shippingCharge, gst: gstExtracted, total: totalPayable };
+    // ✅ GST Extraction: If MRP is tax-inclusive, extract GST
+    // GST = (selling price × 18) / (1 + 18) = selling price × 0.18 / 1.18
+    const gstExtracted = Math.round((sellingTotal * GST_RATE) / (1 + GST_RATE) * 100) / 100;
+
+    // ✅ CORRECT FORMULA: Subtotal + Tax + Shipping + COD - Coupon
+    // NO product discount subtraction!
+    const totalPayable = sellingTotal + gstExtracted + shippingCharge + codFee;
+
+    return { 
+        mrp: mrpTotal, 
+        sellingTotal, 
+        productDiscount,  // ✅ For display only
+        shipping: shippingCharge, 
+        codFee,
+        gst: gstExtracted, 
+        total: totalPayable  // ✅ This is the final amount customer pays
+    };
 }
 
-// Render the right-panel summary breakdown on every relevant state change
+// ── Render Summary Breakdown (UPDATED) ─────────────────────────────────────
+// function renderSummaryBreakdown() {
+//     const s    = calcSummary();
+//     const cart = STATE.cartData;
+
+//     const totalQty = cart ? (cart.totalItems || 0) : 0;
+//     document.getElementById('items-count-badge').textContent =
+//         `${totalQty} item${totalQty !== 1 ? 's' : ''}`;
+
+//     setText('sum-mrp', `₹${fmtNum(s.mrp)}`);
+
+//     // Discount
+//     const discRow = document.getElementById('sum-discount-row');
+//     if (s.productDiscount > 0) {
+//         discRow.style.display = 'flex';
+//         setText('sum-discount', `-₹${fmtNum(s.productDiscount)}`);
+//     } else {
+//         discRow.style.display = 'none';
+//     }
+
+//     // Shipping
+//     const shippingEl = document.getElementById('sum-shipping');
+//     shippingEl.textContent = s.shipping === 0 ? 'FREE' : `₹${fmtNum(s.shipping)}`;
+//     shippingEl.className   = s.shipping === 0 ? 'text-green-600 font-medium' : 'font-medium';
+
+//     // COD Fee (NEW)
+//     const codRow = document.getElementById('sum-cod-fee-row');
+//     if (s.codFee > 0) {
+//         codRow.style.display = 'flex';
+//         setText('sum-cod-fee', `+₹${fmtNum(s.codFee)}`);
+//     } else {
+//         codRow.style.display = 'none';
+//     }
+
+//     setText('sum-gst',   `₹${fmtNum(s.gst)}`);
+//     setText('sum-total', `₹${fmtNum(s.total)}`);
+
+//     // Savings
+//     const savingsMsg = document.getElementById('sum-savings-msg');
+//     if (s.productDiscount > 0) {
+//         savingsMsg.classList.remove('hidden');
+//         setText('sum-savings-amount', `₹${fmtNum(s.productDiscount)}`);
+//     } else {
+//         savingsMsg.classList.add('hidden');
+//     }
+// }
+
+
+
+/**
+ * Render pricing breakdown in UI (FIXED VERSION)
+ * ✅ Uses only existing HTML elements
+ */
 function renderSummaryBreakdown() {
     const s    = calcSummary();
     const cart = STATE.cartData;
 
+    // ────────────────────────────────────────────────────────
+    // Item count badge
+    // ────────────────────────────────────────────────────────
     const totalQty = cart ? (cart.totalItems || 0) : 0;
-    document.getElementById('items-count-badge').textContent =
-        `${totalQty} item${totalQty !== 1 ? 's' : ''}`;
+    const badgeEl = document.getElementById('items-count-badge');
+    if (badgeEl) {
+        badgeEl.textContent = `${totalQty} item${totalQty !== 1 ? 's' : ''}`;
+    }
 
+    // ────────────────────────────────────────────────────────
+    // MRP (original price)
+    // ────────────────────────────────────────────────────────
     setText('sum-mrp', `₹${fmtNum(s.mrp)}`);
 
-    // Show discount row only when there's an actual discount
+    // ────────────────────────────────────────────────────────
+    // Product Discount (DISPLAY ONLY — NOT SUBTRACTED)
+    // ────────────────────────────────────────────────────────
     const discRow = document.getElementById('sum-discount-row');
-    if (s.productDiscount > 0) {
-        discRow.style.display = 'flex';
-        setText('sum-discount', `-₹${fmtNum(s.productDiscount)}`);
-    } else {
-        discRow.style.display = 'none';
+    if (discRow) {
+        if (s.productDiscount > 0) {
+            discRow.style.display = 'flex';
+            setText('sum-discount', `-₹${fmtNum(s.productDiscount)}`);
+        } else {
+            discRow.style.display = 'none';
+        }
     }
 
+    // ────────────────────────────────────────────────────────
+    // Shipping Charge
+    // ────────────────────────────────────────────────────────
     const shippingEl = document.getElementById('sum-shipping');
-    shippingEl.textContent = s.shipping === 0 ? 'FREE' : `₹${fmtNum(s.shipping)}`;
-    shippingEl.className   = s.shipping === 0 ? 'text-green-600 font-medium' : 'font-medium';
+    if (shippingEl) {
+        shippingEl.textContent = s.shipping === 0 ? 'FREE' : `₹${fmtNum(s.shipping)}`;
+        shippingEl.className   = s.shipping === 0 ? 'text-green-600 font-medium' : 'font-medium';
+    }
 
-    setText('sum-gst',   `₹${fmtNum(s.gst)}`);
+    // ────────────────────────────────────────────────────────
+    // COD Convenience Fee (only if payment is COD)
+    // ────────────────────────────────────────────────────────
+    const codRow = document.getElementById('sum-cod-fee-row');
+    if (codRow) {
+        if (s.codFee > 0) {
+            codRow.style.display = 'flex';
+            setText('sum-cod-fee', `+₹${fmtNum(s.codFee)}`);
+        } else {
+            codRow.style.display = 'none';
+        }
+    }
+
+    // ────────────────────────────────────────────────────────
+    // GST
+    // ────────────────────────────────────────────────────────
+    setText('sum-gst', `₹${fmtNum(s.gst)}`);
+
+    // ────────────────────────────────────────────────────────
+    // FINAL TOTAL
+    // ────────────────────────────────────────────────────────
     setText('sum-total', `₹${fmtNum(s.total)}`);
 
-    // Savings callout — shown only when product discount exists
+    // ────────────────────────────────────────────────────────
+    // Savings message (showing product discount)
+    // ────────────────────────────────────────────────────────
     const savingsMsg = document.getElementById('sum-savings-msg');
-    if (s.productDiscount > 0) {
-        savingsMsg.classList.remove('hidden');
-        setText('sum-savings-amount', `₹${fmtNum(s.productDiscount)}`);
-    } else {
-        savingsMsg.classList.add('hidden');
+    if (savingsMsg) {
+        if (s.productDiscount > 0) {
+            savingsMsg.classList.remove('hidden');
+            setText('sum-savings-amount', `₹${fmtNum(s.productDiscount)}`);
+        } else {
+            savingsMsg.classList.add('hidden');
+        }
     }
 }
+
 
 // ── Addresses ─────────────────────────────────────────────────────────────────
 // Fetch all saved addresses for the user; auto-select default
@@ -528,8 +667,23 @@ function clearAddressModalErrors() {
 
 // ── Payment Selection ─────────────────────────────────────────────────────────
 // Toggle ONLINE / COD; update STATE and radio highlight
+// function selectPayment(type, mode) {
+//     STATE.payment = { type, mode };
+//     ['ONLINE', 'COD'].forEach(val => {
+//         const el = document.querySelector(`input[name="paymentMethod"][value="${val}"]`);
+//         if (el) {
+//             el.checked = (val === mode);
+//             const item = el.closest('.radio-item');
+//             if (item) item.classList.toggle('selected', val === mode);
+//         }
+//     });
+// }
+
+// ── Payment Selection ─────────────────────────────────────────────────────────
 function selectPayment(type, mode) {
     STATE.payment = { type, mode };
+    
+    // Update UI radio buttons
     ['ONLINE', 'COD'].forEach(val => {
         const el = document.querySelector(`input[name="paymentMethod"][value="${val}"]`);
         if (el) {
@@ -538,6 +692,9 @@ function selectPayment(type, mode) {
             if (item) item.classList.toggle('selected', val === mode);
         }
     });
+
+    // 🔥 IMPORTANT: Refresh summary when payment changes
+    renderSummaryBreakdown();
 }
 
 // ── Step Navigation ───────────────────────────────────────────────────────────
@@ -655,7 +812,7 @@ function populateReviewStep() {
     // Delivery is always Standard / FREE since delivery step was removed
     document.getElementById('review-shipping').innerHTML =
         `${STATE.shipping.name} — ${STATE.shipping.description}
-        &nbsp;<strong class="text-green-600">FREE</strong>`;
+        &nbsp;`;
 
     document.getElementById('review-payment').innerHTML =
         STATE.payment.mode === 'COD'
@@ -840,6 +997,44 @@ hideProcessingOverlay();
 
 // Build the /api/orders/create payload from STATE + calculated summary
 // productStrId comes from cart item directly (set when item was added to cart)
+// function buildOrderPayload(addr, s, paymentMethod, paymentMode, razorpayPaymentId, razorpayOrderId) {
+//     return {
+//         customerName:      addr.customerName,
+//         customerPhone:     addr.customerPhone,
+//         customerEmail:     addr.customerEmail,
+//         shippingAddress1:  (addr.flatNo ? addr.flatNo + ', ' : '') + addr.shippingAddress,
+//         shippingAddress2:  addr.landmark || addr.nearBy || '',
+//         shippingCity:      addr.shippingCity,
+//         shippingState:     addr.shippingState,
+//         shippingPincode:   addr.shippingPincode,
+//         paymentMethod,
+//         paymentMode,
+//         razorpayPaymentId: razorpayPaymentId || null,
+//         razorpayOrderId:   razorpayOrderId   || null,
+
+//         // productStrId must come from cart API (set at add-to-cart time from ProductEntity)
+//         items: STATE.cartData.items.map(item => ({
+//             productStrId: item.productStrId,     // e.g. "PRD00001" — never fabricated
+//             variantId:    item.variantId || null,
+//             quantity:     item.quantity,
+//         })),
+
+//         couponCode:      null,
+//         couponDiscount:  0,
+//         discountAmount:  s.productDiscount,
+//         discountPercent: s.mrp > 0
+//             ? parseFloat(((s.productDiscount / s.mrp) * 100).toFixed(2))
+//             : 0,
+//         shippingCharges: s.shipping,
+//         convenienceFee:  s.codFee,  //added new value
+//         tax:             s.gst,
+//         giftWrap:        false,
+//         giftwrapCharges: 0,
+//         orderNotes:      document.getElementById('deliveryNotes')?.value?.trim() || '',
+//     };
+// }
+
+
 function buildOrderPayload(addr, s, paymentMethod, paymentMode, razorpayPaymentId, razorpayOrderId) {
     return {
         customerName:      addr.customerName,
@@ -855,22 +1050,27 @@ function buildOrderPayload(addr, s, paymentMethod, paymentMode, razorpayPaymentI
         razorpayPaymentId: razorpayPaymentId || null,
         razorpayOrderId:   razorpayOrderId   || null,
 
-        // productStrId must come from cart API (set at add-to-cart time from ProductEntity)
+        // ✅ Items — only productStrId, variantId, quantity
         items: STATE.cartData.items.map(item => ({
-            productStrId: item.productStrId,     // e.g. "PRD00001" — never fabricated
+            productStrId: item.productStrId,     // e.g. "PRD00001"
             variantId:    item.variantId || null,
             quantity:     item.quantity,
         })),
 
+        // ✅ CORRECTED PRICING
+        // Key Point: discountAmount is ALWAYS 0 (product discount already in price)
+        // Only coupon discounts are passed
         couponCode:      null,
-        couponDiscount:  0,
-        discountAmount:  s.productDiscount,
-        discountPercent: s.mrp > 0
-            ? parseFloat(((s.productDiscount / s.mrp) * 100).toFixed(2))
-            : 0,
-        shippingCharges: s.shipping,
-        convenienceFee:  0,
-        tax:             s.gst,
+        couponDiscount:  0,  // ✅ Only NEW coupons
+        discountAmount:  0,  // ✅ ALWAYS 0 — product discount is NOT sent
+        discountPercent: 0,  // ✅ ALWAYS 0
+        
+        // ✅ Additional charges
+        tax:             s.gst,           // GST on selling price
+        shippingCharges: s.shipping,      // Shipping charge (0 if free)
+        convenienceFee:  s.codFee,        // ₹100 if COD, else 0
+        
+        // ✅ Extras
         giftWrap:        false,
         giftwrapCharges: 0,
         orderNotes:      document.getElementById('deliveryNotes')?.value?.trim() || '',

@@ -93,9 +93,28 @@
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
     <!-- Product count + sort row -->
-    <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+    <!-- <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
       <p id="categoryProductCount" class="text-sm text-gray-500 font-lexend">Loading…</p>
-    </div>
+    </div> -->
+
+    <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+  <p id="categoryProductCount" class="text-sm text-gray-500 font-lexend">Loading…</p>
+  <div class="relative">
+    <select id="categoryPriceFilter"
+      class="appearance-none text-xs font-lexend border border-[#fccd81] rounded-full px-4 py-2 pr-8 bg-white text-[#1D3C4A] cursor-pointer focus:outline-none focus:border-accent shadow-sm hover:border-accent transition-colors">
+      <option value="default">Sort: Default</option>
+      <option value="price_asc">Price: Low to High</option>
+      <option value="price_desc">Price: High to Low</option>
+      <option value="under_500">Under ₹500</option>
+      <option value="500_2000">₹500 – ₹2,000</option>
+      <option value="above_2000">Above ₹2,000</option>
+    </select>
+    <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 pointer-events-none"></i>
+  </div>
+</div>
+
+<!-- Subcategory tags strip — populated by JS -->
+<div id="categorySubTags" class="flex flex-wrap gap-2 mb-5 min-h-0"></div>
 
     <!-- Error state -->
     <div id="categoryError"
@@ -193,6 +212,135 @@
     <!-- Pagination — populated by homecategory.js -->
     <div id="categoryPagination"></div>
 
+     <!-- ARTEZO BRAND INFO SECTION -->
+  <section class="py-16 bg-gradient-to-b from-stone-50 to-white">
+    <div class="max-w-7xl mx-auto px-6">
+
+      <!-- 1 Brand Intro -->
+      <div class="text-center mb-14">
+        <h2 class="text-3xl md:text-4xl font-semibold text-[#1D3C4A]">
+          About ARTEZO
+        </h2>
+
+        <p class="text-gray-600 mt-4 max-w-3xl mx-auto leading-relaxed">
+          ARTEZO is a premium Indian brand dedicated to refined home decor,
+          personalized gifting, and corporate recognition products.
+          Built on craftsmanship, precision, and aesthetic excellence,
+          our collections are designed to enhance spaces while preserving
+          memories and celebrating achievements.
+        </p>
+      </div>
+
+
+      <!-- 2 Product Expertise -->
+      <div class="grid md:grid-cols-3 gap-6 mb-16">
+
+        <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition">
+          <h3 class="font-semibold text-[#1D3C4A] mb-2">Home & Wall Decor</h3>
+          <p class="text-gray-600 text-sm">
+            Elegant decor pieces designed to elevate both modern and
+            traditional interiors.
+          </p>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition">
+          <h3 class="font-semibold text-[#1D3C4A] mb-2">Photo Frames & Nameplates</h3>
+          <p class="text-gray-600 text-sm">
+            Premium frames and identity products crafted with durability
+            and refined finishing.
+          </p>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition">
+          <h3 class="font-semibold text-[#1D3C4A] mb-2">Personalized Gifts</h3>
+          <p class="text-gray-600 text-sm">
+            Customized gifts designed to preserve memories and express
+            individuality.
+          </p>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition">
+          <h3 class="font-semibold text-[#1D3C4A] mb-2">Corporate Gifts</h3>
+          <p class="text-gray-600 text-sm">
+            Professional gifting solutions for businesses and institutions.
+          </p>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition">
+          <h3 class="font-semibold text-[#1D3C4A] mb-2">Trophies & Mementos</h3>
+          <p class="text-gray-600 text-sm">
+            Recognition products designed to honor achievements with prestige.
+          </p>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition">
+          <h3 class="font-semibold text-[#1D3C4A] mb-2">Trending Products</h3>
+          <p class="text-gray-600 text-sm">
+            Modern decor and gifting products inspired by contemporary design.
+          </p>
+        </div>
+
+      </div>
+
+
+      <!-- 3 Brand Philosophy -->
+      <div class="text-center mb-10">
+        <h3 class="text-2xl font-semibold text-[#1D3C4A] mb-6">
+          Our Brand Philosophy
+        </h3>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-10 text-center mb-16">
+
+        <div class="bg-[#F4F7F8] border border-gray-300  p-6 rounded-xl">
+          <h4 class="font-semibold text-lg text-[#1D3C4A] mb-2">
+            Design with Purpose
+          </h4>
+          <p class="text-gray-600 text-sm">
+            Every product is designed to deliver both aesthetic appeal
+            and emotional value.
+          </p>
+        </div>
+
+        <div class="bg-[#F4F7F8] border border-gray-300 p-6 rounded-xl">
+          <h4 class="font-semibold text-lg text-[#1D3C4A] mb-2">
+            Craft with Precision
+          </h4>
+          <p class="text-gray-600 text-sm">
+            From materials to finishing, attention to detail defines
+            the ARTEZO standard.
+          </p>
+        </div>
+
+        <div class="bg-[#F4F7F8] border border-gray-300 p-6 rounded-xl">
+          <h4 class="font-semibold text-lg text-[#1D3C4A] mb-2">
+            Deliver with Integrity
+          </h4>
+          <p class="text-gray-600 text-sm">
+            Consistency, reliability, and professionalism guide
+            our customer experience.
+          </p>
+        </div>
+
+      </div>
+
+
+      <!-- 4 Closing Statement -->
+      <div class="text-center max-w-3xl mx-auto">
+        <p class="text-gray-700 leading-relaxed">
+          ARTEZO bridges personal expression and professional recognition.
+          From enhancing interiors to celebrating milestones,
+          our products are crafted for individuals, families,
+          businesses, and institutions that value excellence.
+        </p>
+
+        <p class="mt-4 font-medium text-[#1D3C4A]">
+          Elevating Spaces. Preserving Moments. Honoring Success.
+        </p>
+      </div>
+
+    </div>
+  </section>
   </main>
 
   <!-- ═══════════════════════════════════════════════════════════════

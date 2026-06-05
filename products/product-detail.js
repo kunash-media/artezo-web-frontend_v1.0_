@@ -1,3 +1,172 @@
+// ═══════════════════════════════════════════════════════════════════════════
+//  ARTEZO LOGGING SYSTEM (Non-conflicting)
+// ═══════════════════════════════════════════════════════════════════════════
+
+window.artezoLog = {
+    info: (msg, ...args) => {
+        const formatted = msg.replace(/{}/g, () => {
+            const arg = args.shift();
+            return typeof arg === 'object' ? JSON.stringify(arg) : arg;
+        });
+        console.log(`%c[✅ INFO] ${formatted}`, 'color: #4CAF50; font-weight: bold; font-size: 12px;');
+    },
+    error: (msg, ...args) => {
+        const formatted = msg.replace(/{}/g, () => {
+            const arg = args.shift();
+            return typeof arg === 'object' ? JSON.stringify(arg) : arg;
+        });
+        console.error(`%c[❌ ERROR] ${formatted}`, 'color: #F44336; font-weight: bold; font-size: 12px;');
+    },
+    warn: (msg, ...args) => {
+        const formatted = msg.replace(/{}/g, () => {
+            const arg = args.shift();
+            return typeof arg === 'object' ? JSON.stringify(arg) : arg;
+        });
+        console.warn(`%c[⚠️ WARN] ${formatted}`, 'color: #FF9800; font-weight: bold; font-size: 12px;');
+    },
+    debug: (msg, ...args) => {
+        const formatted = msg.replace(/{}/g, () => {
+            const arg = args.shift();
+            return typeof arg === 'object' ? JSON.stringify(arg) : arg;
+        });
+        console.log(`%c[🔍 DEBUG] ${formatted}`, 'color: #2196F3; font-weight: normal; font-size: 11px;');
+    }
+};
+
+// Shorter alias
+const L = window.artezoLog;
+
+L.info("═══════════════════════════════════════════════════════════");
+L.info("  ARTEZO PRODUCT DETAILS PAGE INITIALIZED");
+L.info("═══════════════════════════════════════════════════════════");
+
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  SHIPROCKET DYNAMIC SCRIPT INJECTION (WORKAROUND)
+// ═══════════════════════════════════════════════════════════════════════════
+
+L.info("Attempting Shiprocket script injection...");
+
+// Remove any existing script tag to avoid duplicates
+const existingScript = document.querySelector('script[src*="shiprocket-checkout"]');
+if (existingScript) {
+    L.warn("Removing existing Shiprocket script tag");
+    existingScript.remove();
+}
+
+// Create and inject new script
+const shiprocketScript = document.createElement('script');
+shiprocketScript.src = 'https://cdn.shiprocket.in/checkout/js/shiprocket-checkout.js';
+shiprocketScript.type = 'text/javascript';
+shiprocketScript.async = true;
+shiprocketScript.charset = 'UTF-8';
+
+shiprocketScript.onload = function() {
+    L.info("✅ Shiprocket script loaded successfully!");
+    window.shiprocketScriptLoaded = true;
+    
+    // Verify window.Shiprocket exists
+    if (typeof window.Shiprocket !== "undefined") {
+        L.info("✅ window.Shiprocket is available");
+        L.info("  Methods: {}", Object.keys(window.Shiprocket).join(", "));
+    } else {
+        L.error("❌ Script loaded but window.Shiprocket is still undefined");
+    }
+};
+
+shiprocketScript.onerror = function() {
+    L.error("❌ Failed to load Shiprocket script");
+    L.error("Possible reasons:");
+    L.error("  1. CORS blocked the request");
+    L.error("  2. Network/internet issue");
+    L.error("  3. Shiprocket service down");
+    L.error("  Check Network tab for details");
+};
+
+// Append to head
+document.head.appendChild(shiprocketScript);
+L.debug("Shiprocket script injection initiated");
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  SHIPROCKET SDK INITIALIZATION CHECKER
+// ═══════════════════════════════════════════════════════════════════════════
+
+L.info("🔍 Checking Shiprocket SDK availability...");
+
+// Add a global flag to track if script loaded
+window.shiprocketScriptLoaded = false;
+
+(function initializeShiprocketCheck() {
+    let checkCount = 0;
+    const maxChecks = 50;
+    
+    const checkSRSDK = setInterval(() => {
+        checkCount++;
+        
+        L.debug("SR SDK Check #{}: window.Shiprocket = {}",
+            checkCount,
+            typeof window.Shiprocket);
+        
+        if (typeof window.Shiprocket !== "undefined") {
+            clearInterval(checkSRSDK);
+            window.shiprocketScriptLoaded = true;
+            
+            L.info("✅ SHIPROCKET SDK LOADED SUCCESSFULLY!");
+            L.info("  window.Shiprocket type: {}", typeof window.Shiprocket);
+            L.info("  window.Shiprocket.checkout type: {}", typeof window.Shiprocket.checkout);
+            L.debug("  Available methods: {}", Object.keys(window.Shiprocket).join(", "));
+            
+            return;
+        }
+        
+        if (checkCount >= maxChecks) {
+            clearInterval(checkSRSDK);
+            window.shiprocketScriptLoaded = false;
+            
+            L.error("❌ SHIPROCKET SDK FAILED TO LOAD AFTER 5 SECONDS");
+            L.error("Checking script tag status...");
+            
+            const scriptTag = document.querySelector('script[src*="shiprocket-checkout"]');
+            if (scriptTag) {
+                L.error("  ✅ Script tag found");
+                L.error("  Script src: {}", scriptTag.src);
+                L.error("  Script async: {}", scriptTag.async);
+                L.error("  Script loaded: {}", scriptTag.loaded);
+                L.error("  ⚠️ Script tag exists but window.Shiprocket is undefined");
+                L.error("  Possible causes:");
+                L.error("    → CORS blocking (check Network tab)");
+                L.error("    → Script didn't execute/initialize");
+                L.error("    → Wrong URL");
+                L.error("    → Third-party script error");
+            } else {
+                L.error("  ❌ NO SCRIPT TAG FOUND!");
+                L.error("  Make sure <script src=\"https://checkout.shiprocket.in/js/shiprocket-checkout.js\"></script> is in <head>");
+            }
+        }
+    }, 100);
+})();
+
+// Check on page load events
+document.addEventListener('DOMContentLoaded', () => {
+    L.debug("DOMContentLoaded: window.Shiprocket = {}", typeof window.Shiprocket);
+});
+
+window.addEventListener('load', () => {
+    L.debug("Window load: window.Shiprocket = {}", typeof window.Shiprocket);
+    
+    // If still not loaded, it's definitely a script issue
+    if (typeof window.Shiprocket === "undefined") {
+        L.error("❌ CRITICAL: Shiprocket still not loaded at window.load");
+        L.error("This means the script failed to execute. Check:");
+        L.error("  1. Network tab - did shiprocket-checkout.js load with 200 status?");
+        L.error("  2. Console - any CORS errors?");
+        L.error("  3. Is your internet connection working?");
+    }
+});
+
+
 (function () {
   "use strict";
 
@@ -7,6 +176,26 @@
 
   // Hardcoded userId until auth system is wired
   const USER_ID = localStorage.getItem('userId');
+
+
+
+
+  // ── SIMPLE LOGGING HELPER ──────────────────────────────────────────────
+const log = {
+    info: (msg, ...args) => {
+        const formatted = msg.replace(/{}/g, () => JSON.stringify(args.shift()));
+        console.log(`%c[INFO] ${formatted}`, 'color: #4CAF50; font-weight: bold;');
+    },
+    error: (msg, ...args) => {
+        const formatted = msg.replace(/{}/g, () => JSON.stringify(args.shift()));
+        console.error(`%c[ERROR] ${formatted}`, 'color: #F44336; font-weight: bold;');
+    },
+    warn: (msg, ...args) => {
+        const formatted = msg.replace(/{}/g, () => JSON.stringify(args.shift()));
+        console.warn(`%c[WARN] ${formatted}`, 'color: #FF9800; font-weight: bold;');
+    }
+};
+
 
   // ─── URL HELPERS ───────────────────────────────────────────────────────────
   function absUrl(path) {
@@ -633,11 +822,11 @@ function generateProductSEOUrl(product) {
     if (cleanName.toLowerCase().startsWith((product.brandName || "").toLowerCase())) {
         cleanName = cleanName.substring((product.brandName || "").length).trim();
     }
-    const productSlug = slugify(cleanName || product.productName);
+    // const productSlug = slugify(cleanName || product.productName);
     const sku         = product.currentSku || `PROD-${product.productPrimeId}`;
 
     // Use file path so it works on Live Server + Hostinger without extra rewrite rules
-    return `/products/product-detail.html?id=${product.productPrimeId}&sku=${sku}&brand=${brandSlug}&category=${categorySlug}&product=${productSlug}`;
+    return `/products/product-detail.html?id=${product.productPrimeId}&sku=${sku}&brand=${brandSlug}&category=${categorySlug}`;
 }
 
 
@@ -676,7 +865,7 @@ function slugify(text) {
         window.seoInfo = {
             productId: productId,
             brandSlug: brandSlug,
-            productSlug: productSlug,
+            // productSlug: productSlug,
             variantId: variantId
         };
         
@@ -816,7 +1005,7 @@ function rewriteURLToSEO(variantSku) {
         sku:     baseSku,
         brand:   slugify(safeProductData.brandName),
         category: slugify(safeProductData.productCategory || "products"),
-        product: slugify(safeProductData.productName),
+        // product: slugify(safeProductData.productName),
     });
 
     if (variantSku && variantSku !== `VAR-${safeProductData.productId}`) {
@@ -1000,21 +1189,39 @@ async function fetchProductFromAPI(id) {
    * Confirm Buy Now order after Shiprocket checkout callback.
    * Calls POST /api/orders/confirm-buynow with X-User-Id header.
    */
-  async function apiConfirmBuyNow(payload) {
-    const res = await fetch(`${BASE_URL}/api/orders/confirm-buynow`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-User-Id": USER_ID,
-      },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) {
-      const errBody = await res.text().catch(() => "");
-      throw new Error(`HTTP ${res.status} — ${errBody}`);
+ async function apiConfirmBuyNow(payload) {
+    log.debug("API Call: POST /api/orders/confirm-buynow");
+    log.debug("Headers: X-User-Id = {}", USER_ID);
+    log.debug("Payload: {}", JSON.stringify(payload, null, 2));
+    
+    try {
+        const res = await fetch(`${BASE_URL}/api/orders/confirm-buynow`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-User-Id": USER_ID,
+            },
+            body: JSON.stringify(payload),
+        });
+
+        log.debug("API Response status: {}", res.status);
+
+        if (!res.ok) {
+            const errBody = await res.text().catch(() => "");
+            log.error("API Error: {}", errBody);
+            throw new Error(`HTTP ${res.status} — ${errBody}`);
+        }
+
+        const data = await res.json();
+        log.info("✅ API call successful");
+        log.debug("Response data: {}", data);
+        
+        return data;
+    } catch (err) {
+        log.error("❌ API call failed: {}", err.message);
+        throw err;
     }
-    return res.json();
-  }
+}
 
   /**
    * Fetch addon products for "Bought Together".
@@ -1186,7 +1393,7 @@ async function fetchProductFromAPI(id) {
     // Must be declared BEFORE safeProductData assignment so [baseVariant, ...variants]
     // reference below is valid. Base uses root-level product fields.
     const baseVariant = {
-      variantId:       "__base__",
+      variantId:       p.variantId,
       color:           p.selectedColor       || "Default",
       sku:             p.currentSku,
       price:           p.currentSellingPrice,
@@ -1335,76 +1542,7 @@ async function fetchProductFromAPI(id) {
 
   //====================================================//
   //      PATCH ADDED
-  //=================================================//
-
-
-  // ==================== SETUP FUNCTIONS - #patch-2 ====================
-  // function setupDynamicVariants() {
-  //   const sizeButtons = document.querySelectorAll(".size-btn");
-  //   const sizeHint = document.getElementById("sizeHint");
-
-  //   function filterColorsBySize(selectedSize) {
-  //     const colorButtons = document.querySelectorAll(".color-variant");
-  //     let count = 0;
-  //     let firstVisible = null;
-
-  //     colorButtons.forEach((btn) => {
-  //       const supportedSizes = btn.dataset.sizes.split(",");
-  //       if (supportedSizes.includes(selectedSize)) {
-  //         btn.style.display = "block";
-  //         count++;
-  //         if (!firstVisible) firstVisible = btn;
-  //       } else {
-  //         btn.style.display = "none";
-  //       }
-  //     });
-
-  //     if (sizeHint)
-  //       sizeHint.textContent = `${count} color${count > 1 ? "s" : ""} available`;
-
-  //     if (firstVisible) firstVisible.click();
-  //   }
-
-  //   // Size buttons
-  //   sizeButtons.forEach((btn) => {
-  //     btn.addEventListener("click", () => {
-  //       sizeButtons.forEach((b) =>
-  //         b.classList.remove(
-  //           "border-[#E6A62C]",
-  //           "bg-[#fff9ef]",
-  //           "text-[#033E59]",
-  //         ),
-  //       );
-  //       btn.classList.add("border-[#E6A62C]", "bg-[#fff9ef]", "text-[#033E59]");
-
-  //       filterColorsBySize(btn.dataset.size);
-  //     });
-  //   });
-
-  //   // Color buttons
-  //   document.getElementById("variantSection").addEventListener("click", (e) => {
-  //     const btn = e.target.closest(".color-variant");
-  //     if (!btn) return;
-
-  //     document
-  //       .querySelectorAll(".color-variant")
-  //       .forEach((b) =>
-  //         b.classList.remove("ring-2", "ring-[#E6A62C]", "ring-offset-2"),
-  //       );
-  //     btn.classList.add("ring-2", "ring-[#E6A62C]", "ring-offset-2");
-
-  //     // Update main product info
-  //     document.getElementById("mainProductImage").src = btn.dataset.image;
-  //     document.querySelector(".price-display").textContent =
-  //       `₹${parseInt(btn.dataset.price).toLocaleString()}`;
-  //   });
-
-  //   // Initialize with first size
-  //   if (sizeButtons.length > 0) {
-  //     sizeButtons[0].click();
-  //   }
-  // }
-
+  //=================================================/
 
 
    // ==================== SHARE FUNCTIONALITY ====================
@@ -1532,7 +1670,7 @@ async function fetchProductFromAPI(id) {
             <p class="text-sm tracking-[0.3em] text-gray-500 uppercase mb-4">
               ${escapeHtml(safeProductData.productCategory || "")}
             </p>
-            <h1 class="text-3xl md:text-5xl font-zain font-semibold text-gray-900 leading-tight mb-4">
+            <h1 class="text-3xl md:text-2xl font-zain font-semibold text-gray-900 leading-tight mb-4">
               ${escapeHtml(safeProductData.productName)}
             </h1>
           </div>
@@ -1736,52 +1874,7 @@ function setupDynamicVariants() {}
 // ─── END PATCH 4 VARIANT SELECTION ────────────────────────────────────────
 
 
-  /**
- * PATCH 1A — Out-of-stock CTA guard.
- * Disables Add-to-Cart and Buy-Now buttons when stock <= 0.
- * Called on initial render and every variant switch.
- */
-// function applyStockState(stock) {
-//   const isOOS = !stock || stock <= 0;
-
-//   // All CTA buttons on page (main + sticky bar)
-//   const cartBtns    = document.querySelectorAll(".add-to-cart-btn");
-//   const buyNowBtns  = document.querySelectorAll(".buy-now-btn");
-
-//   cartBtns.forEach((btn) => {
-//     btn.disabled = isOOS;
-//     btn.classList.toggle("opacity-40",   isOOS);
-//     btn.classList.toggle("cursor-not-allowed", isOOS);
-//     btn.classList.toggle("pointer-events-none", isOOS);
-//     if (isOOS) {
-//       btn.dataset.originalText = btn.innerHTML;
-//       btn.innerHTML = `<i class="fas fa-ban"></i> <span class="text-sm">Out of Stock</span>`;
-//     } else if (btn.dataset.originalText) {
-//       btn.innerHTML = btn.dataset.originalText;
-//     }
-//   });
-
-//   buyNowBtns.forEach((btn) => {
-//     btn.disabled = isOOS;
-//     btn.classList.toggle("opacity-40",   isOOS);
-//     btn.classList.toggle("cursor-not-allowed", isOOS);
-//     btn.classList.toggle("pointer-events-none", isOOS);
-//   });
-
-//   // Qty controls
-//   const incBtn = document.getElementById("increaseBtn");
-//   if (incBtn) {
-//     incBtn.disabled = isOOS;
-//     incBtn.classList.toggle("opacity-40", isOOS);
-//     incBtn.classList.toggle("cursor-not-allowed", isOOS);
-//   }
-// }
-
-
-// ─── PATCH 2: SINGLE SOURCE OF TRUTH FOR STOCK STATE ──────────────────────────
-// Called from exactly two places: initial render + variant switch.
-// Owns: CTA buttons, qty controls, stockInfo label, sticky bar.
-// Never use applyStockState or inline stock checks anywhere else.
+ 
 
 function syncStockUI(stock) {
 
@@ -1939,162 +2032,368 @@ function syncStockUI(stock) {
   //  BUY NOW — SHIPROCKET CHECKOUT INTEGRATION
   // ═══════════════════════════════════════════════════════════════════════════
 
-  /**
-   * handleBuyNow — opens Shiprocket Checkout widget.
-   *
-   * Flow:
-   *  1. If product is customizable → open customization overlay first (existing flow unchanged).
-   *  2. Otherwise → open Shiprocket Checkout widget with product details.
-   *  3. On SR checkout success callback → call /api/orders/confirm-buynow with full payload.
-   *  4. On confirm success → redirect to order success / thank-you page.
-   *
-   * Edge cases handled:
-   *  - SR SDK not loaded (CDN failure) → fallback graceful error toast, no crash.
-   *  - USER_ID not set (not logged in) → prompt login before opening checkout.
-   *  - Confirm API failure → toast error, do NOT redirect (order integrity).
-   *  - SR checkout dismissed / cancelled → silent close, no action.
-   */
-  async function handleBuyNow(e) {
+
+
+
+/**
+ * HANDLE SHIPROCKET CHECKOUT SUCCESS
+ * Called when user completes payment in SR widget
+ */
+// async function handleBuyNowSuccess(srData, variant, quantity, itemTotal) {
+//     log.info("═══════════════════════════════════════════════════════");
+//     log.info("  SHIPROCKET CHECKOUT SUCCESS");
+//     log.info("═══════════════════════════════════════════════════════");
+    
+//     log.info("Received SR callback data:");
+//     log.info("  SR Order ID: {}", srData.order_id);
+//     log.info("  SR Shipment ID: {}", srData.shipment_id);
+//     log.info("  Payment ID: {}", srData.payment_id);
+//     log.info("  Customer Name: {}", srData.customer_name);
+//     log.info("  Customer Email: {}", srData.customer_email);
+//     log.info("  Customer Phone: {}", srData.customer_phone);
+//     log.info("  Shipping Address: {}, {}, {} - {}",
+//         srData.shipping_address,
+//         srData.shipping_city,
+//         srData.shipping_state,
+//         srData.shipping_pincode);
+
+//     showToast("Payment successful! Confirming your order…", "success");
+
+//     try {
+//         log.debug("Building BuyNowConfirmRequest payload...");
+//         const confirmPayload = buildBuyNowConfirmPayload(srData, variant, quantity, itemTotal);
+        
+//         log.info("Sending order confirmation to backend...");
+//         log.debug("Payload: {}", JSON.stringify(confirmPayload, null, 2));
+
+//         const response = await apiConfirmBuyNow(confirmPayload);
+
+//         log.info("✅ Backend response received:");
+//         log.info("  Order ID: {}", response.data?.orderStrId);
+//         log.info("  Final Amount: ₹{}", response.data?.finalAmount);
+//         log.info("  Status: {}", response.data?.orderStatus);
+
+//         showToast("Order placed successfully! 🎉", "success");
+
+//         const orderId = response?.data?.orderStrId || "";
+//         log.debug("Redirecting to success page with order ID: {}", orderId);
+        
+//         setTimeout(() => {
+//             window.location.href = `/Order-Success/order-success.html${orderId ? "?orderId=" + encodeURIComponent(orderId) : ""}`;
+//         }, 1500);
+
+//     } catch (err) {
+//         log.error("❌ Order confirmation failed");
+//         log.error("  Error: {}", err.message);
+//         log.error("  Stack: {}", err.stack);
+//         showToast("Payment received but order confirmation failed. Contact support with payment ID: " + srData.payment_id, "error");
+//     }
+// }
+
+// /**
+//  * WAIT FOR SHIPROCKET SDK TO LOAD
+//  * Checks every 100ms up to maxWaitTime
+//  */
+// /**
+//  * WAIT FOR SHIPROCKET SDK TO LOAD
+//  * Polls every 100ms with updated logging
+//  */
+// async function waitForShiprocketSDK(maxWaitTime = 5000) {
+//     L.info("⏳ Waiting for Shiprocket SDK (max {}ms)...", maxWaitTime);
+    
+//     const startTime = Date.now();
+//     let checkCount = 0;
+    
+//     while (Date.now() - startTime < maxWaitTime) {
+//         checkCount++;
+        
+//         L.debug("  Retry #{}: typeof window.Shiprocket = {}", 
+//             checkCount,
+//             typeof window.Shiprocket);
+        
+//         if (typeof window.Shiprocket !== "undefined" && 
+//             typeof window.Shiprocket.checkout === "function") {
+            
+//             const timeElapsed = Date.now() - startTime;
+//             L.info("✅ Shiprocket SDK loaded in {}ms", timeElapsed);
+//             return true;
+//         }
+        
+//         await new Promise(resolve => setTimeout(resolve, 100));
+//     }
+    
+//     L.error("❌ Shiprocket SDK failed to load after {}ms", maxWaitTime);
+//     return false;
+// }
+
+
+/**
+ * FIXED handleBuyNow() — Shiprocket Hot Checkout integration
+ * All inline checks, proper error handling, confirmed SDK loading
+ */
+async function handleBuyNow(e) {
     e.preventDefault();
     e.stopPropagation();
 
-    // ── 1. Customizable products go through overlay first ──────────────────
-    if (safeProductData.isCustomizable) {
-      openCustomizationOverlay();
-      return;
+    L.info("═══════════════════════════════════════════════════════");
+    L.info("  HEADLESS BUY NOW INITIATED");
+    L.info("═══════════════════════════════════════════════════════");
+
+    // ── 1. CUSTOMIZABLE CHECK ──────────────────────────────────────────
+    if (safeProductData?.isCustomizable) {
+        L.info("✅ Product is customizable, opening overlay");
+        openCustomizationOverlay();
+        return;
     }
 
-    // ── 2. Auth guard — must be logged in ──────────────────────────────────
+    // ── 2. AUTH CHECK ──────────────────────────────────────────────────
     if (!USER_ID) {
-      showToast("Please login to continue.", "error");
-      // Optional: redirect to login
-      // window.location.href = "../Auth/login.html?redirect=" + encodeURIComponent(window.location.href);
-      return;
+        L.error("❌ User not authenticated");
+        showToast("Please login to continue.", "error");
+        return;
     }
 
-    // ── 3. SR SDK guard ────────────────────────────────────────────────────
-    if (typeof window.Shiprocket === "undefined" || typeof window.Shiprocket.checkout !== "function") {
-      showToast("Payment gateway loading. Please try again in a moment.", "error");
-      console.error("[BuyNow] Shiprocket SDK not loaded. Ensure SR checkout script is included in HTML.");
-      return;
+    // ── 3. VERIFY SHIPROCKET SDK IS LOADED ─────────────────────────────
+    if (typeof window.ShiprocketCheckout === 'undefined') {
+        L.error("❌ Shiprocket SDK not loaded");
+        showToast("Payment system loading. Please try again in a moment.", "error");
+        return;
     }
 
-    const variant  = getSelectedVariant();
+    // ── 4. EXTRACT CORE UI SELECTIONS ──────────────────────────────────
+    const variant = getSelectedVariant();
     const quantity = parseInt(document.getElementById("quantity")?.textContent || 1);
     const unitPrice = variant?.price || safeProductData.currentSellingPrice;
-    const totalAmount = unitPrice * quantity;
 
-    // ── 4. Build SR Checkout config ────────────────────────────────────────
-    const srConfig = {
-      // Product details shown inside SR checkout window
-      products: [
-        {
-          name:     safeProductData.productName,
-          sku:      variant?.sku || safeProductData.currentSku,
-          units:    quantity,
-          selling_price: String(unitPrice),
-          discount: "",
-          tax:      "",
-          hsn:      safeProductData.hsnCode || "",
-        },
-      ],
+    if (!unitPrice || unitPrice <= 0) {
+        L.error("❌ Invalid price: {}", unitPrice);
+        showToast("Price information unavailable. Please refresh and try again.", "error");
+        return;
+    }
 
-      // Order metadata
-      order_id: `ARTEZO-${Date.now()}`,   // temp reference; real orderId assigned by backend on confirm
-
-      // Payment amount in paise (Razorpay standard)
-      amount: totalAmount,
-
-      // ── SUCCESS CALLBACK ────────────────────────────────────────────────
-      /**
-       * Called by SR SDK after successful payment + address collection.
-       * `data` contains:
-       *   data.order_id           — Shiprocket order id
-       *   data.shipment_id        — Shiprocket shipment id
-       *   data.payment_id         — Razorpay payment id
-       *   data.customer_name
-       *   data.customer_email
-       *   data.customer_phone
-       *   data.shipping_address
-       *   data.shipping_city
-       *   data.shipping_state
-       *   data.shipping_pincode
-       */
-      success: async function (data) {
-        console.log("[BuyNow] SR Checkout success callback data:", data);
-        showToast("Payment successful! Confirming your order…", "success");
-
-        try {
-          const confirmPayload = buildBuyNowConfirmPayload(data, variant, quantity, totalAmount);
-          const response = await apiConfirmBuyNow(confirmPayload);
-
-          console.log("[BuyNow] Order confirmed:", response);
-          showToast("Order placed successfully! 🎉", "success");
-
-          // Redirect to order success page
-          // Pass orderId if available in response for order tracking
-          const orderId = response?.data?.orderId || response?.data?.orderStrId || "";
-          setTimeout(() => {
-            window.location.href = `/Order-Success/order-success.html${orderId ? "?orderId=" + encodeURIComponent(orderId) : ""}`;
-          }, 1200);
-
-        } catch (err) {
-          console.error("[BuyNow] Confirm API error:", err);
-          showToast("Payment received but order confirmation failed. Please contact support.", "error");
-          // Do NOT redirect — let user contact support with payment id
-        }
-      },
-
-      // ── CANCEL CALLBACK ─────────────────────────────────────────────────
-      cancel: function () {
-        console.log("[BuyNow] SR Checkout cancelled by user.");
-        // Silent — no toast needed, user intentionally closed
-      },
-
-      // ── ERROR CALLBACK ──────────────────────────────────────────────────
-      error: function (err) {
-        console.error("[BuyNow] SR Checkout error:", err);
-        showToast("Payment could not be processed. Please try again.", "error");
-      },
+    // ── 5. DISPATCH TO SPRING BOOT BACKEND ─────────────────────────────
+    const payload = {
+        productStrId: safeProductData.productStrId,
+        productName: safeProductData.productName,
+        variantId: variant?.id || null,
+        sku: variant?.sku || safeProductData.currentSku,
+        quantity: quantity,
+        unitPrice: parseFloat(unitPrice)
     };
 
-    // ── 5. Open SR Checkout widget ─────────────────────────────────────────
     try {
-      window.Shiprocket.checkout(srConfig);
+        showToast("Preparing secure checkout...", "info");
+        L.info("Requesting checkout URL from Spring Boot backend...");
+
+        const response = await fetch('http://localhost:8085/api/checkout/initiate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-User-Id': USER_ID
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            L.error("Backend error response: {} | Details: {}", response.status, errorData);
+            
+            if (response.status === 500) {
+                showToast("Server error initiating checkout. Please contact support.", "error");
+            } else if (response.status === 400) {
+                showToast("Invalid product or pricing information.", "error");
+            } else {
+                showToast("Failed to initialize payment. Status: " + response.status, "error");
+            }
+            return;
+        }
+
+        const data = await response.json();
+
+        if (!data?.checkoutUrl) {
+            L.error("❌ Backend returned success but no checkoutUrl");
+            L.error("Response: {}", JSON.stringify(data));
+            showToast("Checkout URL not received. Please try again.", "error");
+            return;
+        }
+
+        L.info("✅ Checkout URL received from backend");
+        L.info("Opening Shiprocket Hot Checkout modal...");
+
+        // ── 6. LAUNCH SHIPROCKET HOT CHECKOUT MODAL ────────────────────
+        window.ShiprocketCheckout.open({
+            url: data.checkoutUrl,
+            fallback: false, // Opens as modal, not tab redirect
+
+            // Fired when customer completes payment
+            success: async function (callbackData) {
+                L.info("✅ Shiprocket checkout success callback received");
+                await handleBuyNowSuccess(callbackData, variant, quantity, (unitPrice * quantity));
+            },
+
+            // Fired when customer closes the checkout without paying
+            cancel: function () {
+                L.warn("User dismissed the checkout modal");
+                showToast("Checkout cancelled. Your cart is saved.", "info");
+            },
+
+            // Fired on iframe/SDK errors
+            error: function (err) {
+                L.error("Shiprocket iframe error: {}", err);
+                showToast("Payment system error. Please try again.", "error");
+            }
+        });
+
     } catch (err) {
-      console.error("[BuyNow] Failed to open SR Checkout:", err);
-      showToast("Could not open checkout. Please try again.", "error");
+        L.error("❌ Checkout initiation failed: {}", err.message);
+        showToast("Unable to start payment. Please check your connection and try again.", "error");
     }
-  }
+}
+
+/**
+ * FIXED handleBuyNowSuccess() — Maps Shiprocket callback → backend order confirmation
+ */
+async function handleBuyNowSuccess(srData, variant, quantity, itemTotal) {
+    L.info("═══════════════════════════════════════════════════════");
+    L.info("  SHIPROCKET CHECKOUT SUCCESS (CALLBACK)");
+    L.info("═══════════════════════════════════════════════════════");
+
+    // Validate we have the required fields from Shiprocket
+    if (!srData?.order_id || !srData?.payment_id) {
+        L.error("❌ Shiprocket callback missing order_id or payment_id");
+        showToast("Payment received but order reference incomplete. Please contact support with Payment ID: " + srData?.payment_id, "warning");
+        return;
+    }
+
+    showToast("Payment verified! Processing your order...", "success");
+
+    // Build payload to send to our backend for order persistence
+    const confirmPayload = {
+        shiprocketOrderId: String(srData.order_id),
+        shiprocketShipmentId: String(srData.shipment_id || ""),
+        razorpayPaymentId: String(srData.payment_id),
+        amount: parseFloat(itemTotal),
+        productStrId: safeProductData.productStrId,
+        variantId: variant?.id || null,
+        quantity: parseInt(quantity),
+        customerName: srData.customer_name || "",
+        customerPhone: srData.customer_phone || "",
+        customerEmail: srData.customer_email || "",
+        shippingAddress1: srData.shipping_address || "",
+        shippingAddress2: srData.shipping_address_2 || "",
+        shippingCity: srData.shipping_city || "",
+        shippingState: srData.shipping_state || "",
+        shippingPincode: srData.shipping_pincode || ""
+    };
+
+    try {
+        L.info("Confirming order with backend...");
+        const response = await fetch('/api/orders/confirm-buynow', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-User-Id': USER_ID
+            },
+            body: JSON.stringify(confirmPayload)
+        });
+
+        const backendResult = await response.json();
+
+        if (!response.ok) {
+            L.error("Backend order confirmation failed: {}", response.status);
+            L.error("Response: {}", JSON.stringify(backendResult));
+            
+            // Payment went through but order not saved — critical state
+            showToast(
+                "⚠️ Payment complete (ID: " + srData.payment_id + ") but order save failed. " +
+                "Please contact support with this Payment ID. Your payment is safe.",
+                "warning"
+            );
+            return;
+        }
+
+        L.info("✅ Order confirmed and saved in database");
+        const orderStrId = backendResult?.data?.orderStrId || backendResult?.orderStrId;
+
+        if (!orderStrId) {
+            L.warn("Order saved but orderStrId not in response");
+            showToast("Order placed successfully! 🎉", "success");
+            setTimeout(() => {
+                window.location.href = "/order-success.html";
+            }, 1500);
+            return;
+        }
+
+        showToast("Order placed successfully! 🎉", "success");
+        
+        // Redirect to order success page with order ID
+        setTimeout(() => {
+            window.location.href = `/Order-Success/order-success.html?orderId=${encodeURIComponent(orderStrId)}`;
+        }, 1500);
+
+    } catch (err) {
+        L.error("❌ Order confirmation request failed: {}", err.message);
+        showToast(
+            "Payment complete but order sync failed. Contact support with Payment ID: " + srData.payment_id,
+            "error"
+        );
+    }
+}
+
+
+
 
   /**
-   * Builds the BuyNowConfirmRequest payload from SR checkout callback data.
-   * Maps SR field names → your backend DTO field names.
-   */
-  function buildBuyNowConfirmPayload(srData, variant, quantity, totalAmount) {
-    return {
-      // SR references
-      shiprocketOrderId:   srData.order_id   ? String(srData.order_id)   : null,
-      shiprocketShipmentId: srData.shipment_id ? String(srData.shipment_id) : null,
-      razorpayPaymentId:   srData.payment_id  || null,
-      amount:              totalAmount,
+ * BUILDS THE PAYLOAD FOR BACKEND ORDER CONFIRMATION
+ * Maps SR Checkout callback data → BuyNowConfirmRequest DTO
+ * 
+ * NOTE: Frontend sends ITEM TOTAL (pre-tax)
+ *       Backend calculates tax, shipping, final amount
+ *       This ensures consistent calculations
+ */
+/**
+ * BUILD BUYNOW CONFIRM REQUEST
+ * Maps SR Checkout callback → Backend DTO
+ */
+function buildBuyNowConfirmPayload(srData, variant, quantity, itemTotal) {
+    log.info("Building BuyNowConfirmRequest payload...");
+    
+    const payload = {
+        shiprocketOrderId:   srData.order_id   ? String(srData.order_id)   : null,
+        shiprocketShipmentId: srData.shipment_id ? String(srData.shipment_id) : null,
+        razorpayPaymentId:   srData.payment_id  || null,
+        amount:              itemTotal,
 
-      // Product reference
-      productStrId: safeProductData.productStrId,
-      variantId:    variant?.variantId || null,
-      quantity:     quantity,
+        productStrId: safeProductData.productStrId,
+        variantId:    variant?.variantId || null,
+        quantity:     quantity,
 
-      // Customer / address — filled by SR Checkout widget
-      customerName:     srData.customer_name    || "",
-      customerPhone:    srData.customer_phone   || "",
-      customerEmail:    srData.customer_email   || null,
-      shippingAddress1: srData.shipping_address || "",
-      shippingAddress2: srData.shipping_address2 || null,
-      shippingCity:     srData.shipping_city    || "",
-      shippingState:    srData.shipping_state   || "",
-      shippingPincode:  srData.shipping_pincode || "",
+        customerName:     srData.customer_name    || "",
+        customerPhone:    srData.customer_phone   || "",
+        customerEmail:    srData.customer_email   || "",
+
+        shippingAddress1: srData.shipping_address || "",
+        shippingAddress2: srData.shipping_address_2 || null,
+        shippingCity:     srData.shipping_city    || "",
+        shippingState:    srData.shipping_state   || "",
+        shippingPincode:  srData.shipping_pincode || "",
     };
-  }
+
+    log.info("✅ Payload built:");
+    log.info("  SR Order: {}", payload.shiprocketOrderId);
+    log.info("  Product: {}", payload.productStrId);
+    log.info("  Variant: {}", payload.variantId);
+    log.info("  Quantity: {}", payload.quantity);
+    log.info("  Amount: ₹{}", payload.amount);
+    log.info("  Customer: {}", payload.customerName);
+    log.info("  Address: {}, {}, {} - {}",
+        payload.shippingAddress1,
+        payload.shippingCity,
+        payload.shippingState,
+        payload.shippingPincode);
+
+    return payload;
+}
 
   function buildCartPayload(variant, quantity, customFieldsJson) {
 
@@ -3077,7 +3376,7 @@ if (safeProductData.availableVariants.length > 1) {
           <div class=" pr-2 space-y-3 hide-scrollbar">
 
             <!-- Product name + Trending badge -->
-            <h1 class="text-3xl md:text-4xl font-normal font-zain leading-tight text-[#033E59]">
+            <h1 class="text-3xl md:text-2xl font-normal font-zain leading-tight text-[#033E59]">
               ${escapeHtml(safeProductData.productName)}${trendingBadgeHTML()}
             </h1>
 

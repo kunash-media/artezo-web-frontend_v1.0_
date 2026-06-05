@@ -3,24 +3,27 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Artezo</title>
+    <title>Artezo - Product Details</title>
+    
+    <!-- ======== STYLES ======== -->
     <link rel="stylesheet" href="../Header/header.css" />
-
+    <link rel="stylesheet" href="./product-detail.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Zain:wght@200;300;400;700;800;900&family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    
+    <!-- ======== TAILWIND CSS ======== -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- ======== SHIPROCKET HOT CHECKOUT ======== -->
+    <script src="https://shiprocket.in" defer></script>
     <script src="https://checkout.shiprocket.in/js/shiprocket-checkout.js"></script>
 
-    <link rel="stylesheet" href="./product-detail.css" />
-
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-    />
-
-    <link
-      href="https://fonts.googleapis.com/css2?family=Zain:wght@200;300;400;700;800;900&family=Lexend:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-
+    
+    <!-- ======== CSP POLICY ======== -->
+    <meta http-equiv="Content-Security-Policy" 
+          content="script-src 'self' 'unsafe-inline' https://checkout.shiprocket.in;">
+    
+    <!-- ======== TAILWIND CONFIG ======== -->
     <script>
       tailwind.config = {
         content: [],
@@ -62,11 +65,8 @@
       id="heroSection"
       class="px-4 sm:px-6 lg:px-8 py-10 sm:py-12 lg:py-16 bg-[#f5f5f5]"
     >
-      <div
-        class="relative min-h-[60vh] sm:min-h-[70vh] lg:min-h-[90vh] flex items-center justify-center text-center overflow-hidden rounded-2xl sm:rounded-3xl"
-      >
+      <div class="relative min-h-[60vh] sm:min-h-[70vh] lg:min-h-[90vh] flex items-center justify-center text-center overflow-hidden rounded-2xl sm:rounded-3xl">
         <div class="absolute inset-0 bg-gray-200 animate-pulse"></div>
-
         <div class="relative z-10 max-w-3xl px-4 sm:px-6">
           <div class="h-4 w-24 sm:w-32 bg-gray-300 rounded mx-auto mb-4 sm:mb-6"></div>
           <div class="h-10 sm:h-12 w-48 sm:w-64 bg-gray-300 rounded mx-auto mb-4 sm:mb-6"></div>
@@ -76,16 +76,10 @@
     </section>
 
     <!-- INSTALLATION SECTION -->
-    <section
-      id="installSection"
-      class="py-12 sm:py-16 bg-white"
-    ></section>
+    <section id="installSection" class="py-12 sm:py-16 bg-white"></section>
 
     <!-- SOCIAL PROOF -->
-    <section
-      id="socialSection"
-      class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 lg:py-16"
-    ></section>
+    <section id="socialSection" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 lg:py-16"></section>
 
     <!-- FOOTER -->
     <div id="footer-container"></div>
@@ -97,50 +91,27 @@
     ></div>
 
     <!-- OFFER OVERLAY -->
-    <div
-      id="offerOverlay"
-      class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-[100] p-4"
-    >
-      <div
-        id="offerModal"
-        class="bg-white rounded-2xl sm:rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl transform scale-95 transition-all"
-      >
+    <div id="offerOverlay" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-[100] p-4">
+      <div id="offerModal" class="bg-white rounded-2xl sm:rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl transform scale-95 transition-all">
         <div class="p-4 sm:p-6 border-b flex justify-between items-center">
-          <h3 class="text-xl sm:text-2xl font-semibold text-[#1D3C4A]">
-            Available Offers
-          </h3>
-
-          <button
-            id="closeOffersBtn"
-            class="text-2xl sm:text-3xl text-gray-400 hover:text-gray-600"
-          >
-            &times;
-          </button>
+          <h3 class="text-xl sm:text-2xl font-semibold text-[#1D3C4A]">Available Offers</h3>
+          <button id="closeOffersBtn" class="text-2xl sm:text-3xl text-gray-400 hover:text-gray-600">&times;</button>
         </div>
-
         <div id="offerContent" class="p-4 sm:p-6 space-y-4"></div>
-
         <div class="p-4 sm:p-6 border-t flex justify-end">
-          <button
-            id="closeOffersBtn2"
-            class="px-6 sm:px-8 py-2.5 sm:py-3 bg-[#1D3C4A] text-white rounded-xl sm:rounded-2xl font-medium"
-          >
-            Close
-          </button>
+          <button id="closeOffersBtn2" class="px-6 sm:px-8 py-2.5 sm:py-3 bg-[#1D3C4A] text-white rounded-xl sm:rounded-2xl font-medium">Close</button>
         </div>
       </div>
     </div>
 
-    <!-- Scripts -->
-     <script src="/auth.js"></script>
+    <!-- ======== SCRIPTS ======== -->
+    <script src="/auth.js"></script>
     <script src="/services/product-data.js"></script>
     <script src="../services/cart-wishlist-service.js"></script>
     <script src="../services/global-utils.js"></script>
     <script src="../Header/load-header.js" defer></script>
     <script src="../Header/header.js" defer></script>
-
     <script src="../Footer/footer-loader.js"></script>
-
     <script src="./product-detail.js"></script>
 
     <script>
@@ -148,7 +119,6 @@
         if (window.ProductDatabase) {
           console.log("✅ ProductDatabase loaded!");
           const product = ProductDatabase.getProductById(5055);
-
           console.log("Product name:", product?.productName);
           console.log("Variants:", product?.availableVariants?.length);
           console.log("First variant:", product?.availableVariants?.[0]);

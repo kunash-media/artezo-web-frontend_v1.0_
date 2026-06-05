@@ -645,7 +645,7 @@
           </section>
 
           <!-- Top Rated Section -->
-          <section class="top-rated-section py-8 bg-gray-50">
+         <section class="top-rated-section py-8 bg-gray-50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div class="flex items-center justify-between mb-6">
                 <div>
