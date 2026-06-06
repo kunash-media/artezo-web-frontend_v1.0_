@@ -150,6 +150,39 @@ const quickAccessLinks = [
   },
 ];
 
+
+// Cache so we don't re-fetch on every menu open
+const _catImageCache = {};
+
+async function fetchCategoryThumbnail(categoryName, redirectUrl) {
+  if (_catImageCache[categoryName]) return _catImageCache[categoryName];
+
+  try {
+    // Hit the same products API your category page uses
+    const url = `http://localhost:8085/api/products/get-all?category=${encodeURIComponent(categoryName)}&page=0&size=1`;
+    const res  = await fetch(url);
+    if (!res.ok) throw new Error("no products");
+    const data = await res.json();
+
+    // Handle both paginated {content:[]} and plain array responses
+    const products = data.content || data.data || data || [];
+    const first    = Array.isArray(products) ? products[0] : null;
+
+    if (first) {
+      const img = first.mainImage || first.mainImageUrl || first.imageUrl || "";
+      const full = img.startsWith("/") ? "http://localhost:8085" + img : img;
+      if (full) { _catImageCache[categoryName] = full; return full; }
+    }
+  } catch(e) {
+    // silent — fall through to static map
+  }
+
+  // Fallback: static categoryImages map
+  const fallback = categoryImages[categoryName] || "";
+  _catImageCache[categoryName] = fallback;
+  return fallback;
+}
+
 // ─── Category Images ─────────────────────────────────────────────────────────
 const categoryImages = {
   "Wall Decor":
@@ -175,17 +208,28 @@ const bannerImages = [
   "https://picsum.photos/id/201/800/300",
 ];
 
-function getMobileBannerImages() {
-  if (
-    window.artezoData &&
-    window.artezoData.bannerSlides &&
-    window.artezoData.bannerSlides.length > 0
-  ) {
+async function fetchMobileBannerImages() {
+  // 1. Already loaded by index.js → use it
+  if (window.artezoData?.bannerSlides?.length > 0) {
     return window.artezoData.bannerSlides.map(
-      (slide) => slide.mainImage || slide.smallImage || bannerImages[0],
-    );
+      s => s.mainImage || s.smallImage
+    ).filter(Boolean);
   }
-  return bannerImages;
+  // 2. Fetch directly from banner API
+  try {
+    const res  = await fetch("http://localhost:8085/api/banners/get-banner-by-name/home");
+    if (!res.ok) throw new Error("banner api failed");
+    const json = await res.json();
+    const slides = json?.data?.slides || [];
+    return slides.map(slide => {
+      const url = slide.leftMain?.imageUrl || slide.leftMain?.image
+                || slide.mainImageUrl     || slide.mainImage || "";
+      return url.startsWith("/") ? "http://localhost:8085" + url : url;
+    }).filter(Boolean);
+  } catch(e) {
+    console.warn("[MobileBanner] fetch failed:", e.message);
+    return [];
+  }
 }
 
 // ─── URL Builder Helpers ─────────────────────────────────────────────────────
@@ -444,64 +488,42 @@ window.handleQuickAccessClick = function (event, label) {
 };
 
 // ─── Mobile Navigation ───────────────────────────────────────────────────────
-function renderMobileNavigation(categories) {
+async  function renderMobileNavigation(categories) {
   const mobileNav = document.querySelector(
     "#mobile-menu .flex-1.overflow-y-auto",
   );
   if (!mobileNav) return;
 
-  const staticMobileGridHTML = `
-    <a href="../HomeCategory/homecategory.html?category=Wall+Decor"
-       class="flex flex-col items-center text-center group">
-      <div class="relative w-full aspect-square bg-[#FFF9E5] rounded-2xl overflow-hidden mb-2 group-hover:shadow-md transition-shadow">
-        <img src="https://cdn.shopify.com/s/files/1/0632/2526/6422/files/1_4345985e-c8a5-40af-9a03-0fcf35940ffc.jpg?v=1771484241&width=1728"
-             alt="Wall Decor" class="w-full h-full object-cover">
-      </div>
-      <span class="text-xs font-medium text-gray-700 group-hover:text-accent">Wall Decor</span>
-    </a>
-    <a href="../HomeCategory/homecategory.html?category=Photo+Frames"
-       class="flex flex-col items-center text-center group">
-      <div class="relative w-full aspect-square bg-[#FFF9E5] rounded-2xl overflow-hidden mb-2 group-hover:shadow-md transition-shadow">
-        <img src="https://cdn.shopify.com/s/files/1/0632/2526/6422/files/ASFRP25405_3.jpg?v=1772760662&width=1728"
-             alt="Photo Frames" class="w-full h-full object-cover">
-      </div>
-      <span class="text-xs font-medium text-gray-700 group-hover:text-accent">Photo Frames</span>
-    </a>
-    <a href="../HomeCategory/homecategory.html?category=Home+Decor"
-       class="flex flex-col items-center text-center group">
-      <div class="relative w-full aspect-square bg-[#FFF9E5] rounded-2xl overflow-hidden mb-2 group-hover:shadow-md transition-shadow">
-        <img src="https://m.media-amazon.com/images/S/shoppable-media-external-prod-iad-us-east-1/dc96db56-6f71-48d1-b4d5-af22a91e4d60/6b804-0a5f-4946-b7aa-22414c476._AC_._SX1200_SCLZZZZZZZ_.jpeg"
-             alt="Home Decor" class="w-full h-full object-cover">
-      </div>
-      <span class="text-xs font-medium text-gray-700 group-hover:text-accent">Home Decor</span>
-    </a>
-    <a href="../HomeCategory/homecategory.html?category=Nameplates"
-       class="flex flex-col items-center text-center group">
-      <div class="relative w-full aspect-square bg-[#FFF9E5] rounded-2xl overflow-hidden mb-2 group-hover:shadow-md transition-shadow">
-        <img src="https://picsum.photos/id/237/600/600"
-             alt="Nameplates" class="w-full h-full object-cover">
-      </div>
-      <span class="text-xs font-medium text-gray-700 group-hover:text-accent">Nameplates</span>
-    </a>
-    <a href="../HomeCategory/homecategory.html?category=Corporate+Gifting"
-       class="flex flex-col items-center text-center group">
-      <div class="relative w-full aspect-square bg-[#FFF9E5] rounded-2xl overflow-hidden mb-2 group-hover:shadow-md transition-shadow">
-        <img src="https://printo-s3.dietpixels.net/site/2025/Joining%20kit/1280/The-Onward-Box_1742898848.jpg?quality=70&format=webp&w=640"
-             alt="Corporate Gifting" class="w-full h-full object-cover">
-      </div>
-      <span class="text-xs font-medium text-gray-700 group-hover:text-accent">Corporate Gifting</span>
-    </a>
-    <a href="../HomeCategory/homecategory.html?category=Personalised+Gifts"
-       class="flex flex-col items-center text-center group">
-      <div class="relative w-full aspect-square bg-[#FFF9E5] rounded-2xl overflow-hidden mb-2 group-hover:shadow-md transition-shadow">
-        <img src="https://static-assets-prod.fnp.com/images/pr/l/v20240104150045/personalised-photo-magnets_1.jpg"
-             alt="Personalised Gifts" class="w-full h-full object-cover">
-      </div>
-      <span class="text-xs font-medium text-gray-700 group-hover:text-accent">Personalised Gifts</span>
-    </a>
-  `;
+ // Build mobile category grid from API categories (same source as desktop nav)
+// Falls back to categoryData.navCategories if API failed
+const mobileCats = categories || categoryData.navCategories;
 
-  const mobileBannerImages = getMobileBannerImages();
+// Fetch all category thumbnails in parallel before rendering
+const catImgResolved = await Promise.all(
+  mobileCats.map(cat => fetchCategoryThumbnail(cat.productCategory || ""))
+);
+
+const staticMobileGridHTML = mobileCats.map((cat, idx) => {
+  const name = cat.productCategory || "";
+  const url  = buildCategoryUrl(cat.productCategoryRedirect || "#", name);
+  const img  = catImgResolved[idx] || "";
+
+  return `
+    <a href="${url}" class="flex flex-col items-center text-center group">
+      <div class="w-full aspect-square bg-gray-100 rounded-2xl overflow-hidden mb-2 group-hover:shadow-md transition-shadow">
+        ${img
+          ? `<img src="${img}" alt="${name}" class="w-full h-full object-cover"
+                  onerror="this.style.display='none'">`
+          : `<div class="w-full h-full flex items-center justify-center text-gray-300 text-2xl">
+               <i class="fa-solid fa-image"></i>
+             </div>`
+        }
+      </div>
+      <span class="text-xs font-medium text-gray-700 group-hover:text-accent line-clamp-2 leading-tight">${name}</span>
+    </a>`;
+}).join("");
+
+  const mobileBannerImages = await fetchMobileBannerImages();
 
   const carouselHTML = `
     <div class="mt-8">
@@ -525,15 +547,19 @@ function renderMobileNavigation(categories) {
     </div>`;
 
   mobileNav.innerHTML = `
-    <div class="mb-6 px-4">
-      <div class="relative">
-        <input type="text" placeholder="Search for 'wall decor'"
-               class="w-full h-12 pl-12 pr-4 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-accent/50" />
-        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-          <i class="fa-solid fa-magnifying-glass"></i>
-        </div>
-      </div>
+    <div class="mb-4 px-4">
+  <div class="relative">
+    <input id="hamburger-search-input" type="text" placeholder="Search products…"
+           class="w-full h-12 pl-12 pr-4 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-accent/50" />
+    <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+      <i class="fa-solid fa-magnifying-glass"></i>
     </div>
+  </div>
+  <!-- Results drop in here -->
+  <div id="hamburger-search-results"
+       class="hidden mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 max-h-[50vh] overflow-y-auto">
+  </div>
+</div>
     <div class="mb-4 px-4">
       <h2 class="text-lg font-semibold text-gray-900">All Categories</h2>
     </div>
@@ -545,6 +571,8 @@ function renderMobileNavigation(categories) {
   `;
 
   setTimeout(initBannerCarousel, 150);
+  // Wire hamburger menu search after DOM is injected
+  setTimeout(initHamburgerSearch, 50);
 }
 
 // ─── Banner Carousel ─────────────────────────────────────────────────────────
@@ -747,14 +775,26 @@ function quickSearch(el) {
 }
 
 // ─── Mobile Menu ─────────────────────────────────────────────────────────────
+// function openMobileMenu() {
+//   const menu = document.getElementById("mobile-menu");
+//   if (!menu) return;
+//   menu.classList.remove("translate-x-full");
+//   document.body.style.overflow = "hidden";
+//   showingAllCategories = false;
+//   renderMobileNavigation();
+// }
+
+
 function openMobileMenu() {
   const menu = document.getElementById("mobile-menu");
   if (!menu) return;
   menu.classList.remove("translate-x-full");
   document.body.style.overflow = "hidden";
   showingAllCategories = false;
-  renderMobileNavigation();
+  // Pass already-fetched categories so grid uses API data, not fallback
+  getCategoriesPromise().then(cats => renderMobileNavigation(cats));
 }
+
 
 function closeMobileMenu() {
   const menu = document.getElementById("mobile-menu");
@@ -1010,11 +1050,11 @@ async function initializeCategories() {
   try {
     const categories = await fetchCategories();
     renderDesktopNavigation(categories);
-    renderMobileNavigation();
+    renderMobileNavigation(categories);
   } catch (err) {
     console.error("Failed to load categories, using fallback");
     renderDesktopNavigation(null);
-    renderMobileNavigation();
+    renderMobileNavigation(null);
   }
 }
 
@@ -1137,6 +1177,8 @@ async function initializeHeader() {
   initTypingAnimationForTopBar();
   renderAccountDropdown();
   initMobileMenu();
+  initMobileSearchFeature(); // ← add this line
+
 
   document
     .getElementById("cart-btn")
@@ -1573,6 +1615,289 @@ function initSearchFeature() {
     console.log('[Search] ✅ Initialized successfully');
 }
 
+// ═══════════════════════════════════════════════════════════════
+//  MOBILE LIVE SEARCH  — mirrors desktop search exactly
+//  Target: #mobile-search-input inside #mobile-search-overlay
+// ═══════════════════════════════════════════════════════════════
+function initMobileSearchFeature() {
+  const overlay = document.getElementById("mobile-search-overlay");
+  const input   = document.getElementById("mobile-search-input");
+  if (!input || !overlay) return;
+
+  // Create results container inside the overlay, below the search box
+  let results = document.getElementById("mobile-overlay-search-results");
+  if (!results) {
+    results = document.createElement("div");
+    results.id = "mobile-overlay-search-results";
+    results.className = "w-full mt-3 bg-white rounded-2xl shadow-xl border border-gray-100 max-h-[55vh] overflow-y-auto hidden";
+    // Insert after the white search pill div
+    input.closest(".bg-white.rounded-3xl").insertAdjacentElement("afterend", results);
+  }
+
+  let debounceTimer  = null;
+  let lastKeyword    = "";
+  let activeIndex    = -1;
+  let currentResults = [];
+
+  function showResults() { results.classList.remove("hidden"); }
+  function hideResults() { results.classList.add("hidden"); activeIndex = -1; }
+
+  function updateActive() {
+    results.querySelectorAll(".artezo-suggestion-item").forEach((el, i) => {
+      el.classList.toggle("is-active", i === activeIndex);
+    });
+  }
+
+  function renderResults(data, keyword) {
+    currentResults = data;
+    activeIndex = -1;
+
+    if (!data.length) {
+      results.innerHTML = `
+        <div class="px-5 py-8 text-center text-sm text-gray-400 font-lexend">
+          No products found for <strong class="text-primary">"${keyword}"</strong>
+        </div>`;
+      showResults();
+      return;
+    }
+
+    const items = data.map((p, i) => {
+      const discount   = getDiscountPct(p.currentSellingPrice, p.currentMrpPrice);
+      const discBadge  = discount
+        ? `<span class="ml-1 text-[10px] bg-green-100 text-green-700 font-semibold px-1.5 py-0.5 rounded-full">${discount}% off</span>`
+        : "";
+      const mrpHtml = (p.currentMrpPrice && p.currentMrpPrice > p.currentSellingPrice)
+        ? `<span class="line-through text-gray-400 text-[11px] ml-1">${formatPrice(p.currentMrpPrice)}</span>`
+        : "";
+      const highlighted = highlightMatch(p.productName, keyword);
+      const imageUrl    = p.mainImageUrl
+        || (p.mainImage?.startsWith("/") ? "http://localhost:8085" + p.mainImage : p.mainImage)
+        || `http://localhost:8085/api/products/${p.productPrimeId}/main`;
+
+      return `
+        <div class="artezo-suggestion-item flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-zinc-50 transition-colors"
+             data-index="${i}"
+             onmousedown="event.preventDefault()"
+             onclick="hideMobileSearch(); window.__artezoGoProduct(${p.productPrimeId})">
+          <div class="w-12 h-12 flex-shrink-0 rounded-xl overflow-hidden border border-gray-100 bg-zinc-50">
+            <img src="${imageUrl}" alt="${p.productName}" class="w-full h-full object-cover"
+                 onerror="this.style.display='none'" />
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-lexend text-gray-800 truncate leading-tight">${highlighted}</p>
+            ${p.brandName ? `<p class="text-[11px] text-gray-400 mt-0.5">${p.brandName}</p>` : ""}
+            <div class="flex items-center mt-1 flex-wrap gap-1">
+              <span class="text-sm font-semibold text-primary">${formatPrice(p.currentSellingPrice)}</span>
+              ${mrpHtml}${discBadge}
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-right text-[10px] text-gray-300 flex-shrink-0"></i>
+        </div>`;
+    }).join("");
+
+    results.innerHTML = `
+      <style>
+        .artezo-hl{background:transparent;color:#E6A62C;font-weight:600;padding:0}
+        .artezo-suggestion-item.is-active{background-color:#f4f4f5}
+      </style>
+      <div class="py-1">${items}</div>`;
+    showResults();
+
+    results.querySelectorAll(".artezo-suggestion-item").forEach(el => {
+      el.addEventListener("mouseenter", () => {
+        activeIndex = parseInt(el.dataset.index, 10);
+        updateActive();
+      });
+    });
+  }
+
+  // ── Input handler ──────────────────────────────────────────────
+  input.addEventListener("input", (e) => {
+    const keyword = e.target.value.trim();
+    clearTimeout(debounceTimer);
+
+    if (keyword.length < SEARCH_MIN_CHARS) { hideResults(); lastKeyword = ""; return; }
+    if (keyword === lastKeyword) return;
+
+    results.innerHTML = `
+      <div class="px-5 py-5 flex items-center justify-center gap-2 text-sm text-gray-400">
+        <svg class="animate-spin h-4 w-4 text-accent" xmlns="http://www.w3.org/2000/svg"
+             fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+        </svg>
+        Searching…
+      </div>`;
+    showResults();
+
+    debounceTimer = setTimeout(async () => {
+      lastKeyword = keyword;
+      const data = await fetchSearchSuggestions(keyword);
+      if (input.value.trim() !== keyword) return; // stale
+      if (data === null) { hideResults(); return; }
+      renderResults(data, keyword);
+    }, SEARCH_DEBOUNCE_MS);
+  });
+
+  // ── Keyboard nav ───────────────────────────────────────────────
+  input.addEventListener("keydown", (e) => {
+    const items = results.querySelectorAll(".artezo-suggestion-item");
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      activeIndex = Math.min(activeIndex + 1, items.length - 1);
+      updateActive();
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      activeIndex = Math.max(activeIndex - 1, 0);
+      updateActive();
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (activeIndex >= 0 && currentResults[activeIndex]) {
+        hideMobileSearch();
+        window.__artezoGoProduct(currentResults[activeIndex].productPrimeId);
+      }
+    } else if (e.key === "Escape") {
+      hideMobileSearch();
+    }
+  });
+
+  // ── Clear results when overlay is hidden ───────────────────────
+  // Patch hideMobileSearch to also reset state
+  const _origHide = window.hideMobileSearch;
+  window.hideMobileSearch = function () {
+    hideResults();
+    input.value = "";
+    lastKeyword = "";
+    if (_origHide) _origHide();
+  };
+}
+
+
+
+// ═══════════════════════════════════════════════════════════════
+//  HAMBURGER MENU SEARCH  — live search inside mobile side menu
+//  Target: #hamburger-search-input / #hamburger-search-results
+// ═══════════════════════════════════════════════════════════════
+function initHamburgerSearch() {
+  const input   = document.getElementById("hamburger-search-input");
+  const results = document.getElementById("hamburger-search-results");
+  if (!input || !results) return;
+
+  let debounceTimer   = null;
+  let lastKeyword     = "";
+  let activeIndex     = -1;
+  let currentResults  = [];
+
+  function showResults() { results.classList.remove("hidden"); }
+  function hideResults() { results.classList.add("hidden"); activeIndex = -1; }
+
+  function updateActive() {
+    results.querySelectorAll(".artezo-suggestion-item").forEach((el, i) => {
+      el.classList.toggle("is-active", i === activeIndex);
+    });
+  }
+
+  function renderResults(data, keyword) {
+    currentResults = data;
+    activeIndex = -1;
+
+    if (!data.length) {
+      results.innerHTML = `
+        <div class="px-5 py-8 text-center text-sm text-gray-400 font-lexend">
+          No products found for <strong class="text-primary">"${keyword}"</strong>
+        </div>`;
+      showResults();
+      return;
+    }
+
+    const items = data.map((p, i) => {
+      const discount = getDiscountPct(p.currentSellingPrice, p.currentMrpPrice);
+      const discBadge = discount
+        ? `<span class="ml-1 text-[10px] bg-green-100 text-green-700 font-semibold px-1.5 py-0.5 rounded-full">${discount}% off</span>`
+        : "";
+      const mrpHtml = (p.currentMrpPrice && p.currentMrpPrice > p.currentSellingPrice)
+        ? `<span class="line-through text-gray-400 text-[11px] ml-1">${formatPrice(p.currentMrpPrice)}</span>`
+        : "";
+      const highlighted = highlightMatch(p.productName, keyword);
+      const imageUrl = p.mainImageUrl || `http://localhost:8085/api/products/${p.productPrimeId}/main`;
+
+      return `
+        <div class="artezo-suggestion-item flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-zinc-50 transition-colors"
+             data-index="${i}"
+             onmousedown="event.preventDefault()"
+             onclick="closeMobileMenu(); window.__artezoGoProduct(${p.productPrimeId})">
+          <div class="w-11 h-11 flex-shrink-0 rounded-xl overflow-hidden border border-gray-100 bg-zinc-50">
+            <img src="${imageUrl}" alt="${p.productName}" class="w-full h-full object-cover"
+                 onerror="this.style.display='none'" />
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-lexend text-gray-800 truncate leading-tight">${highlighted}</p>
+            ${p.brandName ? `<p class="text-[11px] text-gray-400 mt-0.5">${p.brandName}</p>` : ""}
+            <div class="flex items-center mt-0.5 flex-wrap gap-1">
+              <span class="text-sm font-semibold text-primary">${formatPrice(p.currentSellingPrice)}</span>
+              ${mrpHtml}${discBadge}
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-right text-[10px] text-gray-300"></i>
+        </div>`;
+    }).join("");
+
+    results.innerHTML = `
+      <style>
+        .artezo-hl{background:transparent;color:#E6A62C;font-weight:600;padding:0}
+        .artezo-suggestion-item.is-active{background-color:#f4f4f5}
+      </style>
+      <div class="py-1">${items}</div>`;
+    showResults();
+
+    results.querySelectorAll(".artezo-suggestion-item").forEach(el => {
+      el.addEventListener("mouseenter", () => {
+        activeIndex = parseInt(el.dataset.index, 10);
+        updateActive();
+      });
+    });
+  }
+
+  input.addEventListener("input", (e) => {
+    const keyword = e.target.value.trim();
+    clearTimeout(debounceTimer);
+
+    if (keyword.length < SEARCH_MIN_CHARS) { hideResults(); lastKeyword = ""; return; }
+    if (keyword === lastKeyword) return;
+
+    // Loading state
+    results.innerHTML = `
+      <div class="px-5 py-5 flex items-center justify-center gap-2 text-sm text-gray-400">
+        <svg class="animate-spin h-4 w-4 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+        </svg>
+        Searching…
+      </div>`;
+    showResults();
+
+    debounceTimer = setTimeout(async () => {
+      lastKeyword = keyword;
+      const data = await fetchSearchSuggestions(keyword); // reuses desktop fetch
+      if (input.value.trim() !== keyword) return; // stale
+      if (data === null) { hideResults(); return; }
+      renderResults(data, keyword);
+    }, SEARCH_DEBOUNCE_MS);
+  });
+
+  input.addEventListener("keydown", (e) => {
+    const items = results.querySelectorAll(".artezo-suggestion-item");
+    if (!items.length) return;
+    if (e.key === "ArrowDown") { e.preventDefault(); activeIndex = Math.min(activeIndex + 1, items.length - 1); updateActive(); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); activeIndex = Math.max(activeIndex - 1, 0); updateActive(); }
+    else if (e.key === "Enter" && activeIndex >= 0 && currentResults[activeIndex]) {
+      e.preventDefault();
+      closeMobileMenu();
+      window.__artezoGoProduct(currentResults[activeIndex].productPrimeId);
+    } else if (e.key === "Escape") { hideResults(); }
+  });
+}
+
 // Navigation handlers
 window.__artezoGoProduct = function (productPrimeId) {
     hideSearchSuggestions();
@@ -1591,6 +1916,8 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initSearchFeature);
 } else {
     initSearchFeature();
+    // ── Wire mobile search overlay input to same live search ──
+    initMobileSearchFeature();
 }
 
 
