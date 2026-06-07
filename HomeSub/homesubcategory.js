@@ -280,6 +280,8 @@ const cartInFlight   = new Set();
         await addToWishlist(userId, productId, btn.dataset);
         console.log("[HSC] ✅ addToWishlist SUCCESS");
         showToast("Added to wishlist ♥");
+        window.dispatchEvent(new CustomEvent('wishlist:updated'));
+        
       } else {
         // data-variant-id already holds the resolved fallback (e.g. "VAR-1")
         // written during buildProductCard — matches the DB row exactly.
@@ -287,6 +289,8 @@ const cartInFlight   = new Set();
         await removeFromWishlist(userId, productId, btn.dataset.variantId);
         console.log("[HSC] ✅ removeFromWishlist SUCCESS");
         showToast("Removed from wishlist");
+        window.dispatchEvent(new CustomEvent('wishlist:updated'));
+
       }
     } catch (err) {
       console.error("[HSC] ❌ API failed — rolling back. Error:", err);
@@ -339,6 +343,7 @@ async function handleCartClick(btn) {
 
     addedToCartSet.add(pid);
     showToast("Added to cart 🛒");
+    window.dispatchEvent(new CustomEvent('cart:updated'));
 
     btn.innerHTML        = '<i class="fa-solid fa-bag-shopping text-xs"></i> Go to Cart';
     btn.disabled         = false;

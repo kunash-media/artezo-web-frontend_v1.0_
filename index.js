@@ -206,12 +206,14 @@
         const res = await fetch(`${BASE_URL}/api/v1/wishlist/add`, { method: "POST", headers: trendingAuthHeaders(), body: JSON.stringify(payload) });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         showToast("Added to wishlist ♥");
+        window.dispatchEvent(new CustomEvent('wishlist:updated'));
       } else {
         const params = new URLSearchParams({ userId, productId: pid });
         if (btn.dataset.variantId) params.append("variantId", btn.dataset.variantId);
         const res = await fetch(`${BASE_URL}/api/v1/wishlist/remove?${params}`, { method: "DELETE", headers: trendingAuthHeaders() });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         showToast("Removed from wishlist");
+        window.dispatchEvent(new CustomEvent('wishlist:updated'));
       }
     } catch(err) {
       wasWL ? TRENDING_WISHLIST_SET.add(pid) : TRENDING_WISHLIST_SET.delete(pid);
@@ -247,6 +249,7 @@
       const res = await fetch(`${BASE_URL}/api/v1/cart/add`, { method: "POST", headers: trendingAuthHeaders(), body: JSON.stringify(payload) });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       showToast("Added to cart 🛒");
+      window.dispatchEvent(new CustomEvent('cart:updated'));
       
       TRENDING_ADDED_TO_CART.add(pid);
       saveAddedToCartState();

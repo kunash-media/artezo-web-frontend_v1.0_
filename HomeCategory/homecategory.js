@@ -278,6 +278,8 @@ const res = await fetch(
 
       addedToCartSet.add(pid);
       showToast("Added to cart 🛒");
+      window.dispatchEvent(new CustomEvent('cart:updated')); // ← ADD HERE
+
 
       btn.innerHTML        = '<i class="fa-solid fa-bag-shopping text-xs"></i> Go to Cart';
       btn.disabled         = false;
@@ -339,9 +341,13 @@ const res = await fetch(
       if (nowWishlisted) {
         await addToWishlist(userId, productId, btn.dataset);
         showToast("Added to wishlist ♥");
+        window.dispatchEvent(new CustomEvent('wishlist:updated')); // ← ADD HERE
+
       } else {
         await removeFromWishlist(userId, productId, btn.dataset.variantId);
         showToast("Removed from wishlist");
+        window.dispatchEvent(new CustomEvent('wishlist:updated')); // ← ADD HERE
+
       }
     } catch (err) {
       wasWishlisted ? wishlistSet.add(productId) : wishlistSet.delete(productId);
@@ -689,7 +695,6 @@ const res = await fetch(
   }
 
 })();
-
 
 
 
