@@ -2022,6 +2022,7 @@ function syncStockUI(stock) {
     try {
       await apiAddToCart(payload);
       showToast("Added to cart! 🛒", "success");
+      window.dispatchEvent(new CustomEvent('cart:updated'));
     } catch (err) {
       console.error("[Cart] add error:", err);
       showToast("Could not add to cart. Please try again.", "error");
@@ -3996,8 +3997,10 @@ if (safeProductData.availableVariants.length > 1) {
         try {
           await apiAddToCart(payload);
           showToast("Added to cart! 🛒", "success");
+          window.dispatchEvent(new CustomEvent('cart:updated'));
         } catch (err) {
           showToast("Could not add to cart.", "error");
+
         }
         return;
       }
@@ -4033,6 +4036,7 @@ if (safeProductData.availableVariants.length > 1) {
               : "fa-solid fa-heart text-red-500 text-xs";
           }
           showToast("Wishlist updated ❤️", "info");
+          window.dispatchEvent(new CustomEvent('wishlist:updated'));
         } catch (err) {
           showToast("Could not update wishlist.", "error");
         }
