@@ -290,11 +290,11 @@ function calcSummary() {
 
     // ✅ GST Extraction: If MRP is tax-inclusive, extract GST
     // GST = (selling price × 18) / (1 + 18) = selling price × 0.18 / 1.18
-    const gstExtracted = Math.round((sellingTotal * GST_RATE) / (1 + GST_RATE) * 100) / 100;
+    const gstExtracted = 0;  //Math.round((sellingTotal * GST_RATE) / (1 + GST_RATE) * 100) / 100;
 
     // ✅ CORRECT FORMULA: Subtotal + Tax + Shipping + COD - Coupon
     // NO product discount subtraction!
-    const totalPayable = sellingTotal + gstExtracted + shippingCharge + codFee;
+    const totalPayable = sellingTotal + shippingCharge + codFee;
 
     return { 
         mrp: mrpTotal, 
@@ -416,7 +416,7 @@ function renderSummaryBreakdown() {
     // ────────────────────────────────────────────────────────
     // GST
     // ────────────────────────────────────────────────────────
-    setText('sum-gst', `₹${fmtNum(s.gst)}`);
+    setText('sum-gst', 'Included in price');  //`₹${fmtNum(s.gst)}`
 
     // ────────────────────────────────────────────────────────
     // FINAL TOTAL
@@ -1066,7 +1066,7 @@ function buildOrderPayload(addr, s, paymentMethod, paymentMode, razorpayPaymentI
         discountPercent: 0,  // ✅ ALWAYS 0
         
         // ✅ Additional charges
-        tax:             s.gst,           // GST on selling price
+        tax:             0,           //s.gst  GST on selling price
         shippingCharges: s.shipping,      // Shipping charge (0 if free)
         convenienceFee:  s.codFee,        // ₹100 if COD, else 0
         

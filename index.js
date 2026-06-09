@@ -399,6 +399,82 @@
       </div>`;
   }
 
+
+  // ── Shared card builder for Discover / Best Sellers / Photo Frames ──
+function buildAddonCard(p, containerClass) {
+  const pid     = Number(p.productPrimeId);
+  const mrp     = p.currentMrpPrice     || 0;
+  const selling = p.currentSellingPrice || 0;
+  const discount = mrp > 0 ? Math.round(((mrp - selling) / mrp) * 100) : 0;
+  const isWL    = TRENDING_WISHLIST_SET.has(pid);
+  const isOOS   = (p.currentStock != null && p.currentStock <= 0);
+  const isAdded = TRENDING_ADDED_TO_CART.has(pid);
+
+  const imageUrl = p.mainImage
+    ? (p.mainImage.startsWith("http") ? p.mainImage : `${BASE_URL}${p.mainImage}`)
+    : "/Images/product_fallback/artezo_product_fallback_img.png";
+
+  const resolvedSku = p.currentSku || `PROD-${pid}`;
+  let nameClean = (p.productName || "").toLowerCase().startsWith((p.brandName || "").toLowerCase())
+    ? (p.productName || "").substring((p.brandName || "").length).trim()
+    : (p.productName || "");
+  const productUrl = `/products/product-detail.html?id=${pid}&sku=${resolvedSku}&brand=${trendingSlugify(p.brandName)}&category=${trendingSlugify(p.productCategory)}&product=${trendingSlugify(nameClean || p.productName)}`;
+
+  return `
+    <div class="relative ${containerClass} flex-shrink-0 bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 snap-start ${isOOS ? "grayscale opacity-70" : ""}">
+
+      ${discount > 0 ? `<span class="absolute top-3 left-3 bg-[#E39F32] text-white text-[10px] font-semibold px-2 py-1 rounded-md z-20">${discount}% OFF</span>` : ""}
+
+      <button class="addon-wl-btn absolute top-3 right-3 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:scale-110 transition z-20"
+        data-pid="${pid}" data-sku="${trendingEsc(resolvedSku)}"
+        data-color="${trendingEsc(p.selectedColor || "")}"
+        data-title="${trendingEsc(p.productName   || "")}"
+        data-price="${selling}">
+        <i class="${isWL ? "fa-solid fa-heart" : "fa-regular fa-heart"}" style="color:${isWL ? "#e39f32" : "#6b7280"};font-size:13px;"></i>
+      </button>
+
+      <div class="addon-nav-img p-1.5 cursor-pointer" data-href="${productUrl}">
+        <div class="border border-gray-200 rounded-xl overflow-hidden h-[130px] sm:h-[155px] bg-gray-100">
+          <img src="${imageUrl}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+               alt="${trendingEsc(p.productName)}" loading="lazy"
+               onerror="this.src='/Images/product_fallback/artezo_product_fallback_img.png'" />
+          ${isOOS ? `<div class="absolute inset-0 flex items-center justify-center bg-black/30"><span class="bg-gray-800 text-white text-[10px] font-bold px-2 py-1 rounded-full">OUT OF STOCK</span></div>` : ""}
+        </div>
+      </div>
+
+      <div class="px-2.5 pb-2 pt-1">
+        <h3 class="addon-nav-img text-sm text-gray-700 line-clamp-2 font-medium leading-tight min-h-[20px] cursor-pointer hover:underline"
+            data-href="${productUrl}">${trendingEsc(p.productName)}</h3>
+        <p class="text-[10px] text-gray-400 mt-0.5">${trendingEsc(p.productSubCategory || p.productCategory || "")}</p>
+        <div class="flex items-center gap-1 mt-1 flex-wrap">
+          <span class="font-semibold text-base text-[#1D3C4A]">₹${selling.toLocaleString("en-IN")}</span>
+          ${mrp > selling ? `<span class="text-gray-400 line-through text-xs">₹${mrp.toLocaleString("en-IN")}</span>` : ""}
+          ${discount > 0 ? `<span class="text-green-600 text-[9px] sm:text-xs font-semibold">${discount}% OFF</span>` : ""}
+          </div>
+        <button class="addon-cart-btn group w-full mt-2 bg-[#1D3C4A] text-white py-2.5 rounded-lg flex items-center justify-center gap-2 text-xs font-medium hover:bg-[#E39F32] transition-all duration-300"
+          data-pid="${pid}" data-sku="${trendingEsc(resolvedSku)}"
+          data-color="${trendingEsc(p.selectedColor || "")}"
+          data-title="${trendingEsc(p.productName   || "")}"
+          data-price="${selling}" data-mrp-price="${mrp}"
+          ${isOOS ? "disabled" : ""}>
+          <i class="fa-solid fa-cart-shopping text-[#E39F32] group-hover:text-[#1D3C4A] transition-colors duration-300"></i>
+          ${isAdded ? "Go to Cart" : (isOOS ? "Out of Stock" : "Add to Cart")}
+        </button>
+      </div>
+    </div>`;
+}
+
+function addonSkeletonCard(containerClass) {
+  return `<div class="${containerClass} flex-shrink-0 bg-white border border-gray-200 rounded-xl overflow-hidden">
+    <div class="p-1.5"><div class="bg-gray-200 animate-pulse rounded-xl h-[130px] sm:h-[155px]"></div></div>
+    <div class="p-3 space-y-2">
+      <div class="bg-gray-200 animate-pulse h-4 rounded w-3/4"></div>
+      <div class="bg-gray-200 animate-pulse h-3 rounded w-1/2"></div>
+      <div class="bg-gray-200 animate-pulse h-8 rounded w-full mt-2"></div>
+    </div>
+  </div>`;
+}
+
   function trendingSkeletonCard() {
     return `<div class="w-[180px] sm:w-[200px] md:w-[230px] flex-shrink-0"><div class="bg-white border border-gray-200 rounded-xl overflow-hidden"><div class="p-1"><div class="bg-gray-200 animate-pulse rounded-lg h-[140px] sm:h-[150px] md:h-[170px]"></div></div><div class="p-3 space-y-2"><div class="bg-gray-200 animate-pulse h-4 rounded w-3/4"></div><div class="bg-gray-200 animate-pulse h-3 rounded w-1/2"></div><div class="bg-gray-200 animate-pulse h-7 rounded w-full mt-2"></div></div></div></div>`;
   }
@@ -493,6 +569,135 @@
       }
     });
   });
+}
+
+
+// ── Addon sections: Discover / Best Sellers / Photo Frames ──
+
+const ADDON_CONFIG = [
+  { key: "discover new",  sliderId: "discoverSlider",       containerClass: "min-w-[48%] sm:min-w-[48%] md:min-w-[31%] lg:min-w-[250px] xl:min-w-[270px]" },
+  { key: "best seller",   sliderId: "topRatedSlider",        containerClass: "min-w-[48%] sm:min-w-[48%] md:min-w-[32%] lg:min-w-[250px] xl:min-w-[270px]" },
+  { key: "photo frames",  sliderId: "photoFramesContainer",  containerClass: "w-[170px] sm:w-[220px] md:w-[250px] lg:w-[250px] xl:w-[270px]" },
+];
+
+function injectAddonSkeletons() {
+  ADDON_CONFIG.forEach(({ sliderId, containerClass }) => {
+    const el = document.getElementById(sliderId);
+    if (el) el.innerHTML = Array(5).fill(addonSkeletonCard(containerClass)).join("");
+  });
+}
+
+function wireAddonDelegation() {
+  ADDON_CONFIG.forEach(({ sliderId }) => {
+    const el = document.getElementById(sliderId);
+    if (!el || el._addonBound) return;
+    el._addonBound = true;
+
+    el.addEventListener("click", function (e) {
+      // Wishlist
+      const wlBtn = e.target.closest(".addon-wl-btn");
+      if (wlBtn) {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        trendingToggleWishlist(wlBtn);
+        return;
+      }
+      // Cart
+      const cartBtn = e.target.closest(".addon-cart-btn");
+      if (cartBtn && !cartBtn.disabled) {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        if (cartBtn.dataset.added === "true" || cartBtn.innerHTML.includes("Go to Cart")) {
+          window.location.href = "/Cart/cart.html";
+          return;
+        }
+        addonAddToCart(cartBtn);
+        return;
+      }
+      // Navigate
+      const navEl = e.target.closest(".addon-nav-img");
+      if (navEl && navEl.dataset.href) {
+        window.location.href = navEl.dataset.href;
+      }
+    });
+  });
+}
+
+async function addonAddToCart(btn) {
+  const userId = trendingGetUserId();
+  if (!userId) { showToast("Please log in to add items to cart."); return; }
+  if (btn.dataset.adding === "true") return;
+  btn.dataset.adding = "true";
+  const orig = btn.innerHTML;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i> Adding…';
+  btn.disabled  = true;
+  const pid = Number(btn.dataset.pid);
+  const payload = {
+    userId,
+    productId:     pid,
+    variantId:     null,
+    sku:           btn.dataset.sku    || `PROD-${pid}`,
+    selectedColor: btn.dataset.color  || null,
+    selectedSize:  null,
+    titleName:     btn.dataset.title  || null,
+    unitPrice:     Number(btn.dataset.price)    || 0,
+    mrpPrice:      Number(btn.dataset.mrpPrice)  || 0,
+    quantity: 1,
+  };
+  try {
+    const res = await fetch(`${BASE_URL}/api/v1/cart/add`, { method: "POST", headers: trendingAuthHeaders(), body: JSON.stringify(payload) });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    showToast("Added to cart 🛒");
+    window.dispatchEvent(new CustomEvent('cart:updated'));
+    TRENDING_ADDED_TO_CART.add(pid);
+    saveAddedToCartState();
+    btn.innerHTML        = '<i class="fa-solid fa-bag-shopping text-xs"></i> Go to Cart';
+    btn.disabled         = false;
+    btn.style.background = "#e39f32";
+    btn.style.color      = "#1D3C4A";
+    btn.dataset.added    = "true";
+  } catch (err) {
+    showToast("Could not add to cart. Please try again.");
+    btn.innerHTML = orig;
+    btn.disabled  = false;
+  } finally {
+    btn.dataset.adding = "false";
+  }
+}
+
+async function fetchAndRenderAddonSections() {
+  injectAddonSkeletons();
+  try {
+    const [discoverRes, bestSellerRes, photoFramesRes] = await Promise.all(
+      ADDON_CONFIG.map(({ key }) =>
+        fetch(`${BASE_URL}/api/products/get-by-addon?addonKey=${encodeURIComponent(key)}`, {
+          headers: { "Content-Type": "application/json" }
+        }).then(r => r.ok ? r.json() : Promise.reject(r.status))
+      )
+    );
+
+    const results = [discoverRes, bestSellerRes, photoFramesRes];
+
+    ADDON_CONFIG.forEach(({ sliderId, containerClass }, i) => {
+      const el = document.getElementById(sliderId);
+      if (!el) return;
+      const products = results[i]?.content || [];
+      if (!products.length) {
+        el.innerHTML = `<p class="text-sm text-gray-400 px-4 py-6">No products available.</p>`;
+        return;
+      }
+      el.innerHTML = products.map(p => buildAddonCard(p, containerClass)).join("");
+    });
+
+    trendingSyncHearts(); // sync wishlist hearts across all sections
+    console.info("[Addon] Discover/BestSellers/PhotoFrames loaded.");
+  } catch (err) {
+    console.warn("[Addon] fetch failed:", err);
+    ADDON_CONFIG.forEach(({ sliderId }) => {
+      const el = document.getElementById(sliderId);
+      if (el) el.innerHTML = `<p class="text-sm text-gray-400 px-4 py-6">Could not load products.</p>`;
+    });
+  }
 }
 
   async function fetchAndRenderTrending() {
@@ -1179,8 +1384,13 @@
       if (cont) cont.scrollBy({ left: dir * 350, behavior: "smooth" });
     };
 
-    wireTrendingDelegation();
-    fetchAndRenderTrending();
+    // wireTrendingDelegation();
+    // fetchAndRenderTrending();
+
+      wireTrendingDelegation();
+      fetchAndRenderTrending();
+      wireAddonDelegation();
+      fetchAndRenderAddonSections();
   }
 
   init();
