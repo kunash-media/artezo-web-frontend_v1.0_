@@ -51,6 +51,25 @@
     return h;
   }
 
+
+  async function loadCartItems() {
+  const userId = getUserId();
+  if (!userId) return;
+  try {
+    const res = await fetch(`${BASE_URL}/api/v1/cart?userId=${userId}`, {
+      headers: getAuthHeaders()
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data.success || !data.data?.items) return;
+    data.data.items.forEach(item => {
+      if (item.productId) addedToCartSet.add(Number(item.productId));
+    });
+  } catch (err) {
+    console.warn("[HC] loadCartItems failed:", err.message);
+  }
+}
+
   // ─── INIT ─────────────────────────────────────────────────────────────────────
   async function init() {
     const params = new URLSearchParams(window.location.search);
@@ -68,7 +87,8 @@
     await Promise.all([
       loadWishlist(),
       fetchProducts(0),
-      fetchSubCategories()
+      fetchSubCategories(),
+      loadCartItems()  // ← ADD
     ]);
   }
 

@@ -297,6 +297,8 @@ async function apiRemoveWishlist(userId, productId) {
     } catch { return false; }
 }
 
+
+
 // ─── Image Resolution ─────────────────────────────────────────────────────────
 
 function resolveImageUrl(raw) {
@@ -662,6 +664,14 @@ async function confirmAndRemove(productId, variantId, cartItemEl) {
 
             if (success) {
                 showToast('Item removed from cart', 'info');
+
+                // === IMPORTANT: Notify Trending "Go to Cart" state ===
+                if (typeof window.trendingRemoveFromAddedToCart === 'function') {
+                    window.trendingRemoveFromAddedToCart(productId);
+                }
+                window.dispatchEvent(new CustomEvent('cart:updated', { 
+                    detail: { action: 'remove', productId: productId } 
+                }));
                 if (cartItemEl) {
                     cartItemEl.style.transition = 'opacity 0.3s, transform 0.3s, max-height 0.4s';
                     cartItemEl.style.opacity    = '0';
@@ -723,7 +733,21 @@ function handleClearCart() {
             else { localStorage.removeItem('artezocart'); success = true; }
             setCheckoutBtnLoading(false);
             if (success) {
+
                 showToast('Cart cleared successfully', 'success');
+
+                // === IMPORTANT: Clear all persisted "Go to Cart" states ===
+                if (typeof window.trendingRemoveFromAddedToCart === 'function') {
+                    // For clear cart, we can reload trending state
+                    window.dispatchEvent(new CustomEvent('cart:updated', { 
+                        detail: { action: 'clear' } 
+                    }));
+                } else {
+                    // Fallback: clear localStorage directly
+                    try {
+                        localStorage.removeItem("trendingAddedToCart");
+                    } catch(e) {}
+                }
                 window.dispatchEvent(new CustomEvent('cart:updated')); // ← ADD
                 await renderCart(); 
             }
@@ -1015,6 +1039,8 @@ window.handleRecAddToCart = async function(btn, product) {
     }
 };
 
+
+
 // ─── Checkout ─────────────────────────────────────────────────────────────────
 
 function handleCheckout() {
@@ -1100,3 +1126,5 @@ window.addEventListener('storage', e => { if (e.key === 'artezocart') renderCart
 document.addEventListener('DOMContentLoaded', () => initCartPage());
 
 console.log('[Cart] cart.js loaded ✓');
+
+
