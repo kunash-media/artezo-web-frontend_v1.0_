@@ -246,7 +246,7 @@
         const payload = {
           userId, wishlistName: "My Wishlist",
           productId: pid,
-          variantId: btn.dataset.variantId || `VAR-${pid}`,
+          variantId: btn.dataset.variantId || null,
           sku: btn.dataset.sku || `PROD-${pid}`,
           selectedColor: btn.dataset.color || null,
           selectedSize: btn.dataset.size || null,
@@ -286,7 +286,7 @@
     const payload = {
       userId,
       productId:     pid,
-      variantId:     btn.dataset.variantId || `VAR-${pid}`,
+      variantId:     btn.dataset.variantId || null,
       sku:           btn.dataset.sku       || `PROD-${pid}`,
       selectedColor: btn.dataset.color     || null,
       selectedSize:  btn.dataset.size      || null,
@@ -331,7 +331,7 @@
       ? (p.mainImage.startsWith("http") ? p.mainImage : `${BASE_URL}${p.mainImage}`)
       : "/Images/product_fallback/artezo_product_fallback_img.png";
 
-    const resolvedVariantId = p.variantId  || `VAR-${pid}`;
+    const resolvedVariantId = p.variantId  || null;
     const resolvedSku       = p.currentSku || `PROD-${pid}`;
 
     let nameClean = (p.productName || "").toLowerCase().startsWith((p.brandName || "").toLowerCase())
