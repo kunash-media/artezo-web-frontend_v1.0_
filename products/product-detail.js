@@ -4013,7 +4013,7 @@ if (safeProductData.availableVariants.length > 1) {
         const pid     = card ? parseInt(card.dataset.productId) : null;
         const price   = card ? parseFloat(card.dataset.price) : 0;
         const sku     = card ? (card.dataset.sku || "") : "";
-        const productName = cart ? (card.dataset.productName) : "Artezo";
+        const productName = cart ? (card.dataset.productName) : "Artezo Premium Product";
         if (!pid) return;
         const payload = {
           userId:          USER_ID,

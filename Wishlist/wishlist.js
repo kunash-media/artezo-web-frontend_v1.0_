@@ -104,7 +104,7 @@ function renderWishlistItems() {
         }
        
         const imageUrl = item.productImageUrl ||
-                        "https://placehold.co/400x300/e2e8f0/475569?text=No+Image";
+                        "/Images/product_fallback/artezo_product_fallback_img.png";
  
         const productUrl = `/products/product-detail.html?id=${item.productId}`;
  
@@ -274,6 +274,7 @@ async function removeFromWishlist(itemId, productId, variantId = '') {
                     showToast("Item removed successfully", "success");
                     await loadWishlistFromBackend(userId);
                     window.refreshCartWishlistCount?.();
+                    window.location.reload();
                 } else {
                     throw new Error("Remove failed");
                 }
@@ -305,6 +306,7 @@ async function moveToCart(wishlistItemId) {
             showToast("Moved to cart successfully!", "success");
             await loadWishlistFromBackend(userId);
             window.refreshCartWishlistCount?.();
+            window.location.reload();
         } else {
             throw new Error("Move failed");
         }
@@ -339,6 +341,7 @@ async function clearWishlist() {
                     currentWishlistItems = [];
                     showEmptyState();
                     window.refreshCartWishlistCount?.();
+                    window.location.reload();
                 } else {
                     throw new Error("Clear failed");
                 }
@@ -392,9 +395,14 @@ function escapeHtml(text) {
 if (moveAllButton) {
     moveAllButton.addEventListener('click', async () => {
         if (currentWishlistItems.length === 0) return;
+
+        showToast("Moving all items to cart...");
+
         for (const item of [...currentWishlistItems]) {   // copy to avoid mutation issues
             await moveToCart(item.itemId);
         }
+        // If you want only one reload at the very end, comment out the reload inside moveToCart and uncomment below:
+        window.location.reload();
     });
 }
  
