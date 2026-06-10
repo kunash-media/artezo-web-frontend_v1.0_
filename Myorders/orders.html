@@ -600,7 +600,9 @@ return backendOrders.map(order => ({
                 doc.setTextColor(...darkBlue);
                 doc.setFontSize(9);
                 doc.setFont('helvetica', 'bold');
-                doc.text('ARTEZO', margin + 5, 18);
+                // doc.text('ARTEZO', margin + 5, 18);
+                doc.addImage('/Images/Artezo-logo-dark-bg.jpg', 'PNG', margin, 7, 40, 16);
+
 
                 doc.setTextColor(...white);
                 doc.setFontSize(20);
