@@ -2409,7 +2409,7 @@ function buildBuyNowConfirmPayload(srData, variant, quantity, itemTotal) {
       sku:              variant?.sku           || safeProductData.currentSku,
       selectedColor:    variant?.color         || safeProductData.selectedColor,
       selectedSize:     variant?.size          || null,
-      titleName:        variant?.productName   || "Artezo Product",
+      titleName:        safeProductData?.productName   || "Artezo Product",
       unitPrice:        variant?.price         || safeProductData.currentSellingPrice,
       mrpPrice:         variant?.mrp           || safeProductData.currentMrpPrice,
       quantity,
