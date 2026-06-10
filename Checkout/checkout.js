@@ -10,7 +10,7 @@
 // ── Constants ────────────────────────────────────────────────────────────────
 const BASE_URL        = 'http://localhost:8085';
 const RAZORPAY_KEY_ID = 'rzp_live_YOUR_KEY_HERE'; // ← replace with your live key
-const GST_RATE        = 0.18; // Art supplies: 18% GST inclusive in MRP
+const GST_RATE        = 0.0; // Art supplies: 18% GST inclusive in MRP
 
 // ── Global State ─────────────────────────────────────────────────────────────
 // Single source of truth — all mutations go through STATE only
@@ -239,34 +239,26 @@ async function clearCart() {
     }
 }
 
+// DELETE ordered items from cart after successful order placement
+async function clearOrderedCartItems() {
+    try {
+        const items = STATE.cartData.items.map(item => ({
+            productId: item.productId,
+            variantId: item.variantId || null,
+        }));
+        await apiFetch('/api/v1/cart/remove-checkout-items', {
+            method: 'DELETE',
+            body: JSON.stringify({ userId: STATE.userId, items }),
+        });
+        console.log('[Cart] Ordered items cleared from cart');
+    } catch (err) {
+        // Non-blocking — order is already placed, just log
+        console.warn('[Cart] Failed to clear ordered cart items:', err.message);
+    }
+}
+
 
 // ── Summary Calculation (UPDATED) ───────────────────────────────────────────
-// function calcSummary() {
-//     const cart = STATE.cartData;
-//     if (!cart) return { mrp: 0, sellingTotal: 0, productDiscount: 0, shipping: 0, codFee: 0, gst: 0, total: 0 };
-
-//     const mrpTotal        = Number(cart.totalMrp)    || 0;
-//     const sellingTotal    = Number(cart.totalAmount)  || 0;
-//     const productDiscount = Math.max(0, mrpTotal - sellingTotal);
-//     const shippingCharge  = STATE.shipping.price      || 0;
-    
-//     // COD Convenience Fee
-//     const codFee = (STATE.payment.mode === 'COD') ? 100 : 0;
-
-//     const gstExtracted    = Math.round(sellingTotal * GST_RATE / (1 + GST_RATE));
-//     const totalPayable    = sellingTotal + shippingCharge + codFee;
-
-//     return { 
-//         mrp: mrpTotal, 
-//         sellingTotal, 
-//         productDiscount, 
-//         shipping: shippingCharge, 
-//         codFee,
-//         gst: gstExtracted, 
-//         total: totalPayable 
-//     };
-// }
-
 
 function calcSummary() {
     const cart = STATE.cartData;
@@ -308,53 +300,6 @@ function calcSummary() {
 }
 
 // ── Render Summary Breakdown (UPDATED) ─────────────────────────────────────
-// function renderSummaryBreakdown() {
-//     const s    = calcSummary();
-//     const cart = STATE.cartData;
-
-//     const totalQty = cart ? (cart.totalItems || 0) : 0;
-//     document.getElementById('items-count-badge').textContent =
-//         `${totalQty} item${totalQty !== 1 ? 's' : ''}`;
-
-//     setText('sum-mrp', `₹${fmtNum(s.mrp)}`);
-
-//     // Discount
-//     const discRow = document.getElementById('sum-discount-row');
-//     if (s.productDiscount > 0) {
-//         discRow.style.display = 'flex';
-//         setText('sum-discount', `-₹${fmtNum(s.productDiscount)}`);
-//     } else {
-//         discRow.style.display = 'none';
-//     }
-
-//     // Shipping
-//     const shippingEl = document.getElementById('sum-shipping');
-//     shippingEl.textContent = s.shipping === 0 ? 'FREE' : `₹${fmtNum(s.shipping)}`;
-//     shippingEl.className   = s.shipping === 0 ? 'text-green-600 font-medium' : 'font-medium';
-
-//     // COD Fee (NEW)
-//     const codRow = document.getElementById('sum-cod-fee-row');
-//     if (s.codFee > 0) {
-//         codRow.style.display = 'flex';
-//         setText('sum-cod-fee', `+₹${fmtNum(s.codFee)}`);
-//     } else {
-//         codRow.style.display = 'none';
-//     }
-
-//     setText('sum-gst',   `₹${fmtNum(s.gst)}`);
-//     setText('sum-total', `₹${fmtNum(s.total)}`);
-
-//     // Savings
-//     const savingsMsg = document.getElementById('sum-savings-msg');
-//     if (s.productDiscount > 0) {
-//         savingsMsg.classList.remove('hidden');
-//         setText('sum-savings-amount', `₹${fmtNum(s.productDiscount)}`);
-//     } else {
-//         savingsMsg.classList.add('hidden');
-//     }
-// }
-
-
 
 /**
  * Render pricing breakdown in UI (FIXED VERSION)
@@ -665,19 +610,6 @@ function clearAddressModalErrors() {
         });
 }
 
-// ── Payment Selection ─────────────────────────────────────────────────────────
-// Toggle ONLINE / COD; update STATE and radio highlight
-// function selectPayment(type, mode) {
-//     STATE.payment = { type, mode };
-//     ['ONLINE', 'COD'].forEach(val => {
-//         const el = document.querySelector(`input[name="paymentMethod"][value="${val}"]`);
-//         if (el) {
-//             el.checked = (val === mode);
-//             const item = el.closest('.radio-item');
-//             if (item) item.classList.toggle('selected', val === mode);
-//         }
-//     });
-// }
 
 // ── Payment Selection ─────────────────────────────────────────────────────────
 function selectPayment(type, mode) {
@@ -729,6 +661,29 @@ function updateStepIndicator(step) {
 }
 
 // Update Back / Continue / Place Order button states per step
+// function updateNavButtons(step) {
+//     const back = document.getElementById('btn-back');
+//     const next = document.getElementById('btn-next');
+
+//     back.classList.toggle('hidden', step === 1);
+
+//     if (step === STATE.totalSteps) {
+//         next.innerHTML = STATE.payment.mode === 'COD'
+//             ? '<i class="fa-solid fa-check mr-2"></i>Place Order'
+//             : '<i class="fa-solid fa-lock mr-2"></i>Proceed to Pay';
+//         next.style.background    = '#10b981';
+//         next.onmouseover         = () => next.style.background = '#059669';
+//         next.onmouseleave        = () => next.style.background = '#10b981';
+//     } else {
+//         next.innerHTML           = 'Continue <i class="fa-solid fa-chevron-right ml-1"></i>';
+//         next.style.background    = '';
+//         next.onmouseover         = null;
+//         next.onmouseleave        = null;
+//     }
+// }
+
+
+
 function updateNavButtons(step) {
     const back = document.getElementById('btn-back');
     const next = document.getElementById('btn-next');
@@ -742,25 +697,80 @@ function updateNavButtons(step) {
         next.style.background    = '#10b981';
         next.onmouseover         = () => next.style.background = '#059669';
         next.onmouseleave        = () => next.style.background = '#10b981';
+
+        // ── Hide Place Order until terms checkbox is ticked ──
+        // ── Disable Place Order until terms checkbox is ticked ──
+        const terms = document.getElementById('termsAgree');
+
+        function applyTermsState() {
+            const checked = terms ? terms.checked : false;
+            if (checked) {
+                next.disabled        = false;
+                next.style.opacity   = '1';
+                next.style.cursor    = 'pointer';
+                next.style.filter    = '';
+            } else {
+                next.disabled        = false; // keep clickable so we can intercept
+                next.style.opacity   = '0.45';
+                next.style.cursor    = 'not-allowed';
+                next.style.filter    = 'grayscale(60%)';
+            }
+        }
+
+        applyTermsState();
+
+        // Wire checkbox listener once (guard with _termsBound flag)
+        if (terms && !terms._termsBound) {
+            terms._termsBound = true;
+            terms.addEventListener('change', applyTermsState);
+        }
     } else {
         next.innerHTML           = 'Continue <i class="fa-solid fa-chevron-right ml-1"></i>';
         next.style.background    = '';
         next.onmouseover         = null;
         next.onmouseleave        = null;
+        next.classList.remove('hidden'); // always visible on steps 1 & 2
     }
 }
+
 
 function previousStep() {
     if (STATE.currentStep > 1) goToStep(STATE.currentStep - 1);
 }
 
 // Validate current step, populate review if going to step 3, advance
+// function nextStep() {
+//     if (STATE.currentStep === STATE.totalSteps) {
+//         placeOrder();
+//     } else {
+//         if (validateStep(STATE.currentStep)) {
+//             if (STATE.currentStep === 2) populateReviewStep(); // payment → review
+//             goToStep(STATE.currentStep + 1);
+//         }
+//     }
+// }
+
 function nextStep() {
     if (STATE.currentStep === STATE.totalSteps) {
+        // ── Guard: terms must be checked before placing order ──
+        const terms = document.getElementById('termsAgree');
+        if (!terms || !terms.checked) {
+            toast('Please agree to the Terms & Conditions to continue', 'error');
+            // Shake the checkbox row to draw attention
+            const row = terms?.closest('label') || terms?.parentElement;
+            if (row) {
+                row.style.transition = 'transform 0.1s';
+                row.style.transform  = 'translateX(6px)';
+                setTimeout(() => row.style.transform = 'translateX(-6px)', 100);
+                setTimeout(() => row.style.transform = 'translateX(4px)',  200);
+                setTimeout(() => row.style.transform = 'translateX(0)',    300);
+            }
+            return;
+        }
         placeOrder();
     } else {
         if (validateStep(STATE.currentStep)) {
-            if (STATE.currentStep === 2) populateReviewStep(); // payment → review
+            if (STATE.currentStep === 2) populateReviewStep();
             goToStep(STATE.currentStep + 1);
         }
     }
@@ -997,42 +1007,6 @@ hideProcessingOverlay();
 
 // Build the /api/orders/create payload from STATE + calculated summary
 // productStrId comes from cart item directly (set when item was added to cart)
-// function buildOrderPayload(addr, s, paymentMethod, paymentMode, razorpayPaymentId, razorpayOrderId) {
-//     return {
-//         customerName:      addr.customerName,
-//         customerPhone:     addr.customerPhone,
-//         customerEmail:     addr.customerEmail,
-//         shippingAddress1:  (addr.flatNo ? addr.flatNo + ', ' : '') + addr.shippingAddress,
-//         shippingAddress2:  addr.landmark || addr.nearBy || '',
-//         shippingCity:      addr.shippingCity,
-//         shippingState:     addr.shippingState,
-//         shippingPincode:   addr.shippingPincode,
-//         paymentMethod,
-//         paymentMode,
-//         razorpayPaymentId: razorpayPaymentId || null,
-//         razorpayOrderId:   razorpayOrderId   || null,
-
-//         // productStrId must come from cart API (set at add-to-cart time from ProductEntity)
-//         items: STATE.cartData.items.map(item => ({
-//             productStrId: item.productStrId,     // e.g. "PRD00001" — never fabricated
-//             variantId:    item.variantId || null,
-//             quantity:     item.quantity,
-//         })),
-
-//         couponCode:      null,
-//         couponDiscount:  0,
-//         discountAmount:  s.productDiscount,
-//         discountPercent: s.mrp > 0
-//             ? parseFloat(((s.productDiscount / s.mrp) * 100).toFixed(2))
-//             : 0,
-//         shippingCharges: s.shipping,
-//         convenienceFee:  s.codFee,  //added new value
-//         tax:             s.gst,
-//         giftWrap:        false,
-//         giftwrapCharges: 0,
-//         orderNotes:      document.getElementById('deliveryNotes')?.value?.trim() || '',
-//     };
-// }
 
 
 function buildOrderPayload(addr, s, paymentMethod, paymentMode, razorpayPaymentId, razorpayOrderId) {
@@ -1079,9 +1053,20 @@ function buildOrderPayload(addr, s, paymentMethod, paymentMode, razorpayPaymentI
 
 // ── Order Finish ──────────────────────────────────────────────────────────────
 // Update processing text → wait → confetti → success overlay
+// async function finishOrder(orderId) {
+//     localStorage.setItem('lastOrderId', orderId || '');
+//     updateProcessingText('Order confirmed! 🎉', 'Your art is on its way');
+//     await sleep(1200);
+//     hideProcessingOverlay();
+//     launchConfetti();
+//     showSuccessOverlay(orderId);
+// }
+
 async function finishOrder(orderId) {
     localStorage.setItem('lastOrderId', orderId || '');
-    updateProcessingText('Order confirmed! 🎉', 'Your art is on its way');
+    updateProcessingText('Order confirmed! 🎉', 'Your product is on its way!!');
+    // ── Clear only the ordered items from cart (non-blocking) ──
+    await clearOrderedCartItems();
     await sleep(1200);
     hideProcessingOverlay();
     launchConfetti();
