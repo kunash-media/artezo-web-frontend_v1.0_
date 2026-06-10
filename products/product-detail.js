@@ -2436,7 +2436,7 @@ function buildBuyNowConfirmPayload(srData, variant, quantity, itemTotal) {
       sku:              variant?.sku        || safeProductData.currentSku,
       selectedColor:    variant?.color      || safeProductData.selectedColor,
       selectedSize:     variant?.size       || null,
-      titleName:        variant?.productName || "Artezo Product",
+      titleName:        safeProductData?.productName || "Artezo Product",
       wishlistedPrice:  variant?.price      || safeProductData.currentSellingPrice,
       customFieldsJson: null,
     };
@@ -4013,6 +4013,7 @@ if (safeProductData.availableVariants.length > 1) {
         const pid     = card ? parseInt(card.dataset.productId) : null;
         const price   = card ? parseFloat(card.dataset.price) : 0;
         const sku     = card ? (card.dataset.sku || "") : "";
+        const productName = cart ? (card.dataset.productName) : "Artezo";
         if (!pid) return;
         const payload = {
           userId:          USER_ID,
@@ -4022,7 +4023,7 @@ if (safeProductData.availableVariants.length > 1) {
           sku,
           selectedColor:   "",
           selectedSize:    null,
-          titleName:       "",
+          titleName:      productName,
           wishlistedPrice: price,
           customFieldsJson: null,
         };
