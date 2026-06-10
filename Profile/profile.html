@@ -319,10 +319,10 @@
                                             id="displayPhone">—</span></div>
                                 </div>
                                 <div>
-                                    <div class="field-label"><i class="fa-solid fa-location-dot mr-1"></i>Full Name
-                                        Details</div>
-                                    <div class="field-value"><i class="fa-solid fa-id-card text-accent"></i><span
-                                            id="displayFullDetails">—</span></div>
+                                    <!-- <div class="field-label"><i class="fa-solid fa-location-dot mr-1"></i>Full Name
+                                        Details</div> -->
+                                    <!-- <div class="field-value"><i class="fa-solid fa-id-card text-accent"></i><span
+                                            id="displayFullDetails">—</span></div> -->
                                 </div>
                             </div>
                         </div>
@@ -474,7 +474,7 @@
             document.getElementById('displayEmail').textContent = currentUser.email || '—'; 
             document.getElementById('displayPhone').textContent = currentUser.phone || '—'; 
             const nameParts = `${currentUser.firstName || ''} ${currentUser.middleName || ''} ${currentUser.lastName || ''}`.trim(); 
-            document.getElementById('displayFullDetails').innerHTML = nameParts || '—'; 
+            // document.getElementById('displayFullDetails').innerHTML = nameParts || '—'; 
         }
         
         function populateModal() { 

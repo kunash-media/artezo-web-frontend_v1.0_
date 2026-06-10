@@ -204,6 +204,8 @@ const log = {
     return BASE_URL + path;
   }
 
+   
+
 
   // ═══════════════════════════════════════════════════════════════════════════
 //  PATCH 3 — REVIEWS (COMPLETE: image + video, lightbox, aggregate)
@@ -1184,6 +1186,63 @@ async function fetchProductFromAPI(id) {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json();
   }
+
+
+  // ── PATCH: Wishlist icon sync ────────────────────────────────────────────────
+async function initWishlistIcon() {
+  const btn = document.querySelector(".wishlist-icon-btn");
+    setWishlistIcon(btn, true);  // or false on remove
+
+  if (!btn) return;
+
+  let userId = localStorage.getItem("userId") || sessionStorage.getItem("userId");
+  if (!userId) {
+    const rawUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+    if (rawUser) {
+      try { const p = JSON.parse(rawUser); userId = p?.userId || p?.id || null; } catch (_) {}
+    }
+  }
+
+  const productId = safeProductData?.productPrimeId
+                 || safeProductData?.productId
+                 || safeProductData?.id;
+
+  if (!userId || !productId) return;
+
+  // ── Check current wishlist state ─────────────────────────────────────────
+  try {
+    const res = await fetch(`${BASE_URL}/api/v1/wishlist/check?userId=${userId}&productId=${productId}`);
+    if (res.ok) {
+      const json = await res.json();
+      setWishlistIcon(btn, json?.data === true);
+    }
+  } catch (e) {
+    console.warn("[Wishlist] Check failed:", e);
+  }
+
+  // ── Toggle on click (icon only — actual wishlist add/remove already wired elsewhere) ──
+  btn.addEventListener("click", () => {
+    const isCurrentlyWishlisted = btn.classList.contains("wishlisted");
+    setWishlistIcon(btn, !isCurrentlyWishlisted);
+  });
+}
+
+function setWishlistIcon(btn, isWishlisted) {
+  const icon = btn.querySelector("i");
+  if (!icon) return;
+  if (isWishlisted) {
+    icon.classList.remove("fa-regular");
+    icon.classList.add("fa-solid");
+    icon.style.color = "#e53e3e";
+    btn.classList.add("wishlisted");
+  } else {
+    icon.classList.remove("fa-solid");
+    icon.classList.add("fa-regular");
+    icon.style.color = "";
+    btn.classList.remove("wishlisted");
+  }
+}
+// ── END PATCH ────────────────────────────────────────────────────────────────
 
   /**
    * Confirm Buy Now order after Shiprocket checkout callback.
@@ -2451,6 +2510,7 @@ function buildBuyNowConfirmPayload(srData, variant, quantity, itemTotal) {
           : "fa-solid fa-heart text-red-500";
       }
       showToast("Wishlist updated ❤️", "info");
+      
     } catch (err) {
       console.error("[Wishlist] error:", err);
       showToast("Could not update wishlist. Please try again.", "error");
@@ -3021,6 +3081,219 @@ function buildBuyNowConfirmPayload(srData, variant, quantity, itemTotal) {
   //  COUPON
   // ═══════════════════════════════════════════════════════════════════════════
 
+  // ── PATCH: Fetch user coupons from API ──────────────────────────────────────
+// async function fetchUserCoupons() {
+//   try {
+//     const userId = localStorage.getItem("userId") || sessionStorage.getItem("userId");
+//     const productPrimeId = safeProductData?.productPrimeId;
+//     if (!userId || !productPrimeId) return [];
+//     const res = await fetch(
+//       `${BASE_URL}/api/v1/coupons/get-by-product?userId=${userId}&productPrimeId=${productPrimeId}`
+//     );
+//     if (!res.ok) return [];
+//     const data = await res.json();
+//     return Array.isArray(data) ? data : [];
+//   } catch (e) {
+//     console.warn("[Coupons] Failed to fetch user coupons:", e);
+//     return [];
+//   }
+// }
+
+async function fetchUserCoupons() {
+  try {
+    // ── Resolve userId ───────────────────────────────────────────────────────
+    let userId = localStorage.getItem("userId") || sessionStorage.getItem("userId");
+
+    // Fallback: parse from stored user object
+    if (!userId) {
+      const rawUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+      if (rawUser) {
+        try {
+          const parsed = JSON.parse(rawUser);
+          userId = parsed?.userId || parsed?.id || parsed?.user_id || null;
+        } catch (_) {}
+      }
+    }
+
+    // Fallback: decode JWT directly
+    if (!userId) {
+      const token = localStorage.getItem("token")
+                 || localStorage.getItem("jwtToken")
+                 || localStorage.getItem("authToken")
+                 || sessionStorage.getItem("token")
+                 || sessionStorage.getItem("jwtToken");
+      if (token) {
+        try {
+          const payload = JSON.parse(atob(token.split(".")[1]));
+          userId = payload?.userId || payload?.user_id || payload?.id || payload?.sub || null;
+        } catch (_) {}
+      }
+    }
+
+    // ── Resolve productPrimeId ───────────────────────────────────────────────
+    const productPrimeId = safeProductData?.productPrimeId
+                        || safeProductData?.productId
+                        || safeProductData?.id;
+
+    console.log("[Coupons] userId:", userId);
+    console.log("[Coupons] productPrimeId:", productPrimeId);
+    console.log("[Coupons] safeProductData keys:", safeProductData ? Object.keys(safeProductData) : "null");
+
+    if (!userId || !productPrimeId) {
+      console.warn("[Coupons] Skipping fetch — missing userId:", userId, "productPrimeId:", productPrimeId);
+      return [];
+    }
+
+    const url = `${BASE_URL}/api/v1/coupons/get-by-product?userId=${userId}&productPrimeId=${productPrimeId}`;
+    console.log("[Coupons] Fetching URL:", url);
+
+    const res = await fetch(url);
+    console.log("[Coupons] Response status:", res.status);
+
+    if (!res.ok) {
+      console.warn("[Coupons] Bad response:", res.status, res.statusText);
+      return [];
+    }
+
+    const data = await res.json();
+    console.log("[Coupons] Raw response:", data);
+
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    console.warn("[Coupons] Failed to fetch user coupons:", e);
+    return [];
+  }
+}
+// ── END PATCH ───────────────────────────────────────────────────────────────
+
+
+// ── PATCH: Build coupon card HTML (display-only, no apply btn) ──────────────
+function buildUserCouponCardHTML(coupon) {
+  const now = new Date();
+  // Parse validTo in IST context
+  const validTo = coupon.validTo ? new Date(coupon.validTo) : null;
+
+  let urgencyBadgeHTML = "";
+  let timerHTML = "";
+
+  if (validTo) {
+    const diffMs = validTo - now;
+    const diffHours = diffMs / (1000 * 60 * 60);
+    const diffDays = diffMs / (1000 * 60 * 60 * 24);
+
+    if (diffMs > 0 && diffDays <= 1) {
+      // Under 1 day left — show live countdown timer
+      const countdownId = `coupon-timer-${coupon.couponId}`;
+      urgencyBadgeHTML = `
+        <div class="flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full bg-red-50 border border-red-200 w-fit animate-pulse">
+          <i class="fa-solid fa-fire text-red-500 text-[9px]"></i>
+          <span class="text-[9px] font-semibold text-red-600 uppercase tracking-wide">Grab your deal · Expiring soon!</span>
+        </div>`;
+      timerHTML = `
+        <div class="mt-2 flex items-center gap-1.5">
+          <span class="text-[10px] text-gray-500">Expires in:</span>
+          <div class="flex items-center gap-[3px]" id="${countdownId}">
+            <div class="bg-red-50 border border-red-200 px-1.5 py-[2px] rounded text-[11px] font-mono font-bold text-red-600 countdown-h">00</div>
+            <span class="text-red-400 font-bold text-[10px]">:</span>
+            <div class="bg-red-50 border border-red-200 px-1.5 py-[2px] rounded text-[11px] font-mono font-bold text-red-600 countdown-m">00</div>
+            <span class="text-red-400 font-bold text-[10px]">:</span>
+            <div class="bg-red-50 border border-red-200 px-1.5 py-[2px] rounded text-[11px] font-mono font-bold text-red-600 countdown-s">00</div>
+          </div>
+        </div>`;
+    }
+  }
+
+  const discountLabel = coupon.discountType === "PERCENTAGE"
+    ? `${coupon.discountValue}% OFF`
+    : `₹${coupon.discountValue} OFF`;
+
+  const minOrder = coupon.minOrderAmount
+    ? `<p class="text-[10px] text-gray-400 mt-1">Min. Order: ₹${coupon.minOrderAmount.toLocaleString("en-IN")}</p>`
+    : "";
+
+  const maxDisc = coupon.maxDiscountAmount && coupon.discountType === "PERCENTAGE"
+    ? `<p class="text-[10px] text-gray-400">Max. Discount: ₹${coupon.maxDiscountAmount.toLocaleString("en-IN")}</p>`
+    : "";
+
+  const freeShipping = coupon.freeShipping
+    ? `<span class="inline-flex items-center gap-1 mt-1 text-[10px] bg-green-50 border border-green-200 text-green-700 px-2 py-0.5 rounded-full">
+         <i class="fa-solid fa-truck text-[9px]"></i> Free Shipping Included
+       </span>`
+    : "";
+
+  const alreadyUsed = coupon.couponUsed
+    ? `<span class="inline-flex items-center gap-1 mt-1 text-[10px] bg-gray-100 border border-gray-200 text-gray-500 px-2 py-0.5 rounded-full">
+         <i class="fa-solid fa-check text-[9px]"></i> Already Used
+       </span>`
+    : "";
+
+  return `
+    <div class="bg-gradient-to-br from-[#e39f32]/5 to-[#1D3C4A]/5 rounded-xl p-4 border border-gray-400 coupon-card"
+         data-coupon-id="${coupon.couponId}"
+         data-valid-to="${coupon.validTo || ""}">
+      <div class="flex justify-between items-start gap-3">
+        <div class="flex-1">
+          <span class="text-xs text-[#e39f32] uppercase tracking-wide">Limited Time</span>
+          ${urgencyBadgeHTML}
+          <div class="font-lexend text-xl text-[#1D3C4A] mt-1">${discountLabel}</div>
+          <p class="text-xs text-[#1D3C4A]/60 mt-1">${escapeHtml(coupon.description || "")}</p>
+          ${minOrder}
+          ${maxDisc}
+          ${freeShipping}
+          ${alreadyUsed}
+          ${timerHTML}
+        </div>
+        <div class="bg-white px-3 py-2 rounded-lg border border-dashed border-[#e39f32] flex-shrink-0">
+          <span class="font-mono text-sm text-[#1D3C4A]">${escapeHtml(coupon.couponCode)}</span>
+        </div>
+      </div>
+      <div class="mt-3 flex items-center gap-1.5 text-[11px] text-[#1D3C4A]/60">
+        <i class="fa-solid fa-cart-shopping text-[#e39f32] text-[10px]"></i>
+        <span>Add to cart or Buy Now to avail this offer</span>
+      </div>
+    </div>`;
+}
+// ── END PATCH ───────────────────────────────────────────────────────────────
+
+
+// ── PATCH: Start live countdown timers for expiring coupons ─────────────────
+function startCouponCountdowns() {
+  document.querySelectorAll(".coupon-card[data-valid-to]").forEach((card) => {
+    const validToStr = card.getAttribute("data-valid-to");
+    if (!validToStr) return;
+    const validTo = new Date(validToStr);
+    const timerId = card.querySelector("[id^='coupon-timer-']")?.id;
+    if (!timerId) return;
+
+    const tick = () => {
+      const now = new Date();
+      const diffMs = validTo - now;
+      if (diffMs <= 0) {
+        const el = document.getElementById(timerId);
+        if (el) el.closest(".coupon-card")?.remove();
+        return;
+      }
+      const h = String(Math.floor(diffMs / 3600000)).padStart(2, "0");
+      const m = String(Math.floor((diffMs % 3600000) / 60000)).padStart(2, "0");
+      const s = String(Math.floor((diffMs % 60000) / 1000)).padStart(2, "0");
+      const wrap = document.getElementById(timerId);
+      if (wrap) {
+        wrap.querySelector(".countdown-h").textContent = h;
+        wrap.querySelector(".countdown-m").textContent = m;
+        wrap.querySelector(".countdown-s").textContent = s;
+      }
+    };
+
+    tick();
+    setInterval(tick, 1000);
+  });
+}
+// ── END PATCH ───────────────────────────────────────────────────────────────
+
+
+
+
+//==== old depricated ======//
   function applyCoupon(couponCode) {
     const coupon = safeProductData.availabeCoupons?.find(
       (c) => c.couponCode === couponCode
@@ -3042,6 +3315,13 @@ function buildBuyNowConfirmPayload(srData, variant, quantity, itemTotal) {
     if (priceEl) priceEl.textContent = `₹${finalPrice.toLocaleString("en-IN")}`;
     return true;
   }
+
+
+
+
+
+
+
 
   // ═══════════════════════════════════════════════════════════════════════════
   //  STARS + TOAST
@@ -3128,32 +3408,10 @@ function buildBuyNowConfirmPayload(srData, variant, quantity, itemTotal) {
     const initialMedia = getVariantMedia(currentVariant || { mainImage: safeProductData.mainImage, mockupImages: null, productVideoUrl: null });
 
     // Coupons HTML for offer overlay
-    const couponsHTML = (safeProductData.availabeCoupons || [])
-      .map(
-        (coupon) => `
-      <div class="bg-gradient-to-br from-[#e39f32]/5 to-[#1D3C4A]/5 rounded-xl p-4 border border-[#e5e7eb]">
-        <div class="flex justify-between items-start">
-          <div>
-            <span class="text-xs text-[#e39f32] uppercase tracking-wide">Limited Time</span>
-            <div class="font-lexend text-xl text-[#1D3C4A] mt-1">${escapeHtml(coupon.discount)} OFF</div>
-            <p class="text-xs text-[#1D3C4A]/60 mt-1">${escapeHtml(coupon.couponDescription || "")}</p>
-            ${coupon.minPurchase ? `<p class="text-[10px] text-gray-400 mt-1">Min. Purchase: ₹${coupon.minPurchase}</p>` : ""}
-          </div>
-          <div class="bg-white px-3 py-2 rounded-lg border border-[#e5e7eb]">
-            <span class="font-mono text-sm text-[#1D3C4A]">${escapeHtml(coupon.couponCode)}</span>
-          </div>
-        </div>
-        <div class="flex gap-2 mt-4">
-          <button class="apply-coupon-btn flex-1 bg-[#1D3C4A] text-white text-sm py-2.5 rounded-lg hover:opacity-90 transition"
-                  data-coupon-code="${escapeHtml(coupon.couponCode)}">Apply Now</button>
-          <button class="copy-coupon-btn flex-1 border border-[#e5e7eb] text-[#1D3C4A] text-sm py-2.5 rounded-lg hover:bg-gray-50 transition"
-                  data-coupon-code="${escapeHtml(coupon.couponCode)}">Copy Code</button>
-        </div>
-      </div>`
-      )
-      .join("");
+    // Coupons HTML — overlay is lazy-loaded via fetchUserCoupons() on viewMoreBtn click
+    // Static placeholder only; real cards injected by setupEventListeners patch
 
-    const firstCoupon  = safeProductData.availabeCoupons?.[0];
+    // const firstCoupon  = safeProductData.availabeCoupons?.[0];
     const addCartText  = safeProductData.isCustomizable ? "Customize" : "Add to Cart";
     const addCartIcon  = safeProductData.isCustomizable
       ? '<i class="fas fa-sliders-h"></i>'
@@ -3395,10 +3653,10 @@ if (safeProductData.availableVariants.length > 1) {
               </div>
 
              <div class="flex items-center gap-2 flex-shrink-0">
-    <!-- Wishlist Button -->
-    <button class="wishlist-icon-btn w-9 h-9 rounded-full border border-stone-200 flex items-center justify-center hover:bg-stone-100 transition bg-white shadow-sm">
-      <i class="fa-regular fa-heart text-[#033E59]"></i>
-    </button>
+              <!-- Wishlist Button -->
+              <button class="wishlist-icon-btn w-9 h-9 rounded-full border border-stone-200 flex items-center justify-center hover:bg-stone-100 transition bg-white shadow-sm">
+                <i class="fa-regular fa-heart text-[#033E59]"></i>
+              </button>
     
     <!-- Share Button -->
       <div class="relative" id="shareContainer" style="z-index: 30;">
@@ -3455,27 +3713,27 @@ if (safeProductData.availableVariants.length > 1) {
                 </div>
               </div>
 
-              ${firstCoupon
-                ? `<div class="relative z-10 bg-[#FCF8F8] border border-[#e5e7eb] rounded-xl p-2.5 flex flex-col gap-2">
-                    <div class="flex items-start justify-between gap-2.5">
-                      <div>
-                        <p class="text-[9px] tracking-wide text-[#e39f32] uppercase font-semibold">LIMITED TIME</p>
-                        <h3 class="text-base md:text-lg font-bold text-[#1D3C4A] leading-tight">${escapeHtml(firstCoupon.discount)} OFF</h3>
-                        <p class="text-[10px] text-gray-500">${escapeHtml(firstCoupon.couponDescription || "Special discount")}</p>
-                      </div>
-                      <div class="font-mono text-[10px] bg-white border border-[#e5e7eb] px-2 py-[2px] rounded-md text-[#1D3C4A] shadow-sm">
-                        ${escapeHtml(firstCoupon.couponCode)}
-                      </div>
-                    </div>
-                    <div class="flex gap-2">
-                      <button class="apply-coupon-btn flex-1 bg-[#1D3C4A] text-white text-xs py-1.5 rounded-lg hover:opacity-90 transition"
-                              data-coupon-code="${escapeHtml(firstCoupon.couponCode)}">Apply Now</button>
-                      <button id="viewMoreBtn" class="flex-1 border border-[#e5e7eb] text-[#1D3C4A] text-xs py-1.5 rounded-lg hover:bg-[#e39f32]/5 transition flex items-center justify-center gap-1">
-                        Offers <i class="fa-solid fa-arrow-right text-[9px] text-[#e39f32]"></i>
-                      </button>
-                    </div>
-                  </div>`
-                : ""}
+              <div class="relative z-10 bg-[#FCF8F8] border border-[#e5e7eb] rounded-xl p-2.5 flex flex-col gap-2" id="teaserCouponCard">
+                <div class="flex items-start justify-between gap-2.5">
+                  <div>
+                    <p class="text-[9px] tracking-wide text-[#e39f32] uppercase font-semibold">LIMITED TIME</p>
+                    <h3 class="text-base md:text-lg font-bold text-[#1D3C4A] leading-tight" id="teaserDiscountLabel">
+                      <span class="inline-block w-16 h-4 bg-gray-200 rounded animate-pulse"></span>
+                    </h3>
+                    <p class="text-[10px] text-gray-500" id="teaserDescription">
+                      <span class="inline-block w-28 h-3 bg-gray-100 rounded animate-pulse mt-1"></span>
+                    </p>
+                  </div>
+                  <div class="font-mono text-[10px] bg-white border border-[#e5e7eb] px-2 py-[2px] rounded-md text-[#1D3C4A] shadow-sm" id="teaserCouponCode">
+                    ••••••
+                  </div>
+                </div>
+                <div class="flex gap-2">
+                  <button id="viewMoreBtn" class="flex-1 border border-[#e5e7eb] text-[#1D3C4A] text-xs py-1.5 rounded-lg hover:bg-[#e39f32]/5 transition flex items-center justify-center gap-1">
+                    View Offers <i class="fa-solid fa-arrow-right text-[9px] text-[#e39f32]"></i>
+                  </button>
+                </div>
+              </div>
             </div>
 
             <!-- Offer Overlay (inline) -->
@@ -3483,7 +3741,14 @@ if (safeProductData.availableVariants.length > 1) {
               <div id="offerModal" class="hidden flex flex-col bg-white w-full max-w-md mx-4 rounded-xl p-5 border border-[#e5e7eb] shadow-2xl scale-95 opacity-0 transition-all duration-300">
                 <button id="closeOffersBtn" class="absolute top-4 right-4 text-[#e39f32] hover:text-[#1D3C4A] transition-colors text-xl">✕</button>
                 <h3 class="text-[#1D3C4A] font-lexend text-lg mb-5 pb-2 border-b border-[#e5e7eb]">✨ Available Offers</h3>
-                <div class="space-y-4 max-h-[60vh] overflow-y-auto pr-1">${couponsHTML}</div>
+                
+                <div class="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+                  <div class="text-center py-4 text-gray-400 text-sm">
+                    <i class="fa-solid fa-ticket text-2xl mb-2 block text-[#e39f32]/40"></i>
+                    Loading your offers…
+                  </div>
+                </div>
+
               </div>
             </div>
 
@@ -3590,6 +3855,33 @@ if (safeProductData.availableVariants.length > 1) {
 
     // Wire up the initial thumb strip click handlers
     wireInitialThumbClicks(initialThumbItems);
+      // Sync wishlist heart icon state
+    initWishlistIcon();
+
+     // ── PATCH: Populate teaser coupon card async ─────────────────────────────
+    fetchUserCoupons().then((coupons) => {
+      const card = document.getElementById("teaserCouponCard");
+      if (!card) return;
+
+      if (!coupons.length) {
+        card.style.display = "none";
+        return;
+      }
+
+      const c = coupons[0];
+      const discLabel = c.discountType === "PERCENTAGE"
+        ? `${c.discountValue}% OFF`
+        : `₹${c.discountValue} OFF`;
+
+      const labelEl = document.getElementById("teaserDiscountLabel");
+      const descEl  = document.getElementById("teaserDescription");
+      const codeEl  = document.getElementById("teaserCouponCode");
+
+      if (labelEl) labelEl.textContent = discLabel;
+      if (descEl)  descEl.textContent  = c.description || "Special discount for you";
+      if (codeEl)  codeEl.textContent  = c.couponCode;
+    });
+    // ── END PATCH ────────────────────────────────────────────────────────────
   }
 
   /** Build an ordered media item array from a media object. */
@@ -4753,18 +5045,72 @@ bg-gray-100 px-2 py-0.5 rounded-md">
     // Offer overlay
     const overlay  = document.getElementById("offerOverlay");
     const modal    = document.getElementById("offerModal");
+
     const viewBtn  = document.getElementById("viewMoreBtn");
+
+    
     const closeBtn = document.getElementById("closeOffersBtn");
 
     if (overlay && modal && viewBtn && closeBtn) {
-      viewBtn.addEventListener("click", (e) => {
+      let userCouponsLoaded = false;
+
+      viewBtn.addEventListener("click", async (e) => {
         e.preventDefault();
         overlay.classList.remove("hidden", "opacity-0", "pointer-events-none");
         overlay.classList.add("flex", "opacity-100");
         modal.classList.remove("hidden", "scale-95", "opacity-0");
         modal.classList.add("flex", "scale-100", "opacity-100");
         document.body.classList.add("overflow-hidden");
+
+        // ── PATCH: Lazy-load user coupons on first open ──────────────────────
+        if (!userCouponsLoaded) {
+          const couponListEl = modal.querySelector(".space-y-4");
+          if (couponListEl) {
+            couponListEl.innerHTML = `
+              <div class="flex flex-col gap-3">
+                ${[1, 2].map(() => `
+                  <div class="rounded-xl p-4 border border-[#e5e7eb] bg-white space-y-2 animate-pulse">
+                    <div class="h-3 bg-gray-200 rounded w-1/3"></div>
+                    <div class="h-5 bg-gray-200 rounded w-1/2"></div>
+                    <div class="h-3 bg-gray-200 rounded w-2/3"></div>
+                  </div>`).join("")}
+              </div>`;
+
+            const coupons = await fetchUserCoupons();
+            userCouponsLoaded = true;
+
+            if (!coupons.length) {
+              couponListEl.innerHTML = `
+                <div class="text-center py-8 text-gray-400">
+                  <i class="fa-regular fa-face-sad-tear text-3xl mb-2 block"></i>
+                  <p class="text-sm">No coupons available for your account</p>
+                </div>`;
+              return;
+            }
+
+            couponListEl.innerHTML = coupons.map(buildUserCouponCardHTML).join("");
+
+            // Wire copy buttons inside modal
+            // couponListEl.querySelectorAll(".copy-coupon-btn").forEach((btn) => {
+            //   btn.addEventListener("click", (e) => {
+            //     e.preventDefault();
+            //     const code = btn.dataset.couponCode;
+            //     if (code) {
+            //       navigator.clipboard?.writeText(code).then(() =>
+            //         showToast(`Copied: ${code}`, "success")
+            //       );
+            //     }
+            //   });
+            // });
+
+            // Start countdown tickers for ≤1 day coupons
+            startCouponCountdowns();
+          }
+        }
+        // ── END PATCH ────────────────────────────────────────────────────────
       });
+
+
       function closeOffers() {
         overlay.classList.add("opacity-0", "pointer-events-none");
         modal.classList.add("scale-95", "opacity-0");
