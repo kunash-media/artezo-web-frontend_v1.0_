@@ -43,6 +43,50 @@ const recommendedGrid    = document.getElementById('recommendedGrid');
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
+// ─── Confirmed quantity store (last known good from backend) ──────────────────
+const confirmedQty = {};   // itemId → last quantity backend accepted
+
+// ─── Quantity Rate Limit Tracker ──────────────────────────────────────────────
+const qtyRequestTracker = {
+    counts: {},        // key: itemId → request count this window
+    timers: {},        // key: itemId → reset timer
+    LIMIT: 18,         // slightly under backend's 20 to account for network lag
+    WINDOW_MS: 60000,  // 1 minute — matches backend window
+
+    increment(itemId) {
+        const key = String(itemId);
+        this.counts[key] = (this.counts[key] || 0) + 1;
+
+        // Reset counter after window
+        clearTimeout(this.timers[key]);
+        this.timers[key] = setTimeout(() => {
+            delete this.counts[key];
+        }, this.WINDOW_MS);
+
+        return this.counts[key];
+    },
+
+    isLimitReached(itemId) {
+        return (this.counts[String(itemId)] || 0) >= this.LIMIT;
+    },
+
+    reset(itemId) {
+        const key = String(itemId);
+        clearTimeout(this.timers[key]);
+        delete this.counts[key];
+        delete this.timers[key];
+    }
+};
+
+function handle429(res, context = "") {
+    if (res.status === 429) {
+        showToast("Too many requests — please wait a moment and try again", "info");
+        console.warn(`[RateLimit] 429 on ${context}`);
+        return true;
+    }
+    return false;
+}
+
 function escapeHtml(text) {
     if (text === null || text === undefined) return '';
     const div = document.createElement('div');
@@ -142,22 +186,22 @@ function showDeleteConfirmModal(title, message, onConfirm) {
 }
 
 // ─── API Layer ────────────────────────────────────────────────────────────────
-
 async function apiFetchCart(userId) {
     const url = buildUrl(CART_FETCH_URL, { userId });
     try {
         const res = await fetchWithTimeout(url, { method: 'GET' });
+        if (res.status === 429) return 'rate_limited';
         if (!res.ok) return null;
         const json = await res.json();
         return json.success ? (json.data ?? null) : null;
     } catch { return null; }
 }
-
 async function apiRemoveItem(userId, productId, variantId = null) {
     const url = buildUrl(CART_REMOVE_URL, { userId, productId, variantId });
     try {
         const res = await fetchWithTimeout(url, { method: 'DELETE' });
         if (!res.ok) return false;
+        if (res.status === 429) { handle429(res, "cart-action"); return false; }
         const json = await res.json();
         return json.success === true;
     } catch { return false; }
@@ -168,6 +212,7 @@ async function apiClearCart(userId) {
     try {
         const res = await fetchWithTimeout(url, { method: 'DELETE' });
         if (!res.ok) return false;
+        if (res.status === 429) { handle429(res, "cart-action"); return false; }
         const json = await res.json();
         return json.success === true;
     } catch { return false; }
@@ -178,6 +223,7 @@ async function apiUpdateQuantity(userId, itemId, quantity) {
     const url = buildUrl(CART_UPDATE_QUANTITY_URL, { userId, itemId, quantity });
     try {
         const res = await fetchWithTimeout(url, { method: 'PATCH', headers: { 'Content-Type': 'application/json' } });
+        if (res.status === 429) return 'rate_limited';
         if (!res.ok) return false;
         const json = await res.json();
         return json.success === true;
@@ -202,6 +248,10 @@ async function apiCheckWishlist(userId, productId) {
     const url = buildUrl(`${BASE_URL}/api/v1/wishlist/check`, { userId, productId });
     try {
         const res = await fetchWithTimeout(url, { method: 'GET' });
+        if (res.status === 429) {
+            console.warn("[Wishlist] Rate limited — skipping check for productId:", productId);
+            return false;
+        }
         if (!res.ok) return false;
         const json = await res.json();
         return json.data === true;
@@ -313,6 +363,10 @@ function resolveImageUrl(raw) {
 async function renderCart() {
     if (isLoading) return;
     isLoading = true;
+    // Clear any stale rate limit message
+    const rlMsg = document.getElementById('cartRateLimitMsg');
+    if (rlMsg) rlMsg.classList.add('hidden');
+
 
     if (cartLoading)      cartLoading.classList.remove('hidden');
     if (cartContent)      cartContent.classList.add('hidden');
@@ -330,6 +384,7 @@ async function renderCart() {
     isLoading = false;
     if (cartLoading) cartLoading.classList.add('hidden');
 
+    if (data === 'rate_limited') { showRateLimitedCart(); return; }
     if (!data) { renderFromLocalStorage(); return; }
 
     apiCartData = data;
@@ -493,7 +548,10 @@ function paintCart(items) {
         </div>`;
     });
 
-    if (cartItemsContainer) cartItemsContainer.innerHTML = html;
+  if (cartItemsContainer) {
+        cartItemsContainer.innerHTML = '';  // clear before paint — prevents duplicates
+        cartItemsContainer.innerHTML = html;
+    }
     attachCartEventListeners();
 }
 
@@ -555,16 +613,68 @@ function attachCartEventListeners() {
 
 // ─── Quantity Handlers ────────────────────────────────────────────────────────
 
+// async function handleQuantityDecrease(e) {
+//     e.preventDefault(); e.stopPropagation();
+//     const btn       = e.currentTarget;
+//     const productId = btn.getAttribute('data-product-id');
+//     const variantId = btn.getAttribute('data-variant-id') || null;
+//     const itemId    = btn.getAttribute('data-item-id');
+//     const cartItem  = btn.closest('.cart-item');
+//     const current   = parseInt(cartItem?.querySelector('.quantity-value')?.textContent || '1', 10);
+
+//     if (current <= 1) { confirmAndRemove(productId, variantId, cartItem); return; }
+
+//     const newQty = current - 1;
+//     updateQtyInDom(cartItem, newQty);
+//     updateLocalStorageQty(productId, variantId, newQty);
+//     recalcSummaryFromDom();
+
+//     if (currentUserId && itemId) {
+//         setCheckoutBtnLoading(true);
+//         const ok = await apiUpdateQuantity(currentUserId, itemId, newQty);
+//         setCheckoutBtnLoading(false);
+//         // if (!ok) { showToast('Quantity update failed. Refreshing...', 'error'); await renderCart(); return; }
+        
+//         if (ok === 'rate_limited') {
+//           showToast('Too many requests — please wait a moment', 'info');
+//           const allQtyBtns = cartItem?.querySelectorAll('.quantity-decrease, .quantity-increase');
+//           allQtyBtns?.forEach(b => { b.disabled = true; b.classList.add('opacity-50', 'cursor-not-allowed'); });
+//           setTimeout(() => {
+//             allQtyBtns?.forEach(b => { b.disabled = false; b.classList.remove('opacity-50', 'cursor-not-allowed'); });
+//           }, 5000); // freeze for 5s
+//           return;
+//         }
+//         if (!ok) { showToast('Quantity update failed. Refreshing...', 'error'); await renderCart(); return; }
+//     }
+//     showToast('Quantity updated', 'success');
+// }
+
+
+// ─── Replace handleQuantityDecrease ──────────────────────────────────────────
 async function handleQuantityDecrease(e) {
     e.preventDefault(); e.stopPropagation();
     const btn       = e.currentTarget;
+    const itemId    = btn.getAttribute('data-item-id');
     const productId = btn.getAttribute('data-product-id');
     const variantId = btn.getAttribute('data-variant-id') || null;
-    const itemId    = btn.getAttribute('data-item-id');
     const cartItem  = btn.closest('.cart-item');
     const current   = parseInt(cartItem?.querySelector('.quantity-value')?.textContent || '1', 10);
 
     if (current <= 1) { confirmAndRemove(productId, variantId, cartItem); return; }
+
+    // ── Frontend limit gate ───────────────────────────────────────────────────
+    if (qtyRequestTracker.isLimitReached(itemId)) {
+        showToast('Update limit reached — please wait a moment', 'info');
+        disableQtyButtons(cartItem, true);
+        return;
+    }
+
+    const requestCount = qtyRequestTracker.increment(itemId);
+
+    if (requestCount >= qtyRequestTracker.LIMIT) {
+        disableQtyButtons(cartItem, true);
+        showToast('Update limit reached — buttons will re-enable shortly', 'info');
+    }
 
     const newQty = current - 1;
     updateQtyInDom(cartItem, newQty);
@@ -575,21 +685,100 @@ async function handleQuantityDecrease(e) {
         setCheckoutBtnLoading(true);
         const ok = await apiUpdateQuantity(currentUserId, itemId, newQty);
         setCheckoutBtnLoading(false);
-        if (!ok) { showToast('Quantity update failed. Refreshing...', 'error'); await renderCart(); return; }
+
+        if (ok === 'rate_limited') {
+            const fallback = confirmedQty[itemId] ?? current;
+            updateQtyInDom(cartItem, fallback);
+            updateLocalStorageQty(productId, variantId, fallback);
+            recalcSummaryFromDom();
+            disableQtyButtons(cartItem, true);
+            showToast('Too many requests — quantity restored', 'info');
+
+            setTimeout(() => {
+                qtyRequestTracker.reset(itemId);
+                disableQtyButtons(cartItem, false);
+                const qty = parseInt(cartItem?.querySelector('.quantity-value')?.textContent || '1', 10);
+                const decBtn = cartItem?.querySelector('.quantity-decrease');
+                if (decBtn) decBtn.disabled = qty <= 1;
+            }, 20000);
+            return;
+        }
+
+        if (!ok) {
+            showToast('Quantity update failed. Refreshing...', 'error');
+            await renderCart();
+            return;
+        }
+
+        confirmedQty[itemId] = newQty;
     }
+
     showToast('Quantity updated', 'success');
 }
 
+// async function handleQuantityIncrease(e) {
+//     e.preventDefault(); e.stopPropagation();
+//     const btn       = e.currentTarget;
+//     const productId = btn.getAttribute('data-product-id');
+//     const variantId = btn.getAttribute('data-variant-id') || null;
+//     const itemId    = btn.getAttribute('data-item-id');
+//     const cartItem  = btn.closest('.cart-item');
+//     const current   = parseInt(cartItem?.querySelector('.quantity-value')?.textContent || '1', 10);
+//     const newQty    = current + 1;
+
+//     updateQtyInDom(cartItem, newQty);
+//     updateLocalStorageQty(productId, variantId, newQty);
+//     recalcSummaryFromDom();
+
+//     if (currentUserId && itemId) {
+//         setCheckoutBtnLoading(true);
+//         const ok = await apiUpdateQuantity(currentUserId, itemId, newQty);
+//         setCheckoutBtnLoading(false);
+//         // if (!ok) { showToast('Quantity update failed. Refreshing...', 'error'); await renderCart(); return; }
+
+//         // if (ok === 'rate_limited') { showToast('Too many requests — please wait a moment', 'info'); return; }
+
+//         if (ok === 'rate_limited') {
+//           showToast('Too many requests — please wait a moment', 'info');
+//           const allQtyBtns = cartItem?.querySelectorAll('.quantity-decrease, .quantity-increase');
+//           allQtyBtns?.forEach(b => { b.disabled = true; b.classList.add('opacity-50', 'cursor-not-allowed'); });
+//           setTimeout(() => {
+//             allQtyBtns?.forEach(b => { b.disabled = false; b.classList.remove('opacity-50', 'cursor-not-allowed'); });
+//           }, 5000); // freeze for 5s
+//           return;
+//         }
+//         if (!ok) { showToast('Quantity update failed. Refreshing...', 'error'); await renderCart(); return; }
+//     }
+//     showToast('Quantity updated', 'success');
+// }
+
+// ─── Replace handleQuantityIncrease ──────────────────────────────────────────
 async function handleQuantityIncrease(e) {
     e.preventDefault(); e.stopPropagation();
     const btn       = e.currentTarget;
+    const itemId    = btn.getAttribute('data-item-id');
     const productId = btn.getAttribute('data-product-id');
     const variantId = btn.getAttribute('data-variant-id') || null;
-    const itemId    = btn.getAttribute('data-item-id');
     const cartItem  = btn.closest('.cart-item');
     const current   = parseInt(cartItem?.querySelector('.quantity-value')?.textContent || '1', 10);
     const newQty    = current + 1;
 
+    // ── Frontend limit gate ───────────────────────────────────────────────────
+    if (qtyRequestTracker.isLimitReached(itemId)) {
+        showToast('Update limit reached — please wait a moment', 'info');
+        disableQtyButtons(cartItem, true);
+        return;
+    }
+
+    const requestCount = qtyRequestTracker.increment(itemId);
+
+    // Disable buttons when approaching limit
+    if (requestCount >= qtyRequestTracker.LIMIT) {
+        disableQtyButtons(cartItem, true);
+        showToast('Update limit reached — buttons will re-enable shortly', 'info');
+    }
+
+    // Optimistic DOM update
     updateQtyInDom(cartItem, newQty);
     updateLocalStorageQty(productId, variantId, newQty);
     recalcSummaryFromDom();
@@ -598,10 +787,54 @@ async function handleQuantityIncrease(e) {
         setCheckoutBtnLoading(true);
         const ok = await apiUpdateQuantity(currentUserId, itemId, newQty);
         setCheckoutBtnLoading(false);
-        if (!ok) { showToast('Quantity update failed. Refreshing...', 'error'); await renderCart(); return; }
+
+        if (ok === 'rate_limited') {
+            // Snap back to last confirmed quantity
+            const fallback = confirmedQty[itemId] ?? (current);
+            updateQtyInDom(cartItem, fallback);
+            updateLocalStorageQty(productId, variantId, fallback);
+            recalcSummaryFromDom();
+            disableQtyButtons(cartItem, true);
+            showToast('Too many requests — quantity restored', 'info');
+
+            // Re-enable after 20s
+            setTimeout(() => {
+                qtyRequestTracker.reset(itemId);
+                disableQtyButtons(cartItem, false);
+                // Also re-enable decrease unless qty is 1
+                const qty = parseInt(cartItem?.querySelector('.quantity-value')?.textContent || '1', 10);
+                const decBtn = cartItem?.querySelector('.quantity-decrease');
+                if (decBtn) decBtn.disabled = qty <= 1;
+            }, 20000);
+            return;
+        }
+
+        if (!ok) {
+            showToast('Quantity update failed. Refreshing...', 'error');
+            await renderCart();
+            return;
+        }
+
+        // ── Confirmed by backend — save as last known good ────────────────────
+        confirmedQty[itemId] = newQty;
     }
+
     showToast('Quantity updated', 'success');
 }
+
+// ─── Helper: disable/enable both qty buttons on a cart item ──────────────────
+function disableQtyButtons(cartItemEl, disabled) {
+    if (!cartItemEl) return;
+    cartItemEl.querySelectorAll('.quantity-increase, .quantity-decrease').forEach(btn => {
+        btn.disabled = disabled;
+        if (disabled) {
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+        } else {
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+    });
+}
+
 
 function updateQtyInDom(cartItemEl, newQty) {
     if (!cartItemEl) return;
@@ -879,15 +1112,23 @@ async function loadRecommendedProducts(items) {
 
     if (!category) { recommendedSection.classList.add('hidden'); return; }
 
-    const products = await apiFetchCategoryProducts(category);
+    let products = await apiFetchCategoryProducts(category);
     if (!products.length) { recommendedSection.classList.add('hidden'); return; }
 
-    // Wishlist state for each product
+    // Exclude items already in cart
+    const cartProductIds = new Set(
+        (apiCartData?.items ?? []).map(i => String(i.productId))
+    );
+    products = products.filter(p => !cartProductIds.has(String(p.productPrimeId)));
+    if (!products.length) { recommendedSection.classList.add('hidden'); return; }
+    
+   // Wishlist state — staggered to avoid rate limit burst
     const wishlistStates = {};
     if (currentUserId) {
-        await Promise.all(products.map(async p => {
+        for (const p of products) {
             wishlistStates[p.productPrimeId] = await apiCheckWishlist(currentUserId, p.productPrimeId);
-        }));
+            await new Promise(r => setTimeout(r, 80)); // 80ms gap between each check
+        }
     }
 
     // Update section title
@@ -921,7 +1162,7 @@ async function loadRecommendedProducts(items) {
                 <i class="${isWishlisted ? 'fas' : 'far'} fa-heart text-sm ${isWishlisted ? 'text-red-500' : 'text-gray-400'}"></i>
             </button>
 
-            ${discPct > 0 ? `<div class="absolute top-2 left-2 bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded">${discPct}% off</div>` : ''}
+           
 
             <div class="aspect-square bg-gray-100 overflow-hidden">
                 <img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(p.productName)}"
@@ -933,7 +1174,10 @@ async function loadRecommendedProducts(items) {
                 <h3 class="text-sm font-medium text-gray-800 line-clamp-2 mb-2">${escapeHtml(p.productName)}</h3>
                 <div class="flex items-baseline gap-2 flex-wrap">
                     <span class="font-bold text-base" style="color:#1D3C4A;">₹${p.currentSellingPrice.toLocaleString('en-IN')}</span>
-                    ${hasDiscount ? `<span class="text-xs text-gray-400 line-through">₹${p.currentMrpPrice.toLocaleString('en-IN')}</span>` : ''}
+                    ${hasDiscount ? `
+                        <span class="text-xs text-gray-400 line-through">₹${p.currentMrpPrice.toLocaleString('en-IN')}</span>
+                        <span class="text-xs font-semibold text-green-600">${discPct}% off</span>
+                    ` : ''}
                 </div>
                 ${stockLabel}
                 <button class="rec-add-to-cart-btn mt-2.5 w-full bg-[#1D3C4A] text-white text-xs font-medium border border-gray-300 hover:border-accent hover:bg-accent hover:text-white text-gray-700 py-1.5 rounded-lg transition flex items-center justify-center gap-1.5 ${p.currentStock === 0 ? 'opacity-50 cursor-not-allowed' : ''}"
@@ -1075,6 +1319,46 @@ function showToast(message, type = 'success') {
 }
 
 // ─── Fallback ─────────────────────────────────────────────────────────────────
+
+// ─── Rate Limited Cart State ──────────────────────────────────────────────────
+function showRateLimitedCart() {
+    if (cartLoading)        cartLoading.classList.add('hidden');
+    if (cartContent)        cartContent.classList.add('hidden');
+    if (recommendedSection) recommendedSection.classList.add('hidden');
+    if (emptyCartMessage)   emptyCartMessage.classList.add('hidden');
+
+    let el = document.getElementById('cartRateLimitMsg');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'cartRateLimitMsg';
+        // Insert before cartContent or as sibling
+        const anchor = cartContent || emptyCartMessage;
+        anchor?.parentNode?.insertBefore(el, anchor);
+    }
+
+    el.className = '';
+    el.innerHTML = `
+        <div class="flex flex-col items-center justify-center py-16 px-6 text-center">
+            <div class="w-16 h-16 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center mb-4">
+                <i class="fa-solid fa-clock text-amber-400 text-2xl"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-700 mb-1">Too many requests</h3>
+            <p class="text-sm text-gray-500 mb-5">Please wait a moment before loading your cart again.</p>
+            <button onclick="handleRateLimitRetry()"
+                    class="inline-flex items-center gap-2 bg-[#1D3C4A] text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-[#e39f32] transition">
+                <i class="fa-solid fa-rotate-right text-xs"></i> Try Again
+            </button>
+        </div>`;
+    el.classList.remove('hidden');
+}
+
+window.handleRateLimitRetry = function() {
+    const el = document.getElementById('cartRateLimitMsg');
+    if (el) el.classList.add('hidden');
+    initAttempts = 0;
+    renderCart();
+};
+
 
 function showFallbackMessage() {
     if (cartLoading)        cartLoading.classList.add('hidden');

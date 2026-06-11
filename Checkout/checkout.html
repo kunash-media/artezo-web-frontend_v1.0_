@@ -326,6 +326,35 @@
         }
         .secure-badge { display:flex; align-items:center; gap:6px; font-size:11.5px; color:#6b7280; margin-top:14px; padding-top:14px; border-top:1px solid #f0f0f0; }
         .pm-icon { font-size:20px; margin-right:4px; }
+
+        /* ── Coupon section ─────────────────────────────────────── */
+#coupon-section { border-top: 1px dashed #e5e7eb; padding-top: 14px; }
+#coupon-input-panel { animation: slideDown 0.2s ease; }
+@keyframes slideDown {
+    from { opacity:0; transform:translateY(-6px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+.coupon-card {
+    border: 1.5px dashed #d1d5db; border-radius: 8px;
+    padding: 10px 12px; cursor: pointer; transition: all 0.2s;
+    background: #fafafa;
+}
+.coupon-card:hover { border-color: #1D3C4A; background: #f0f9ff; }
+.coupon-card-code {
+    font-size: 12px; font-weight: 700; color: #1D3C4A;
+    letter-spacing: 0.06em; margin-bottom: 2px;
+}
+.coupon-card-desc { font-size: 11px; color: #6b7280; line-height: 1.4; }
+.coupon-card-tag {
+    display: inline-block; background: #fef3c7; color: #92400e;
+    font-size: 10px; font-weight: 600; padding: 1px 6px;
+    border-radius: 20px; margin-top: 4px;
+}
+/* Mini confetti canvas for coupon */
+#coupon-confetti-canvas {
+    position: fixed; inset: 0; z-index: 19000;
+    pointer-events: none; display: none;
+}
     </style>
 
     <script>
@@ -531,69 +560,169 @@
             <!-- ── RIGHT: Order Summary Panel ── -->
             <div>
                 <div class="order-summary">
-                    <div class="cart-section-header">
-                        <span class="font-semibold text-base text-gray-900">Order Summary</span>
-                        <button id="clear-cart-btn" onclick="clearCart()" class="btn-danger-sm hidden">
-                            <i class="fa-solid fa-trash-can mr-1"></i>Clear All
-                        </button>
-                    </div>
+    <div class="cart-section-header">
+        <span class="font-semibold text-base text-gray-900">Order Summary</span>
+        <button id="clear-cart-btn" onclick="clearCart()" class="btn-danger-sm hidden">
+            <i class="fa-solid fa-trash-can mr-1"></i>Clear All
+        </button>
+    </div>
 
-                    <!-- Cart items rendered by JS -->
-                    <div id="order-items-list" class="mb-4">
-                        <div class="loading-skeleton h-16 mb-2 rounded-lg"></div>
-                        <div class="loading-skeleton h-16 mb-2 rounded-lg"></div>
-                    </div>
+    <!-- Cart items rendered by JS -->
+    <div id="order-items-list" class="mb-4">
+        <div class="loading-skeleton h-16 mb-2 rounded-lg"></div>
+        <div class="loading-skeleton h-16 mb-2 rounded-lg"></div>
+    </div>
 
-                    <div class="summary-divider"></div>
+    <div class="summary-divider"></div>
 
-                    <!-- Price breakdown -->
-                    <!-- Price breakdown -->
-<div class="summary-row">
-    <span class="text-gray-500">
-        MRP Total
-        <span id="items-count-badge" class="tag-badge ml-1"></span>
-    </span>
-    <span id="sum-mrp" class="font-medium">₹0</span>
-</div>
+    <!-- ── Coupon Section ──────────────────────────────────── -->
+    <div id="coupon-section" class="py-3" style="border-bottom: 1px dashed #e5e7eb;">
 
-<div class="summary-row savings" id="sum-discount-row" style="display:none">
-    <span><i class="fa-solid fa-tag mr-1"></i> Product Discount</span>
-    <span id="sum-discount">-₹0</span>
-</div>
+        <!-- Trigger row (hidden once coupon applied) -->
+        <div id="coupon-trigger"
+             class="flex items-center gap-2 cursor-pointer group"
+             onclick="toggleCouponInput()">
+            <div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
+                 style="background:#fef9ec; border:1px solid #f0d080;">
+                <i class="fa-solid fa-tag text-xs" style="color:#E39F32;"></i>
+            </div>
+            <span class="text-sm font-medium text-gray-700 group-hover:text-primary transition-colors">
+                Apply Coupon / Promo Code
+            </span>
+            <i class="fa-solid fa-chevron-down text-gray-400 text-xs ml-auto transition-transform duration-200"
+               id="coupon-chevron"></i>
+        </div>
 
-<div class="summary-row">
-    <span class="text-gray-500">Delivery Charges</span>
-    <span id="sum-shipping" class="text-green-600 font-medium">FREE</span>
-</div>
+        <!-- Input + available coupons panel -->
+        <div id="coupon-input-panel" class="hidden mt-3">
 
-<!-- 🔥 NEW: COD Convenience Fee Row -->
-<div class="summary-row" id="sum-cod-fee-row" style="display: none;">
-    <span class="text-gray-500">COD Convenience Fee</span>
-    <span id="sum-cod-fee" class="font-medium text-amber-600">+₹100</span>
-</div>
+            <!-- Input row -->
+            <div class="flex gap-2">
+                <input type="text" id="coupon-code-input"
+                    placeholder="Enter coupon code"
+                    maxlength="30"
+                    oninput="this.value = this.value.toUpperCase(); hideCouponError();"
+                    onkeydown="if(event.key==='Enter') applyCoupon()"
+                    class="flex-1 px-3 py-2 text-sm font-semibold tracking-widest border border-gray-300 rounded-lg focus:outline-none focus:border-primary transition-all uppercase"
+                    style="font-family:'Lexend',sans-serif; letter-spacing:0.08em;">
+                <button onclick="applyCoupon()" id="coupon-apply-btn"
+                    class="px-4 py-2 text-sm font-semibold text-white rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap"
+                    style="background:#1D3C4A; font-family:'Lexend',sans-serif; min-width:76px;">
+                    <span id="coupon-apply-text">Apply</span>
+                    <div id="coupon-apply-spinner"
+                         class="hidden w-3.5 h-3.5 rounded-full border-2 border-white/30"
+                         style="border-top-color:#fff; animation:spin 0.7s linear infinite;"></div>
+                </button>
+            </div>
 
-<div class="summary-row">
-    <span class="text-gray-500">GST</span>
-    <span id="sum-gst">₹0</span>
-</div>
+            <!-- Inline error -->
+            <div id="coupon-error-msg"
+                 class="hidden mt-1.5 text-xs text-red-500 flex items-center gap-1">
+                <i class="fa-solid fa-circle-exclamation text-xs"></i>
+                <span id="coupon-error-text">Invalid coupon</span>
+            </div>
 
-<div class="summary-divider"></div>
+            <!-- View available coupons toggle -->
+            <button id="show-coupons-btn"
+                    onclick="loadAvailableCoupons()"
+                    class="mt-2.5 text-xs font-medium underline hover:no-underline transition-all"
+                    style="color:#1D3C4A; background:none; border:none; cursor:pointer; padding:0;">
+                <i class="fa-solid fa-ticket mr-1" style="color:#E39F32;"></i>
+                View available coupons
+            </button>
 
-<div class="summary-total">
-    <span>Total Amount</span>
-    <span id="sum-total">₹0</span>
-</div>
-                    <!-- Savings callout -->
-                    <div id="sum-savings-msg" class="mt-3 text-xs text-green-600 font-medium hidden">
-                        <i class="fa-solid fa-circle-check mr-1"></i>
-                        You save <span id="sum-savings-amount">₹0</span> on this order!
-                    </div>
+            <!-- Available coupons list — lazy loaded -->
+            <div id="available-coupons-list" class="hidden mt-2 space-y-2"></div>
+        </div>
 
-                    <div class="secure-badge">
-                        <i class="fa-solid fa-lock text-green-600"></i>
-                        <span>Secure &amp; Encrypted Checkout</span>
-                    </div>
+        <!-- Applied chip (shown after successful apply) -->
+        <div id="coupon-applied-chip"
+             class="hidden mt-2 flex items-center justify-between rounded-lg px-3 py-2.5"
+             style="background:#f0fdf4; border:1.5px solid #86efac;">
+            <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
+                     style="background:#dcfce7;">
+                    <i class="fa-solid fa-check text-xs" style="color:#16a34a;"></i>
                 </div>
+                <div>
+                    <div class="text-xs font-bold tracking-wide" style="color:#15803d;"
+                         id="applied-coupon-code-label">SAVE20</div>
+                    <div class="text-xs" style="color:#16a34a;"
+                         id="applied-coupon-savings-label">You save ₹0</div>
+                </div>
+            </div>
+            <button onclick="removeCoupon()"
+                class="text-xs font-medium flex items-center gap-1 transition-colors"
+                style="color:#dc2626; background:none; border:none; cursor:pointer;">
+                <i class="fa-solid fa-xmark"></i> Remove
+            </button>
+        </div>
+    </div>
+    <!-- ── End Coupon Section ──────────────────────────────── -->
+
+    <!-- Price breakdown -->
+    <div class="mt-3">
+        <div class="summary-row">
+            <span class="text-gray-500">
+                MRP Total
+                <span id="items-count-badge" class="tag-badge ml-1"></span>
+            </span>
+            <span id="sum-mrp" class="font-medium">₹0</span>
+        </div>
+
+        <div class="summary-row" id="sum-discount-row" style="display:none; color:#16a34a;">
+            <span><i class="fa-solid fa-tag mr-1"></i> Product Discount</span>
+            <span id="sum-discount" class="font-medium">-₹0</span>
+        </div>
+
+        <!-- Coupon discount row — shown only when coupon applied -->
+        <div class="summary-row hidden" id="sum-coupon-row" style="color:#16a34a;">
+            <span>
+                <i class="fa-solid fa-scissors mr-1"></i>
+                Coupon
+                <span id="sum-coupon-code-badge"
+                      class="text-xs font-bold ml-1 px-1.5 py-0.5 rounded"
+                      style="background:#dcfce7; color:#15803d; letter-spacing:0.04em;"></span>
+            </span>
+            <span id="sum-coupon-discount" class="font-medium">-₹0</span>
+        </div>
+
+        <div class="summary-row">
+            <span class="text-gray-500">Delivery Charges</span>
+            <span id="sum-shipping" class="text-green-600 font-medium">FREE</span>
+        </div>
+
+        <div class="summary-row" id="sum-cod-fee-row" style="display:none;">
+            <span class="text-gray-500">COD Convenience Fee</span>
+            <span id="sum-cod-fee" class="font-medium" style="color:#d97706;">+₹100</span>
+        </div>
+
+        <div class="summary-row">
+            <span class="text-gray-500">GST</span>
+            <span id="sum-gst" class="text-gray-500">Included in price</span>
+        </div>
+    </div>
+
+    <div class="summary-divider"></div>
+
+    <div class="summary-total">
+        <span>Total Amount</span>
+        <span id="sum-total">₹0</span>
+    </div>
+
+    <!-- Savings callout — shows product discount + coupon savings combined -->
+    <div id="sum-savings-msg"
+         class="hidden mt-3 text-xs font-medium rounded-lg px-3 py-2 flex items-center gap-2"
+         style="background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0;">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>You save <span id="sum-savings-amount" class="font-bold">₹0</span> on this order 🎉</span>
+    </div>
+
+    <div class="secure-badge">
+        <i class="fa-solid fa-lock text-green-600"></i>
+        <span>Secure &amp; Encrypted Checkout</span>
+    </div>
+</div>
             </div>
         </div>
     </main>

@@ -260,42 +260,78 @@ async function clearOrderedCartItems() {
 
 // ── Summary Calculation (UPDATED) ───────────────────────────────────────────
 
+// function calcSummary() {
+//     const cart = STATE.cartData;
+//     if (!cart) return { 
+//         mrp: 0, sellingTotal: 0, productDiscount: 0, 
+//         shipping: 0, codFee: 0, gst: 0, total: 0 
+//     };
+
+//     // ✅ MRP and selling totals from cart
+//     const mrpTotal        = Number(cart.totalMrp)    || 0;  // 2199.00
+//     const sellingTotal    = Number(cart.totalAmount)  || 0;  // 898.99
+    
+//     // ✅ Display only — never subtract
+//     const productDiscount = Math.max(0, mrpTotal - sellingTotal);  // 1300.01 (for display)
+    
+//     // ✅ Shipping
+//     const shippingCharge = STATE.shipping.price || 0;
+    
+//     // ✅ COD fee only if payment is COD
+//     const codFee = (STATE.payment.mode === 'COD') ? 100 : 0;
+
+//     // ✅ GST Extraction: If MRP is tax-inclusive, extract GST
+//     // GST = (selling price × 18) / (1 + 18) = selling price × 0.18 / 1.18
+//     const gstExtracted = 0;  //Math.round((sellingTotal * GST_RATE) / (1 + GST_RATE) * 100) / 100;
+
+//     // ✅ CORRECT FORMULA: Subtotal + Tax + Shipping + COD - Coupon
+//     // NO product discount subtraction!
+//     const totalPayable = sellingTotal + shippingCharge + codFee;
+
+//     return { 
+//         mrp: mrpTotal, 
+//         sellingTotal, 
+//         productDiscount,  // ✅ For display only
+//         shipping: shippingCharge, 
+//         codFee,
+//         gst: gstExtracted, 
+//         total: totalPayable  // ✅ This is the final amount customer pays
+//     };
+// }
+
+
+// REPLACE calcSummary entirely
+
 function calcSummary() {
     const cart = STATE.cartData;
-    if (!cart) return { 
-        mrp: 0, sellingTotal: 0, productDiscount: 0, 
-        shipping: 0, codFee: 0, gst: 0, total: 0 
+    if (!cart) return {
+        mrp: 0, sellingTotal: 0, productDiscount: 0,
+        couponDiscount: 0, shipping: 0, codFee: 0, gst: 0, total: 0
     };
 
-    // ✅ MRP and selling totals from cart
-    const mrpTotal        = Number(cart.totalMrp)    || 0;  // 2199.00
-    const sellingTotal    = Number(cart.totalAmount)  || 0;  // 898.99
-    
-    // ✅ Display only — never subtract
-    const productDiscount = Math.max(0, mrpTotal - sellingTotal);  // 1300.01 (for display)
-    
-    // ✅ Shipping
-    const shippingCharge = STATE.shipping.price || 0;
-    
-    // ✅ COD fee only if payment is COD
-    const codFee = (STATE.payment.mode === 'COD') ? 100 : 0;
+    const mrpTotal        = Number(cart.totalMrp)   || 0;
+    const sellingTotal    = Number(cart.totalAmount) || 0;
+    const productDiscount = Math.max(0, mrpTotal - sellingTotal);
+    const shippingCharge  = STATE.shipping.price || 0;
+    const codFee          = STATE.payment.mode === 'COD' ? 100 : 0;
+    const gstExtracted    = 0;
 
-    // ✅ GST Extraction: If MRP is tax-inclusive, extract GST
-    // GST = (selling price × 18) / (1 + 18) = selling price × 0.18 / 1.18
-    const gstExtracted = 0;  //Math.round((sellingTotal * GST_RATE) / (1 + GST_RATE) * 100) / 100;
+    // ── Coupon discount — capped at sellingTotal ──────────────────────────
+    const couponDiscount  = COUPON_STATE.applied
+        ? Math.min(COUPON_STATE.discountAmount, sellingTotal)
+        : 0;
 
-    // ✅ CORRECT FORMULA: Subtotal + Tax + Shipping + COD - Coupon
-    // NO product discount subtraction!
-    const totalPayable = sellingTotal + shippingCharge + codFee;
+    const totalPayable = sellingTotal - couponDiscount + shippingCharge + codFee;
 
-    return { 
-        mrp: mrpTotal, 
-        sellingTotal, 
-        productDiscount,  // ✅ For display only
-        shipping: shippingCharge, 
+    return {
+        mrp: mrpTotal,
+        sellingTotal,
+        productDiscount,
+        couponDiscount,
+        shipping: shippingCharge,
         codFee,
-        gst: gstExtracted, 
-        total: totalPayable  // ✅ This is the final amount customer pays
+        gst: gstExtracted,
+        total: Math.max(0, totalPayable),
     };
 }
 
@@ -305,27 +341,97 @@ function calcSummary() {
  * Render pricing breakdown in UI (FIXED VERSION)
  * ✅ Uses only existing HTML elements
  */
+// function renderSummaryBreakdown() {
+//     const s    = calcSummary();
+//     const cart = STATE.cartData;
+
+//     // ────────────────────────────────────────────────────────
+//     // Item count badge
+//     // ────────────────────────────────────────────────────────
+//     const totalQty = cart ? (cart.totalItems || 0) : 0;
+//     const badgeEl = document.getElementById('items-count-badge');
+//     if (badgeEl) {
+//         badgeEl.textContent = `${totalQty} item${totalQty !== 1 ? 's' : ''}`;
+//     }
+
+//     // ────────────────────────────────────────────────────────
+//     // MRP (original price)
+//     // ────────────────────────────────────────────────────────
+//     setText('sum-mrp', `₹${fmtNum(s.mrp)}`);
+
+//     // ────────────────────────────────────────────────────────
+//     // Product Discount (DISPLAY ONLY — NOT SUBTRACTED)
+//     // ────────────────────────────────────────────────────────
+//     const discRow = document.getElementById('sum-discount-row');
+//     if (discRow) {
+//         if (s.productDiscount > 0) {
+//             discRow.style.display = 'flex';
+//             setText('sum-discount', `-₹${fmtNum(s.productDiscount)}`);
+//         } else {
+//             discRow.style.display = 'none';
+//         }
+//     }
+
+//     // ────────────────────────────────────────────────────────
+//     // Shipping Charge
+//     // ────────────────────────────────────────────────────────
+//     const shippingEl = document.getElementById('sum-shipping');
+//     if (shippingEl) {
+//         shippingEl.textContent = s.shipping === 0 ? 'FREE' : `₹${fmtNum(s.shipping)}`;
+//         shippingEl.className   = s.shipping === 0 ? 'text-green-600 font-medium' : 'font-medium';
+//     }
+
+//     // ────────────────────────────────────────────────────────
+//     // COD Convenience Fee (only if payment is COD)
+//     // ────────────────────────────────────────────────────────
+//     const codRow = document.getElementById('sum-cod-fee-row');
+//     if (codRow) {
+//         if (s.codFee > 0) {
+//             codRow.style.display = 'flex';
+//             setText('sum-cod-fee', `+₹${fmtNum(s.codFee)}`);
+//         } else {
+//             codRow.style.display = 'none';
+//         }
+//     }
+
+//     // ────────────────────────────────────────────────────────
+//     // GST
+//     // ────────────────────────────────────────────────────────
+//     setText('sum-gst', 'Included in price');  //`₹${fmtNum(s.gst)}`
+
+//     // ────────────────────────────────────────────────────────
+//     // FINAL TOTAL
+//     // ────────────────────────────────────────────────────────
+//     setText('sum-total', `₹${fmtNum(s.total)}`);
+
+//     // ────────────────────────────────────────────────────────
+//     // Savings message (showing product discount)
+//     // ────────────────────────────────────────────────────────
+//     const savingsMsg = document.getElementById('sum-savings-msg');
+//     if (savingsMsg) {
+//         if (s.productDiscount > 0) {
+//             savingsMsg.classList.remove('hidden');
+//             setText('sum-savings-amount', `₹${fmtNum(s.productDiscount)}`);
+//         } else {
+//             savingsMsg.classList.add('hidden');
+//         }
+//     }
+// }
+
+
+
+// REPLACE renderSummaryBreakdown entirely
+
 function renderSummaryBreakdown() {
     const s    = calcSummary();
     const cart = STATE.cartData;
 
-    // ────────────────────────────────────────────────────────
-    // Item count badge
-    // ────────────────────────────────────────────────────────
     const totalQty = cart ? (cart.totalItems || 0) : 0;
-    const badgeEl = document.getElementById('items-count-badge');
-    if (badgeEl) {
-        badgeEl.textContent = `${totalQty} item${totalQty !== 1 ? 's' : ''}`;
-    }
+    const badgeEl  = document.getElementById('items-count-badge');
+    if (badgeEl) badgeEl.textContent = `${totalQty} item${totalQty !== 1 ? 's' : ''}`;
 
-    // ────────────────────────────────────────────────────────
-    // MRP (original price)
-    // ────────────────────────────────────────────────────────
     setText('sum-mrp', `₹${fmtNum(s.mrp)}`);
 
-    // ────────────────────────────────────────────────────────
-    // Product Discount (DISPLAY ONLY — NOT SUBTRACTED)
-    // ────────────────────────────────────────────────────────
     const discRow = document.getElementById('sum-discount-row');
     if (discRow) {
         if (s.productDiscount > 0) {
@@ -336,18 +442,21 @@ function renderSummaryBreakdown() {
         }
     }
 
-    // ────────────────────────────────────────────────────────
-    // Shipping Charge
-    // ────────────────────────────────────────────────────────
+    // Coupon row — driven by COUPON_STATE, not recalculated here
+    const couponRow = document.getElementById('sum-coupon-row');
+    if (couponRow) {
+        couponRow.classList.toggle('hidden', !COUPON_STATE.applied);
+        if (COUPON_STATE.applied) {
+            setText('sum-coupon-discount', `-₹${fmtNum(s.couponDiscount)}`);
+        }
+    }
+
     const shippingEl = document.getElementById('sum-shipping');
     if (shippingEl) {
         shippingEl.textContent = s.shipping === 0 ? 'FREE' : `₹${fmtNum(s.shipping)}`;
         shippingEl.className   = s.shipping === 0 ? 'text-green-600 font-medium' : 'font-medium';
     }
 
-    // ────────────────────────────────────────────────────────
-    // COD Convenience Fee (only if payment is COD)
-    // ────────────────────────────────────────────────────────
     const codRow = document.getElementById('sum-cod-fee-row');
     if (codRow) {
         if (s.codFee > 0) {
@@ -358,24 +467,15 @@ function renderSummaryBreakdown() {
         }
     }
 
-    // ────────────────────────────────────────────────────────
-    // GST
-    // ────────────────────────────────────────────────────────
-    setText('sum-gst', 'Included in price');  //`₹${fmtNum(s.gst)}`
-
-    // ────────────────────────────────────────────────────────
-    // FINAL TOTAL
-    // ────────────────────────────────────────────────────────
+    setText('sum-gst', 'Included in price');
     setText('sum-total', `₹${fmtNum(s.total)}`);
 
-    // ────────────────────────────────────────────────────────
-    // Savings message (showing product discount)
-    // ────────────────────────────────────────────────────────
     const savingsMsg = document.getElementById('sum-savings-msg');
     if (savingsMsg) {
-        if (s.productDiscount > 0) {
+        const totalSavings = s.productDiscount + s.couponDiscount;
+        if (totalSavings > 0) {
             savingsMsg.classList.remove('hidden');
-            setText('sum-savings-amount', `₹${fmtNum(s.productDiscount)}`);
+            setText('sum-savings-amount', `₹${fmtNum(totalSavings)}`);
         } else {
             savingsMsg.classList.add('hidden');
         }
@@ -684,6 +784,8 @@ function updateStepIndicator(step) {
 
 
 
+// REPLACE the entire updateNavButtons function
+
 function updateNavButtons(step) {
     const back = document.getElementById('btn-back');
     const next = document.getElementById('btn-next');
@@ -694,42 +796,37 @@ function updateNavButtons(step) {
         next.innerHTML = STATE.payment.mode === 'COD'
             ? '<i class="fa-solid fa-check mr-2"></i>Place Order'
             : '<i class="fa-solid fa-lock mr-2"></i>Proceed to Pay';
-        next.style.background    = '#10b981';
-        next.onmouseover         = () => next.style.background = '#059669';
-        next.onmouseleave        = () => next.style.background = '#10b981';
+        next.style.background = '#10b981';
+        next.onmouseover  = () => next.style.background = '#059669';
+        next.onmouseleave = () => next.style.background = '#10b981';
 
-        // ── Hide Place Order until terms checkbox is ticked ──
-        // ── Disable Place Order until terms checkbox is ticked ──
+        // Apply terms-gated style on step 3 only
         const terms = document.getElementById('termsAgree');
 
         function applyTermsState() {
             const checked = terms ? terms.checked : false;
-            if (checked) {
-                next.disabled        = false;
-                next.style.opacity   = '1';
-                next.style.cursor    = 'pointer';
-                next.style.filter    = '';
-            } else {
-                next.disabled        = false; // keep clickable so we can intercept
-                next.style.opacity   = '0.45';
-                next.style.cursor    = 'not-allowed';
-                next.style.filter    = 'grayscale(60%)';
-            }
+            next.disabled      = false; // keep clickable so we can intercept in nextStep()
+            next.style.opacity = checked ? '1'            : '0.45';
+            next.style.cursor  = checked ? 'pointer'      : 'not-allowed';
+            next.style.filter  = checked ? ''             : 'grayscale(60%)';
         }
 
         applyTermsState();
-
-        // Wire checkbox listener once (guard with _termsBound flag)
         if (terms && !terms._termsBound) {
             terms._termsBound = true;
             terms.addEventListener('change', applyTermsState);
         }
+
     } else {
-        next.innerHTML           = 'Continue <i class="fa-solid fa-chevron-right ml-1"></i>';
-        next.style.background    = '';
-        next.onmouseover         = null;
-        next.onmouseleave        = null;
-        next.classList.remove('hidden'); // always visible on steps 1 & 2
+        // ── Steps 1 & 2: ALWAYS fully enabled, reset any step-3 styles ──────
+        next.innerHTML     = 'Continue <i class="fa-solid fa-chevron-right ml-1"></i>';
+        next.style.background  = '';        // back to CSS class default
+        next.style.opacity     = '1';       // ← resets the 0.45 from step 3
+        next.style.cursor      = 'pointer'; // ← resets not-allowed
+        next.style.filter      = '';        // ← resets grayscale
+        next.disabled          = false;     // ← explicit enable
+        next.onmouseover       = null;
+        next.onmouseleave      = null;
     }
 }
 
@@ -1034,10 +1131,15 @@ function buildOrderPayload(addr, s, paymentMethod, paymentMode, razorpayPaymentI
         // ✅ CORRECTED PRICING
         // Key Point: discountAmount is ALWAYS 0 (product discount already in price)
         // Only coupon discounts are passed
-        couponCode:      null,
-        couponDiscount:  0,  // ✅ Only NEW coupons
-        discountAmount:  0,  // ✅ ALWAYS 0 — product discount is NOT sent
-        discountPercent: 0,  // ✅ ALWAYS 0
+        // couponCode:      null,
+        // couponDiscount:  0,  // ✅ Only NEW coupons
+        // discountAmount:  0,  // ✅ ALWAYS 0 — product discount is NOT sent
+        // discountPercent: 0,  // ✅ ALWAYS 0
+
+         couponCode:      COUPON_STATE.applied ? COUPON_STATE.code : null,
+        couponDiscount:  COUPON_STATE.applied ? COUPON_STATE.discountAmount : 0,
+        discountAmount:  0,
+        discountPercent: 0,
         
         // ✅ Additional charges
         tax:             0,           //s.gst  GST on selling price
@@ -1175,6 +1277,231 @@ function launchConfetti() {
         });
         frame++;
         if (frame < 260 && particles.some(p => p.alpha > 0)) {
+            requestAnimationFrame(draw);
+        } else {
+            canvas.style.display = 'none';
+        }
+    }
+    draw();
+}
+
+// ── Coupon State ─────────────────────────────────────────────────────────────
+const COUPON_STATE = {
+    applied:        false,
+    code:           null,
+    discountAmount: 0,
+    couponId:       null,
+    couponData:     null,
+};
+
+// Toggle the coupon input panel open/closed
+function toggleCouponInput() {
+    const panel   = document.getElementById('coupon-input-panel');
+    const chevron = document.getElementById('coupon-chevron');
+    const isHidden = panel.classList.contains('hidden');
+    panel.classList.toggle('hidden', !isHidden);
+    chevron.style.transform = isHidden ? 'rotate(180deg)' : '';
+    if (isHidden) document.getElementById('coupon-code-input')?.focus();
+}
+
+// Load available coupons for this user from backend
+async function loadAvailableCoupons() {
+    if (!STATE.userId) return;
+    const listEl   = document.getElementById('available-coupons-list');
+    const showBtn  = document.getElementById('show-coupons-btn');
+    listEl.innerHTML = '<div class="text-xs text-gray-400 py-2">Loading coupons…</div>';
+    listEl.classList.remove('hidden');
+    if (showBtn) showBtn.classList.add('hidden');
+
+    try {
+        const data = await apiFetch(`/api/v1/coupons/get-by-userId/${STATE.userId}`);
+        const coupons = Array.isArray(data) ? data : (data.data || []);
+
+        if (!coupons.length) {
+            listEl.innerHTML = '<div class="text-xs text-gray-400 py-2">No coupons available for your account.</div>';
+            return;
+        }
+
+        listEl.innerHTML = coupons.map(c => {
+            const savings = c.discountType === 'PERCENTAGE'
+                ? `${c.discountValue}% off${c.maxDiscountAmount ? ` (up to ₹${fmtNum(c.maxDiscountAmount)})` : ''}`
+                : `Flat ₹${fmtNum(c.discountValue)} off`;
+            const minOrder = c.minOrderAmount ? `Min. order ₹${fmtNum(c.minOrderAmount)}` : '';
+            const expiry   = c.validTo
+                ? `Valid till ${new Date(c.validTo).toLocaleDateString('en-IN', { day:'numeric', month:'short' })}`
+                : '';
+
+            return `
+            <div class="coupon-card" onclick="fillAndApplyCoupon('${c.couponCode}')">
+                <div class="flex items-start justify-between gap-2">
+                    <div>
+                        <div class="coupon-card-code">${c.couponCode}</div>
+                        <div class="coupon-card-desc">${c.description || savings}</div>
+                        ${minOrder ? `<div class="coupon-card-tag">${minOrder}</div>` : ''}
+                    </div>
+                    <div class="text-right flex-shrink-0">
+                        <div class="text-xs font-bold text-green-600">${savings}</div>
+                        ${expiry ? `<div class="text-xs text-gray-400 mt-0.5">${expiry}</div>` : ''}
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    } catch (err) {
+        listEl.innerHTML = '<div class="text-xs text-red-400 py-2">Could not load coupons.</div>';
+    }
+}
+
+// Fill input and trigger apply when user taps a coupon card
+function fillAndApplyCoupon(code) {
+    const input = document.getElementById('coupon-code-input');
+    if (input) { input.value = code; }
+    applyCoupon();
+}
+
+// Core: validate coupon via /v2 endpoint, apply discount, show chip + confetti
+async function applyCoupon() {
+    const input = document.getElementById('coupon-code-input');
+    const code  = input?.value?.trim().toUpperCase();
+    if (!code) {
+        showCouponError('Please enter a coupon code');
+        return;
+    }
+
+    const s           = calcSummary();          // current totals before coupon
+    const orderAmount = s.sellingTotal;         // validate against selling price
+
+    setCouponApplyLoading(true);
+    hideCouponError();
+
+    try {
+        const res = await apiFetch(
+            `/api/v1/coupons/validate-coupon/v2?couponCode=${encodeURIComponent(code)}&orderAmount=${orderAmount}&userId=${STATE.userId}`
+        );
+
+        if (!res.valid) {
+            showCouponError(res.message || 'Coupon is not valid');
+            setCouponApplyLoading(false);
+            return;
+        }
+
+        // ── Apply ─────────────────────────────────────────────────────────
+        const discount = res.discountAmount || 0;
+        COUPON_STATE.applied        = true;
+        COUPON_STATE.code           = code;
+        COUPON_STATE.discountAmount = discount;
+        COUPON_STATE.couponId       = res.coupon?.couponId || null;
+        COUPON_STATE.couponData     = res.coupon || null;
+
+        // UI: show chip, hide input panel
+        document.getElementById('coupon-trigger').classList.add('hidden');
+        document.getElementById('coupon-input-panel').classList.add('hidden');
+        document.getElementById('coupon-applied-chip').classList.remove('hidden');
+        document.getElementById('applied-coupon-code-label').textContent  = code;
+        document.getElementById('applied-coupon-savings-label').textContent = `You save ₹${fmtNum(discount)}`;
+
+        // Show coupon row in summary
+        document.getElementById('sum-coupon-row').classList.remove('hidden');
+        document.getElementById('sum-coupon-discount').textContent = `-₹${fmtNum(discount)}`;
+
+        renderSummaryBreakdown(); // recalc totals with coupon
+        toast(`Coupon ${code} applied! You save ₹${fmtNum(discount)}`, 'success');
+        launchMiniConfetti();     // small celebration burst
+
+    } catch (err) {
+        showCouponError(err.message || 'Could not validate coupon. Try again.');
+    } finally {
+        setCouponApplyLoading(false);
+    }
+}
+
+// Remove applied coupon, restore original totals
+function removeCoupon() {
+    COUPON_STATE.applied        = false;
+    COUPON_STATE.code           = null;
+    COUPON_STATE.discountAmount = 0;
+    COUPON_STATE.couponId       = null;
+    COUPON_STATE.couponData     = null;
+
+    // Reset UI
+    document.getElementById('coupon-trigger').classList.remove('hidden');
+    document.getElementById('coupon-applied-chip').classList.add('hidden');
+    document.getElementById('sum-coupon-row').classList.add('hidden');
+    document.getElementById('coupon-code-input').value = '';
+    hideCouponError();
+
+    renderSummaryBreakdown();
+    toast('Coupon removed', 'info');
+}
+
+function setCouponApplyLoading(loading) {
+    const btn     = document.getElementById('coupon-apply-btn');
+    const text    = document.getElementById('coupon-apply-text');
+    const spinner = document.getElementById('coupon-apply-spinner');
+    btn.disabled        = loading;
+    text.textContent    = loading ? 'Checking…' : 'Apply';
+    spinner.classList.toggle('hidden', !loading);
+}
+
+function showCouponError(msg) {
+    const el = document.getElementById('coupon-error-msg');
+    if (el) { el.textContent = msg; el.classList.remove('hidden'); }
+}
+
+function hideCouponError() {
+    const el = document.getElementById('coupon-error-msg');
+    if (el) { el.textContent = ''; el.classList.add('hidden'); }
+}
+
+// Mini confetti burst (smaller than order confetti — just for coupon delight)
+function launchMiniConfetti() {
+    let canvas = document.getElementById('coupon-confetti-canvas');
+    if (!canvas) {
+        canvas = document.createElement('canvas');
+        canvas.id = 'coupon-confetti-canvas';
+        canvas.style.cssText = 'position:fixed;inset:0;z-index:19000;pointer-events:none;';
+        document.body.appendChild(canvas);
+    }
+    canvas.style.display = 'block';
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const ctx = canvas.getContext('2d');
+
+    const colors = ['#1D3C4A','#E39F32','#10b981','#f59e0b','#fff'];
+    const particles = Array.from({ length: 80 }, () => ({
+        x:     Math.random() * canvas.width,
+        y:     canvas.height * 0.6 + Math.random() * 100,  // burst from bottom-right area
+        w:     Math.random() * 8 + 4,
+        h:     Math.random() * 4 + 2,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        vx:    (Math.random() - 0.5) * 7,
+        vy:    -(Math.random() * 8 + 4),  // upward
+        angle: Math.random() * Math.PI * 2,
+        spin:  (Math.random() - 0.5) * 0.3,
+        alpha: 1,
+        gravity: 0.25,
+    }));
+
+    let frame = 0;
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+            p.x      += p.vx;
+            p.vy     += p.gravity;
+            p.y      += p.vy;
+            p.angle  += p.spin;
+            if (frame > 40) p.alpha -= 0.03;
+            p.alpha   = Math.max(p.alpha, 0);
+
+            ctx.save();
+            ctx.globalAlpha = p.alpha;
+            ctx.translate(p.x + p.w / 2, p.y + p.h / 2);
+            ctx.rotate(p.angle);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+            ctx.restore();
+        });
+        frame++;
+        if (frame < 120 && particles.some(p => p.alpha > 0)) {
             requestAnimationFrame(draw);
         } else {
             canvas.style.display = 'none';
