@@ -1,170 +1,170 @@
-// ═══════════════════════════════════════════════════════════════════════════
-//  ARTEZO LOGGING SYSTEM (Non-conflicting)
-// ═══════════════════════════════════════════════════════════════════════════
+// // ═══════════════════════════════════════════════════════════════════════════
+// //  ARTEZO LOGGING SYSTEM (Non-conflicting)
+// // ═══════════════════════════════════════════════════════════════════════════
 
-window.artezoLog = {
-    info: (msg, ...args) => {
-        const formatted = msg.replace(/{}/g, () => {
-            const arg = args.shift();
-            return typeof arg === 'object' ? JSON.stringify(arg) : arg;
-        });
-        console.log(`%c[✅ INFO] ${formatted}`, 'color: #4CAF50; font-weight: bold; font-size: 12px;');
-    },
-    error: (msg, ...args) => {
-        const formatted = msg.replace(/{}/g, () => {
-            const arg = args.shift();
-            return typeof arg === 'object' ? JSON.stringify(arg) : arg;
-        });
-        console.error(`%c[❌ ERROR] ${formatted}`, 'color: #F44336; font-weight: bold; font-size: 12px;');
-    },
-    warn: (msg, ...args) => {
-        const formatted = msg.replace(/{}/g, () => {
-            const arg = args.shift();
-            return typeof arg === 'object' ? JSON.stringify(arg) : arg;
-        });
-        console.warn(`%c[⚠️ WARN] ${formatted}`, 'color: #FF9800; font-weight: bold; font-size: 12px;');
-    },
-    debug: (msg, ...args) => {
-        const formatted = msg.replace(/{}/g, () => {
-            const arg = args.shift();
-            return typeof arg === 'object' ? JSON.stringify(arg) : arg;
-        });
-        console.log(`%c[🔍 DEBUG] ${formatted}`, 'color: #2196F3; font-weight: normal; font-size: 11px;');
-    }
-};
+// window.artezoLog = {
+//     info: (msg, ...args) => {
+//         const formatted = msg.replace(/{}/g, () => {
+//             const arg = args.shift();
+//             return typeof arg === 'object' ? JSON.stringify(arg) : arg;
+//         });
+//         console.log(`%c[✅ INFO] ${formatted}`, 'color: #4CAF50; font-weight: bold; font-size: 12px;');
+//     },
+//     error: (msg, ...args) => {
+//         const formatted = msg.replace(/{}/g, () => {
+//             const arg = args.shift();
+//             return typeof arg === 'object' ? JSON.stringify(arg) : arg;
+//         });
+//         console.error(`%c[❌ ERROR] ${formatted}`, 'color: #F44336; font-weight: bold; font-size: 12px;');
+//     },
+//     warn: (msg, ...args) => {
+//         const formatted = msg.replace(/{}/g, () => {
+//             const arg = args.shift();
+//             return typeof arg === 'object' ? JSON.stringify(arg) : arg;
+//         });
+//         console.warn(`%c[⚠️ WARN] ${formatted}`, 'color: #FF9800; font-weight: bold; font-size: 12px;');
+//     },
+//     debug: (msg, ...args) => {
+//         const formatted = msg.replace(/{}/g, () => {
+//             const arg = args.shift();
+//             return typeof arg === 'object' ? JSON.stringify(arg) : arg;
+//         });
+//         console.log(`%c[🔍 DEBUG] ${formatted}`, 'color: #2196F3; font-weight: normal; font-size: 11px;');
+//     }
+// };
 
-// Shorter alias
-const L = window.artezoLog;
+// // Shorter alias
+// const L = window.artezoLog;
 
-L.info("═══════════════════════════════════════════════════════════");
-L.info("  ARTEZO PRODUCT DETAILS PAGE INITIALIZED");
-L.info("═══════════════════════════════════════════════════════════");
+// L.info("═══════════════════════════════════════════════════════════");
+// L.info("  ARTEZO PRODUCT DETAILS PAGE INITIALIZED");
+// L.info("═══════════════════════════════════════════════════════════");
 
 
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  SHIPROCKET DYNAMIC SCRIPT INJECTION (WORKAROUND)
-// ═══════════════════════════════════════════════════════════════════════════
+// // ═══════════════════════════════════════════════════════════════════════════
+// //  SHIPROCKET DYNAMIC SCRIPT INJECTION (WORKAROUND)
+// // ═══════════════════════════════════════════════════════════════════════════
 
-L.info("Attempting Shiprocket script injection...");
+// L.info("Attempting Shiprocket script injection...");
 
-// Remove any existing script tag to avoid duplicates
-const existingScript = document.querySelector('script[src*="shiprocket-checkout"]');
-if (existingScript) {
-    L.warn("Removing existing Shiprocket script tag");
-    existingScript.remove();
-}
+// // Remove any existing script tag to avoid duplicates
+// const existingScript = document.querySelector('script[src*="shiprocket-checkout"]');
+// if (existingScript) {
+//     L.warn("Removing existing Shiprocket script tag");
+//     existingScript.remove();
+// }
 
-// Create and inject new script
-const shiprocketScript = document.createElement('script');
-shiprocketScript.src = 'https://cdn.shiprocket.in/checkout/js/shiprocket-checkout.js';
-shiprocketScript.type = 'text/javascript';
-shiprocketScript.async = true;
-shiprocketScript.charset = 'UTF-8';
+// // Create and inject new script
+// const shiprocketScript = document.createElement('script');
+// shiprocketScript.src = 'https://cdn.shiprocket.in/checkout/js/shiprocket-checkout.js';
+// shiprocketScript.type = 'text/javascript';
+// shiprocketScript.async = true;
+// shiprocketScript.charset = 'UTF-8';
 
-shiprocketScript.onload = function() {
-    L.info("✅ Shiprocket script loaded successfully!");
-    window.shiprocketScriptLoaded = true;
+// shiprocketScript.onload = function() {
+//     L.info("✅ Shiprocket script loaded successfully!");
+//     window.shiprocketScriptLoaded = true;
     
-    // Verify window.Shiprocket exists
-    if (typeof window.Shiprocket !== "undefined") {
-        L.info("✅ window.Shiprocket is available");
-        L.info("  Methods: {}", Object.keys(window.Shiprocket).join(", "));
-    } else {
-        L.error("❌ Script loaded but window.Shiprocket is still undefined");
-    }
-};
+//     // Verify window.Shiprocket exists
+//     if (typeof window.Shiprocket !== "undefined") {
+//         L.info("✅ window.Shiprocket is available");
+//         L.info("  Methods: {}", Object.keys(window.Shiprocket).join(", "));
+//     } else {
+//         L.error("❌ Script loaded but window.Shiprocket is still undefined");
+//     }
+// };
 
-shiprocketScript.onerror = function() {
-    L.error("❌ Failed to load Shiprocket script");
-    L.error("Possible reasons:");
-    L.error("  1. CORS blocked the request");
-    L.error("  2. Network/internet issue");
-    L.error("  3. Shiprocket service down");
-    L.error("  Check Network tab for details");
-};
+// shiprocketScript.onerror = function() {
+//     L.error("❌ Failed to load Shiprocket script");
+//     L.error("Possible reasons:");
+//     L.error("  1. CORS blocked the request");
+//     L.error("  2. Network/internet issue");
+//     L.error("  3. Shiprocket service down");
+//     L.error("  Check Network tab for details");
+// };
 
-// Append to head
-document.head.appendChild(shiprocketScript);
-L.debug("Shiprocket script injection initiated");
+// // Append to head
+// document.head.appendChild(shiprocketScript);
+// L.debug("Shiprocket script injection initiated");
 
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  SHIPROCKET SDK INITIALIZATION CHECKER
-// ═══════════════════════════════════════════════════════════════════════════
+// // ═══════════════════════════════════════════════════════════════════════════
+// //  SHIPROCKET SDK INITIALIZATION CHECKER
+// // ═══════════════════════════════════════════════════════════════════════════
 
-L.info("🔍 Checking Shiprocket SDK availability...");
+// L.info("🔍 Checking Shiprocket SDK availability...");
 
-// Add a global flag to track if script loaded
-window.shiprocketScriptLoaded = false;
+// // Add a global flag to track if script loaded
+// window.shiprocketScriptLoaded = false;
 
-(function initializeShiprocketCheck() {
-    let checkCount = 0;
-    const maxChecks = 50;
+// (function initializeShiprocketCheck() {
+//     let checkCount = 0;
+//     const maxChecks = 50;
     
-    const checkSRSDK = setInterval(() => {
-        checkCount++;
+//     const checkSRSDK = setInterval(() => {
+//         checkCount++;
         
-        L.debug("SR SDK Check #{}: window.Shiprocket = {}",
-            checkCount,
-            typeof window.Shiprocket);
+//         L.debug("SR SDK Check #{}: window.Shiprocket = {}",
+//             checkCount,
+//             typeof window.Shiprocket);
         
-        if (typeof window.Shiprocket !== "undefined") {
-            clearInterval(checkSRSDK);
-            window.shiprocketScriptLoaded = true;
+//         if (typeof window.Shiprocket !== "undefined") {
+//             clearInterval(checkSRSDK);
+//             window.shiprocketScriptLoaded = true;
             
-            L.info("✅ SHIPROCKET SDK LOADED SUCCESSFULLY!");
-            L.info("  window.Shiprocket type: {}", typeof window.Shiprocket);
-            L.info("  window.Shiprocket.checkout type: {}", typeof window.Shiprocket.checkout);
-            L.debug("  Available methods: {}", Object.keys(window.Shiprocket).join(", "));
+//             L.info("✅ SHIPROCKET SDK LOADED SUCCESSFULLY!");
+//             L.info("  window.Shiprocket type: {}", typeof window.Shiprocket);
+//             L.info("  window.Shiprocket.checkout type: {}", typeof window.Shiprocket.checkout);
+//             L.debug("  Available methods: {}", Object.keys(window.Shiprocket).join(", "));
             
-            return;
-        }
+//             return;
+//         }
         
-        if (checkCount >= maxChecks) {
-            clearInterval(checkSRSDK);
-            window.shiprocketScriptLoaded = false;
+//         if (checkCount >= maxChecks) {
+//             clearInterval(checkSRSDK);
+//             window.shiprocketScriptLoaded = false;
             
-            L.error("❌ SHIPROCKET SDK FAILED TO LOAD AFTER 5 SECONDS");
-            L.error("Checking script tag status...");
+//             L.error("❌ SHIPROCKET SDK FAILED TO LOAD AFTER 5 SECONDS");
+//             L.error("Checking script tag status...");
             
-            const scriptTag = document.querySelector('script[src*="shiprocket-checkout"]');
-            if (scriptTag) {
-                L.error("  ✅ Script tag found");
-                L.error("  Script src: {}", scriptTag.src);
-                L.error("  Script async: {}", scriptTag.async);
-                L.error("  Script loaded: {}", scriptTag.loaded);
-                L.error("  ⚠️ Script tag exists but window.Shiprocket is undefined");
-                L.error("  Possible causes:");
-                L.error("    → CORS blocking (check Network tab)");
-                L.error("    → Script didn't execute/initialize");
-                L.error("    → Wrong URL");
-                L.error("    → Third-party script error");
-            } else {
-                L.error("  ❌ NO SCRIPT TAG FOUND!");
-                L.error("  Make sure <script src=\"https://checkout.shiprocket.in/js/shiprocket-checkout.js\"></script> is in <head>");
-            }
-        }
-    }, 100);
-})();
+//             const scriptTag = document.querySelector('script[src*="shiprocket-checkout"]');
+//             if (scriptTag) {
+//                 L.error("  ✅ Script tag found");
+//                 L.error("  Script src: {}", scriptTag.src);
+//                 L.error("  Script async: {}", scriptTag.async);
+//                 L.error("  Script loaded: {}", scriptTag.loaded);
+//                 L.error("  ⚠️ Script tag exists but window.Shiprocket is undefined");
+//                 L.error("  Possible causes:");
+//                 L.error("    → CORS blocking (check Network tab)");
+//                 L.error("    → Script didn't execute/initialize");
+//                 L.error("    → Wrong URL");
+//                 L.error("    → Third-party script error");
+//             } else {
+//                 L.error("  ❌ NO SCRIPT TAG FOUND!");
+//                 L.error("  Make sure <script src=\"https://checkout.shiprocket.in/js/shiprocket-checkout.js\"></script> is in <head>");
+//             }
+//         }
+//     }, 100);
+// })();
 
-// Check on page load events
-document.addEventListener('DOMContentLoaded', () => {
-    L.debug("DOMContentLoaded: window.Shiprocket = {}", typeof window.Shiprocket);
-});
+// // Check on page load events
+// document.addEventListener('DOMContentLoaded', () => {
+//     L.debug("DOMContentLoaded: window.Shiprocket = {}", typeof window.Shiprocket);
+// });
 
-window.addEventListener('load', () => {
-    L.debug("Window load: window.Shiprocket = {}", typeof window.Shiprocket);
+// window.addEventListener('load', () => {
+//     L.debug("Window load: window.Shiprocket = {}", typeof window.Shiprocket);
     
-    // If still not loaded, it's definitely a script issue
-    if (typeof window.Shiprocket === "undefined") {
-        L.error("❌ CRITICAL: Shiprocket still not loaded at window.load");
-        L.error("This means the script failed to execute. Check:");
-        L.error("  1. Network tab - did shiprocket-checkout.js load with 200 status?");
-        L.error("  2. Console - any CORS errors?");
-        L.error("  3. Is your internet connection working?");
-    }
-});
+//     // If still not loaded, it's definitely a script issue
+//     if (typeof window.Shiprocket === "undefined") {
+//         L.error("❌ CRITICAL: Shiprocket still not loaded at window.load");
+//         L.error("This means the script failed to execute. Check:");
+//         L.error("  1. Network tab - did shiprocket-checkout.js load with 200 status?");
+//         L.error("  2. Console - any CORS errors?");
+//         L.error("  3. Is your internet connection working?");
+//     }
+// });
 
 
 (function () {
@@ -913,7 +913,7 @@ async function fetchProductBySKU(sku, variantId) {
         // Try 3: Get all products and filter (fallback)
         if (!response) {
             console.log("Trying fallback: fetch all products and filter by SKU");
-            const res = await fetch(`${BASE_URL}/api/products/get-all?page=0&size=100`, {
+            const res = await fetch(`${BASE_URL}/api/products/get-all-active-products?page=0&size=100`, {
                 method: "GET",
                 headers: { "Content-Type": "application/json" },
             });
@@ -1188,13 +1188,12 @@ async function fetchProductFromAPI(id) {
   }
 
 
-  // ── PATCH: Wishlist icon sync ────────────────────────────────────────────────
+// ── PATCH: Wishlist icon sync ────────────────────────────────────────────────
 async function initWishlistIcon() {
   const btn = document.querySelector(".wishlist-icon-btn");
-    setWishlistIcon(btn, true);  // or false on remove
-
   if (!btn) return;
 
+  // ── Resolve userId ─────────────────────────────────────────────────────────
   let userId = localStorage.getItem("userId") || sessionStorage.getItem("userId");
   if (!userId) {
     const rawUser = localStorage.getItem("user") || sessionStorage.getItem("user");
@@ -1209,21 +1208,108 @@ async function initWishlistIcon() {
 
   if (!userId || !productId) return;
 
-  // ── Check current wishlist state ─────────────────────────────────────────
+  // ── Check current wishlist state on load ───────────────────────────────────
   try {
     const res = await fetch(`${BASE_URL}/api/v1/wishlist/check?userId=${userId}&productId=${productId}`);
     if (res.ok) {
       const json = await res.json();
       setWishlistIcon(btn, json?.data === true);
+      window.dispatchEvent(new CustomEvent('wishlist:updated')); // ← ADD
     }
   } catch (e) {
     console.warn("[Wishlist] Check failed:", e);
   }
 
-  // ── Toggle on click (icon only — actual wishlist add/remove already wired elsewhere) ──
-  btn.addEventListener("click", () => {
-    const isCurrentlyWishlisted = btn.classList.contains("wishlisted");
-    setWishlistIcon(btn, !isCurrentlyWishlisted);
+  // ── Click: toggle add / remove ─────────────────────────────────────────────
+  // ── Click: toggle add / remove ─────────────────────────────────────────────
+  let wishlistBusy = false;
+  btn.addEventListener("click", async (e) => {
+    e.stopImmediatePropagation(); // block any other listener on this btn
+    if (wishlistBusy) return;
+    wishlistBusy = true;
+    const isWishlisted = btn.classList.contains("wishlisted");
+
+    if (isWishlisted) {
+      // ── REMOVE ─────────────────────────────────────────────────────────────
+      try {
+        const variantId = getSelectedVariant()?.variantId || null;
+        let url = `${BASE_URL}/api/v1/wishlist/remove?userId=${userId}&productId=${productId}`;
+        if (variantId) url += `&variantId=${variantId}`;
+
+        const res = await fetch(url, { method: "DELETE" });
+        if (res.ok) {
+          setWishlistIcon(btn, false);
+          showToast("Removed from wishlist", "info");
+          // Sync header wishlist count
+          // document.dispatchEvent(new CustomEvent("wishlist:updated"));
+          window.dispatchEvent(new CustomEvent('wishlist:updated')); // ← ADD
+        } else {
+          showToast("Failed to remove from wishlist", "error");
+        }
+     } catch (e) {
+        console.warn("[Wishlist] Remove failed:", e);
+        showToast("Something went wrong", "error");
+      } finally {
+        wishlistBusy = false;
+      }
+
+   } else {
+      // ── ADD ────────────────────────────────────────────────────────────────
+      try {
+        const variantId = getSelectedVariant()?.variantId || null;
+        const params = new URLSearchParams({ userId, productId });
+        if (variantId) params.append("variantId", variantId);
+
+        const addUrl = `${BASE_URL}/api/v1/wishlist/add`;
+        console.log("[Wishlist] ADD url:", addUrl);
+
+       const selectedVariant = getSelectedVariant();
+        const sellingPrice = selectedVariant?.price
+                          || safeProductData?.currentSellingPrice
+                          || null;
+        const mrpPrice = selectedVariant?.mrp
+                      || safeProductData?.currentMrpPrice
+                      || null;
+
+      //  const selectedVariant = getSelectedVariant();
+
+        const body = {
+          userId:          Number(userId),
+          productId:       Number(productId),
+          wishlistName:    "My Wishlist",
+          wishlistedPrice: selectedVariant?.price ?? safeProductData?.currentSellingPrice ?? null,
+          mrpPrice:        selectedVariant?.mrp   ?? safeProductData?.currentMrpPrice    ?? null,
+          sku:             selectedVariant?.sku   || safeProductData?.currentSku         || null,
+          selectedColor:   selectedVariant?.color || safeProductData?.selectedColor      || null,
+          selectedSize:    selectedVariant?.size  || null,
+          titleName:       selectedVariant?.titleName || safeProductData?.productName    || null,
+          productName:     safeProductData?.productName || null,
+          variantId:       selectedVariant?.variantId || null
+        };
+
+        const res = await fetch(addUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+
+        if (res.ok) {
+          setWishlistIcon(btn, true);
+          showToast("Added to wishlist", "success");
+          console.log("[Wishlist] Dispatching wishlist:updated after ADD");
+          window.dispatchEvent(new CustomEvent("wishlist:updated"));
+        } else {
+          const errText = await res.text();
+          console.warn("[Wishlist] ADD failed:", res.status, errText);
+          showToast("Failed to add to wishlist", "error");
+        }
+      } catch (e) {
+        console.warn("[Wishlist] Add failed:", e);
+        showToast("Something went wrong", "error");
+      } finally {
+        wishlistBusy = false;
+      }
+    }
   });
 }
 
@@ -1243,6 +1329,7 @@ function setWishlistIcon(btn, isWishlisted) {
   }
 }
 // ── END PATCH ────────────────────────────────────────────────────────────────
+
 
   /**
    * Confirm Buy Now order after Shiprocket checkout callback.
@@ -1564,13 +1651,13 @@ function setWishlistIcon(btn, isWishlisted) {
     const initialVariantSku = safeProductData.availableVariants?.[0]?.sku || null;
     rewriteURLToSEO(initialVariantSku);
     
-    buildCompleteHTML();
+   buildCompleteHTML();
     fillAccordion();
-    // fillSocialProof();
     fillInstallation();
     fillHeroBanner();
     fillStickyBar();
     setupEventListeners();
+    initWishlistIcon();
 
     // Async fills
     fillBoughtTogether();
@@ -1586,8 +1673,8 @@ function setWishlistIcon(btn, isWishlisted) {
             .forEach((btn) => btn.addEventListener("click", handleAddToCart));
         document.querySelectorAll(".buy-now-btn")
             .forEach((btn) => btn.addEventListener("click", handleBuyNow));
-        document.querySelectorAll(".wishlist-btn, .wishlist-icon-btn")
-            .forEach((btn) => btn.addEventListener("click", handleWishlistToggle));
+        // document.querySelectorAll(".wishlist-btn, .wishlist-icon-btn")
+        //     .forEach((btn) => btn.addEventListener("click", handleWishlistToggle));
         document.querySelectorAll(".apply-coupon-btn").forEach((btn) =>
             btn.addEventListener("click", (e) => {
                 e.preventDefault();

@@ -278,7 +278,7 @@ const res = await fetch(
     const payload = {
       userId,
       productId:     pid,
-      variantId:     btn.dataset.variantId || `VAR-${pid}`,
+      variantId:     btn.dataset.variantId || null,
       sku:           btn.dataset.sku       || `PROD-${pid}`,
       selectedColor: btn.dataset.color     || null,
       selectedSize:  btn.dataset.size      || null,
@@ -411,7 +411,7 @@ const res = await fetch(
   // ─── WISHLIST API ─────────────────────────────────────────────────────────────
   async function addToWishlist(userId, productId, d) {
     const sku       = d.sku       || `PROD-${productId}`;
-    const variantId = d.variantId || `VAR-${productId}`;
+    const variantId = d.variantId || null;
     const payload   = {
       userId:          Number(userId),
       wishlistName:    "My Wishlist",
@@ -540,7 +540,7 @@ const res = await fetch(
           ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10 shadow">${discount}% OFF</span>`
           : "";
 
-    const resolvedVariantId = p.variantId  || `VAR-${pid}`;
+    const resolvedVariantId = p.variantId  || null;
     const resolvedSku       = p.currentSku || `PROD-${pid}`;
 
     const heartIcon = isWL

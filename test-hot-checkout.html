@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Artezo – Product Page</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #f7f5f2;
+      color: #1a1a1a;
+      min-height: 100vh;
+    }
+
+    /* ── Top bar ── */
+    header {
+      background: #fff;
+      border-bottom: 1px solid #e8e4df;
+      padding: 14px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; color: #1a1a1a; }
+    .logo span { color: #c8602a; }
+    nav a { margin-left: 24px; text-decoration: none; color: #555; font-size: .9rem; }
+
+    /* ── Product layout ── */
+    .product-page {
+      max-width: 1100px;
+      margin: 48px auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      padding: 0 24px;
+    }
+
+    .product-image {
+      border-radius: 16px;
+      overflow: hidden;
+      background: #e9e4de;
+      aspect-ratio: 1 / 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .img-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      color: #888;
+    }
+    .img-placeholder svg { width: 80px; height: 80px; opacity: .4; }
+
+    .product-info { display: flex; flex-direction: column; gap: 20px; }
+
+    .badge {
+      display: inline-block;
+      background: #fef2ec;
+      color: #c8602a;
+      font-size: .75rem;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 99px;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      width: fit-content;
+    }
+
+    h1 { font-size: 2rem; font-weight: 700; line-height: 1.2; }
+    .subtitle { color: #666; font-size: 1rem; line-height: 1.6; }
+
+    .price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+    .price { font-size: 2rem; font-weight: 700; color: #1a1a1a; }
+    .price-original { font-size: 1.1rem; color: #aaa; text-decoration: line-through; }
+    .price-off {
+      background: #e8f5e9;
+      color: #2e7d32;
+      font-size: .8rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .variant-label { font-size: .85rem; font-weight: 600; color: #444; margin-bottom: 8px; }
+    .variants { display: flex; gap: 10px; flex-wrap: wrap; }
+    .variant-btn {
+      padding: 8px 18px;
+      border: 2px solid #e0dbd4;
+      border-radius: 8px;
+      background: #fff;
+      cursor: pointer;
+      font-size: .85rem;
+      font-weight: 500;
+      transition: all .15s;
+    }
+    .variant-btn:hover, .variant-btn.active {
+      border-color: #c8602a;
+      color: #c8602a;
+      background: #fef6f2;
+    }
+
+    .qty-row { display: flex; align-items: center; gap: 12px; }
+    .qty-label { font-size: .85rem; font-weight: 600; color: #444; }
+    .qty-control {
+      display: flex;
+      align-items: center;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .qty-control button {
+      width: 36px; height: 36px;
+      border: none;
+      background: #f5f2ee;
+      cursor: pointer;
+      font-size: 1.1rem;
+      color: #555;
+      transition: background .1s;
+    }
+    .qty-control button:hover { background: #eae6e0; }
+    .qty-control input {
+      width: 44px; height: 36px;
+      border: none;
+      text-align: center;
+      font-size: .95rem;
+      font-weight: 600;
+      outline: none;
+      background: #fff;
+    }
+
+    /* ── CTA Buttons ── */
+    .cta-group { display: flex; flex-direction: column; gap: 12px; }
+
+    .btn-buynow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 16px 24px;
+      background: #c8602a;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: .3px;
+      transition: background .15s, transform .1s;
+      position: relative;
+    }
+    .btn-buynow:hover { background: #b3521f; transform: translateY(-1px); }
+    .btn-buynow:active { transform: translateY(0); }
+    .btn-buynow .sr-logo {
+      background: #fff;
+      color: #c8602a;
+      font-size: .65rem;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: .5px;
+    }
+
+    .btn-addcart {
+      padding: 15px 24px;
+      background: transparent;
+      color: #1a1a1a;
+      border: 2px solid #1a1a1a;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .btn-addcart:hover { background: #1a1a1a; color: #fff; }
+
+    .trust-row {
+      display: flex;
+      gap: 20px;
+      padding: 14px 0;
+      border-top: 1px solid #eee;
+      border-bottom: 1px solid #eee;
+    }
+    .trust-item { display: flex; align-items: center; gap: 6px; font-size: .8rem; color: #666; }
+    .trust-item svg { color: #2e7d32; flex-shrink: 0; }
+
+    /* ── Debug / config panel ── */
+    .config-panel {
+      max-width: 1100px;
+      margin: 0 auto 48px;
+      padding: 0 24px;
+    }
+    .config-box {
+      background: #1a1a2e;
+      color: #e0e0e0;
+      border-radius: 12px;
+      padding: 24px 28px;
+    }
+    .config-box h3 { color: #7ec8e3; font-size: .85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+    .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .config-field label { display: block; font-size: .75rem; color: #aaa; margin-bottom: 4px; }
+    .config-field input, .config-field textarea {
+      width: 100%;
+      background: #12121f;
+      border: 1px solid #333;
+      border-radius: 6px;
+      color: #fff;
+      padding: 8px 10px;
+      font-size: .85rem;
+      font-family: monospace;
+      resize: vertical;
+    }
+    .config-field input:focus, .config-field textarea:focus {
+      outline: none;
+      border-color: #7ec8e3;
+    }
+    .config-field.full { grid-column: 1 / -1; }
+    .payload-preview {
+      background: #12121f;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 12px;
+      font-family: monospace;
+      font-size: .78rem;
+      line-height: 1.6;
+      color: #a8d8a8;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .note {
+      background: #2a2a1a;
+      border: 1px solid #555;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: .78rem;
+      color: #d4c88a;
+      margin-top: 14px;
+      line-height: 1.6;
+    }
+
+    /* ── Modal overlay for loading ── */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .overlay.show { display: flex; }
+    .spinner {
+      width: 48px; height: 48px;
+      border: 4px solid rgba(255,255,255,.2);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .overlay-text { color: #fff; font-size: 1rem; font-weight: 500; }
+
+    @media (max-width: 700px) {
+      .product-page { grid-template-columns: 1fr; }
+      .config-grid { grid-template-columns: 1fr; }
+      header { padding: 14px 16px; }
+      nav { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Arte<span>zo</span></div>
+  <nav>
+    <a href="#">Home</a>
+    <a href="#">Shop</a>
+    <a href="#">About</a>
+    <a href="#">Contact</a>
+  </nav>
+</header>
+
+<!-- ── Product Section ── -->
+<div class="product-page">
+
+  <div class="product-image">
+    <!-- Replace src with your actual product image -->
+    <div class="img-placeholder">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+        <path d="M21 15l-5-5L5 21"/>
+      </svg>
+      <span>Product Image</span>
+    </div>
+  </div>
+
+  <div class="product-info">
+    <span class="badge">Best Seller</span>
+    <h1>Handcrafted Ceramic Art Vase</h1>
+    <p class="subtitle">
+      A stunning hand-thrown ceramic vase with a matte glaze finish. 
+      Each piece is uniquely crafted by our artisans — no two are alike. 
+      Perfect for home décor or gifting.
+    </p>
+
+    <div class="price-row">
+      <span class="price">₹1,299</span>
+      <span class="price-original">₹1,799</span>
+      <span class="price-off">28% OFF</span>
+    </div>
+
+    <div>
+      <div class="variant-label">Size</div>
+      <div class="variants">
+        <button class="variant-btn" onclick="selectVariant(this, 'Small')">Small (6")</button>
+        <button class="variant-btn active" onclick="selectVariant(this, 'Medium')">Medium (9")</button>
+        <button class="variant-btn" onclick="selectVariant(this, 'Large')">Large (12")</button>
+      </div>
+    </div>
+
+    <div class="qty-row">
+      <span class="qty-label">Quantity</span>
+      <div class="qty-control">
+        <button onclick="changeQty(-1)">−</button>
+        <input type="number" id="qtyInput" value="1" min="1" max="10" readonly />
+        <button onclick="changeQty(1)">+</button>
+      </div>
+    </div>
+
+    <div class="trust-row">
+      <div class="trust-item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Free Delivery above ₹499
+      </div>
+      <div class="trust-item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Easy 7-day Returns
+      </div>
+      <div class="trust-item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        COD Available
+      </div>
+    </div>
+
+    <div class="cta-group">
+      <button class="btn-buynow" onclick="handleBuyNow()">
+        <span>Buy Now</span>
+        <span class="sr-logo">POWERED BY SR</span>
+      </button>
+      <button class="btn-addcart">Add to Cart</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Config / Debug Panel ── -->
+<div class="config-panel">
+  <div class="config-box">
+    <h3>⚙ Integration Config (replace with your real values)</h3>
+    <div class="config-grid">
+      <div class="config-field">
+        <label>Company ID (from SR Checkout Dashboard)</label>
+        <input type="text" id="cfg_companyId" value="8041717" />
+      </div>
+      <div class="config-field">
+        <label>Return URL (after order placed)</label>
+        <input type="text" id="cfg_returnUrl" value="https://www.artezo.in/order-success" />
+      </div>
+      <div class="config-field">
+        <label>Cancel URL</label>
+        <input type="text" id="cfg_cancelUrl" value="https://www.artezo.in/checkout-cancelled" />
+      </div>
+      <div class="config-field">
+        <label>Your Backend Sync Endpoint (Spring Boot)</label>
+        <input type="text" id="cfg_backendUrl" value="https://api.artezo.in/orders/shiprocket-sync" />
+      </div>
+      <div class="config-field full">
+        <label>Checkout URL Preview (auto-generated)</label>
+        <div class="payload-preview" id="urlPreview">Click "Buy Now" to see the generated URL here...</div>
+      </div>
+    </div>
+    <div class="note">
+      ⚠ <strong>Important:</strong> The <code>companyId</code> is what ties your SR Checkout store to this page. 
+      Find it in SR Checkout Dashboard → Settings → General Settings → Company ID.<br/>
+      The <strong>Custom Endpoint</strong> (Settings → Custom Endpoints) is your Spring Boot URL — SR will POST order data there after payment.<br/>
+      The <strong>Webhook</strong> (Settings → Webhooks → Real Time) is for real-time order status updates to your backend.
+    </div>
+  </div>
+</div>
+
+<!-- Loading overlay -->
+<div class="overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="overlay-text">Opening Shiprocket Checkout...</div>
+</div>
+
+<script>
+  // ─────────────────────────────────────────────
+  //  STATE
+  // ─────────────────────────────────────────────
+  let selectedVariant = 'Medium';
+  let qty = 1;
+
+  // ─────────────────────────────────────────────
+  //  PRODUCT DATA  ← replace with dynamic data
+  // ─────────────────────────────────────────────
+  const product = {
+    id: 'ART-VASE-001',
+    name: 'Handcrafted Ceramic Art Vase',
+    category: 'Home Decor',
+    mrp: 1799,
+    price: 1299,
+    weight: 0.5,     // kg
+    hsn: '69120090', // ceramics HSN
+    sku: 'VASE-MED-001',
+    image: 'https://www.artezo.in/images/vase-001.jpg', // your image URL
+  };
+
+  // ─────────────────────────────────────────────
+  //  UI HELPERS
+  // ─────────────────────────────────────────────
+  function selectVariant(btn, variant) {
+    document.querySelectorAll('.variant-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedVariant = variant;
+  }
+
+  function changeQty(delta) {
+    qty = Math.max(1, Math.min(10, qty + delta));
+    document.getElementById('qtyInput').value = qty;
+  }
+
+  // ─────────────────────────────────────────────
+  //  CORE: BUILD SHIPROCKET CHECKOUT URL
+  // ─────────────────────────────────────────────
+  function buildCheckoutUrl() {
+    const companyId  = document.getElementById('cfg_companyId').value.trim();
+    const returnUrl  = document.getElementById('cfg_returnUrl').value.trim();
+    const cancelUrl  = document.getElementById('cfg_cancelUrl').value.trim();
+
+    // ── Order payload sent to Shiprocket
+    // SR Checkout (headless) reads cart details via:
+    //   1. URL query params (simple mode)   — used here
+    //   2. postMessage after iframe loads    — advanced mode
+    const orderRef = 'ORD-' + Date.now();
+
+    const params = new URLSearchParams({
+      // ── Required
+      company_id:    companyId,
+      order_id:      orderRef,            // your internal order reference
+
+      // ── Product line items (SR supports multiple via indexed params)
+      'product[0][id]':       product.id,
+      'product[0][name]':     product.name + ' – ' + selectedVariant,
+      'product[0][sku]':      product.sku,
+      'product[0][quantity]': qty,
+      'product[0][price]':    product.price,
+      'product[0][mrp]':      product.mrp,
+      'product[0][weight]':   product.weight,
+      'product[0][category]': product.category,
+      'product[0][hsn]':      product.hsn,
+      'product[0][image]':    product.image,
+
+      // ── Order totals
+      total:          product.price * qty,
+      total_mrp:      product.mrp * qty,
+
+      // ── Redirect
+      return_url: returnUrl,
+      cancel_url: cancelUrl,
+
+      // ── Mode
+      source: 'headless_web',
+    });
+
+    // ── Shiprocket Checkout URL structure (headless / hot-checkout)
+    const checkoutUrl = `https://checkout.shiprocket.in/checkout?${params.toString()}`;
+    return { checkoutUrl, orderRef };
+  }
+
+  // ─────────────────────────────────────────────
+  //  BUY NOW HANDLER
+  // ─────────────────────────────────────────────
+  function handleBuyNow() {
+    const companyId = document.getElementById('cfg_companyId').value.trim();
+
+    if (!companyId || companyId === 'YOUR_COMPANY_ID') {
+      alert('⚠ Please enter your Shiprocket Company ID in the config panel below before testing.');
+      return;
+    }
+
+    const { checkoutUrl, orderRef } = buildCheckoutUrl();
+
+    // Show URL in preview panel
+    document.getElementById('urlPreview').textContent = checkoutUrl;
+
+    // ── Optional: notify your Spring Boot backend BEFORE opening checkout
+    // This lets you create a "pending" order record in your DB
+    notifyBackendPreCheckout(orderRef);
+
+    // ── Show brief loading state
+    const overlay = document.getElementById('loadingOverlay');
+    overlay.classList.add('show');
+
+    setTimeout(() => {
+      overlay.classList.remove('show');
+
+      // ── Open Shiprocket Checkout
+      // Option A: same tab (recommended for mobile)
+      window.location.href = checkoutUrl;
+
+      // Option B: popup window (comment out option A and use this for desktop)
+      // openCheckoutPopup(checkoutUrl);
+    }, 600);
+  }
+
+  // ─────────────────────────────────────────────
+  //  OPTION B: POPUP MODE
+  // ─────────────────────────────────────────────
+  function openCheckoutPopup(url) {
+    const w = 500, h = 700;
+    const left = (screen.width - w) / 2;
+    const top  = (screen.height - h) / 2;
+    const popup = window.open(
+      url,
+      'sr_checkout',
+      `width=${w},height=${h},top=${top},left=${left},scrollbars=yes,resizable=yes`
+    );
+
+    // Listen for order success message from the popup
+    window.addEventListener('message', function onMessage(e) {
+      if (e.origin !== 'https://checkout.shiprocket.in') return;
+      if (e.data?.event === 'order_placed' || e.data?.status === 'success') {
+        window.removeEventListener('message', onMessage);
+        popup?.close();
+        handleOrderSuccess(e.data);
+      }
+    });
+  }
+
+  // ─────────────────────────────────────────────
+  //  PRE-CHECKOUT: tell your Spring Boot backend
+  //  to create a PENDING order so you can track it
+  // ─────────────────────────────────────────────
+  async function notifyBackendPreCheckout(orderRef) {
+    const backendUrl = document.getElementById('cfg_backendUrl').value.trim();
+    if (!backendUrl || backendUrl.includes('api.artezo.in')) return; // skip if still dummy
+
+    try {
+      await fetch(backendUrl + '/pre-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderRef,
+          productId:   product.id,
+          productName: product.name + ' – ' + selectedVariant,
+          qty,
+          price:       product.price,
+          total:       product.price * qty,
+          status:      'PENDING',
+          source:      'shiprocket_checkout',
+          timestamp:   new Date().toISOString(),
+        }),
+      });
+    } catch (err) {
+      console.warn('Pre-checkout notify failed (non-blocking):', err);
+    }
+  }
+
+  // ─────────────────────────────────────────────
+  //  POST-CHECKOUT: handle success (popup mode)
+  // ─────────────────────────────────────────────
+  function handleOrderSuccess(data) {
+    console.log('Order placed via Shiprocket:', data);
+    // Redirect to your success page or show a modal
+    window.location.href = document.getElementById('cfg_returnUrl').value;
+  }
+
+  // ─────────────────────────────────────────────
+  //  PARSE SUCCESS PARAMS (same-tab return)
+  //  When SR redirects back to return_url it appends:
+  //  ?order_id=xxx&sr_order_id=xxx&status=success
+  // ─────────────────────────────────────────────
+  (function checkReturnParams() {
+    const p = new URLSearchParams(window.location.search);
+    const status = p.get('status');
+    const srOrderId = p.get('sr_order_id');
+    if (status === 'success' && srOrderId) {
+      console.log('SR Order ID:', srOrderId);
+      // You'd normally redirect to a dedicated success page
+      // Or your Spring Boot webhook already saved it
+    }
+  })();
+</script>
+
+</body>
+</html>

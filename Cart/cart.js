@@ -18,7 +18,7 @@ const CART_UPDATE_QUANTITY_URL = `${BASE_URL}/api/v1/cart/update-quantity`;
 const CATEGORY_PRODUCTS_URL    = `${BASE_URL}/api/products/get-by-category`;
 
 const SHIPPING_THRESHOLD = 999;
-const SHIPPING_COST      = 99;
+const SHIPPING_COST      = 0;
 const FREE_SHIPPING_COST = 0;
 const REQUEST_TIMEOUT_MS = 10000;
 

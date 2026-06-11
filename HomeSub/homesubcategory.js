@@ -323,7 +323,7 @@ async function handleCartClick(btn) {
   const payload = {
     userId,
     productId:     pid,
-    variantId:     btn.dataset.variantId || `VAR-${pid}`,
+    variantId:     btn.dataset.variantId || null,
     sku:           btn.dataset.sku       || `PROD-${pid}`,
     selectedColor: btn.dataset.color     || null,
     selectedSize:  btn.dataset.size      || null,
@@ -618,7 +618,7 @@ async function handleCartClick(btn) {
     // addToWishlist reads d.variantId / d.sku directly from btn.dataset, so
     // whatever we write here is exactly what lands in the DB and what remove sends.
     // Result: add sends "VAR-1", remove reads "VAR-1" from the button → keys match.
-    const resolvedVariantId = p.variantId || `VAR-${pid}`;
+    const resolvedVariantId = p.variantId || null;
     const resolvedSku       = p.currentSku        || `PROD-${pid}`;
 
     // Replace old cta-btn button entirely
