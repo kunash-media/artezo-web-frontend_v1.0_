@@ -65,7 +65,7 @@
 // shiprocketScript.onload = function() {
 //     L.info("✅ Shiprocket script loaded successfully!");
 //     window.shiprocketScriptLoaded = true;
-    
+
 //     // Verify window.Shiprocket exists
 //     if (typeof window.Shiprocket !== "undefined") {
 //         L.info("✅ window.Shiprocket is available");
@@ -101,33 +101,33 @@
 // (function initializeShiprocketCheck() {
 //     let checkCount = 0;
 //     const maxChecks = 50;
-    
+
 //     const checkSRSDK = setInterval(() => {
 //         checkCount++;
-        
+
 //         L.debug("SR SDK Check #{}: window.Shiprocket = {}",
 //             checkCount,
 //             typeof window.Shiprocket);
-        
+
 //         if (typeof window.Shiprocket !== "undefined") {
 //             clearInterval(checkSRSDK);
 //             window.shiprocketScriptLoaded = true;
-            
+
 //             L.info("✅ SHIPROCKET SDK LOADED SUCCESSFULLY!");
 //             L.info("  window.Shiprocket type: {}", typeof window.Shiprocket);
 //             L.info("  window.Shiprocket.checkout type: {}", typeof window.Shiprocket.checkout);
 //             L.debug("  Available methods: {}", Object.keys(window.Shiprocket).join(", "));
-            
+
 //             return;
 //         }
-        
+
 //         if (checkCount >= maxChecks) {
 //             clearInterval(checkSRSDK);
 //             window.shiprocketScriptLoaded = false;
-            
+
 //             L.error("❌ SHIPROCKET SDK FAILED TO LOAD AFTER 5 SECONDS");
 //             L.error("Checking script tag status...");
-            
+
 //             const scriptTag = document.querySelector('script[src*="shiprocket-checkout"]');
 //             if (scriptTag) {
 //                 L.error("  ✅ Script tag found");
@@ -155,7 +155,7 @@
 
 // window.addEventListener('load', () => {
 //     L.debug("Window load: window.Shiprocket = {}", typeof window.Shiprocket);
-    
+
 //     // If still not loaded, it's definitely a script issue
 //     if (typeof window.Shiprocket === "undefined") {
 //         L.error("❌ CRITICAL: Shiprocket still not loaded at window.load");
@@ -176,25 +176,26 @@
 
   // Hardcoded userId until auth system is wired
   const USER_ID = localStorage.getItem('userId');
-
+  // ─── CART STATE ───────────────────────────────────────────────────────────
+  const addedToCartSet = new Set();
 
 
 
   // ── SIMPLE LOGGING HELPER ──────────────────────────────────────────────
-const log = {
+  const log = {
     info: (msg, ...args) => {
-        const formatted = msg.replace(/{}/g, () => JSON.stringify(args.shift()));
-        console.log(`%c[INFO] ${formatted}`, 'color: #4CAF50; font-weight: bold;');
+      const formatted = msg.replace(/{}/g, () => JSON.stringify(args.shift()));
+      console.log(`%c[INFO] ${formatted}`, 'color: #4CAF50; font-weight: bold;');
     },
     error: (msg, ...args) => {
-        const formatted = msg.replace(/{}/g, () => JSON.stringify(args.shift()));
-        console.error(`%c[ERROR] ${formatted}`, 'color: #F44336; font-weight: bold;');
+      const formatted = msg.replace(/{}/g, () => JSON.stringify(args.shift()));
+      console.error(`%c[ERROR] ${formatted}`, 'color: #F44336; font-weight: bold;');
     },
     warn: (msg, ...args) => {
-        const formatted = msg.replace(/{}/g, () => JSON.stringify(args.shift()));
-        console.warn(`%c[WARN] ${formatted}`, 'color: #FF9800; font-weight: bold;');
+      const formatted = msg.replace(/{}/g, () => JSON.stringify(args.shift()));
+      console.warn(`%c[WARN] ${formatted}`, 'color: #FF9800; font-weight: bold;');
     }
-};
+  };
 
 
   // ─── URL HELPERS ───────────────────────────────────────────────────────────
@@ -204,100 +205,100 @@ const log = {
     return BASE_URL + path;
   }
 
-   
+
 
 
   // ═══════════════════════════════════════════════════════════════════════════
-//  PATCH 3 — REVIEWS (COMPLETE: image + video, lightbox, aggregate)
-//  API fields used: customerName, rating, comment, imageUrl, videoUrl,
-//                   createdAt, approved
-//  Media endpoint pattern: BASE_URL + /api/reviews/{id}/media/image|video
-//  A review can have both image AND video simultaneously.
-// ═══════════════════════════════════════════════════════════════════════════
+  //  PATCH 3 — REVIEWS (COMPLETE: image + video, lightbox, aggregate)
+  //  API fields used: customerName, rating, comment, imageUrl, videoUrl,
+  //                   createdAt, approved
+  //  Media endpoint pattern: BASE_URL + /api/reviews/{id}/media/image|video
+  //  A review can have both image AND video simultaneously.
+  // ═══════════════════════════════════════════════════════════════════════════
 
-async function fetchProductReviews(productPrimeId) {
-  try {
-    const res = await fetch(`${BASE_URL}/api/reviews/product/${productPrimeId}`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    // Backend /product/{id} returns only approved per service impl,
-    // but guard here too for safety — newest first
-    return (Array.isArray(data) ? data : [])
-      .filter((r) => r.approved === true)
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  } catch (err) {
-    console.warn("[Reviews] fetch error:", err);
-    return [];
+  async function fetchProductReviews(productPrimeId) {
+    try {
+      const res = await fetch(`${BASE_URL}/api/reviews/product/${productPrimeId}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      // Backend /product/{id} returns only approved per service impl,
+      // but guard here too for safety — newest first
+      return (Array.isArray(data) ? data : [])
+        .filter((r) => r.approved === true)
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    } catch (err) {
+      console.warn("[Reviews] fetch error:", err);
+      return [];
+    }
   }
-}
 
-// ─── Build flat media list from all reviews ────────────────────────────────
-// Each entry: { type: "image"|"video", url, reviewId, customerName, reviewIdx }
-// One review can contribute TWO entries (image + video).
-function buildReviewMediaList(reviews) {
-  const list = [];
-  reviews.forEach((r, reviewIdx) => {
-    if (r.imageUrl) {
-      list.push({
-        type:         "image",
-        url:          `${BASE_URL}${r.imageUrl}`,
-        reviewId:     r.reviewId,
-        customerName: r.customerName || "Customer",
-        reviewIdx,
-      });
-    }
-    if (r.videoUrl) {
-      list.push({
-        type:         "video",
-        url:          `${BASE_URL}${r.videoUrl}`,
-        reviewId:     r.reviewId,
-        customerName: r.customerName || "Customer",
-        reviewIdx,
-      });
-    }
-  });
-  return list;
-}
+  // ─── Build flat media list from all reviews ────────────────────────────────
+  // Each entry: { type: "image"|"video", url, reviewId, customerName, reviewIdx }
+  // One review can contribute TWO entries (image + video).
+  function buildReviewMediaList(reviews) {
+    const list = [];
+    reviews.forEach((r, reviewIdx) => {
+      if (r.imageUrl) {
+        list.push({
+          type: "image",
+          url: `${BASE_URL}${r.imageUrl}`,
+          reviewId: r.reviewId,
+          customerName: r.customerName || "Customer",
+          reviewIdx,
+        });
+      }
+      if (r.videoUrl) {
+        list.push({
+          type: "video",
+          url: `${BASE_URL}${r.videoUrl}`,
+          reviewId: r.reviewId,
+          customerName: r.customerName || "Customer",
+          reviewIdx,
+        });
+      }
+    });
+    return list;
+  }
 
-// ─── Main review section renderer ─────────────────────────────────────────
-async function fillReviews() {
-  const sec = document.getElementById("socialSection");
-  if (!sec) return;
+  // ─── Main review section renderer ─────────────────────────────────────────
+  async function fillReviews() {
+    const sec = document.getElementById("socialSection");
+    if (!sec) return;
 
-  const reviews   = await fetchProductReviews(safeProductData.productId);
-  const mediaList = buildReviewMediaList(reviews);
-  const total     = reviews.length;
-  const avgRating = total
-    ? (reviews.reduce((s, r) => s + (r.rating || 0), 0) / total).toFixed(1)
-    : "0.0";
+    const reviews = await fetchProductReviews(safeProductData.productId);
+    const mediaList = buildReviewMediaList(reviews);
+    const total = reviews.length;
+    const avgRating = total
+      ? (reviews.reduce((s, r) => s + (r.rating || 0), 0) / total).toFixed(1)
+      : "0.0";
 
-  const starCounts = [5, 4, 3, 2, 1].map((star) => ({
-    star,
-    count: reviews.filter((r) => Math.round(r.rating) === star).length,
-  }));
+    const starCounts = [5, 4, 3, 2, 1].map((star) => ({
+      star,
+      count: reviews.filter((r) => Math.round(r.rating) === star).length,
+    }));
 
-  let html = `
+    let html = `
     <div class="mb-6">
       <h2 class="text-2xl md:text-3xl font-semibold font-zain text-[#1D3C4A]">
         Customer Reviews
       </h2>
     </div>`;
 
-  if (!total) {
-    html += `
+    if (!total) {
+      html += `
       <div class="text-center py-16 border border-[#e5e7eb] rounded-2xl bg-white">
         <i class="fa-regular fa-star text-4xl text-gray-300 mb-3 block"></i>
         <p class="text-gray-400 font-lexend">No reviews yet. Be the first to review!</p>
       </div>`;
-    sec.innerHTML = html;
-    return;
-  }
+      sec.innerHTML = html;
+      return;
+    }
 
-  // ── Aggregate block ────────────────────────────────────────────────────
-  html += `
+    // ── Aggregate block ────────────────────────────────────────────────────
+    html += `
     <div class="flex flex-col sm:flex-row gap-6 bg-white border border-[#e5e7eb]
                 rounded-2xl p-6 mb-6 shadow-sm">
       <div class="flex flex-col items-center justify-center min-w-[120px]
@@ -313,8 +314,8 @@ async function fillReviews() {
       </div>
       <div class="flex-1 space-y-2">
         ${starCounts.map(({ star, count }) => {
-          const pct = total ? Math.round((count / total) * 100) : 0;
-          return `
+      const pct = total ? Math.round((count / total) * 100) : 0;
+      return `
             <div class="flex items-center gap-3">
               <span class="text-xs font-lexend text-[#1D3C4A] w-3 text-right shrink-0">${star}</span>
               <i class="fa-solid fa-star text-[#e39f32] text-[10px] shrink-0"></i>
@@ -324,13 +325,13 @@ async function fillReviews() {
               </div>
               <span class="text-xs text-gray-400 font-lexend w-5 shrink-0">${count}</span>
             </div>`;
-        }).join("")}
+    }).join("")}
       </div>
     </div>`;
 
-  // ── All media strip (images + videos combined) ─────────────────────────
-  if (mediaList.length > 0) {
-    html += `
+    // ── All media strip (images + videos combined) ─────────────────────────
+    if (mediaList.length > 0) {
+      html += `
       <div class="mb-6">
         <h3 class="text-sm font-semibold font-lexend text-[#1D3C4A] mb-3">
           Customer photos &amp; videos (${mediaList.length})
@@ -338,8 +339,8 @@ async function fillReviews() {
         <div class="flex gap-2 overflow-x-auto pb-2"
              style="scrollbar-width:thin;scrollbar-color:#e39f32 #f1f1f1">
           ${mediaList.map((item, idx) => {
-            if (item.type === "video") {
-              return `
+        if (item.type === "video") {
+          return `
                 <div class="review-strip-media relative flex-shrink-0 h-20 w-20 rounded-xl
                             border border-[#e5e7eb] overflow-hidden cursor-pointer
                             hover:border-[#e39f32] transition-all group"
@@ -352,8 +353,8 @@ async function fillReviews() {
                     <i class="fa-solid fa-play text-white text-lg"></i>
                   </div>
                 </div>`;
-            }
-            return `
+        }
+        return `
               <img src="${item.url}"
                    class="review-strip-media flex-shrink-0 h-20 w-20 object-cover rounded-xl
                           border border-[#e5e7eb] cursor-pointer
@@ -361,34 +362,34 @@ async function fillReviews() {
                    data-media-idx="${idx}"
                    alt="Review media"
                    onerror="this.parentElement?.remove()"/>`;
-          }).join("")}
+      }).join("")}
         </div>
       </div>`;
-  }
+    }
 
-  // ── Individual review cards ────────────────────────────────────────────
-  html += `<div class="space-y-4">`;
+    // ── Individual review cards ────────────────────────────────────────────
+    html += `<div class="space-y-4">`;
 
-  reviews.forEach((r) => {
-    const name    = escapeHtml(r.customerName || "Anonymous");
-    const initials = name.slice(0, 2).toUpperCase();
-    const rating  = r.rating || 0;
-    const comment = escapeHtml(r.comment || "");
-    const dateStr = r.createdAt
-      ? new Date(r.createdAt).toLocaleDateString("en-IN", {
+    reviews.forEach((r) => {
+      const name = escapeHtml(r.customerName || "Anonymous");
+      const initials = name.slice(0, 2).toUpperCase();
+      const rating = r.rating || 0;
+      const comment = escapeHtml(r.comment || "");
+      const dateStr = r.createdAt
+        ? new Date(r.createdAt).toLocaleDateString("en-IN", {
           day: "numeric", month: "short", year: "numeric",
         })
-      : "";
+        : "";
 
-    // Find media indices for this review's image/video in the global mediaList
-    const imgMediaIdx = mediaList.findIndex(
-      (m) => m.type === "image" && m.reviewId === r.reviewId
-    );
-    const vidMediaIdx = mediaList.findIndex(
-      (m) => m.type === "video" && m.reviewId === r.reviewId
-    );
+      // Find media indices for this review's image/video in the global mediaList
+      const imgMediaIdx = mediaList.findIndex(
+        (m) => m.type === "image" && m.reviewId === r.reviewId
+      );
+      const vidMediaIdx = mediaList.findIndex(
+        (m) => m.type === "video" && m.reviewId === r.reviewId
+      );
 
-    html += `
+      html += `
       <div class="bg-white border border-[#e5e7eb] rounded-2xl p-5 hover:shadow-sm
                   transition-shadow">
 
@@ -402,8 +403,8 @@ async function fillReviews() {
             <div class="flex items-center justify-between gap-2 flex-wrap">
               <span class="font-semibold font-lexend text-[#1D3C4A] text-sm">${name}</span>
               ${dateStr
-                ? `<span class="text-xs text-gray-400 font-lexend">${dateStr}</span>`
-                : ""}
+          ? `<span class="text-xs text-gray-400 font-lexend">${dateStr}</span>`
+          : ""}
             </div>
             <div class="flex items-center gap-1 mt-0.5">
               <div class="flex text-[#e39f32] text-xs gap-0.5">${renderStars(rating)}</div>
@@ -452,27 +453,27 @@ async function fillReviews() {
           </div>` : ""}
 
       </div>`;
-  });
+    });
 
-  html += `</div>`; // close cards list
+    html += `</div>`; // close cards list
 
-  sec.innerHTML = html;
+    sec.innerHTML = html;
 
-  // Build and wire lightbox after DOM is ready
-  if (mediaList.length > 0) {
-    buildReviewLightbox(mediaList);
-    wireReviewLightbox(mediaList);
+    // Build and wire lightbox after DOM is ready
+    if (mediaList.length > 0) {
+      buildReviewLightbox(mediaList);
+      wireReviewLightbox(mediaList);
+    }
   }
-}
 
-// ─── Lightbox builder ──────────────────────────────────────────────────────
-function buildReviewLightbox(mediaList) {
-  // Remove stale instance if re-rendered
-  document.getElementById("reviewLightbox")?.remove();
+  // ─── Lightbox builder ──────────────────────────────────────────────────────
+  function buildReviewLightbox(mediaList) {
+    // Remove stale instance if re-rendered
+    document.getElementById("reviewLightbox")?.remove();
 
-  const thumbsHTML = mediaList.map((item, idx) => {
-    if (item.type === "video") {
-      return `
+    const thumbsHTML = mediaList.map((item, idx) => {
+      if (item.type === "video") {
+        return `
         <div class="lb-thumb-wrap relative flex-shrink-0 h-12 w-12 rounded-lg overflow-hidden
                     cursor-pointer border-2 border-transparent hover:border-[#e39f32]
                     transition-all opacity-60"
@@ -483,17 +484,17 @@ function buildReviewLightbox(mediaList) {
             <i class="fa-solid fa-play text-white text-[10px]"></i>
           </div>
         </div>`;
-    }
-    return `
+      }
+      return `
       <img class="lb-thumb-wrap flex-shrink-0 h-12 w-12 object-cover rounded-lg
                   cursor-pointer border-2 border-transparent hover:border-[#e39f32]
                   transition-all opacity-60"
            src="${item.url}"
            data-lb-idx="${idx}"
            onerror="this.style.display='none'"/>`;
-  }).join("");
+    }).join("");
 
-  document.body.insertAdjacentHTML("beforeend", `
+    document.body.insertAdjacentHTML("beforeend", `
     <div id="reviewLightbox"
          class="fixed inset-0 z-[9999] hidden items-center justify-center"
          style="background:rgba(0,0,0,0.92)">
@@ -550,452 +551,452 @@ function buildReviewLightbox(mediaList) {
 
       </div>
     </div>`);
-}
-
-// ─── Lightbox wiring ───────────────────────────────────────────────────────
-function wireReviewLightbox(mediaList) {
-  if (!mediaList.length) return;
-
-  let currentIdx = 0;
-
-  // ── Open / close ─────────────────────────────────────────────────────────
-  function openLightbox(idx) {
-    currentIdx = Math.max(0, Math.min(idx, mediaList.length - 1));
-    const lb = document.getElementById("reviewLightbox");
-    lb.classList.remove("hidden");
-    lb.classList.add("flex");
-    document.body.style.overflow = "hidden";
-    renderSlide();
   }
 
-  function closeLightbox() {
-    const lb = document.getElementById("reviewLightbox");
-    // Pause any playing video before closing
-    lb.querySelector("video")?.pause();
-    lb.classList.add("hidden");
-    lb.classList.remove("flex");
-    document.body.style.overflow = "";
-  }
+  // ─── Lightbox wiring ───────────────────────────────────────────────────────
+  function wireReviewLightbox(mediaList) {
+    if (!mediaList.length) return;
 
-  // ── Render current slide ──────────────────────────────────────────────────
-  function renderSlide() {
-    const item      = mediaList[currentIdx];
-    const wrap      = document.getElementById("lbMediaWrap");
-    const nameEl    = document.getElementById("lbReviewerName");
-    const counterEl = document.getElementById("lbCounter");
+    let currentIdx = 0;
 
-    if (!wrap) return;
+    // ── Open / close ─────────────────────────────────────────────────────────
+    function openLightbox(idx) {
+      currentIdx = Math.max(0, Math.min(idx, mediaList.length - 1));
+      const lb = document.getElementById("reviewLightbox");
+      lb.classList.remove("hidden");
+      lb.classList.add("flex");
+      document.body.style.overflow = "hidden";
+      renderSlide();
+    }
 
-    // Pause any existing video before swapping
-    wrap.querySelector("video")?.pause();
+    function closeLightbox() {
+      const lb = document.getElementById("reviewLightbox");
+      // Pause any playing video before closing
+      lb.querySelector("video")?.pause();
+      lb.classList.add("hidden");
+      lb.classList.remove("flex");
+      document.body.style.overflow = "";
+    }
 
-    // Swap media element
-    if (item.type === "video") {
-      wrap.innerHTML = `
+    // ── Render current slide ──────────────────────────────────────────────────
+    function renderSlide() {
+      const item = mediaList[currentIdx];
+      const wrap = document.getElementById("lbMediaWrap");
+      const nameEl = document.getElementById("lbReviewerName");
+      const counterEl = document.getElementById("lbCounter");
+
+      if (!wrap) return;
+
+      // Pause any existing video before swapping
+      wrap.querySelector("video")?.pause();
+
+      // Swap media element
+      if (item.type === "video") {
+        wrap.innerHTML = `
         <video src="${item.url}"
                controls
                autoplay
                class="max-h-[65vh] max-w-full rounded-xl outline-none"
                style="background:#000">
         </video>`;
-    } else {
-      wrap.innerHTML = `
+      } else {
+        wrap.innerHTML = `
         <img src="${item.url}"
              alt="Review photo"
              class="max-h-[65vh] max-w-full object-contain rounded-xl"
              onerror="this.alt='Image unavailable'"/>`;
+      }
+
+      // Meta
+      if (nameEl) nameEl.textContent = item.customerName;
+      if (counterEl) counterEl.textContent = `${currentIdx + 1} / ${mediaList.length}`;
+
+      // Sync thumb strip
+      document.querySelectorAll(".lb-thumb-wrap").forEach((t, i) => {
+        const isActive = i === currentIdx;
+        t.classList.toggle("border-[#e39f32]", isActive);
+        t.classList.toggle("opacity-100", isActive);
+        t.classList.toggle("opacity-60", !isActive);
+      });
+
+      // Scroll active thumb into view
+      document.querySelector(`.lb-thumb-wrap[data-lb-idx="${currentIdx}"]`)
+        ?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+
+      // Prev / next visibility
+      const prev = document.getElementById("lbPrev");
+      const next = document.getElementById("lbNext");
+      if (prev) prev.style.visibility = currentIdx === 0 ? "hidden" : "visible";
+      if (next) next.style.visibility = currentIdx === mediaList.length - 1 ? "hidden" : "visible";
     }
 
-    // Meta
-    if (nameEl)    nameEl.textContent    = item.customerName;
-    if (counterEl) counterEl.textContent = `${currentIdx + 1} / ${mediaList.length}`;
-
-    // Sync thumb strip
-    document.querySelectorAll(".lb-thumb-wrap").forEach((t, i) => {
-      const isActive = i === currentIdx;
-      t.classList.toggle("border-[#e39f32]", isActive);
-      t.classList.toggle("opacity-100",      isActive);
-      t.classList.toggle("opacity-60",       !isActive);
+    // ── Strip clicks (top media strip in review section) ─────────────────────
+    document.querySelectorAll(".review-strip-media").forEach((el) => {
+      el.addEventListener("click", () => openLightbox(parseInt(el.dataset.mediaIdx)));
     });
 
-    // Scroll active thumb into view
-    document.querySelector(`.lb-thumb-wrap[data-lb-idx="${currentIdx}"]`)
-      ?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    // ── Per-card media clicks ─────────────────────────────────────────────────
+    document.querySelectorAll(".review-card-media").forEach((el) => {
+      el.addEventListener("click", () => openLightbox(parseInt(el.dataset.mediaIdx)));
+    });
 
-    // Prev / next visibility
-    const prev = document.getElementById("lbPrev");
-    const next = document.getElementById("lbNext");
-    if (prev) prev.style.visibility = currentIdx === 0                     ? "hidden" : "visible";
-    if (next) next.style.visibility = currentIdx === mediaList.length - 1  ? "hidden" : "visible";
+    // ── Lightbox controls ─────────────────────────────────────────────────────
+    document.getElementById("lbClose")
+      ?.addEventListener("click", closeLightbox);
+
+    document.getElementById("lbPrev")
+      ?.addEventListener("click", () => {
+        if (currentIdx > 0) { currentIdx--; renderSlide(); }
+      });
+
+    document.getElementById("lbNext")
+      ?.addEventListener("click", () => {
+        if (currentIdx < mediaList.length - 1) { currentIdx++; renderSlide(); }
+      });
+
+    // ── Lightbox thumb strip ──────────────────────────────────────────────────
+    document.getElementById("lbThumbStrip")
+      ?.addEventListener("click", (e) => {
+        const thumb = e.target.closest(".lb-thumb-wrap");
+        if (thumb) openLightbox(parseInt(thumb.dataset.lbIdx));
+      });
+
+    // ── Backdrop click → close ────────────────────────────────────────────────
+    document.getElementById("reviewLightbox")
+      ?.addEventListener("click", (e) => {
+        if (e.target.id === "reviewLightbox") closeLightbox();
+      });
+
+    // ── Keyboard nav ──────────────────────────────────────────────────────────
+    document.addEventListener("keydown", (e) => {
+      if (document.getElementById("reviewLightbox")?.classList.contains("hidden")) return;
+      if (e.key === "ArrowLeft" && currentIdx > 0) { currentIdx--; renderSlide(); }
+      if (e.key === "ArrowRight" && currentIdx < mediaList.length - 1) { currentIdx++; renderSlide(); }
+      if (e.key === "Escape") closeLightbox();
+    });
   }
 
-  // ── Strip clicks (top media strip in review section) ─────────────────────
-  document.querySelectorAll(".review-strip-media").forEach((el) => {
-    el.addEventListener("click", () => openLightbox(parseInt(el.dataset.mediaIdx)));
-  });
-
-  // ── Per-card media clicks ─────────────────────────────────────────────────
-  document.querySelectorAll(".review-card-media").forEach((el) => {
-    el.addEventListener("click", () => openLightbox(parseInt(el.dataset.mediaIdx)));
-  });
-
-  // ── Lightbox controls ─────────────────────────────────────────────────────
-  document.getElementById("lbClose")
-    ?.addEventListener("click", closeLightbox);
-
-  document.getElementById("lbPrev")
-    ?.addEventListener("click", () => {
-      if (currentIdx > 0) { currentIdx--; renderSlide(); }
-    });
-
-  document.getElementById("lbNext")
-    ?.addEventListener("click", () => {
-      if (currentIdx < mediaList.length - 1) { currentIdx++; renderSlide(); }
-    });
-
-  // ── Lightbox thumb strip ──────────────────────────────────────────────────
-  document.getElementById("lbThumbStrip")
-    ?.addEventListener("click", (e) => {
-      const thumb = e.target.closest(".lb-thumb-wrap");
-      if (thumb) openLightbox(parseInt(thumb.dataset.lbIdx));
-    });
-
-  // ── Backdrop click → close ────────────────────────────────────────────────
-  document.getElementById("reviewLightbox")
-    ?.addEventListener("click", (e) => {
-      if (e.target.id === "reviewLightbox") closeLightbox();
-    });
-
-  // ── Keyboard nav ──────────────────────────────────────────────────────────
-  document.addEventListener("keydown", (e) => {
-    if (document.getElementById("reviewLightbox")?.classList.contains("hidden")) return;
-    if (e.key === "ArrowLeft"  && currentIdx > 0)                         { currentIdx--; renderSlide(); }
-    if (e.key === "ArrowRight" && currentIdx < mediaList.length - 1)      { currentIdx++; renderSlide(); }
-    if (e.key === "Escape") closeLightbox();
-  });
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-//  END PATCH 3
-// ═══════════════════════════════════════════════════════════════════════════
+  // ═══════════════════════════════════════════════════════════════════════════
+  //  END PATCH 3
+  // ═══════════════════════════════════════════════════════════════════════════
 
 
 
 
 
-//============================================================//
+  //============================================================//
   //================ PATCH FUNCTIONS ADDED =====================//
   //============================================================//
 
   // ─── SEO URL PARSER ───────────────────────────────────────────────────────────
-function parseSEOURL() {
+  function parseSEOURL() {
     const pathname = window.location.pathname;
     const searchParams = new URLSearchParams(window.location.search);
-    
+
     // Extract ID from query params (always reliable)
     let productId = parseInt(searchParams.get('id')) || 0;
-    
+
     // If no ID in query params, try to extract from path
     if (!productId) {
-        const pathMatch = pathname.match(/\/products\/[^\/]+\/[^\/]+\/[^\/]+/);
-        if (pathMatch) {
-            const idFromQuery = searchParams.get('id');
-            if (idFromQuery) productId = parseInt(idFromQuery);
-        }
+      const pathMatch = pathname.match(/\/products\/[^\/]+\/[^\/]+\/[^\/]+/);
+      if (pathMatch) {
+        const idFromQuery = searchParams.get('id');
+        if (idFromQuery) productId = parseInt(idFromQuery);
+      }
     }
-    
+
     // Extract SEO data for meta tags
     const seoData = {
-        brand: searchParams.get('brand') || extractFromPath(pathname, 1),
-        category: searchParams.get('category') || extractFromPath(pathname, 2),
-        product: searchParams.get('product') || extractFromPath(pathname, 3),
-        sku: searchParams.get('sku'),
-        variant: searchParams.get('variant')
+      brand: searchParams.get('brand') || extractFromPath(pathname, 1),
+      category: searchParams.get('category') || extractFromPath(pathname, 2),
+      product: searchParams.get('product') || extractFromPath(pathname, 3),
+      sku: searchParams.get('sku'),
+      variant: searchParams.get('variant')
     };
-    
-    function extractFromPath(path, index) {
-        const parts = path.split('/').filter(p => p && p !== 'products');
-        return parts[index] || '';
-    }
-    
-    return { productId, seoData };
-}
 
-// ─── UPDATE SEO META TAGS ─────────────────────────────────────────────────────
-function updateSEOMetaTags(productData, seoData) {
+    function extractFromPath(path, index) {
+      const parts = path.split('/').filter(p => p && p !== 'products');
+      return parts[index] || '';
+    }
+
+    return { productId, seoData };
+  }
+
+  // ─── UPDATE SEO META TAGS ─────────────────────────────────────────────────────
+  function updateSEOMetaTags(productData, seoData) {
     if (!productData) return;
-    
+
     // Build clean title
     let title = `${productData.brandName} ${productData.productName}`;
     if (seoData.variant) {
-        const variantName = seoData.variant.replace(/-/g, ' ');
-        title += ` - ${variantName}`;
+      const variantName = seoData.variant.replace(/-/g, ' ');
+      title += ` - ${variantName}`;
     }
     title += ` | Buy Online at Best Price in India`;
     document.title = title;
-    
+
     // Meta description
     let metaDesc = document.querySelector('meta[name="description"]');
     if (!metaDesc) {
-        metaDesc = document.createElement('meta');
-        metaDesc.name = 'description';
-        document.head.appendChild(metaDesc);
+      metaDesc = document.createElement('meta');
+      metaDesc.name = 'description';
+      document.head.appendChild(metaDesc);
     }
     const price = productData.currentSellingPrice;
-    const discount = productData.currentMrpPrice > price ? 
-        `${Math.round(((productData.currentMrpPrice - price) / productData.currentMrpPrice) * 100)}% off` : '';
+    const discount = productData.currentMrpPrice > price ?
+      `${Math.round(((productData.currentMrpPrice - price) / productData.currentMrpPrice) * 100)}% off` : '';
     metaDesc.content = `Buy ${productData.brandName} ${productData.productName} online at best price. ${discount}. Free shipping. COD available. Shop now!`;
-    
+
     // Meta keywords
     let metaKeywords = document.querySelector('meta[name="keywords"]');
     if (!metaKeywords) {
-        metaKeywords = document.createElement('meta');
-        metaKeywords.name = 'keywords';
-        document.head.appendChild(metaKeywords);
+      metaKeywords = document.createElement('meta');
+      metaKeywords.name = 'keywords';
+      document.head.appendChild(metaKeywords);
     }
     const keywords = [
-        productData.brandName,
-        productData.productName,
-        productData.productCategory,
-        productData.productSubCategory,
-        ...(productData.globalTags || [])
+      productData.brandName,
+      productData.productName,
+      productData.productCategory,
+      productData.productSubCategory,
+      ...(productData.globalTags || [])
     ].filter(Boolean).join(', ');
     metaKeywords.content = keywords;
-    
+
     // Canonical URL
     let canonical = document.querySelector('link[rel="canonical"]');
     if (!canonical) {
-        canonical = document.createElement('link');
-        canonical.rel = 'canonical';
-        document.head.appendChild(canonical);
+      canonical = document.createElement('link');
+      canonical.rel = 'canonical';
+      document.head.appendChild(canonical);
     }
     const canonicalUrl = `${window.location.origin}${window.location.pathname}?id=${productData.productId}`;
     canonical.href = canonicalUrl;
-    
+
     // Open Graph tags
     let ogTitle = document.querySelector('meta[property="og:title"]');
     if (!ogTitle) {
-        ogTitle = document.createElement('meta');
-        ogTitle.setAttribute('property', 'og:title');
-        document.head.appendChild(ogTitle);
+      ogTitle = document.createElement('meta');
+      ogTitle.setAttribute('property', 'og:title');
+      document.head.appendChild(ogTitle);
     }
     ogTitle.setAttribute('content', title);
-    
+
     let ogUrl = document.querySelector('meta[property="og:url"]');
     if (!ogUrl) {
-        ogUrl = document.createElement('meta');
-        ogUrl.setAttribute('property', 'og:url');
-        document.head.appendChild(ogUrl);
+      ogUrl = document.createElement('meta');
+      ogUrl.setAttribute('property', 'og:url');
+      document.head.appendChild(ogUrl);
     }
     ogUrl.setAttribute('content', canonicalUrl);
-}
+  }
 
   // ─── EXTRACT SEO PARAMETERS FROM URL ─────────────────────────────────────────
-function getSEOParameters() {
+  function getSEOParameters() {
     const searchParams = new URLSearchParams(window.location.search);
     return {
-        brand: searchParams.get('seo_brand'),
-        product: searchParams.get('seo_product'),
-        sku: searchParams.get('seo_sku'),
-        variant: searchParams.get('seo_variant')
+      brand: searchParams.get('seo_brand'),
+      product: searchParams.get('seo_product'),
+      sku: searchParams.get('seo_sku'),
+      variant: searchParams.get('seo_variant')
     };
-}
+  }
 
-  
+
 
   // ─── GENERATE SEO URL FOR PRODUCT ────────────────────────────────────────────
-// function generateProductSEOUrl(product) {
-//     if (!product) return null;
-    
-//     const brandSlug = slugify(product.brandName || "artezo");
-//     const productSlug = slugify(product.productName || "product");
-//     const sku = product.currentSku || `PROD-${product.productPrimeId}`;
-    
-//     return `/product/${brandSlug}/${productSlug}/${sku}`;
-// }
+  // function generateProductSEOUrl(product) {
+  //     if (!product) return null;
 
-function generateProductSEOUrl(product) {
+  //     const brandSlug = slugify(product.brandName || "artezo");
+  //     const productSlug = slugify(product.productName || "product");
+  //     const sku = product.currentSku || `PROD-${product.productPrimeId}`;
+
+  //     return `/product/${brandSlug}/${productSlug}/${sku}`;
+  // }
+
+  function generateProductSEOUrl(product) {
     if (!product) return null;
 
-    const brandSlug    = slugify(product.brandName || "artezo");
+    const brandSlug = slugify(product.brandName || "artezo");
     const categorySlug = slugify(product.productCategory || "products");
 
     let cleanName = product.productName || "product";
     if (cleanName.toLowerCase().startsWith((product.brandName || "").toLowerCase())) {
-        cleanName = cleanName.substring((product.brandName || "").length).trim();
+      cleanName = cleanName.substring((product.brandName || "").length).trim();
     }
     // const productSlug = slugify(cleanName || product.productName);
-    const sku         = product.currentSku || `PROD-${product.productPrimeId}`;
+    const sku = product.currentSku || `PROD-${product.productPrimeId}`;
 
     // Use file path so it works on Live Server + Hostinger without extra rewrite rules
     return `/products/product-detail.html?id=${product.productPrimeId}&sku=${sku}&brand=${brandSlug}&category=${categorySlug}`;
-}
+  }
 
 
-// ─── SLUGIFY HELPER (same as homeCategory) ───────────────────────────────────
-function slugify(text) {
+  // ─── SLUGIFY HELPER (same as homeCategory) ───────────────────────────────────
+  function slugify(text) {
     if (!text) return "product";
     return text
-        .toString()
-        .toLowerCase()
-        .trim()
-        .replace(/\s+/g, '-')
-        .replace(/[^\w\-]+/g, '')
-        .replace(/\-\-+/g, '-')
-        .replace(/^-+/, '')
-        .replace(/-+$/, '');
-}
+      .toString()
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w\-]+/g, '')
+      .replace(/\-\-+/g, '-')
+      .replace(/^-+/, '')
+      .replace(/-+$/, '');
+  }
 
 
   // ─── SEO URL PARSER ───────────────────────────────────────────────────────────
   function parseSEOUrdAndGetProductId() {
     const pathname = window.location.pathname;
     const searchParams = new URLSearchParams(window.location.search);
-    
+
     // NEW FORMAT: /product/{id}/{brand}/{product-name}
     const seoMatch = pathname.match(/\/product\/(\d+)\/([^\/]+)\/([^\/]+)/);
-    
+
     if (seoMatch) {
-        const productId = parseInt(seoMatch[1]);
-        const brandSlug = seoMatch[2];
-        const productSlug = seoMatch[3];
-        const variantId = searchParams.get('variant');
-        
-        console.log("[ProductDetail] SEO URL with ID detected:", { productId, brandSlug, productSlug, variantId });
-        
-        // Store for potential URL update later
-        window.seoInfo = {
-            productId: productId,
-            brandSlug: brandSlug,
-            // productSlug: productSlug,
-            variantId: variantId
-        };
-        
-        return productId;  // ← Return the ID directly!
+      const productId = parseInt(seoMatch[1]);
+      const brandSlug = seoMatch[2];
+      const productSlug = seoMatch[3];
+      const variantId = searchParams.get('variant');
+
+      console.log("[ProductDetail] SEO URL with ID detected:", { productId, brandSlug, productSlug, variantId });
+
+      // Store for potential URL update later
+      window.seoInfo = {
+        productId: productId,
+        brandSlug: brandSlug,
+        // productSlug: productSlug,
+        variantId: variantId
+      };
+
+      return productId;  // ← Return the ID directly!
     }
-    
+
     // OLD FORMAT: ?id=123
     const id = parseInt(searchParams.get("id")) || 0;
     if (id) {
-        console.log("[ProductDetail] Legacy URL detected with ID:", id);
-        return id;
+      console.log("[ProductDetail] Legacy URL detected with ID:", id);
+      return id;
     }
-    
+
     return 0;
-}
+  }
 
-// ─── FETCH PRODUCT BY SKU (for SEO URLs) ──────────────────────────────────────
-async function fetchProductBySKU(sku, variantId) {
+  // ─── FETCH PRODUCT BY SKU (for SEO URLs) ──────────────────────────────────────
+  async function fetchProductBySKU(sku, variantId) {
     try {
-        console.log("[ProductDetail] Fetching product by SKU:", sku);
-        
-        // Try multiple API endpoints
-        let response = null;
-        
-        // Try 1: Direct SKU endpoint
-        try {
-            const res = await fetch(`${BASE_URL}/api/products/get-by-sku/${encodeURIComponent(sku)}`, {
-                method: "GET",
-                headers: { "Content-Type": "application/json" },
-            });
-            if (res.ok) response = res;
-        } catch (e) { console.log("SKU endpoint failed, trying alternative..."); }
-        
-        // Try 2: Search by SKU as parameter
-        if (!response) {
-            const res = await fetch(`${BASE_URL}/api/products/search?sku=${encodeURIComponent(sku)}`, {
-                method: "GET",
-                headers: { "Content-Type": "application/json" },
-            });
-            if (res.ok) response = res;
-        }
-        
-        // Try 3: Get all products and filter (fallback)
-        if (!response) {
-            console.log("Trying fallback: fetch all products and filter by SKU");
-            const res = await fetch(`${BASE_URL}/api/products/get-all-active-products?page=0&size=100`, {
-                method: "GET",
-                headers: { "Content-Type": "application/json" },
-            });
-            if (res.ok) {
-                const allProducts = await res.json();
-                const content = allProducts.content || allProducts.data || [];
-                const foundProduct = content.find(p => 
-                    p.currentSku === sku || 
-                    p.sku === sku || 
-                    p.productStrId === sku
-                );
-                if (foundProduct) {
-                    rawProduct = foundProduct;
-                    buildSafeProductData(rawProduct);
-                    if (variantId && rawProduct.availableVariants) {
-                        const targetVariant = rawProduct.availableVariants.find(v => 
-                            v.variantId === variantId || v.sku === variantId
-                        );
-                        if (targetVariant) currentVariant = targetVariant;
-                    }
-                    renderPage();
-                    updateCanonicalURL(sku, variantId);
-                    return;
-                }
-            }
-        }
-        
-        if (!response || !response.ok) {
-            throw new Error(`Product not found with SKU: ${sku}`);
-        }
-        
-        rawProduct = await response.json();
-        buildSafeProductData(rawProduct);
-        
-        if (variantId && rawProduct.availableVariants) {
-            const targetVariant = rawProduct.availableVariants.find(v => 
+      console.log("[ProductDetail] Fetching product by SKU:", sku);
+
+      // Try multiple API endpoints
+      let response = null;
+
+      // Try 1: Direct SKU endpoint
+      try {
+        const res = await fetch(`${BASE_URL}/api/products/get-by-sku/${encodeURIComponent(sku)}`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+        if (res.ok) response = res;
+      } catch (e) { console.log("SKU endpoint failed, trying alternative..."); }
+
+      // Try 2: Search by SKU as parameter
+      if (!response) {
+        const res = await fetch(`${BASE_URL}/api/products/search?sku=${encodeURIComponent(sku)}`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+        if (res.ok) response = res;
+      }
+
+      // Try 3: Get all products and filter (fallback)
+      if (!response) {
+        console.log("Trying fallback: fetch all products and filter by SKU");
+        const res = await fetch(`${BASE_URL}/api/products/get-all-active-products?page=0&size=100`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+        if (res.ok) {
+          const allProducts = await res.json();
+          const content = allProducts.content || allProducts.data || [];
+          const foundProduct = content.find(p =>
+            p.currentSku === sku ||
+            p.sku === sku ||
+            p.productStrId === sku
+          );
+          if (foundProduct) {
+            rawProduct = foundProduct;
+            buildSafeProductData(rawProduct);
+            if (variantId && rawProduct.availableVariants) {
+              const targetVariant = rawProduct.availableVariants.find(v =>
                 v.variantId === variantId || v.sku === variantId
-            );
-            if (targetVariant) currentVariant = targetVariant;
+              );
+              if (targetVariant) currentVariant = targetVariant;
+            }
+            renderPage();
+            updateCanonicalURL(sku, variantId);
+            return;
+          }
         }
-        
-        renderPage();
-        updateCanonicalURL(sku, variantId);
-        
+      }
+
+      if (!response || !response.ok) {
+        throw new Error(`Product not found with SKU: ${sku}`);
+      }
+
+      rawProduct = await response.json();
+      buildSafeProductData(rawProduct);
+
+      if (variantId && rawProduct.availableVariants) {
+        const targetVariant = rawProduct.availableVariants.find(v =>
+          v.variantId === variantId || v.sku === variantId
+        );
+        if (targetVariant) currentVariant = targetVariant;
+      }
+
+      renderPage();
+      updateCanonicalURL(sku, variantId);
+
     } catch (err) {
-        console.error("[ProductDetail] SKU fetch error:", err);
-        showFatalError(`Product not found. Please check the link or try again. (SKU: ${sku})`);
+      console.error("[ProductDetail] SKU fetch error:", err);
+      showFatalError(`Product not found. Please check the link or try again. (SKU: ${sku})`);
     }
-}
+  }
 
 
-// ─── UPDATE CANONICAL URL ─────────────────────────────────────────────────────
-function updateCanonicalURL(sku, variantId) {
+  // ─── UPDATE CANONICAL URL ─────────────────────────────────────────────────────
+  function updateCanonicalURL(sku, variantId) {
     let canonicalUrl = window.location.origin + window.location.pathname;
-    
+
     // Remove any existing canonical link
     const existingCanonical = document.querySelector('link[rel="canonical"]');
     if (existingCanonical) {
-        existingCanonical.remove();
+      existingCanonical.remove();
     }
-    
+
     // Create new canonical link
     const canonicalLink = document.createElement('link');
     canonicalLink.rel = 'canonical';
     canonicalLink.href = canonicalUrl;
     document.head.appendChild(canonicalLink);
-    
+
     // Also update Open Graph URL
     const ogUrl = document.querySelector('meta[property="og:url"]');
     if (ogUrl) {
-        ogUrl.setAttribute('content', canonicalUrl);
+      ogUrl.setAttribute('content', canonicalUrl);
     } else {
-        const meta = document.createElement('meta');
-        meta.setAttribute('property', 'og:url');
-        meta.setAttribute('content', canonicalUrl);
-        document.head.appendChild(meta);
+      const meta = document.createElement('meta');
+      meta.setAttribute('property', 'og:url');
+      meta.setAttribute('content', canonicalUrl);
+      document.head.appendChild(meta);
     }
-}
+  }
 
-// ADD this new function:
-// FIND the entire rewriteURLToSEO function and REPLACE WITH:
-function rewriteURLToSEO(variantSku) {
+  // ADD this new function:
+  // FIND the entire rewriteURLToSEO function and REPLACE WITH:
+  function rewriteURLToSEO(variantSku) {
     if (!safeProductData) return;
 
     const baseSku = safeProductData.currentSku || `PROD-${safeProductData.productId}`;
@@ -1003,84 +1004,84 @@ function rewriteURLToSEO(variantSku) {
     // Keep the REAL file path — no fake /products/ path that breaks refresh
     // and relative links. Only update query params for SEO signals.
     const params = new URLSearchParams({
-        id:      safeProductData.productId,
-        sku:     baseSku,
-        brand:   slugify(safeProductData.brandName),
-        category: slugify(safeProductData.productCategory || "products"),
-        // product: slugify(safeProductData.productName),
+      id: safeProductData.productId,
+      sku: baseSku,
+      brand: slugify(safeProductData.brandName),
+      category: slugify(safeProductData.productCategory || "products"),
+      // product: slugify(safeProductData.productName),
     });
 
     if (variantSku && variantSku !== `VAR-${safeProductData.productId}`) {
-        params.set("variant", variantSku);
+      params.set("variant", variantSku);
     }
 
     // Result: /Product-Details/product-detail.html?id=1&sku=ART-WPLATE-GLD&brand=artezo&...
     const newURL = `/products/product-detail.html?${params.toString()}`;
     history.replaceState({ productId: safeProductData.productId }, document.title, newURL);
     console.log("[ProductDetail] URL updated to:", newURL);
-}
+  }
 
-//================ Update meta tags for SEO =====================//
+  //================ Update meta tags for SEO =====================//
 
-function addStructuredData() {
+  function addStructuredData() {
     // Remove existing structured data
     const existingScript = document.querySelector('script[type="application/ld+json"]');
     if (existingScript) existingScript.remove();
-    
+
     const structuredData = {
-        "@context": "https://schema.org/",
-        "@type": "Product",
-        "name": safeProductData.productName,
-        "image": safeProductData.mainImage,
-        "description": safeProductData.aboutItem?.join(' ') || '',
-        "sku": safeProductData.currentSku,
-        "mpn": safeProductData.productStrId,
-        "brand": {
-            "@type": "Brand",
-            "name": safeProductData.brandName
-        },
-        "offers": {
-            "@type": "Offer",
-            "url": window.location.href,
-            "priceCurrency": "INR",
-            "price": safeProductData.currentSellingPrice,
-            "priceValidUntil": new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            "availability": safeProductData.currentStock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-            "seller": {
-                "@type": "Organization",
-                "name": "Artezo"
-            }
-        },
-        "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "4.5",
-            "reviewCount": safeProductData.productReviews?.length || 50
+      "@context": "https://schema.org/",
+      "@type": "Product",
+      "name": safeProductData.productName,
+      "image": safeProductData.mainImage,
+      "description": safeProductData.aboutItem?.join(' ') || '',
+      "sku": safeProductData.currentSku,
+      "mpn": safeProductData.productStrId,
+      "brand": {
+        "@type": "Brand",
+        "name": safeProductData.brandName
+      },
+      "offers": {
+        "@type": "Offer",
+        "url": window.location.href,
+        "priceCurrency": "INR",
+        "price": safeProductData.currentSellingPrice,
+        "priceValidUntil": new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        "availability": safeProductData.currentStock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+        "seller": {
+          "@type": "Organization",
+          "name": "Artezo"
         }
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.5",
+        "reviewCount": safeProductData.productReviews?.length || 50
+      }
     };
-    
+
     const script = document.createElement('script');
     script.type = 'application/ld+json';
     script.textContent = JSON.stringify(structuredData);
     document.head.appendChild(script);
-}
+  }
 
 
-//============================================//
-//================ PATCH END =================//
-//============================================//
+  //============================================//
+  //================ PATCH END =================//
+  //============================================//
 
   // ─── READ PRODUCT ID FROM URL ──────────────────────────────────────────────
-  const urlParams      = new URLSearchParams(window.location.search);
+  const urlParams = new URLSearchParams(window.location.search);
   const productPrimeId = parseInt(urlParams.get("id")) || 0;
 
   // ─── STATE ─────────────────────────────────────────────────────────────────
-  let rawProduct      = null;
+  let rawProduct = null;
   let safeProductData = null;
-  let currentVariant  = null;
+  let currentVariant = null;
   let transformedData = null;
 
   let currentCustomFields = {};
-  let customFieldValues   = {};
+  let customFieldValues = {};
 
   // ─── INIT ──────────────────────────────────────────────────────────────────
   // document.addEventListener("DOMContentLoaded", function () {
@@ -1100,21 +1101,21 @@ function addStructuredData() {
 
     // Stash incoming SEO params so renderPage() can use them for meta tags
     window.currentSEOData = {
-        brand:    searchParams.get("brand")    || "",
-        category: searchParams.get("category") || "",
-        product:  searchParams.get("product")  || "",
-        sku:      searchParams.get("sku")       || "",
-        variant:  searchParams.get("variant")   || "",
+      brand: searchParams.get("brand") || "",
+      category: searchParams.get("category") || "",
+      product: searchParams.get("product") || "",
+      sku: searchParams.get("sku") || "",
+      variant: searchParams.get("variant") || "",
     };
 
     console.log("[ProductDetail] productId:", productId, "| seoData:", window.currentSEOData);
 
     if (productId > 0) {
-        fetchProductFromAPI(productId);
+      fetchProductFromAPI(productId);
     } else {
-        showFatalError("No product found. Please check the link and try again.");
+      showFatalError("No product found. Please check the link and try again.");
     }
-});
+  });
 
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -1138,7 +1139,7 @@ function addStructuredData() {
   // }
 
 
-async function fetchProductFromAPI(id) {
+  async function fetchProductFromAPI(id) {
     try {
       const res = await fetch(`${BASE_URL}/api/products/get-by-productPrimeId/${id}`, {
         method: "GET",
@@ -1177,6 +1178,22 @@ async function fetchProductFromAPI(id) {
     return res.json();
   }
 
+  async function loadCartItems() {
+    let userId = localStorage.getItem("userId") || sessionStorage.getItem("userId");
+    if (!userId) return;
+    try {
+      const res = await fetch(`${BASE_URL}/api/v1/cart?userId=${userId}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data.success || !data.data?.items) return;
+      data.data.items.forEach(item => {
+        if (item.productId) addedToCartSet.add(Number(item.productId));
+      });
+    } catch (err) {
+      console.warn("[Cart] loadCartItems failed:", err);
+    }
+  }
+
   async function apiAddToWishlist(payload) {
     const res = await fetch(`${BASE_URL}/api/v1/wishlist/add`, {
       method: "POST",
@@ -1188,186 +1205,186 @@ async function fetchProductFromAPI(id) {
   }
 
 
-// ── PATCH: Wishlist icon sync ────────────────────────────────────────────────
-async function initWishlistIcon() {
-  const btn = document.querySelector(".wishlist-icon-btn");
-  if (!btn) return;
+  // ── PATCH: Wishlist icon sync ────────────────────────────────────────────────
+  async function initWishlistIcon() {
+    const btn = document.querySelector(".wishlist-icon-btn");
+    if (!btn) return;
 
-  // ── Resolve userId ─────────────────────────────────────────────────────────
-  let userId = localStorage.getItem("userId") || sessionStorage.getItem("userId");
-  if (!userId) {
-    const rawUser = localStorage.getItem("user") || sessionStorage.getItem("user");
-    if (rawUser) {
-      try { const p = JSON.parse(rawUser); userId = p?.userId || p?.id || null; } catch (_) {}
+    // ── Resolve userId ─────────────────────────────────────────────────────────
+    let userId = localStorage.getItem("userId") || sessionStorage.getItem("userId");
+    if (!userId) {
+      const rawUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+      if (rawUser) {
+        try { const p = JSON.parse(rawUser); userId = p?.userId || p?.id || null; } catch (_) { }
+      }
     }
+
+    const productId = safeProductData?.productPrimeId
+      || safeProductData?.productId
+      || safeProductData?.id;
+
+    if (!userId || !productId) return;
+
+    // ── Check current wishlist state on load ───────────────────────────────────
+    try {
+      const res = await fetch(`${BASE_URL}/api/v1/wishlist/check?userId=${userId}&productId=${productId}`);
+      if (res.ok) {
+        const json = await res.json();
+        setWishlistIcon(btn, json?.data === true);
+        window.dispatchEvent(new CustomEvent('wishlist:updated')); // ← ADD
+      }
+    } catch (e) {
+      console.warn("[Wishlist] Check failed:", e);
+    }
+
+    // ── Click: toggle add / remove ─────────────────────────────────────────────
+    // ── Click: toggle add / remove ─────────────────────────────────────────────
+    let wishlistBusy = false;
+    btn.addEventListener("click", async (e) => {
+      e.stopImmediatePropagation(); // block any other listener on this btn
+      if (wishlistBusy) return;
+      wishlistBusy = true;
+      const isWishlisted = btn.classList.contains("wishlisted");
+
+      if (isWishlisted) {
+        // ── REMOVE ─────────────────────────────────────────────────────────────
+        try {
+          const variantId = getSelectedVariant()?.variantId || null;
+          let url = `${BASE_URL}/api/v1/wishlist/remove?userId=${userId}&productId=${productId}`;
+          if (variantId) url += `&variantId=${variantId}`;
+
+          const res = await fetch(url, { method: "DELETE" });
+          if (res.ok) {
+            setWishlistIcon(btn, false);
+            showToast("Removed from wishlist", "info");
+            // Sync header wishlist count
+            // document.dispatchEvent(new CustomEvent("wishlist:updated"));
+            window.dispatchEvent(new CustomEvent('wishlist:updated')); // ← ADD
+          } else {
+            showToast("Failed to remove from wishlist", "error");
+          }
+        } catch (e) {
+          console.warn("[Wishlist] Remove failed:", e);
+          showToast("Something went wrong", "error");
+        } finally {
+          wishlistBusy = false;
+        }
+
+      } else {
+        // ── ADD ────────────────────────────────────────────────────────────────
+        try {
+          const variantId = getSelectedVariant()?.variantId || null;
+          const params = new URLSearchParams({ userId, productId });
+          if (variantId) params.append("variantId", variantId);
+
+          const addUrl = `${BASE_URL}/api/v1/wishlist/add`;
+          console.log("[Wishlist] ADD url:", addUrl);
+
+          const selectedVariant = getSelectedVariant();
+          const sellingPrice = selectedVariant?.price
+            || safeProductData?.currentSellingPrice
+            || null;
+          const mrpPrice = selectedVariant?.mrp
+            || safeProductData?.currentMrpPrice
+            || null;
+
+          //  const selectedVariant = getSelectedVariant();
+
+          const body = {
+            userId: Number(userId),
+            productId: Number(productId),
+            wishlistName: "My Wishlist",
+            wishlistedPrice: selectedVariant?.price ?? safeProductData?.currentSellingPrice ?? null,
+            mrpPrice: selectedVariant?.mrp ?? safeProductData?.currentMrpPrice ?? null,
+            sku: selectedVariant?.sku || safeProductData?.currentSku || null,
+            selectedColor: selectedVariant?.color || safeProductData?.selectedColor || null,
+            selectedSize: selectedVariant?.size || null,
+            titleName: selectedVariant?.titleName || safeProductData?.productName || null,
+            productName: safeProductData?.productName || null,
+            variantId: selectedVariant?.variantId || null
+          };
+
+          const res = await fetch(addUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+          });
+
+          if (res.ok) {
+            setWishlistIcon(btn, true);
+            showToast("Added to wishlist", "success");
+            console.log("[Wishlist] Dispatching wishlist:updated after ADD");
+            window.dispatchEvent(new CustomEvent("wishlist:updated"));
+          } else {
+            const errText = await res.text();
+            console.warn("[Wishlist] ADD failed:", res.status, errText);
+            showToast("Failed to add to wishlist", "error");
+          }
+        } catch (e) {
+          console.warn("[Wishlist] Add failed:", e);
+          showToast("Something went wrong", "error");
+        } finally {
+          wishlistBusy = false;
+        }
+      }
+    });
   }
 
-  const productId = safeProductData?.productPrimeId
-                 || safeProductData?.productId
-                 || safeProductData?.id;
-
-  if (!userId || !productId) return;
-
-  // ── Check current wishlist state on load ───────────────────────────────────
-  try {
-    const res = await fetch(`${BASE_URL}/api/v1/wishlist/check?userId=${userId}&productId=${productId}`);
-    if (res.ok) {
-      const json = await res.json();
-      setWishlistIcon(btn, json?.data === true);
-      window.dispatchEvent(new CustomEvent('wishlist:updated')); // ← ADD
-    }
-  } catch (e) {
-    console.warn("[Wishlist] Check failed:", e);
-  }
-
-  // ── Click: toggle add / remove ─────────────────────────────────────────────
-  // ── Click: toggle add / remove ─────────────────────────────────────────────
-  let wishlistBusy = false;
-  btn.addEventListener("click", async (e) => {
-    e.stopImmediatePropagation(); // block any other listener on this btn
-    if (wishlistBusy) return;
-    wishlistBusy = true;
-    const isWishlisted = btn.classList.contains("wishlisted");
-
+  function setWishlistIcon(btn, isWishlisted) {
+    const icon = btn.querySelector("i");
+    if (!icon) return;
     if (isWishlisted) {
-      // ── REMOVE ─────────────────────────────────────────────────────────────
-      try {
-        const variantId = getSelectedVariant()?.variantId || null;
-        let url = `${BASE_URL}/api/v1/wishlist/remove?userId=${userId}&productId=${productId}`;
-        if (variantId) url += `&variantId=${variantId}`;
-
-        const res = await fetch(url, { method: "DELETE" });
-        if (res.ok) {
-          setWishlistIcon(btn, false);
-          showToast("Removed from wishlist", "info");
-          // Sync header wishlist count
-          // document.dispatchEvent(new CustomEvent("wishlist:updated"));
-          window.dispatchEvent(new CustomEvent('wishlist:updated')); // ← ADD
-        } else {
-          showToast("Failed to remove from wishlist", "error");
-        }
-     } catch (e) {
-        console.warn("[Wishlist] Remove failed:", e);
-        showToast("Something went wrong", "error");
-      } finally {
-        wishlistBusy = false;
-      }
-
-   } else {
-      // ── ADD ────────────────────────────────────────────────────────────────
-      try {
-        const variantId = getSelectedVariant()?.variantId || null;
-        const params = new URLSearchParams({ userId, productId });
-        if (variantId) params.append("variantId", variantId);
-
-        const addUrl = `${BASE_URL}/api/v1/wishlist/add`;
-        console.log("[Wishlist] ADD url:", addUrl);
-
-       const selectedVariant = getSelectedVariant();
-        const sellingPrice = selectedVariant?.price
-                          || safeProductData?.currentSellingPrice
-                          || null;
-        const mrpPrice = selectedVariant?.mrp
-                      || safeProductData?.currentMrpPrice
-                      || null;
-
-      //  const selectedVariant = getSelectedVariant();
-
-        const body = {
-          userId:          Number(userId),
-          productId:       Number(productId),
-          wishlistName:    "My Wishlist",
-          wishlistedPrice: selectedVariant?.price ?? safeProductData?.currentSellingPrice ?? null,
-          mrpPrice:        selectedVariant?.mrp   ?? safeProductData?.currentMrpPrice    ?? null,
-          sku:             selectedVariant?.sku   || safeProductData?.currentSku         || null,
-          selectedColor:   selectedVariant?.color || safeProductData?.selectedColor      || null,
-          selectedSize:    selectedVariant?.size  || null,
-          titleName:       selectedVariant?.titleName || safeProductData?.productName    || null,
-          productName:     safeProductData?.productName || null,
-          variantId:       selectedVariant?.variantId || null
-        };
-
-        const res = await fetch(addUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body)
-        });
-
-        if (res.ok) {
-          setWishlistIcon(btn, true);
-          showToast("Added to wishlist", "success");
-          console.log("[Wishlist] Dispatching wishlist:updated after ADD");
-          window.dispatchEvent(new CustomEvent("wishlist:updated"));
-        } else {
-          const errText = await res.text();
-          console.warn("[Wishlist] ADD failed:", res.status, errText);
-          showToast("Failed to add to wishlist", "error");
-        }
-      } catch (e) {
-        console.warn("[Wishlist] Add failed:", e);
-        showToast("Something went wrong", "error");
-      } finally {
-        wishlistBusy = false;
-      }
+      icon.classList.remove("fa-regular");
+      icon.classList.add("fa-solid");
+      icon.style.color = "#e53e3e";
+      btn.classList.add("wishlisted");
+    } else {
+      icon.classList.remove("fa-solid");
+      icon.classList.add("fa-regular");
+      icon.style.color = "";
+      btn.classList.remove("wishlisted");
     }
-  });
-}
-
-function setWishlistIcon(btn, isWishlisted) {
-  const icon = btn.querySelector("i");
-  if (!icon) return;
-  if (isWishlisted) {
-    icon.classList.remove("fa-regular");
-    icon.classList.add("fa-solid");
-    icon.style.color = "#e53e3e";
-    btn.classList.add("wishlisted");
-  } else {
-    icon.classList.remove("fa-solid");
-    icon.classList.add("fa-regular");
-    icon.style.color = "";
-    btn.classList.remove("wishlisted");
   }
-}
-// ── END PATCH ────────────────────────────────────────────────────────────────
+  // ── END PATCH ────────────────────────────────────────────────────────────────
 
 
   /**
    * Confirm Buy Now order after Shiprocket checkout callback.
    * Calls POST /api/orders/confirm-buynow with X-User-Id header.
    */
- async function apiConfirmBuyNow(payload) {
+  async function apiConfirmBuyNow(payload) {
     log.debug("API Call: POST /api/orders/confirm-buynow");
     log.debug("Headers: X-User-Id = {}", USER_ID);
     log.debug("Payload: {}", JSON.stringify(payload, null, 2));
-    
+
     try {
-        const res = await fetch(`${BASE_URL}/api/orders/confirm-buynow`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-User-Id": USER_ID,
-            },
-            body: JSON.stringify(payload),
-        });
+      const res = await fetch(`${BASE_URL}/api/orders/confirm-buynow`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-User-Id": USER_ID,
+        },
+        body: JSON.stringify(payload),
+      });
 
-        log.debug("API Response status: {}", res.status);
+      log.debug("API Response status: {}", res.status);
 
-        if (!res.ok) {
-            const errBody = await res.text().catch(() => "");
-            log.error("API Error: {}", errBody);
-            throw new Error(`HTTP ${res.status} — ${errBody}`);
-        }
+      if (!res.ok) {
+        const errBody = await res.text().catch(() => "");
+        log.error("API Error: {}", errBody);
+        throw new Error(`HTTP ${res.status} — ${errBody}`);
+      }
 
-        const data = await res.json();
-        log.info("✅ API call successful");
-        log.debug("Response data: {}", data);
-        
-        return data;
+      const data = await res.json();
+      log.info("✅ API call successful");
+      log.debug("Response data: {}", data);
+
+      return data;
     } catch (err) {
-        log.error("❌ API call failed: {}", err.message);
-        throw err;
+      log.error("❌ API call failed: {}", err.message);
+      throw err;
     }
-}
+  }
 
   /**
    * Fetch addon products for "Bought Together".
@@ -1377,7 +1394,7 @@ function setWishlistIcon(btn, isWishlisted) {
   async function fetchAddonProducts(addonKeys) {
     if (!addonKeys || !addonKeys.length) return [];
 
-    const seen    = new Set();
+    const seen = new Set();
     const results = [];
 
     await Promise.all(
@@ -1426,10 +1443,10 @@ function setWishlistIcon(btn, isWishlisted) {
   async function fetchSuggestions(productId, category, subCategory, userId) {
     try {
       const params = new URLSearchParams({
-        productId:   productId,
-        category:    category   || "",
+        productId: productId,
+        category: category || "",
         subCategory: subCategory || "",
-        userId:      userId,
+        userId: userId,
       });
       const res = await fetch(`${BASE_URL}/api/recent-users/suggestions-product?${params}`, {
         method: "GET",
@@ -1450,15 +1467,15 @@ function setWishlistIcon(btn, isWishlisted) {
 
   function normaliseVariant(v, productFallback) {
     return {
-      variantId:    v.variantId,
-      color:        v.color       || "Default",
-      sku:          v.sku         || null,
-      price:        v.price       || productFallback.currentSellingPrice,
-      mrp:          v.mrp         || productFallback.currentMrpPrice,
-      stock:        v.stock       ?? productFallback.currentStock,
+      variantId: v.variantId,
+      color: v.color || "Default",
+      sku: v.sku || null,
+      price: v.price || productFallback.currentSellingPrice,
+      mrp: v.mrp || productFallback.currentMrpPrice,
+      stock: v.stock ?? productFallback.currentStock,
       // ── Media ──────────────────────────────────────────────────────────────
       // Variant mainImage: use variant's own, fall back to product mainImage, then fallback img
-      mainImage:    absUrl(v.mainImage) || absUrl(productFallback.mainImage) || FALLBACK_IMG,
+      mainImage: absUrl(v.mainImage) || absUrl(productFallback.mainImage) || FALLBACK_IMG,
       // Variant mockups: use variant's own array; null/empty → inherit product-level mockups
       mockupImages: Array.isArray(v.mockupImages) && v.mockupImages.length
         ? v.mockupImages.map((m) => absUrl(m)).filter(Boolean)
@@ -1466,15 +1483,15 @@ function setWishlistIcon(btn, isWishlisted) {
       // Variant video (not in payload today but structurally supported)
       productVideoUrl: absUrl(v.productVideoUrl) || null,
       // ── Meta ───────────────────────────────────────────────────────────────
-      size:         v.size        || "Standard",
-      sizes:        v.size ? [v.size] : [],
-      titleName:    v.titleName   || v.color || "Default",
-      name:         v.productName   || v.color || "Default",
-      weight:       v.weight,
-      length:       v.length,
-      breadth:      v.breadth,
-      height:       v.height,
-      mfgDate:      v.mfgDate,
+      size: v.size || "Standard",
+      sizes: v.size ? [v.size] : [],
+      titleName: v.titleName || v.color || "Default",
+      name: v.productName || v.color || "Default",
+      weight: v.weight,
+      length: v.length,
+      breadth: v.breadth,
+      height: v.height,
+      mfgDate: v.mfgDate,
     };
   }
 
@@ -1498,8 +1515,8 @@ function setWishlistIcon(btn, isWishlisted) {
   // Rule: mockups = variant mockups first, then product mockups (deduped)
   function getVariantMedia(variant) {
     if (!variant) return {
-      mainImage:       safeProductData.mainImage,
-      mockupImages:    safeProductData.mockupImages,
+      mainImage: safeProductData.mainImage,
+      mockupImages: safeProductData.mockupImages,
       productVideoUrl: safeProductData.productVideoUrl || null,
     };
 
@@ -1509,21 +1526,21 @@ function setWishlistIcon(btn, isWishlisted) {
     // Merge mockups: variant first, then product-level, deduped by URL
     const variantMockups = Array.isArray(variant.mockupImages) ? variant.mockupImages : [];
     const productMockups = safeProductData.mockupImages || [];
-    const seen           = new Set();
-    const mergedMockups  = [];
+    const seen = new Set();
+    const mergedMockups = [];
     [...variantMockups, ...productMockups].forEach((url) => {
       if (url && !seen.has(url)) { seen.add(url); mergedMockups.push(url); }
     });
 
     return {
       mainImage,
-      mockupImages:    mergedMockups,
+      mockupImages: mergedMockups,
       productVideoUrl: variant.productVideoUrl || safeProductData.productVideoUrl || null,
     };
   }
   // END PATCH 4 media resolver
 
- function buildSafeProductData(p) {
+  function buildSafeProductData(p) {
     let customFields = [];
     if (p.customFields) {
       try { customFields = JSON.parse(p.customFields); }
@@ -1539,25 +1556,25 @@ function setWishlistIcon(btn, isWishlisted) {
     // Must be declared BEFORE safeProductData assignment so [baseVariant, ...variants]
     // reference below is valid. Base uses root-level product fields.
     const baseVariant = {
-      variantId:       p.variantId,
-      color:           p.selectedColor       || "Default",
-      sku:             p.currentSku,
-      price:           p.currentSellingPrice,
-      mrp:             p.currentMrpPrice,
-      stock:           p.currentStock        || 0,
-      mainImage:       absUrl(p.mainImage)   || FALLBACK_IMG,
-      mockupImages:    null,                  // null = inherit product-level mockups
+      variantId: p.variantId,
+      color: p.selectedColor || "Default",
+      sku: p.currentSku,
+      price: p.currentSellingPrice,
+      mrp: p.currentMrpPrice,
+      stock: p.currentStock || 0,
+      mainImage: absUrl(p.mainImage) || FALLBACK_IMG,
+      mockupImages: null,                  // null = inherit product-level mockups
       productVideoUrl: absUrl(p.productVideoUrl) || null,
-      size:            p.productSize         || "",
-      sizes:           p.productSize         ? [p.productSize] : [],
-      titleName:       p.productName         || "Artezo Product",
-      name:            p.selectedColor       || "Default",
-      weight:          p.weight,
-      length:          p.length,
-      breadth:         p.breadth,
-      height:          p.height,
-      mfgDate:         null,
-      isBase:          true,
+      size: p.productSize || "",
+      sizes: p.productSize ? [p.productSize] : [],
+      titleName: p.productName || "Artezo Product",
+      name: p.selectedColor || "Default",
+      weight: p.weight,
+      length: p.length,
+      breadth: p.breadth,
+      height: p.height,
+      mfgDate: null,
+      isBase: true,
     };
 
     // ── 3. Full variant list = base first, then API variants ──────────────
@@ -1565,68 +1582,68 @@ function setWishlistIcon(btn, isWishlisted) {
 
     // ── 4. Build remaining data needed for safeProductData ────────────────
     const heroBanners = (p.heroBanners || []).map((b) => ({
-      bannerId:       b.bannerId,
-      bannerImg:      absUrl(b.bannerImg),
+      bannerId: b.bannerId,
+      bannerImg: absUrl(b.bannerImg),
       imgDescription: b.imgDescription || "",
     }));
 
     const installationSteps = (p.installationSteps || []).map((s) => ({
-      step:             s.step,
-      title:            s.title,
+      step: s.step,
+      title: s.title,
       shortDescription: s.shortDescription,
-      shortNote:        s.shortNote,
-      stepImage:        absUrl(s.stepImage),
-      videoUrl:         absUrl(s.videoUrl),
+      shortNote: s.shortNote,
+      stepImage: absUrl(s.stepImage),
+      videoUrl: absUrl(s.videoUrl),
     }));
 
     // Product-level mockups (fallback when variant has none)
     const mockupImages = (p.mockupImages || []).map((img) => absUrl(img)).filter(Boolean);
 
-    const faqAns         = p.faq               || {};
-    const availabeCoupons = p.availableCoupons  || [];
+    const faqAns = p.faq || {};
+    const availabeCoupons = p.availableCoupons || [];
 
     // ── 5. Assign safeProductData — baseVariant and allVariants are ready ─
     safeProductData = {
-      productId:           p.productPrimeId,
-      productStrId:        p.productStrId       || String(p.productPrimeId),
-      productName:         p.productName,
-      brandName:           p.brandName          || "Artezo",
-      currentSku:          p.currentSku,
-      selectedColor:       p.selectedColor      || "",
+      productId: p.productPrimeId,
+      productStrId: p.productStrId || String(p.productPrimeId),
+      productName: p.productName,
+      brandName: p.brandName || "Artezo",
+      currentSku: p.currentSku,
+      selectedColor: p.selectedColor || "",
       currentSellingPrice: p.currentSellingPrice,
-      currentMrpPrice:     p.currentMrpPrice,
-      currentStock:        p.currentStock       || 0,
-      mainImage:           absUrl(p.mainImage)  || FALLBACK_IMG,
+      currentMrpPrice: p.currentMrpPrice,
+      currentStock: p.currentStock || 0,
+      mainImage: absUrl(p.mainImage) || FALLBACK_IMG,
       mockupImages,
-      productVideoUrl:     absUrl(p.productVideoUrl) || null,
-      hero_banners:        heroBanners,
-      availableVariants:   allVariants,          // base + API variants
-      productSize:         p.productSize        || "",
-      productReviews:      p.productReviews     || [],
-      specifications:      p.specifications     || {},
-      aboutItem:           Array.isArray(p.aboutItem)     ? p.aboutItem     : [],
-      description:         Array.isArray(p.description)   ? p.description   : [],
+      productVideoUrl: absUrl(p.productVideoUrl) || null,
+      hero_banners: heroBanners,
+      availableVariants: allVariants,          // base + API variants
+      productSize: p.productSize || "",
+      productReviews: p.productReviews || [],
+      specifications: p.specifications || {},
+      aboutItem: Array.isArray(p.aboutItem) ? p.aboutItem : [],
+      description: Array.isArray(p.description) ? p.description : [],
       faqAns,
       additionalInfo: p.additionalInfo || {},
       installationSteps,
       availabeCoupons,
-      isCustomizable:      p.isCustomizable     || false,
+      isCustomizable: p.isCustomizable || false,
       customFields,
-      productCategory:     p.productCategory,
-      productSubCategory:  p.productSubCategory,
-      subcategory:         p.productSubCategory,
-      globalTags:          p.globalTags         || [],
-      isExchange:          p.isExchange,
-      returnAvailable:     p.returnAvailable,
-      youtubeUrl:          p.youtubeUrl         || "",
-      addonKeys:           p.addonKeys          || [],
-      underTrendCategory:  p.underTrendCategory || false,
-      weight:              p.weight,
-      length:              p.length,
-      breadth:             p.breadth,
-      height:              p.height,
-      hsnCode:             p.hsnCode,
-      hasVariants:         p.hasVariants,
+      productCategory: p.productCategory,
+      productSubCategory: p.productSubCategory,
+      subcategory: p.productSubCategory,
+      globalTags: p.globalTags || [],
+      isExchange: p.isExchange,
+      returnAvailable: p.returnAvailable,
+      youtubeUrl: p.youtubeUrl || "",
+      addonKeys: p.addonKeys || [],
+      underTrendCategory: p.underTrendCategory || false,
+      weight: p.weight,
+      length: p.length,
+      breadth: p.breadth,
+      height: p.height,
+      hsnCode: p.hsnCode,
+      hasVariants: p.hasVariants,
     };
 
     // ── 6. Set initial active variant — always base first ─────────────────
@@ -1642,7 +1659,7 @@ function setWishlistIcon(btn, isWishlisted) {
   function renderPage() {
     // Update SEO meta tags with the extracted data
     if (window.currentSEOData) {
-        updateSEOMetaTags(safeProductData, window.currentSEOData);
+      updateSEOMetaTags(safeProductData, window.currentSEOData);
     }
 
     // Rewrite browser URL to SEO format now that we have real product data.
@@ -1650,8 +1667,24 @@ function setWishlistIcon(btn, isWishlisted) {
     // The initial variant is the first variant's SKU (or null if no variants).
     const initialVariantSku = safeProductData.availableVariants?.[0]?.sku || null;
     rewriteURLToSEO(initialVariantSku);
-    
-   buildCompleteHTML();
+
+    buildCompleteHTML();
+    buildCompleteHTML();
+   
+   loadCartItems().then(() => {
+      const pid = Number(safeProductData.productPrimeId);
+      if (addedToCartSet.has(pid)) {
+        // ── Update ALL add-to-cart buttons (main + sticky) ──────────────
+        document.querySelectorAll(".add-to-cart-btn").forEach(addBtn => {
+          addBtn.innerHTML = `<i class="fa-solid fa-bag-shopping"></i> <span class="text-sm whitespace-nowrap">Go to Cart</span>`;
+          addBtn.style.background = "#e39f32";
+          addBtn.style.color = "#1D3C4A";
+          addBtn.style.fontWeight = "600";
+          addBtn.style.borderColor = "#e39f32";
+        });
+      }
+    });
+
     fillAccordion();
     fillInstallation();
     fillHeroBanner();
@@ -1666,24 +1699,24 @@ function setWishlistIcon(btn, isWishlisted) {
 
 
     setTimeout(() => {
-        setupVariantSelection();
-        setupDynamicVariants();
-        
-        document.querySelectorAll(".add-to-cart-btn")
-            .forEach((btn) => btn.addEventListener("click", handleAddToCart));
-        document.querySelectorAll(".buy-now-btn")
-            .forEach((btn) => btn.addEventListener("click", handleBuyNow));
-        // document.querySelectorAll(".wishlist-btn, .wishlist-icon-btn")
-        //     .forEach((btn) => btn.addEventListener("click", handleWishlistToggle));
-        document.querySelectorAll(".apply-coupon-btn").forEach((btn) =>
-            btn.addEventListener("click", (e) => {
-                e.preventDefault();
-                const code = btn.dataset.couponCode;
-                if (code) applyCoupon(code);
-            })
-        );
+      setupVariantSelection();
+      setupDynamicVariants();
+
+      document.querySelectorAll(".add-to-cart-btn")
+        .forEach((btn) => btn.addEventListener("click", handleAddToCart));
+      document.querySelectorAll(".buy-now-btn")
+        .forEach((btn) => btn.addEventListener("click", handleBuyNow));
+      // document.querySelectorAll(".wishlist-btn, .wishlist-icon-btn")
+      //     .forEach((btn) => btn.addEventListener("click", handleWishlistToggle));
+      document.querySelectorAll(".apply-coupon-btn").forEach((btn) =>
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          const code = btn.dataset.couponCode;
+          if (code) applyCoupon(code);
+        })
+      );
     }, 100);
-}
+  }
 
 
   //====================================================//
@@ -1691,7 +1724,7 @@ function setWishlistIcon(btn, isWishlisted) {
   //=================================================/
 
 
-   // ==================== SHARE FUNCTIONALITY ====================
+  // ==================== SHARE FUNCTIONALITY ====================
 
   function setupShareFunctionality() {
     const shareButton = document.getElementById("shareButton");
@@ -1799,8 +1832,8 @@ function setWishlistIcon(btn, isWishlisted) {
                    onerror="this.style.display='none'"/>
             </div>
             ${banner.imgDescription
-              ? `<div class="banner-desc"><p class="banner-text">${escapeHtml(banner.imgDescription)}</p></div>`
-              : ""}
+            ? `<div class="banner-desc"><p class="banner-text">${escapeHtml(banner.imgDescription)}</p></div>`
+            : ""}
           </div>`;
       });
       heroHTML += `</div>`;
@@ -1834,7 +1867,7 @@ function setWishlistIcon(btn, isWishlisted) {
    */
   function buildMediaStrip(media) {
     const thumbContainer = document.getElementById("thumbContainer");
-    const mainImg        = document.getElementById("mainProductImage");
+    const mainImg = document.getElementById("mainProductImage");
     if (!thumbContainer || !mainImg) return;
 
     // Build ordered media list: mainImage first, then video (if any), then mockups
@@ -1907,11 +1940,11 @@ function setWishlistIcon(btn, isWishlisted) {
 
       container.style.display = "none";
       const vid = document.createElement("video");
-      vid.id        = "mainProductVideo";
-      vid.src       = item.url;
-      vid.controls  = true;
-      vid.autoplay  = false;
-      vid.muted     = false;
+      vid.id = "mainProductVideo";
+      vid.src = item.url;
+      vid.controls = true;
+      vid.autoplay = false;
+      vid.muted = false;
       vid.className = "max-h-full max-w-full object-contain rounded-lg";
       container.parentElement.appendChild(vid);
     } else {
@@ -1940,138 +1973,154 @@ function setWishlistIcon(btn, isWishlisted) {
   }
 
   // ─── PATCH 4: AMAZON-STYLE VARIANT SELECTION ──────────────────────────────
-// Replaces both setupVariantSelection() and setupDynamicVariants().
-// Single unified handler — size pills filter color cards,
-// color card click updates all product display.
+  // Replaces both setupVariantSelection() and setupDynamicVariants().
+  // Single unified handler — size pills filter color cards,
+  // color card click updates all product display.
 
-function setupVariantSelection() {
-  const sizePills  = document.querySelectorAll(".size-pill");
-  const variantSection = document.getElementById("variantSection");
-  if (!sizePills.length || !variantSection) return;
+  function setupVariantSelection() {
+    const sizePills = document.querySelectorAll(".size-pill");
+    const variantSection = document.getElementById("variantSection");
+    if (!sizePills.length || !variantSection) return;
 
-  // ── Wire size pills ────────────────────────────────────────────────────
-  sizePills.forEach((pill) => {
-    pill.addEventListener("click", function () {
-      const selectedSize = this.dataset.size;
+    // ── Wire size pills ────────────────────────────────────────────────────
+    sizePills.forEach((pill) => {
+      pill.addEventListener("click", function () {
+        const selectedSize = this.dataset.size;
 
-      // Update pill active state
-      sizePills.forEach((p) => {
-        p.classList.remove("border-[#1D3C4A]", "bg-[#1D3C4A]", "text-white", "shadow-sm");
-        p.classList.add("border-gray-200", "text-gray-600");
+        // Update pill active state
+        sizePills.forEach((pill) => {
+
+          pill.addEventListener("click", function () {
+
+            sizePills.forEach((p) => {
+
+              p.className =
+
+                "size-pill px-4 py-2 rounded-lg border-2 text-xs font-medium transition-all duration-200 rounded-xl border-gray-200 text-gray-600 hover:border-[#E6A62C]";
+
+            });
+
+            this.className =
+
+              "size-pill px-4 py-2 rounded-lg border-2 text-xs font-medium transition-all duration-200 rounded-xl border-[#E6A62C] bg-[#1D3C4A] text-white shadow-sm";
+
+            filterColorsBySize(this.dataset.size);
+
+          });
+
+        });
+
+
+        // Update active size label
+        const activeSizeLabel = document.getElementById("activeSizeLabel");
+        if (activeSizeLabel) activeSizeLabel.textContent = selectedSize;
+
+        // Show only cards matching this size
+        const allCards = document.querySelectorAll(".variant-card");
+        let firstVisible = null;
+        allCards.forEach((card) => {
+          const matches = card.dataset.size === selectedSize;
+          card.style.display = matches ? "" : "none";
+          if (matches && !firstVisible) firstVisible = card;
+        });
+
+        // Auto-select first visible color card
+        if (firstVisible) firstVisible.click();
       });
-      this.classList.add("border-[#1D3C4A]", "bg-[#1D3C4A]", "text-white", "shadow-sm");
-      this.classList.remove("border-gray-200", "text-gray-600");
+    });
 
-      // Update active size label
-      const activeSizeLabel = document.getElementById("activeSizeLabel");
-      if (activeSizeLabel) activeSizeLabel.textContent = selectedSize;
+    // ── Wire color cards via delegation ───────────────────────────────────
+    variantSection.addEventListener("click", function (e) {
+      const card = e.target.closest(".variant-card");
+      if (!card) return;
 
-      // Show only cards matching this size
-      const allCards = document.querySelectorAll(".variant-card");
-      let firstVisible = null;
-      allCards.forEach((card) => {
-        const matches = card.dataset.size === selectedSize;
-        card.style.display = matches ? "" : "none";
-        if (matches && !firstVisible) firstVisible = card;
+      // Active ring
+      document.querySelectorAll(".variant-card").forEach((c) => {
+        c.classList.remove("border-[#1D3C4A]", "shadow-md");
+        c.classList.add("border-gray-200");
       });
+      card.classList.add("border-[#1D3C4A]", "shadow-md");
+      card.classList.remove("border-gray-200");
 
-      // Auto-select first visible color card
-      if (firstVisible) firstVisible.click();
+      // Find variant
+      const variantId = card.dataset.variantId;
+      const newVariant = safeProductData.availableVariants.find(
+        (v) => v.variantId === variantId
+      );
+
+      if (!newVariant) return;
+
+      currentVariant = newVariant;
+
+      // Update active color label
+      const activeColorLabel = document.getElementById("activeColorLabel");
+      if (activeColorLabel) activeColorLabel.textContent = newVariant.color;
+
+      // Full display update
+      updateProductDisplay();
     });
-  });
 
-  // ── Wire color cards via delegation ───────────────────────────────────
-  variantSection.addEventListener("click", function (e) {
-    const card = e.target.closest(".variant-card");
-    if (!card) return;
-
-    // Active ring
-    document.querySelectorAll(".variant-card").forEach((c) => {
-      c.classList.remove("border-[#1D3C4A]", "shadow-md");
-      c.classList.add("border-gray-200");
-    });
-    card.classList.add("border-[#1D3C4A]", "shadow-md");
-    card.classList.remove("border-gray-200");
-
-    // Find variant
-    const variantId  = card.dataset.variantId;
-    const newVariant = safeProductData.availableVariants.find(
-      (v) => v.variantId === variantId
-    );
-
-    if (!newVariant) return;
-
-    currentVariant = newVariant;
-
-    // Update active color label
-    const activeColorLabel = document.getElementById("activeColorLabel");
-    if (activeColorLabel) activeColorLabel.textContent = newVariant.color;
-
-    // Full display update
-    updateProductDisplay();
-  });
-
-  // ── Auto-trigger first size pill on init ──────────────────────────────
-  if (sizePills[0]) sizePills[0].click();
-}
-
-// setupDynamicVariants is now a no-op — PATCH 4 handles everything above
-function setupDynamicVariants() {}
-// ─── END PATCH 4 VARIANT SELECTION ────────────────────────────────────────
-
-
- 
-
-function syncStockUI(stock) {
-
-  console.log("[syncStockUI] called with stock:", stock, "| isOOS:", !stock || stock <= 0);
-  const isOOS   = !stock || stock <= 0;
-  const remaining = Math.max(0, stock || 0);
-
-  // ── 1. CTA buttons (main + sticky bar) ──────────────────────────────────
-  document.querySelectorAll(".add-to-cart-btn, .buy-now-btn").forEach((btn) => {
-    btn.disabled = isOOS;
-    btn.setAttribute("aria-disabled", String(isOOS));
-    btn.classList.toggle("opacity-50",        isOOS);
-    btn.classList.toggle("cursor-not-allowed", isOOS);
-
-    if (btn.classList.contains("add-to-cart-btn")) {
-      const isCustom = safeProductData?.isCustomizable;
-      btn.innerHTML = isOOS
-        ? `<i class="fas fa-ban"></i><span class="text-sm ml-1">Out of Stock</span>`
-        : isCustom
-          ? `<i class="fas fa-sliders-h"></i><span class="text-sm ml-1">Customize</span>`
-          : `<i class="fa-solid fa-cart-shopping"></i><span class="text-sm ml-1">Add to Cart</span>`;
-    }
-    // buy-now-btn has no text change — disable state alone is sufficient
-  });
-
-  // ── 2. Qty increase button ───────────────────────────────────────────────
-  const incBtn = document.getElementById("increaseBtn");
-  if (incBtn) {
-    incBtn.disabled = isOOS;
-    incBtn.classList.toggle("opacity-40", isOOS);
-    incBtn.classList.toggle("cursor-not-allowed", isOOS);
+    // ── Auto-trigger first size pill on init ──────────────────────────────
+    if (sizePills[0]) sizePills[0].click();
   }
 
-  // ── 3. stockInfo label ───────────────────────────────────────────────────
-  const stockEl = document.getElementById("stockInfo");
-  if (stockEl) {
-    if (isOOS) {
-      stockEl.textContent = "Out of stock";
-      stockEl.className   = "text-xs text-red-600 font-semibold";
-    } else {
-      // Re-read current qty from DOM to calculate remaining
-      const qty = parseInt(document.getElementById("quantity")?.textContent || 1);
-      const rem = stock - qty;
-      stockEl.textContent = rem > 0 ? `Only ${rem} items left in stock` : "Out of stock";
-      stockEl.className   = rem > 0
-        ? "text-xs text-green-600 font-semibold"
-        : "text-xs text-red-600 font-semibold";
+  // setupDynamicVariants is now a no-op — PATCH 4 handles everything above
+  function setupDynamicVariants() { }
+  // ─── END PATCH 4 VARIANT SELECTION ────────────────────────────────────────
+
+
+
+
+  function syncStockUI(stock) {
+
+    console.log("[syncStockUI] called with stock:", stock, "| isOOS:", !stock || stock <= 0);
+    const isOOS = !stock || stock <= 0;
+    const remaining = Math.max(0, stock || 0);
+
+    // ── 1. CTA buttons (main + sticky bar) ──────────────────────────────────
+    document.querySelectorAll(".add-to-cart-btn, .buy-now-btn").forEach((btn) => {
+      btn.disabled = isOOS;
+      btn.setAttribute("aria-disabled", String(isOOS));
+      btn.classList.toggle("opacity-50", isOOS);
+      btn.classList.toggle("cursor-not-allowed", isOOS);
+
+      if (btn.classList.contains("add-to-cart-btn")) {
+        const isCustom = safeProductData?.isCustomizable;
+        btn.innerHTML = isOOS
+          ? `<i class="fas fa-ban"></i><span class="text-sm ml-1">Out of Stock</span>`
+          : isCustom
+            ? `<i class="fas fa-sliders-h"></i><span class="text-sm ml-1">Customize</span>`
+            : `<i class="fa-solid fa-cart-shopping"></i><span class="text-sm ml-1">Add to Cart</span>`;
+      }
+      // buy-now-btn has no text change — disable state alone is sufficient
+    });
+
+    // ── 2. Qty increase button ───────────────────────────────────────────────
+    const incBtn = document.getElementById("increaseBtn");
+    if (incBtn) {
+      incBtn.disabled = isOOS;
+      incBtn.classList.toggle("opacity-40", isOOS);
+      incBtn.classList.toggle("cursor-not-allowed", isOOS);
+    }
+
+    // ── 3. stockInfo label ───────────────────────────────────────────────────
+    const stockEl = document.getElementById("stockInfo");
+    if (stockEl) {
+      if (isOOS) {
+        stockEl.textContent = "Out of stock";
+        stockEl.className = "text-xs text-red-600 font-semibold";
+      } else {
+        // Re-read current qty from DOM to calculate remaining
+        const qty = parseInt(document.getElementById("quantity")?.textContent || 1);
+        const rem = stock - qty;
+        stockEl.textContent = rem > 0 ? `Only ${rem} items left in stock` : "Out of stock";
+        stockEl.className = rem > 0
+          ? "text-xs text-green-600 font-semibold"
+          : "text-xs text-red-600 font-semibold";
+      }
     }
   }
-}
-// ─── END PATCH 2 STOCK FUNCTION ───────────────────────────────────────────────
+  // ─── END PATCH 2 STOCK FUNCTION ───────────────────────────────────────────────
 
   /**
    * Full product display update on variant switch.
@@ -2086,18 +2135,18 @@ function syncStockUI(stock) {
 
     // ── 2. Price ───────────────────────────────────────────────────────────
     const priceEl = document.querySelector(".price-display");
-    const mrpEl   = document.querySelector(".price-display")?.closest(".flex")
+    const mrpEl = document.querySelector(".price-display")?.closest(".flex")
       ?.querySelector(".line-through");
     if (priceEl) priceEl.textContent = `₹${currentVariant.price.toLocaleString("en-IN")}`;
-    if (mrpEl)   mrpEl.textContent   = `₹${currentVariant.mrp.toLocaleString("en-IN")}`;
+    if (mrpEl) mrpEl.textContent = `₹${currentVariant.mrp.toLocaleString("en-IN")}`;
 
     // Also update sticky bar price
     const stickyPrice = document.querySelector("#stickyBar .price-sticky");
     if (stickyPrice) stickyPrice.textContent = `₹${currentVariant.price.toLocaleString("en-IN")}`;
 
     // ── 3. Discount badge ──────────────────────────────────────────────────
-    const discPct     = calcDiscount(currentVariant.price, currentVariant.mrp);
-    const discBadges  = document.querySelectorAll(".discount-badge");
+    const discPct = calcDiscount(currentVariant.price, currentVariant.mrp);
+    const discBadges = document.querySelectorAll(".discount-badge");
     discBadges.forEach((b) => {
       b.textContent = discPct > 0 ? `${discPct}% OFF` : "";
       b.style.display = discPct > 0 ? "" : "none";
@@ -2130,7 +2179,7 @@ function syncStockUI(stock) {
     const customPreview = document.getElementById("customPreviewImage");
     if (customPreview) customPreview.src = currentVariant.mainImage;
 
-     // ─── UPDATE URL WHEN VARIANT CHANGES (NEW) ──────────────────────────────
+    // ─── UPDATE URL WHEN VARIANT CHANGES (NEW) ──────────────────────────────
     // if (safeProductData && safeProductData.productId) {
     //     updateBrowserURLToSEO({
     //         brandName: safeProductData.brandName,
@@ -2140,17 +2189,42 @@ function syncStockUI(stock) {
     //     }, currentVariant);
     // }
 
-     // Update URL to reflect selected variant using the shared rewriteURLToSEO helper
+    // Update URL to reflect selected variant using the shared rewriteURLToSEO helper
     if (safeProductData && currentVariant) {
-        const variantSku = currentVariant.sku || currentVariant.variantId || null;
-        rewriteURLToSEO(variantSku);
+      const variantSku = currentVariant.sku || currentVariant.variantId || null;
+      rewriteURLToSEO(variantSku);
     }
-    
+
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
   //  CART
   // ═══════════════════════════════════════════════════════════════════════════
+
+  // async function handleAddToCart(e) {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+
+  //   if (safeProductData.isCustomizable) {
+  //     openCustomizationOverlay();
+  //     return;
+  //   }
+
+  //   const variant = getSelectedVariant();
+  //   const quantity = parseInt(document.getElementById("quantity")?.textContent || 1);
+  //   const payload = buildCartPayload(variant, quantity, null);
+
+  //   try {
+  //     await apiAddToCart(payload);
+  //     showToast("Added to cart! 🛒", "success");
+  //     window.dispatchEvent(new CustomEvent('cart:updated'));
+  //   } catch (err) {
+  //     console.error("[Cart] add error:", err);
+  //     showToast("Could not add to cart. Please try again.", "error");
+  //   }
+  // }
+
+
 
   async function handleAddToCart(e) {
     e.preventDefault();
@@ -2161,20 +2235,37 @@ function syncStockUI(stock) {
       return;
     }
 
-    const variant  = getSelectedVariant();
+    const variant = getSelectedVariant();
     const quantity = parseInt(document.getElementById("quantity")?.textContent || 1);
-    const payload  = buildCartPayload(variant, quantity, null);
+    const payload = buildCartPayload(variant, quantity, null);
+    const pid = Number(safeProductData.productPrimeId);
+
+    // ── If already added → go to cart ──────────────────────────────────────
+    if (addedToCartSet.has(pid)) {
+      window.location.href = "/Cart/cart.html";
+      return;
+    }
 
     try {
       await apiAddToCart(payload);
+      addedToCartSet.add(pid);
       showToast("Added to cart! 🛒", "success");
       window.dispatchEvent(new CustomEvent('cart:updated'));
+
+      // ── Update ALL add-to-cart buttons (main + sticky) ─────────────────
+      document.querySelectorAll(".add-to-cart-btn").forEach(addBtn => {
+        addBtn.innerHTML = `<i class="fa-solid fa-bag-shopping"></i> <span class="text-sm whitespace-nowrap">Go to Cart</span>`;
+        addBtn.style.background = "#e39f32";
+        addBtn.style.color = "#1D3C4A";
+        addBtn.style.fontWeight = "600";
+        addBtn.style.borderColor = "#e39f32";
+      });
     } catch (err) {
       console.error("[Cart] add error:", err);
       showToast("Could not add to cart. Please try again.", "error");
     }
   }
-
+  
   // ═══════════════════════════════════════════════════════════════════════════
   //  BUY NOW — SHIPROCKET CHECKOUT INTEGRATION
   // ═══════════════════════════════════════════════════════════════════════════
@@ -2182,103 +2273,103 @@ function syncStockUI(stock) {
 
 
 
-/**
- * HANDLE SHIPROCKET CHECKOUT SUCCESS
- * Called when user completes payment in SR widget
- */
-// async function handleBuyNowSuccess(srData, variant, quantity, itemTotal) {
-//     log.info("═══════════════════════════════════════════════════════");
-//     log.info("  SHIPROCKET CHECKOUT SUCCESS");
-//     log.info("═══════════════════════════════════════════════════════");
-    
-//     log.info("Received SR callback data:");
-//     log.info("  SR Order ID: {}", srData.order_id);
-//     log.info("  SR Shipment ID: {}", srData.shipment_id);
-//     log.info("  Payment ID: {}", srData.payment_id);
-//     log.info("  Customer Name: {}", srData.customer_name);
-//     log.info("  Customer Email: {}", srData.customer_email);
-//     log.info("  Customer Phone: {}", srData.customer_phone);
-//     log.info("  Shipping Address: {}, {}, {} - {}",
-//         srData.shipping_address,
-//         srData.shipping_city,
-//         srData.shipping_state,
-//         srData.shipping_pincode);
+  /**
+   * HANDLE SHIPROCKET CHECKOUT SUCCESS
+   * Called when user completes payment in SR widget
+   */
+  // async function handleBuyNowSuccess(srData, variant, quantity, itemTotal) {
+  //     log.info("═══════════════════════════════════════════════════════");
+  //     log.info("  SHIPROCKET CHECKOUT SUCCESS");
+  //     log.info("═══════════════════════════════════════════════════════");
 
-//     showToast("Payment successful! Confirming your order…", "success");
+  //     log.info("Received SR callback data:");
+  //     log.info("  SR Order ID: {}", srData.order_id);
+  //     log.info("  SR Shipment ID: {}", srData.shipment_id);
+  //     log.info("  Payment ID: {}", srData.payment_id);
+  //     log.info("  Customer Name: {}", srData.customer_name);
+  //     log.info("  Customer Email: {}", srData.customer_email);
+  //     log.info("  Customer Phone: {}", srData.customer_phone);
+  //     log.info("  Shipping Address: {}, {}, {} - {}",
+  //         srData.shipping_address,
+  //         srData.shipping_city,
+  //         srData.shipping_state,
+  //         srData.shipping_pincode);
 
-//     try {
-//         log.debug("Building BuyNowConfirmRequest payload...");
-//         const confirmPayload = buildBuyNowConfirmPayload(srData, variant, quantity, itemTotal);
-        
-//         log.info("Sending order confirmation to backend...");
-//         log.debug("Payload: {}", JSON.stringify(confirmPayload, null, 2));
+  //     showToast("Payment successful! Confirming your order…", "success");
 
-//         const response = await apiConfirmBuyNow(confirmPayload);
+  //     try {
+  //         log.debug("Building BuyNowConfirmRequest payload...");
+  //         const confirmPayload = buildBuyNowConfirmPayload(srData, variant, quantity, itemTotal);
 
-//         log.info("✅ Backend response received:");
-//         log.info("  Order ID: {}", response.data?.orderStrId);
-//         log.info("  Final Amount: ₹{}", response.data?.finalAmount);
-//         log.info("  Status: {}", response.data?.orderStatus);
+  //         log.info("Sending order confirmation to backend...");
+  //         log.debug("Payload: {}", JSON.stringify(confirmPayload, null, 2));
 
-//         showToast("Order placed successfully! 🎉", "success");
+  //         const response = await apiConfirmBuyNow(confirmPayload);
 
-//         const orderId = response?.data?.orderStrId || "";
-//         log.debug("Redirecting to success page with order ID: {}", orderId);
-        
-//         setTimeout(() => {
-//             window.location.href = `/Order-Success/order-success.html${orderId ? "?orderId=" + encodeURIComponent(orderId) : ""}`;
-//         }, 1500);
+  //         log.info("✅ Backend response received:");
+  //         log.info("  Order ID: {}", response.data?.orderStrId);
+  //         log.info("  Final Amount: ₹{}", response.data?.finalAmount);
+  //         log.info("  Status: {}", response.data?.orderStatus);
 
-//     } catch (err) {
-//         log.error("❌ Order confirmation failed");
-//         log.error("  Error: {}", err.message);
-//         log.error("  Stack: {}", err.stack);
-//         showToast("Payment received but order confirmation failed. Contact support with payment ID: " + srData.payment_id, "error");
-//     }
-// }
+  //         showToast("Order placed successfully! 🎉", "success");
 
-// /**
-//  * WAIT FOR SHIPROCKET SDK TO LOAD
-//  * Checks every 100ms up to maxWaitTime
-//  */
-// /**
-//  * WAIT FOR SHIPROCKET SDK TO LOAD
-//  * Polls every 100ms with updated logging
-//  */
-// async function waitForShiprocketSDK(maxWaitTime = 5000) {
-//     L.info("⏳ Waiting for Shiprocket SDK (max {}ms)...", maxWaitTime);
-    
-//     const startTime = Date.now();
-//     let checkCount = 0;
-    
-//     while (Date.now() - startTime < maxWaitTime) {
-//         checkCount++;
-        
-//         L.debug("  Retry #{}: typeof window.Shiprocket = {}", 
-//             checkCount,
-//             typeof window.Shiprocket);
-        
-//         if (typeof window.Shiprocket !== "undefined" && 
-//             typeof window.Shiprocket.checkout === "function") {
-            
-//             const timeElapsed = Date.now() - startTime;
-//             L.info("✅ Shiprocket SDK loaded in {}ms", timeElapsed);
-//             return true;
-//         }
-        
-//         await new Promise(resolve => setTimeout(resolve, 100));
-//     }
-    
-//     L.error("❌ Shiprocket SDK failed to load after {}ms", maxWaitTime);
-//     return false;
-// }
+  //         const orderId = response?.data?.orderStrId || "";
+  //         log.debug("Redirecting to success page with order ID: {}", orderId);
+
+  //         setTimeout(() => {
+  //             window.location.href = `/Order-Success/order-success.html${orderId ? "?orderId=" + encodeURIComponent(orderId) : ""}`;
+  //         }, 1500);
+
+  //     } catch (err) {
+  //         log.error("❌ Order confirmation failed");
+  //         log.error("  Error: {}", err.message);
+  //         log.error("  Stack: {}", err.stack);
+  //         showToast("Payment received but order confirmation failed. Contact support with payment ID: " + srData.payment_id, "error");
+  //     }
+  // }
+
+  // /**
+  //  * WAIT FOR SHIPROCKET SDK TO LOAD
+  //  * Checks every 100ms up to maxWaitTime
+  //  */
+  // /**
+  //  * WAIT FOR SHIPROCKET SDK TO LOAD
+  //  * Polls every 100ms with updated logging
+  //  */
+  // async function waitForShiprocketSDK(maxWaitTime = 5000) {
+  //     L.info("⏳ Waiting for Shiprocket SDK (max {}ms)...", maxWaitTime);
+
+  //     const startTime = Date.now();
+  //     let checkCount = 0;
+
+  //     while (Date.now() - startTime < maxWaitTime) {
+  //         checkCount++;
+
+  //         L.debug("  Retry #{}: typeof window.Shiprocket = {}", 
+  //             checkCount,
+  //             typeof window.Shiprocket);
+
+  //         if (typeof window.Shiprocket !== "undefined" && 
+  //             typeof window.Shiprocket.checkout === "function") {
+
+  //             const timeElapsed = Date.now() - startTime;
+  //             L.info("✅ Shiprocket SDK loaded in {}ms", timeElapsed);
+  //             return true;
+  //         }
+
+  //         await new Promise(resolve => setTimeout(resolve, 100));
+  //     }
+
+  //     L.error("❌ Shiprocket SDK failed to load after {}ms", maxWaitTime);
+  //     return false;
+  // }
 
 
-/**
- * FIXED handleBuyNow() — Shiprocket Hot Checkout integration
- * All inline checks, proper error handling, confirmed SDK loading
- */
-async function handleBuyNow(e) {
+  /**
+   * FIXED handleBuyNow() — Shiprocket Hot Checkout integration
+   * All inline checks, proper error handling, confirmed SDK loading
+   */
+  async function handleBuyNow(e) {
     e.preventDefault();
     e.stopPropagation();
 
@@ -2288,23 +2379,23 @@ async function handleBuyNow(e) {
 
     // ── 1. CUSTOMIZABLE CHECK ──────────────────────────────────────────
     if (safeProductData?.isCustomizable) {
-        L.info("✅ Product is customizable, opening overlay");
-        openCustomizationOverlay();
-        return;
+      L.info("✅ Product is customizable, opening overlay");
+      openCustomizationOverlay();
+      return;
     }
 
     // ── 2. AUTH CHECK ──────────────────────────────────────────────────
     if (!USER_ID) {
-        L.error("❌ User not authenticated");
-        showToast("Please login to continue.", "error");
-        return;
+      L.error("❌ User not authenticated");
+      showToast("Please login to continue.", "error");
+      return;
     }
 
     // ── 3. VERIFY SHIPROCKET SDK IS LOADED ─────────────────────────────
     if (typeof window.ShiprocketCheckout === 'undefined') {
-        L.error("❌ Shiprocket SDK not loaded");
-        showToast("Payment system loading. Please try again in a moment.", "error");
-        return;
+      L.error("❌ Shiprocket SDK not loaded");
+      showToast("Payment system loading. Please try again in a moment.", "error");
+      return;
     }
 
     // ── 4. EXTRACT CORE UI SELECTIONS ──────────────────────────────────
@@ -2313,179 +2404,179 @@ async function handleBuyNow(e) {
     const unitPrice = variant?.price || safeProductData.currentSellingPrice;
 
     if (!unitPrice || unitPrice <= 0) {
-        L.error("❌ Invalid price: {}", unitPrice);
-        showToast("Price information unavailable. Please refresh and try again.", "error");
-        return;
+      L.error("❌ Invalid price: {}", unitPrice);
+      showToast("Price information unavailable. Please refresh and try again.", "error");
+      return;
     }
 
     // ── 5. DISPATCH TO SPRING BOOT BACKEND ─────────────────────────────
     const payload = {
-        productStrId: safeProductData.productStrId,
-        productName: safeProductData.productName,
-        variantId: variant?.id || null,
-        sku: variant?.sku || safeProductData.currentSku,
-        quantity: quantity,
-        unitPrice: parseFloat(unitPrice)
+      productStrId: safeProductData.productStrId,
+      productName: safeProductData.productName,
+      variantId: variant?.id || null,
+      sku: variant?.sku || safeProductData.currentSku,
+      quantity: quantity,
+      unitPrice: parseFloat(unitPrice)
     };
 
     try {
-        showToast("Preparing secure checkout...", "info");
-        L.info("Requesting checkout URL from Spring Boot backend...");
+      showToast("Preparing secure checkout...", "info");
+      L.info("Requesting checkout URL from Spring Boot backend...");
 
-        const response = await fetch('http://localhost:8085/api/checkout/initiate', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-User-Id': USER_ID
-            },
-            body: JSON.stringify(payload)
-        });
+      const response = await fetch('http://localhost:8085/api/checkout/initiate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-Id': USER_ID
+        },
+        body: JSON.stringify(payload)
+      });
 
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            L.error("Backend error response: {} | Details: {}", response.status, errorData);
-            
-            if (response.status === 500) {
-                showToast("Server error initiating checkout. Please contact support.", "error");
-            } else if (response.status === 400) {
-                showToast("Invalid product or pricing information.", "error");
-            } else {
-                showToast("Failed to initialize payment. Status: " + response.status, "error");
-            }
-            return;
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        L.error("Backend error response: {} | Details: {}", response.status, errorData);
+
+        if (response.status === 500) {
+          showToast("Server error initiating checkout. Please contact support.", "error");
+        } else if (response.status === 400) {
+          showToast("Invalid product or pricing information.", "error");
+        } else {
+          showToast("Failed to initialize payment. Status: " + response.status, "error");
         }
+        return;
+      }
 
-        const data = await response.json();
+      const data = await response.json();
 
-        if (!data?.checkoutUrl) {
-            L.error("❌ Backend returned success but no checkoutUrl");
-            L.error("Response: {}", JSON.stringify(data));
-            showToast("Checkout URL not received. Please try again.", "error");
-            return;
+      if (!data?.checkoutUrl) {
+        L.error("❌ Backend returned success but no checkoutUrl");
+        L.error("Response: {}", JSON.stringify(data));
+        showToast("Checkout URL not received. Please try again.", "error");
+        return;
+      }
+
+      L.info("✅ Checkout URL received from backend");
+      L.info("Opening Shiprocket Hot Checkout modal...");
+
+      // ── 6. LAUNCH SHIPROCKET HOT CHECKOUT MODAL ────────────────────
+      window.ShiprocketCheckout.open({
+        url: data.checkoutUrl,
+        fallback: false, // Opens as modal, not tab redirect
+
+        // Fired when customer completes payment
+        success: async function (callbackData) {
+          L.info("✅ Shiprocket checkout success callback received");
+          await handleBuyNowSuccess(callbackData, variant, quantity, (unitPrice * quantity));
+        },
+
+        // Fired when customer closes the checkout without paying
+        cancel: function () {
+          L.warn("User dismissed the checkout modal");
+          showToast("Checkout cancelled. Your cart is saved.", "info");
+        },
+
+        // Fired on iframe/SDK errors
+        error: function (err) {
+          L.error("Shiprocket iframe error: {}", err);
+          showToast("Payment system error. Please try again.", "error");
         }
-
-        L.info("✅ Checkout URL received from backend");
-        L.info("Opening Shiprocket Hot Checkout modal...");
-
-        // ── 6. LAUNCH SHIPROCKET HOT CHECKOUT MODAL ────────────────────
-        window.ShiprocketCheckout.open({
-            url: data.checkoutUrl,
-            fallback: false, // Opens as modal, not tab redirect
-
-            // Fired when customer completes payment
-            success: async function (callbackData) {
-                L.info("✅ Shiprocket checkout success callback received");
-                await handleBuyNowSuccess(callbackData, variant, quantity, (unitPrice * quantity));
-            },
-
-            // Fired when customer closes the checkout without paying
-            cancel: function () {
-                L.warn("User dismissed the checkout modal");
-                showToast("Checkout cancelled. Your cart is saved.", "info");
-            },
-
-            // Fired on iframe/SDK errors
-            error: function (err) {
-                L.error("Shiprocket iframe error: {}", err);
-                showToast("Payment system error. Please try again.", "error");
-            }
-        });
+      });
 
     } catch (err) {
-        L.error("❌ Checkout initiation failed: {}", err.message);
-        showToast("Unable to start payment. Please check your connection and try again.", "error");
+      L.error("❌ Checkout initiation failed: {}", err.message);
+      showToast("Unable to start payment. Please check your connection and try again.", "error");
     }
-}
+  }
 
-/**
- * FIXED handleBuyNowSuccess() — Maps Shiprocket callback → backend order confirmation
- */
-async function handleBuyNowSuccess(srData, variant, quantity, itemTotal) {
+  /**
+   * FIXED handleBuyNowSuccess() — Maps Shiprocket callback → backend order confirmation
+   */
+  async function handleBuyNowSuccess(srData, variant, quantity, itemTotal) {
     L.info("═══════════════════════════════════════════════════════");
     L.info("  SHIPROCKET CHECKOUT SUCCESS (CALLBACK)");
     L.info("═══════════════════════════════════════════════════════");
 
     // Validate we have the required fields from Shiprocket
     if (!srData?.order_id || !srData?.payment_id) {
-        L.error("❌ Shiprocket callback missing order_id or payment_id");
-        showToast("Payment received but order reference incomplete. Please contact support with Payment ID: " + srData?.payment_id, "warning");
-        return;
+      L.error("❌ Shiprocket callback missing order_id or payment_id");
+      showToast("Payment received but order reference incomplete. Please contact support with Payment ID: " + srData?.payment_id, "warning");
+      return;
     }
 
     showToast("Payment verified! Processing your order...", "success");
 
     // Build payload to send to our backend for order persistence
     const confirmPayload = {
-        shiprocketOrderId: String(srData.order_id),
-        shiprocketShipmentId: String(srData.shipment_id || ""),
-        razorpayPaymentId: String(srData.payment_id),
-        amount: parseFloat(itemTotal),
-        productStrId: safeProductData.productStrId,
-        variantId: variant?.id || null,
-        quantity: parseInt(quantity),
-        customerName: srData.customer_name || "",
-        customerPhone: srData.customer_phone || "",
-        customerEmail: srData.customer_email || "",
-        shippingAddress1: srData.shipping_address || "",
-        shippingAddress2: srData.shipping_address_2 || "",
-        shippingCity: srData.shipping_city || "",
-        shippingState: srData.shipping_state || "",
-        shippingPincode: srData.shipping_pincode || ""
+      shiprocketOrderId: String(srData.order_id),
+      shiprocketShipmentId: String(srData.shipment_id || ""),
+      razorpayPaymentId: String(srData.payment_id),
+      amount: parseFloat(itemTotal),
+      productStrId: safeProductData.productStrId,
+      variantId: variant?.id || null,
+      quantity: parseInt(quantity),
+      customerName: srData.customer_name || "",
+      customerPhone: srData.customer_phone || "",
+      customerEmail: srData.customer_email || "",
+      shippingAddress1: srData.shipping_address || "",
+      shippingAddress2: srData.shipping_address_2 || "",
+      shippingCity: srData.shipping_city || "",
+      shippingState: srData.shipping_state || "",
+      shippingPincode: srData.shipping_pincode || ""
     };
 
     try {
-        L.info("Confirming order with backend...");
-        const response = await fetch('/api/orders/confirm-buynow', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-User-Id': USER_ID
-            },
-            body: JSON.stringify(confirmPayload)
-        });
+      L.info("Confirming order with backend...");
+      const response = await fetch('/api/orders/confirm-buynow', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-Id': USER_ID
+        },
+        body: JSON.stringify(confirmPayload)
+      });
 
-        const backendResult = await response.json();
+      const backendResult = await response.json();
 
-        if (!response.ok) {
-            L.error("Backend order confirmation failed: {}", response.status);
-            L.error("Response: {}", JSON.stringify(backendResult));
-            
-            // Payment went through but order not saved — critical state
-            showToast(
-                "⚠️ Payment complete (ID: " + srData.payment_id + ") but order save failed. " +
-                "Please contact support with this Payment ID. Your payment is safe.",
-                "warning"
-            );
-            return;
-        }
+      if (!response.ok) {
+        L.error("Backend order confirmation failed: {}", response.status);
+        L.error("Response: {}", JSON.stringify(backendResult));
 
-        L.info("✅ Order confirmed and saved in database");
-        const orderStrId = backendResult?.data?.orderStrId || backendResult?.orderStrId;
+        // Payment went through but order not saved — critical state
+        showToast(
+          "⚠️ Payment complete (ID: " + srData.payment_id + ") but order save failed. " +
+          "Please contact support with this Payment ID. Your payment is safe.",
+          "warning"
+        );
+        return;
+      }
 
-        if (!orderStrId) {
-            L.warn("Order saved but orderStrId not in response");
-            showToast("Order placed successfully! 🎉", "success");
-            setTimeout(() => {
-                window.location.href = "/order-success.html";
-            }, 1500);
-            return;
-        }
+      L.info("✅ Order confirmed and saved in database");
+      const orderStrId = backendResult?.data?.orderStrId || backendResult?.orderStrId;
 
+      if (!orderStrId) {
+        L.warn("Order saved but orderStrId not in response");
         showToast("Order placed successfully! 🎉", "success");
-        
-        // Redirect to order success page with order ID
         setTimeout(() => {
-            window.location.href = `/Order-Success/order-success.html?orderId=${encodeURIComponent(orderStrId)}`;
+          window.location.href = "/order-success.html";
         }, 1500);
+        return;
+      }
+
+      showToast("Order placed successfully! 🎉", "success");
+
+      // Redirect to order success page with order ID
+      setTimeout(() => {
+        window.location.href = `/Order-Success/order-success.html?orderId=${encodeURIComponent(orderStrId)}`;
+      }, 1500);
 
     } catch (err) {
-        L.error("❌ Order confirmation request failed: {}", err.message);
-        showToast(
-            "Payment complete but order sync failed. Contact support with Payment ID: " + srData.payment_id,
-            "error"
-        );
+      L.error("❌ Order confirmation request failed: {}", err.message);
+      showToast(
+        "Payment complete but order sync failed. Contact support with Payment ID: " + srData.payment_id,
+        "error"
+      );
     }
-}
+  }
 
 
 
@@ -2498,32 +2589,32 @@ async function handleBuyNowSuccess(srData, variant, quantity, itemTotal) {
  *       Backend calculates tax, shipping, final amount
  *       This ensures consistent calculations
  */
-/**
- * BUILD BUYNOW CONFIRM REQUEST
- * Maps SR Checkout callback → Backend DTO
- */
-function buildBuyNowConfirmPayload(srData, variant, quantity, itemTotal) {
+  /**
+   * BUILD BUYNOW CONFIRM REQUEST
+   * Maps SR Checkout callback → Backend DTO
+   */
+  function buildBuyNowConfirmPayload(srData, variant, quantity, itemTotal) {
     log.info("Building BuyNowConfirmRequest payload...");
-    
+
     const payload = {
-        shiprocketOrderId:   srData.order_id   ? String(srData.order_id)   : null,
-        shiprocketShipmentId: srData.shipment_id ? String(srData.shipment_id) : null,
-        razorpayPaymentId:   srData.payment_id  || null,
-        amount:              itemTotal,
+      shiprocketOrderId: srData.order_id ? String(srData.order_id) : null,
+      shiprocketShipmentId: srData.shipment_id ? String(srData.shipment_id) : null,
+      razorpayPaymentId: srData.payment_id || null,
+      amount: itemTotal,
 
-        productStrId: safeProductData.productStrId,
-        variantId:    variant?.variantId || null,
-        quantity:     quantity,
+      productStrId: safeProductData.productStrId,
+      variantId: variant?.variantId || null,
+      quantity: quantity,
 
-        customerName:     srData.customer_name    || "",
-        customerPhone:    srData.customer_phone   || "",
-        customerEmail:    srData.customer_email   || "",
+      customerName: srData.customer_name || "",
+      customerPhone: srData.customer_phone || "",
+      customerEmail: srData.customer_email || "",
 
-        shippingAddress1: srData.shipping_address || "",
-        shippingAddress2: srData.shipping_address_2 || null,
-        shippingCity:     srData.shipping_city    || "",
-        shippingState:    srData.shipping_state   || "",
-        shippingPincode:  srData.shipping_pincode || "",
+      shippingAddress1: srData.shipping_address || "",
+      shippingAddress2: srData.shipping_address_2 || null,
+      shippingCity: srData.shipping_city || "",
+      shippingState: srData.shipping_state || "",
+      shippingPincode: srData.shipping_pincode || "",
     };
 
     log.info("✅ Payload built:");
@@ -2534,13 +2625,13 @@ function buildBuyNowConfirmPayload(srData, variant, quantity, itemTotal) {
     log.info("  Amount: ₹{}", payload.amount);
     log.info("  Customer: {}", payload.customerName);
     log.info("  Address: {}, {}, {} - {}",
-        payload.shippingAddress1,
-        payload.shippingCity,
-        payload.shippingState,
-        payload.shippingPincode);
+      payload.shippingAddress1,
+      payload.shippingCity,
+      payload.shippingState,
+      payload.shippingPincode);
 
     return payload;
-}
+  }
 
   function buildCartPayload(variant, quantity, customFieldsJson) {
 
@@ -2548,16 +2639,16 @@ function buildBuyNowConfirmPayload(srData, variant, quantity, itemTotal) {
     const selectedVariant = variant || getSelectedVariant();
 
     return {
-      userId:           USER_ID,
-      sessionId:        null,
-      productId:        safeProductData.productId,
-      variantId:        variant?.variantId     || null,
-      sku:              variant?.sku           || safeProductData.currentSku,
-      selectedColor:    variant?.color         || safeProductData.selectedColor,
-      selectedSize:     variant?.size          || null,
-      titleName:        safeProductData?.productName   || "Artezo Product",
-      unitPrice:        variant?.price         || safeProductData.currentSellingPrice,
-      mrpPrice:         variant?.mrp           || safeProductData.currentMrpPrice,
+      userId: USER_ID,
+      sessionId: null,
+      productId: safeProductData.productId,
+      variantId: variant?.variantId || null,
+      sku: variant?.sku || safeProductData.currentSku,
+      selectedColor: variant?.color || safeProductData.selectedColor,
+      selectedSize: variant?.size || null,
+      titleName: safeProductData?.productName || "Artezo Product",
+      unitPrice: variant?.price || safeProductData.currentSellingPrice,
+      mrpPrice: variant?.mrp || safeProductData.currentMrpPrice,
       quantity,
       customFieldsJson: customFieldsJson || null,
     };
@@ -2571,19 +2662,19 @@ function buildBuyNowConfirmPayload(srData, variant, quantity, itemTotal) {
     e.preventDefault();
     e.stopPropagation();
 
-    const btn     = e.currentTarget;
+    const btn = e.currentTarget;
     const variant = getSelectedVariant();
 
     const payload = {
-      userId:           USER_ID,
-      wishlistName:     "My Wishlist",
-      productId:        safeProductData.productId,
-      variantId:        variant?.variantId  || null,
-      sku:              variant?.sku        || safeProductData.currentSku,
-      selectedColor:    variant?.color      || safeProductData.selectedColor,
-      selectedSize:     variant?.size       || null,
-      titleName:        safeProductData?.productName || "Artezo Product",
-      wishlistedPrice:  variant?.price      || safeProductData.currentSellingPrice,
+      userId: USER_ID,
+      wishlistName: "My Wishlist",
+      productId: safeProductData.productId,
+      variantId: variant?.variantId || null,
+      sku: variant?.sku || safeProductData.currentSku,
+      selectedColor: variant?.color || safeProductData.selectedColor,
+      selectedSize: variant?.size || null,
+      titleName: safeProductData?.productName || "Artezo Product",
+      wishlistedPrice: variant?.price || safeProductData.currentSellingPrice,
       customFieldsJson: null,
     };
 
@@ -2597,7 +2688,7 @@ function buildBuyNowConfirmPayload(srData, variant, quantity, itemTotal) {
           : "fa-solid fa-heart text-red-500";
       }
       showToast("Wishlist updated ❤️", "info");
-      
+
     } catch (err) {
       console.error("[Wishlist] error:", err);
       showToast("Could not update wishlist. Please try again.", "error");
@@ -2630,11 +2721,11 @@ function buildBuyNowConfirmPayload(srData, variant, quantity, itemTotal) {
                     ₹${safeProductData.currentSellingPrice.toLocaleString("en-IN")}
                   </span>
                   ${safeProductData.currentMrpPrice > safeProductData.currentSellingPrice
-                    ? `<span class="text-2xl text-gray-400 font-lexend line-through">₹${safeProductData.currentMrpPrice.toLocaleString("en-IN")}</span>`
-                    : ""}
+        ? `<span class="text-2xl text-gray-400 font-lexend line-through">₹${safeProductData.currentMrpPrice.toLocaleString("en-IN")}</span>`
+        : ""}
                   ${discPct
-                    ? `<span class="bg-[#e39f32] text-white font-bold px-4 py-1.5 rounded-2xl text-sm shadow-sm">${discPct}% OFF</span>`
-                    : ""}
+        ? `<span class="bg-[#e39f32] text-white font-bold px-4 py-1.5 rounded-2xl text-sm shadow-sm">${discPct}% OFF</span>`
+        : ""}
                 </div>
               </div>
               <button id="closeCustomOverlayBtn"
@@ -2721,8 +2812,8 @@ function buildBuyNowConfirmPayload(srData, variant, quantity, itemTotal) {
     document.body.insertAdjacentHTML("beforeend", overlayHTML);
 
     if (!document.getElementById("customizationStyles")) {
-      const style       = document.createElement("style");
-      style.id          = "customizationStyles";
+      const style = document.createElement("style");
+      style.id = "customizationStyles";
       style.textContent = `
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
@@ -2809,7 +2900,7 @@ function buildBuyNowConfirmPayload(srData, variant, quantity, itemTotal) {
     let html = "";
 
     customFields.forEach((field) => {
-      const fieldId   = `custom_${field.fieldId}`;
+      const fieldId = `custom_${field.fieldId}`;
       const fieldName = field.fieldName || `field_${field.fieldId}`;
       const inputType = (field.fieldInputType || "text").toLowerCase();
 
@@ -2860,14 +2951,14 @@ function buildBuyNowConfirmPayload(srData, variant, quantity, itemTotal) {
                     ${field.required ? "required" : ""}>
               <option value="">-- Select ${escapeHtml(fieldLabel)} --</option>
               ${options
-                .map(
-                  (opt) =>
-                    `<option value="${escapeHtml(opt)}"
+              .map(
+                (opt) =>
+                  `<option value="${escapeHtml(opt)}"
                              ${field.defaultValue === opt ? "selected" : ""}>
                       ${escapeHtml(opt)}
                     </option>`
-                )
-                .join("")}
+              )
+              .join("")}
             </select>`;
           break;
 
@@ -2914,7 +3005,7 @@ function buildBuyNowConfirmPayload(srData, variant, quantity, itemTotal) {
           const radioOptions = options.length ? options : ["Yes", "No"];
           html += `<div class="cf-radio-group" id="${fieldId}_group">`;
           radioOptions.forEach((opt, i) => {
-            const optId     = `${fieldId}_opt_${i}`;
+            const optId = `${fieldId}_opt_${i}`;
             const isDefault = field.defaultValue
               ? field.defaultValue === opt
               : i === 0;
@@ -2982,7 +3073,7 @@ function buildBuyNowConfirmPayload(srData, variant, quantity, itemTotal) {
         if (file && preview) {
           const reader = new FileReader();
           reader.onload = (e) => {
-            preview.src           = e.target.result;
+            preview.src = e.target.result;
             preview.style.display = "block";
             // Store base64 for payload
             customFieldValues[this.name] = e.target.result;
@@ -3005,7 +3096,7 @@ function buildBuyNowConfirmPayload(srData, variant, quantity, itemTotal) {
   }
 
   function updateCustomizationPrice() {
-    let total      = safeProductData.currentSellingPrice;
+    let total = safeProductData.currentSellingPrice;
     const selections = {};
 
     for (const [fieldId, field] of Object.entries(currentCustomFields)) {
@@ -3079,7 +3170,7 @@ function buildBuyNowConfirmPayload(srData, variant, quantity, itemTotal) {
   function openCustomizationOverlay() {
     buildCustomizationOverlay();
 
-    customFieldValues   = {};
+    customFieldValues = {};
     currentCustomFields = {};
 
     const customFields = safeProductData.customFields || [];
@@ -3120,9 +3211,9 @@ function buildBuyNowConfirmPayload(srData, variant, quantity, itemTotal) {
   }
 
   async function addCustomizedToCart() {
-    const variant    = getSelectedVariant();
-    const quantity   = parseInt(document.getElementById("quantity")?.textContent || 1);
-    const totalText  = document.getElementById("customTotalPrice")?.textContent || "";
+    const variant = getSelectedVariant();
+    const quantity = parseInt(document.getElementById("quantity")?.textContent || 1);
+    const totalText = document.getElementById("customTotalPrice")?.textContent || "";
     const finalPrice =
       parseInt(totalText.replace(/[^0-9]/g, "")) ||
       safeProductData.currentSellingPrice;
@@ -3144,9 +3235,9 @@ function buildBuyNowConfirmPayload(srData, variant, quantity, itemTotal) {
   }
 
   async function buyCustomizedNow() {
-    const variant    = getSelectedVariant();
-    const quantity   = parseInt(document.getElementById("quantity")?.textContent || 1);
-    const totalText  = document.getElementById("customTotalPrice")?.textContent || "";
+    const variant = getSelectedVariant();
+    const quantity = parseInt(document.getElementById("quantity")?.textContent || 1);
+    const totalText = document.getElementById("customTotalPrice")?.textContent || "";
     const finalPrice =
       parseInt(totalText.replace(/[^0-9]/g, "")) ||
       safeProductData.currentSellingPrice;
@@ -3169,114 +3260,114 @@ function buildBuyNowConfirmPayload(srData, variant, quantity, itemTotal) {
   // ═══════════════════════════════════════════════════════════════════════════
 
   // ── PATCH: Fetch user coupons from API ──────────────────────────────────────
-// async function fetchUserCoupons() {
-//   try {
-//     const userId = localStorage.getItem("userId") || sessionStorage.getItem("userId");
-//     const productPrimeId = safeProductData?.productPrimeId;
-//     if (!userId || !productPrimeId) return [];
-//     const res = await fetch(
-//       `${BASE_URL}/api/v1/coupons/get-by-product?userId=${userId}&productPrimeId=${productPrimeId}`
-//     );
-//     if (!res.ok) return [];
-//     const data = await res.json();
-//     return Array.isArray(data) ? data : [];
-//   } catch (e) {
-//     console.warn("[Coupons] Failed to fetch user coupons:", e);
-//     return [];
-//   }
-// }
+  // async function fetchUserCoupons() {
+  //   try {
+  //     const userId = localStorage.getItem("userId") || sessionStorage.getItem("userId");
+  //     const productPrimeId = safeProductData?.productPrimeId;
+  //     if (!userId || !productPrimeId) return [];
+  //     const res = await fetch(
+  //       `${BASE_URL}/api/v1/coupons/get-by-product?userId=${userId}&productPrimeId=${productPrimeId}`
+  //     );
+  //     if (!res.ok) return [];
+  //     const data = await res.json();
+  //     return Array.isArray(data) ? data : [];
+  //   } catch (e) {
+  //     console.warn("[Coupons] Failed to fetch user coupons:", e);
+  //     return [];
+  //   }
+  // }
 
-async function fetchUserCoupons() {
-  try {
-    // ── Resolve userId ───────────────────────────────────────────────────────
-    let userId = localStorage.getItem("userId") || sessionStorage.getItem("userId");
+  async function fetchUserCoupons() {
+    try {
+      // ── Resolve userId ───────────────────────────────────────────────────────
+      let userId = localStorage.getItem("userId") || sessionStorage.getItem("userId");
 
-    // Fallback: parse from stored user object
-    if (!userId) {
-      const rawUser = localStorage.getItem("user") || sessionStorage.getItem("user");
-      if (rawUser) {
-        try {
-          const parsed = JSON.parse(rawUser);
-          userId = parsed?.userId || parsed?.id || parsed?.user_id || null;
-        } catch (_) {}
+      // Fallback: parse from stored user object
+      if (!userId) {
+        const rawUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+        if (rawUser) {
+          try {
+            const parsed = JSON.parse(rawUser);
+            userId = parsed?.userId || parsed?.id || parsed?.user_id || null;
+          } catch (_) { }
+        }
       }
-    }
 
-    // Fallback: decode JWT directly
-    if (!userId) {
-      const token = localStorage.getItem("token")
-                 || localStorage.getItem("jwtToken")
-                 || localStorage.getItem("authToken")
-                 || sessionStorage.getItem("token")
-                 || sessionStorage.getItem("jwtToken");
-      if (token) {
-        try {
-          const payload = JSON.parse(atob(token.split(".")[1]));
-          userId = payload?.userId || payload?.user_id || payload?.id || payload?.sub || null;
-        } catch (_) {}
+      // Fallback: decode JWT directly
+      if (!userId) {
+        const token = localStorage.getItem("token")
+          || localStorage.getItem("jwtToken")
+          || localStorage.getItem("authToken")
+          || sessionStorage.getItem("token")
+          || sessionStorage.getItem("jwtToken");
+        if (token) {
+          try {
+            const payload = JSON.parse(atob(token.split(".")[1]));
+            userId = payload?.userId || payload?.user_id || payload?.id || payload?.sub || null;
+          } catch (_) { }
+        }
       }
-    }
 
-    // ── Resolve productPrimeId ───────────────────────────────────────────────
-    const productPrimeId = safeProductData?.productPrimeId
-                        || safeProductData?.productId
-                        || safeProductData?.id;
+      // ── Resolve productPrimeId ───────────────────────────────────────────────
+      const productPrimeId = safeProductData?.productPrimeId
+        || safeProductData?.productId
+        || safeProductData?.id;
 
-    console.log("[Coupons] userId:", userId);
-    console.log("[Coupons] productPrimeId:", productPrimeId);
-    console.log("[Coupons] safeProductData keys:", safeProductData ? Object.keys(safeProductData) : "null");
+      console.log("[Coupons] userId:", userId);
+      console.log("[Coupons] productPrimeId:", productPrimeId);
+      console.log("[Coupons] safeProductData keys:", safeProductData ? Object.keys(safeProductData) : "null");
 
-    if (!userId || !productPrimeId) {
-      console.warn("[Coupons] Skipping fetch — missing userId:", userId, "productPrimeId:", productPrimeId);
+      if (!userId || !productPrimeId) {
+        console.warn("[Coupons] Skipping fetch — missing userId:", userId, "productPrimeId:", productPrimeId);
+        return [];
+      }
+
+      const url = `${BASE_URL}/api/v1/coupons/get-by-product?userId=${userId}&productPrimeId=${productPrimeId}`;
+      console.log("[Coupons] Fetching URL:", url);
+
+      const res = await fetch(url);
+      console.log("[Coupons] Response status:", res.status);
+
+      if (!res.ok) {
+        console.warn("[Coupons] Bad response:", res.status, res.statusText);
+        return [];
+      }
+
+      const data = await res.json();
+      console.log("[Coupons] Raw response:", data);
+
+      return Array.isArray(data) ? data : [];
+    } catch (e) {
+      console.warn("[Coupons] Failed to fetch user coupons:", e);
       return [];
     }
-
-    const url = `${BASE_URL}/api/v1/coupons/get-by-product?userId=${userId}&productPrimeId=${productPrimeId}`;
-    console.log("[Coupons] Fetching URL:", url);
-
-    const res = await fetch(url);
-    console.log("[Coupons] Response status:", res.status);
-
-    if (!res.ok) {
-      console.warn("[Coupons] Bad response:", res.status, res.statusText);
-      return [];
-    }
-
-    const data = await res.json();
-    console.log("[Coupons] Raw response:", data);
-
-    return Array.isArray(data) ? data : [];
-  } catch (e) {
-    console.warn("[Coupons] Failed to fetch user coupons:", e);
-    return [];
   }
-}
-// ── END PATCH ───────────────────────────────────────────────────────────────
+  // ── END PATCH ───────────────────────────────────────────────────────────────
 
 
-// ── PATCH: Build coupon card HTML (display-only, no apply btn) ──────────────
-function buildUserCouponCardHTML(coupon) {
-  const now = new Date();
-  // Parse validTo in IST context
-  const validTo = coupon.validTo ? new Date(coupon.validTo) : null;
+  // ── PATCH: Build coupon card HTML (display-only, no apply btn) ──────────────
+  function buildUserCouponCardHTML(coupon) {
+    const now = new Date();
+    // Parse validTo in IST context
+    const validTo = coupon.validTo ? new Date(coupon.validTo) : null;
 
-  let urgencyBadgeHTML = "";
-  let timerHTML = "";
+    let urgencyBadgeHTML = "";
+    let timerHTML = "";
 
-  if (validTo) {
-    const diffMs = validTo - now;
-    const diffHours = diffMs / (1000 * 60 * 60);
-    const diffDays = diffMs / (1000 * 60 * 60 * 24);
+    if (validTo) {
+      const diffMs = validTo - now;
+      const diffHours = diffMs / (1000 * 60 * 60);
+      const diffDays = diffMs / (1000 * 60 * 60 * 24);
 
-    if (diffMs > 0 && diffDays <= 1) {
-      // Under 1 day left — show live countdown timer
-      const countdownId = `coupon-timer-${coupon.couponId}`;
-      urgencyBadgeHTML = `
+      if (diffMs > 0 && diffDays <= 1) {
+        // Under 1 day left — show live countdown timer
+        const countdownId = `coupon-timer-${coupon.couponId}`;
+        urgencyBadgeHTML = `
         <div class="flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full bg-red-50 border border-red-200 w-fit animate-pulse">
           <i class="fa-solid fa-fire text-red-500 text-[9px]"></i>
           <span class="text-[9px] font-semibold text-red-600 uppercase tracking-wide">Grab your deal · Expiring soon!</span>
         </div>`;
-      timerHTML = `
+        timerHTML = `
         <div class="mt-2 flex items-center gap-1.5">
           <span class="text-[10px] text-gray-500">Expires in:</span>
           <div class="flex items-center gap-[3px]" id="${countdownId}">
@@ -3287,34 +3378,34 @@ function buildUserCouponCardHTML(coupon) {
             <div class="bg-red-50 border border-red-200 px-1.5 py-[2px] rounded text-[11px] font-mono font-bold text-red-600 countdown-s">00</div>
           </div>
         </div>`;
+      }
     }
-  }
 
-  const discountLabel = coupon.discountType === "PERCENTAGE"
-    ? `${coupon.discountValue}% OFF`
-    : `₹${coupon.discountValue} OFF`;
+    const discountLabel = coupon.discountType === "PERCENTAGE"
+      ? `${coupon.discountValue}% OFF`
+      : `₹${coupon.discountValue} OFF`;
 
-  const minOrder = coupon.minOrderAmount
-    ? `<p class="text-[10px] text-gray-400 mt-1">Min. Order: ₹${coupon.minOrderAmount.toLocaleString("en-IN")}</p>`
-    : "";
+    const minOrder = coupon.minOrderAmount
+      ? `<p class="text-[10px] text-gray-400 mt-1">Min. Order: ₹${coupon.minOrderAmount.toLocaleString("en-IN")}</p>`
+      : "";
 
-  const maxDisc = coupon.maxDiscountAmount && coupon.discountType === "PERCENTAGE"
-    ? `<p class="text-[10px] text-gray-400">Max. Discount: ₹${coupon.maxDiscountAmount.toLocaleString("en-IN")}</p>`
-    : "";
+    const maxDisc = coupon.maxDiscountAmount && coupon.discountType === "PERCENTAGE"
+      ? `<p class="text-[10px] text-gray-400">Max. Discount: ₹${coupon.maxDiscountAmount.toLocaleString("en-IN")}</p>`
+      : "";
 
-  const freeShipping = coupon.freeShipping
-    ? `<span class="inline-flex items-center gap-1 mt-1 text-[10px] bg-green-50 border border-green-200 text-green-700 px-2 py-0.5 rounded-full">
+    const freeShipping = coupon.freeShipping
+      ? `<span class="inline-flex items-center gap-1 mt-1 text-[10px] bg-green-50 border border-green-200 text-green-700 px-2 py-0.5 rounded-full">
          <i class="fa-solid fa-truck text-[9px]"></i> Free Shipping Included
        </span>`
-    : "";
+      : "";
 
-  const alreadyUsed = coupon.couponUsed
-    ? `<span class="inline-flex items-center gap-1 mt-1 text-[10px] bg-gray-100 border border-gray-200 text-gray-500 px-2 py-0.5 rounded-full">
+    const alreadyUsed = coupon.couponUsed
+      ? `<span class="inline-flex items-center gap-1 mt-1 text-[10px] bg-gray-100 border border-gray-200 text-gray-500 px-2 py-0.5 rounded-full">
          <i class="fa-solid fa-check text-[9px]"></i> Already Used
        </span>`
-    : "";
+      : "";
 
-  return `
+    return `
     <div class="bg-gradient-to-br from-[#e39f32]/5 to-[#1D3C4A]/5 rounded-xl p-4 border border-gray-400 coupon-card"
          data-coupon-id="${coupon.couponId}"
          data-valid-to="${coupon.validTo || ""}">
@@ -3339,48 +3430,48 @@ function buildUserCouponCardHTML(coupon) {
         <span>Add to cart or Buy Now to avail this offer</span>
       </div>
     </div>`;
-}
-// ── END PATCH ───────────────────────────────────────────────────────────────
+  }
+  // ── END PATCH ───────────────────────────────────────────────────────────────
 
 
-// ── PATCH: Start live countdown timers for expiring coupons ─────────────────
-function startCouponCountdowns() {
-  document.querySelectorAll(".coupon-card[data-valid-to]").forEach((card) => {
-    const validToStr = card.getAttribute("data-valid-to");
-    if (!validToStr) return;
-    const validTo = new Date(validToStr);
-    const timerId = card.querySelector("[id^='coupon-timer-']")?.id;
-    if (!timerId) return;
+  // ── PATCH: Start live countdown timers for expiring coupons ─────────────────
+  function startCouponCountdowns() {
+    document.querySelectorAll(".coupon-card[data-valid-to]").forEach((card) => {
+      const validToStr = card.getAttribute("data-valid-to");
+      if (!validToStr) return;
+      const validTo = new Date(validToStr);
+      const timerId = card.querySelector("[id^='coupon-timer-']")?.id;
+      if (!timerId) return;
 
-    const tick = () => {
-      const now = new Date();
-      const diffMs = validTo - now;
-      if (diffMs <= 0) {
-        const el = document.getElementById(timerId);
-        if (el) el.closest(".coupon-card")?.remove();
-        return;
-      }
-      const h = String(Math.floor(diffMs / 3600000)).padStart(2, "0");
-      const m = String(Math.floor((diffMs % 3600000) / 60000)).padStart(2, "0");
-      const s = String(Math.floor((diffMs % 60000) / 1000)).padStart(2, "0");
-      const wrap = document.getElementById(timerId);
-      if (wrap) {
-        wrap.querySelector(".countdown-h").textContent = h;
-        wrap.querySelector(".countdown-m").textContent = m;
-        wrap.querySelector(".countdown-s").textContent = s;
-      }
-    };
+      const tick = () => {
+        const now = new Date();
+        const diffMs = validTo - now;
+        if (diffMs <= 0) {
+          const el = document.getElementById(timerId);
+          if (el) el.closest(".coupon-card")?.remove();
+          return;
+        }
+        const h = String(Math.floor(diffMs / 3600000)).padStart(2, "0");
+        const m = String(Math.floor((diffMs % 3600000) / 60000)).padStart(2, "0");
+        const s = String(Math.floor((diffMs % 60000) / 1000)).padStart(2, "0");
+        const wrap = document.getElementById(timerId);
+        if (wrap) {
+          wrap.querySelector(".countdown-h").textContent = h;
+          wrap.querySelector(".countdown-m").textContent = m;
+          wrap.querySelector(".countdown-s").textContent = s;
+        }
+      };
 
-    tick();
-    setInterval(tick, 1000);
-  });
-}
-// ── END PATCH ───────────────────────────────────────────────────────────────
-
-
+      tick();
+      setInterval(tick, 1000);
+    });
+  }
+  // ── END PATCH ───────────────────────────────────────────────────────────────
 
 
-//==== old depricated ======//
+
+
+  //==== old depricated ======//
   function applyCoupon(couponCode) {
     const coupon = safeProductData.availabeCoupons?.find(
       (c) => c.couponCode === couponCode
@@ -3390,10 +3481,10 @@ function startCouponCountdowns() {
       return false;
     }
 
-    const variant    = getSelectedVariant();
-    const price      = variant?.price || safeProductData.currentSellingPrice;
-    const discPct    = parseFloat(coupon.discount);
-    const saved      = Math.round((price * discPct) / 100);
+    const variant = getSelectedVariant();
+    const price = variant?.price || safeProductData.currentSellingPrice;
+    const discPct = parseFloat(coupon.discount);
+    const saved = Math.round((price * discPct) / 100);
     const finalPrice = price - saved;
 
     showToast(`Coupon applied! You saved ₹${saved}`, "success");
@@ -3415,12 +3506,12 @@ function startCouponCountdowns() {
   // ═══════════════════════════════════════════════════════════════════════════
 
   function renderStars(rating, max = 5) {
-    let html  = "";
-    const full  = Math.floor(rating);
-    const half  = rating - full >= 0.5 ? 1 : 0;
+    let html = "";
+    const full = Math.floor(rating);
+    const half = rating - full >= 0.5 ? 1 : 0;
     const empty = max - full - half;
     for (let i = 0; i < full; i++)  html += '<i class="fa-solid fa-star"></i>';
-    if (half)                        html += '<i class="fa-solid fa-star-half-alt"></i>';
+    if (half) html += '<i class="fa-solid fa-star-half-alt"></i>';
     for (let i = 0; i < empty; i++) html += '<i class="fa-regular fa-star"></i>';
     return html;
   }
@@ -3429,8 +3520,8 @@ function startCouponCountdowns() {
     if (window.showGlobalToast) { window.showGlobalToast(message, type); return; }
     let toastEl = document.getElementById("pdToast");
     if (!toastEl) {
-      toastEl           = document.createElement("div");
-      toastEl.id        = "pdToast";
+      toastEl = document.createElement("div");
+      toastEl.id = "pdToast";
       toastEl.style.cssText =
         "position:fixed;bottom:24px;right:24px;background:#1D3C4A;color:white;" +
         "padding:12px 24px;border-radius:40px;box-shadow:0 10px 20px rgba(0,0,0,.15);" +
@@ -3480,15 +3571,15 @@ function startCouponCountdowns() {
 
     const variantColors = safeProductData.availableVariants.map((v) => ({
       variantId: v.variantId,
-      sku:       v.sku,
-      name:      v.titleName || v.name,
-      color:     v.color,
-      image:     v.mainImage,
-      price:     v.price,
-      mrp:       v.mrp,
-      stock:     v.stock,
-      size:      v.size || "Standard",
-      sizes:     v.sizes || [],
+      sku: v.sku,
+      name: v.titleName || v.name,
+      color: v.color,
+      image: v.mainImage,
+      price: v.price,
+      mrp: v.mrp,
+      stock: v.stock,
+      size: v.size || "Standard",
+      sizes: v.sizes || [],
     }));
 
     // Initial media list (product-level, before any variant selection)
@@ -3499,53 +3590,52 @@ function startCouponCountdowns() {
     // Static placeholder only; real cards injected by setupEventListeners patch
 
     // const firstCoupon  = safeProductData.availabeCoupons?.[0];
-    const addCartText  = safeProductData.isCustomizable ? "Customize" : "Add to Cart";
-    const addCartIcon  = safeProductData.isCustomizable
+    const addCartText = safeProductData.isCustomizable ? "Customize" : "Add to Cart";
+    const addCartIcon = safeProductData.isCustomizable
       ? '<i class="fas fa-sliders-h"></i>'
       : '<i class="fa-solid fa-cart-shopping"></i>';
-    const buyNowText   = safeProductData.isCustomizable ? "Customize & Buy" : "Buy Now";
+    const buyNowText = safeProductData.isCustomizable ? "Customize & Buy" : "Buy Now";
 
+   
     // Variant cards HTML
-    // Variant cards HTML
-// ─── PATCH 4: AMAZON-STYLE VARIANT SELECTOR ───────────────────────────────
-let variantCardsHTML = "";
+    // ─── PATCH 4: AMAZON-STYLE VARIANT SELECTOR ───────────────────────────────
+    let variantCardsHTML = "";
 
-if (safeProductData.availableVariants.length > 1) {
+    if (safeProductData.availableVariants.length > 1) {
 
-  // ── Collect unique sizes preserving order (base first) ──────────────────
-  const sizeOrder = [];
-  safeProductData.availableVariants.forEach((v) => {
-    if (v.size && !sizeOrder.includes(v.size)) sizeOrder.push(v.size);
-  });
+      // ── Collect unique sizes preserving order (base first) ──────────────────
+      const sizeOrder = [];
+      safeProductData.availableVariants.forEach((v) => {
+        if (v.size && !sizeOrder.includes(v.size)) sizeOrder.push(v.size);
+      });
 
-  // ── Size → variants map ──────────────────────────────────────────────────
-  const sizeMap = {};
-  sizeOrder.forEach((s) => {
-    sizeMap[s] = safeProductData.availableVariants.filter((v) => v.size === s);
-  });
+      // ── Size → variants map ──────────────────────────────────────────────────
+      const sizeMap = {};
+      sizeOrder.forEach((s) => {
+        sizeMap[s] = safeProductData.availableVariants.filter((v) => v.size === s);
+      });
 
-  // ── Default: first size, first color of that size ───────────────────────
-  const defaultSize    = sizeOrder[0];
-  const defaultVariant = sizeMap[defaultSize][0];
+      // ── Default: first size, first color of that size ───────────────────────
+      const defaultSize = sizeOrder[0];
+      const defaultVariant = sizeMap[defaultSize][0];
 
-  variantCardsHTML = `
+      variantCardsHTML = `
     <div class="mt-5 space-y-5" id="variantSection">
 
       <!-- SIZE SELECTOR -->
       <div>
-        <p class="text-xs font-semibold font-lexend text-gray-500 uppercase
-                  tracking-widest mb-2">
-          Size:
-          <span id="activeSizeLabel" class="text-[#1D3C4A] normal-case tracking-normal
-                                            text-sm ml-1">${escapeHtml(defaultSize)}</span>
-        </p>
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-sm font-semibold text-[#033E59]">Size</span>
+          <div class="h-px bg-gray-200 flex-1"></div>
+        </div>
+       
         <div class="flex flex-wrap gap-2" id="sizePills">
           ${sizeOrder.map((size, idx) => `
-            <button class="size-pill px-4 py-2 rounded-lg border-2 text-sm font-lexend
-                           font-medium transition-all duration-200
+            <button class="size-pill px-4 py-2 rounded-lg border-2 text-xs
+                           font-medium transition-all duration-200 rounded-xl
                            ${idx === 0
-                             ? "border-[#1D3C4A] bg-[#1D3C4A] text-white shadow-sm"
-                             : "border-gray-200 text-gray-600 hover:border-[#1D3C4A]"}"
+          ? "border-[#E6A62C] bg-[#1D3C4A] text-white shadow-sm"
+          : "border-gray-200 text-gray-600 hover:border-[#E6A62C]"}"
                     data-size="${escapeHtml(size)}">
               ${escapeHtml(size)}
             </button>`).join("")}
@@ -3571,8 +3661,8 @@ if (safeProductData.availableVariants.length > 1) {
                              rounded-xl border-2 p-2 transition-all duration-200
                              w-[80px] cursor-pointer
                              ${isDefault
-                               ? "border-[#1D3C4A] shadow-md"
-                               : "border-gray-200 hover:border-[#1D3C4A]"}"
+                ? "border-[#1D3C4A] shadow-md"
+                : "border-gray-200 hover:border-[#1D3C4A]"}"
                       data-variant-id="${escapeHtml(v.variantId)}"
                       data-size="${escapeHtml(v.size || "")}"
                       style="${!isDefault ? "display:none" : ""}">
@@ -3596,8 +3686,8 @@ if (safeProductData.availableVariants.length > 1) {
       </div>
 
     </div>`;
-}
-// ─── END PATCH 4 VARIANT CARDS HTML ──────────────────────────────────────
+    }
+    // ─── END PATCH 4 VARIANT CARDS HTML ──────────────────────────────────────
     // Build the initial thumbnail list for the strip
     const initialThumbItems = buildThumbItemList(initialMedia);
 
@@ -3606,14 +3696,14 @@ if (safeProductData.availableVariants.length > 1) {
 
     // Store transformedData for accordion, social proof, etc.
     transformedData = {
-      name:           safeProductData.productName,
-      brand:          safeProductData.brandName,
-      rating:         4.5,
-      reviewCount:    safeProductData.productReviews?.length || 0,
-      price:          safeProductData.currentSellingPrice,
-      originalPrice:  safeProductData.currentMrpPrice,
+      name: safeProductData.productName,
+      brand: safeProductData.brandName,
+      rating: 4.5,
+      reviewCount: safeProductData.productReviews?.length || 0,
+      price: safeProductData.currentSellingPrice,
+      originalPrice: safeProductData.currentMrpPrice,
       discountPercent,
-      stock:          safeProductData.currentStock,
+      stock: safeProductData.currentStock,
 
       // highlights:     Object.entries(safeProductData.specifications).map(([k, v]) => ({
       //   label:  k.split("_").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" "),
@@ -3627,7 +3717,7 @@ if (safeProductData.availableVariants.length > 1) {
           .filter(Boolean)
           .map((item) => `<p>${escapeHtml(item)}</p>`)
           .join(""),
-          
+
       specifications: Object.entries(safeProductData.specifications).map(([k, v]) => ({
         label: k.split("_").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" "),
         value: v || "N/A",
@@ -3639,31 +3729,31 @@ if (safeProductData.availableVariants.length > 1) {
 
       faqs: Object.entries(safeProductData.faqAns).map(([q, a]) => ({ q, a })),
       stats: [
-        { value: "5k+",  label: "Happy Customers", stars: 5 },
-        { value: "4.5",  label: "Average Rating",  stars: "4.5" },
+        { value: "5k+", label: "Happy Customers", stars: 5 },
+        { value: "4.5", label: "Average Rating", stars: "4.5" },
         { value: "500+", label: "Verified Reviews", extra: "Trusted" },
-        { value: "95%",  label: "Recommend Us",    progress: 95 },
+        { value: "95%", label: "Recommend Us", progress: 95 },
       ],
       reviews: (safeProductData.productReviews?.filter((r) => r.approved) || []).map(
         (r) => ({
-          name:     r.reviewerName  || "Anonymous",
-          img:      r.reviewerImage || "https://randomuser.me/api/portraits/lego/1.jpg",
-          rating:   r.rating        || 4,
-          location: r.location      || "India",
-          time:     r.time          || "recently",
-          text:     r.description   || "Great product!",
-          likes:    r.likes         || 0,
-          verified: r.verified      ?? true,
+          name: r.reviewerName || "Anonymous",
+          img: r.reviewerImage || "https://randomuser.me/api/portraits/lego/1.jpg",
+          rating: r.rating || 4,
+          location: r.location || "India",
+          time: r.time || "recently",
+          text: r.description || "Great product!",
+          likes: r.likes || 0,
+          verified: r.verified ?? true,
         })
       ),
       installSteps: safeProductData.installationSteps.map((step, idx) => ({
-        step:     step.step,
-        title:    step.title,
-        desc:     step.shortDescription,
-        list:     [step.shortNote || "Follow manufacturer guidelines"],
-        time:     idx === 0 ? "15–20 Minutes" : idx === 1 ? "Basic tools required" : "5 Minutes",
-        img:      step.stepImage || null,
-        alt:      step.title,
+        step: step.step,
+        title: step.title,
+        desc: step.shortDescription,
+        list: [step.shortNote || "Follow manufacturer guidelines"],
+        time: idx === 0 ? "15–20 Minutes" : idx === 1 ? "Basic tools required" : "5 Minutes",
+        img: step.stepImage || null,
+        alt: step.title,
         videoUrl: step.videoUrl,
       })),
     };
@@ -3678,9 +3768,9 @@ if (safeProductData.availableVariants.length > 1) {
               <!-- Thumbnail strip (rebuilt by buildMediaStrip on variant switch) -->
               <div class="flex flex-col gap-2 w-14 flex-shrink-0" id="thumbContainer">
                 ${initialThumbItems
-                  .map((item, idx) => {
-                    if (item.type === "video") {
-                      return `
+        .map((item, idx) => {
+          if (item.type === "video") {
+            return `
                         <div class="thumb-video-wrap relative w-full h-16 rounded-md overflow-hidden border-2 cursor-pointer
                                     ${idx === 0 ? "border-[#e39f32]" : "border-transparent hover:border-[#e39f32]"}"
                              data-media-index="${idx}" data-media-type="video" data-media-url="${item.url}">
@@ -3689,15 +3779,15 @@ if (safeProductData.availableVariants.length > 1) {
                             <i class="fas fa-play text-white text-xs"></i>
                           </div>
                         </div>`;
-                    }
-                    return `
+          }
+          return `
                       <img src="${item.url}"
                            data-media-index="${idx}" data-media-type="image" data-media-url="${item.url}"
                            class="w-full h-16 object-cover rounded-md cursor-pointer border-2
                                   ${idx === 0 ? "border-[#e39f32]" : "border-transparent hover:border-[#e39f32]"}"
                            onerror="this.src='${FALLBACK_IMG}'"/>`;
-                  })
-                  .join("")}
+        })
+        .join("")}
               </div>
 
               <!-- Main display area -->
@@ -3709,9 +3799,9 @@ if (safeProductData.availableVariants.length > 1) {
                      class="max-h-full max-w-full object-contain"
                      onerror="this.src='${FALLBACK_IMG}'"/>
                 ${discountPercent > 0
-                  ? `<span class="discount-badge absolute top-2 left-2 text-white text-[10px] font-semibold px-2.5 py-1 rounded-full shadow"
+        ? `<span class="discount-badge absolute top-2 left-2 text-white text-[10px] font-semibold px-2.5 py-1 rounded-full shadow"
                           style="background:#e6a62c">${discountPercent}% OFF</span>`
-                  : ""}
+        : ""}
               </div>
             </div>
           </div>
@@ -3783,9 +3873,9 @@ if (safeProductData.availableVariants.length > 1) {
                     ₹${safeProductData.currentSellingPrice.toLocaleString("en-IN")}
                   </span>
                   ${safeProductData.currentMrpPrice > safeProductData.currentSellingPrice
-                    ? `<span class="text-xs text-[#e39f32] line-through">₹${safeProductData.currentMrpPrice.toLocaleString("en-IN")}</span>
+        ? `<span class="text-xs text-[#e39f32] line-through">₹${safeProductData.currentMrpPrice.toLocaleString("en-IN")}</span>
                        ${discountPercent > 0 ? `<span class="discount-badge bg-[#e39f32] text-white text-[8px] px-1.5 py-[2px] rounded-full">${discountPercent}% OFF</span>` : ""}`
-                    : ""}
+        : ""}
                 </div>
                 <div class="hidden md:block w-px h-7 bg-[#e5e7eb]"></div>
                 <div class="flex items-center gap-1">
@@ -3864,13 +3954,13 @@ if (safeProductData.availableVariants.length > 1) {
                   Only ${safeProductData.currentStock} items left in stock
                 </p>
                 ${safeProductData.isCustomizable
-                  ? `<span class="text-gray-300">|</span>
+        ? `<span class="text-gray-300">|</span>
                      <a href="https://wa.me/919876543210" target="_blank"
                         class="flex items-center gap-1.5 bg-green-50 border border-green-500 text-green-700 px-2.5 py-1 rounded-md font-medium hover:bg-green-100 transition">
                        <i class="fa-brands fa-whatsapp text-green-600 text-sm"></i>
                        Need bulk quantities? Chat with us
                      </a>`
-                  : ""}
+        : ""}
               </div>
             </div>
 
@@ -3942,10 +4032,10 @@ if (safeProductData.availableVariants.length > 1) {
 
     // Wire up the initial thumb strip click handlers
     wireInitialThumbClicks(initialThumbItems);
-      // Sync wishlist heart icon state
+    // Sync wishlist heart icon state
     initWishlistIcon();
 
-     // ── PATCH: Populate teaser coupon card async ─────────────────────────────
+    // ── PATCH: Populate teaser coupon card async ─────────────────────────────
     fetchUserCoupons().then((coupons) => {
       const card = document.getElementById("teaserCouponCard");
       if (!card) return;
@@ -3961,12 +4051,12 @@ if (safeProductData.availableVariants.length > 1) {
         : `₹${c.discountValue} OFF`;
 
       const labelEl = document.getElementById("teaserDiscountLabel");
-      const descEl  = document.getElementById("teaserDescription");
-      const codeEl  = document.getElementById("teaserCouponCode");
+      const descEl = document.getElementById("teaserDescription");
+      const codeEl = document.getElementById("teaserCouponCode");
 
       if (labelEl) labelEl.textContent = discLabel;
-      if (descEl)  descEl.textContent  = c.description || "Special discount for you";
-      if (codeEl)  codeEl.textContent  = c.couponCode;
+      if (descEl) descEl.textContent = c.description || "Special discount for you";
+      if (codeEl) codeEl.textContent = c.couponCode;
     });
     // ── END PATCH ────────────────────────────────────────────────────────────
   }
@@ -3989,7 +4079,7 @@ if (safeProductData.availableVariants.length > 1) {
   function wireInitialThumbClicks(mediaItems) {
     setTimeout(() => {
       const thumbContainer = document.getElementById("thumbContainer");
-      const mainImg        = document.getElementById("mainProductImage");
+      const mainImg = document.getElementById("mainProductImage");
       if (!thumbContainer || !mainImg) return;
 
       thumbContainer.querySelectorAll("[data-media-index]").forEach((thumb) => {
@@ -4083,8 +4173,8 @@ if (safeProductData.availableVariants.length > 1) {
                   <tbody>
                     ${specEntries.map(([key, val], idx) => `
                       <tr class="${idx % 2 === 0
-                        ? "bg-white"
-                        : "bg-[#f8fbfc]"} border-b border-[#f1f5f7]
+          ? "bg-white"
+          : "bg-[#f8fbfc]"} border-b border-[#f1f5f7]
                           hover:bg-[#fff9f2] transition">
                         <td class="py-3 px-4 font-medium border-r border-[#f1f5f7]
                                    w-2/5 text-[#1D3C4A] text-xs uppercase tracking-wide">
@@ -4122,8 +4212,8 @@ if (safeProductData.availableVariants.length > 1) {
                   <tbody>
                     ${addInfoEntries.map(([key, val], idx) => `
                       <tr class="${idx % 2 === 0
-                        ? "bg-white"
-                        : "bg-[#f8fbfc]"} border-b border-[#f1f5f7]
+          ? "bg-white"
+          : "bg-[#f8fbfc]"} border-b border-[#f1f5f7]
                           hover:bg-[#fff9f2] transition">
                         <td class="py-3 px-4 font-medium border-r border-[#f1f5f7]
                                    w-2/5 text-[#1D3C4A] text-xs uppercase tracking-wide">
@@ -4179,9 +4269,9 @@ if (safeProductData.availableVariants.length > 1) {
 
     // ── Accordion click handlers ───────────────────────────────────────────
     acc.querySelectorAll(".item").forEach((item) => {
-      const btn     = item.querySelector(".toggle");
+      const btn = item.querySelector(".toggle");
       const content = item.querySelector(".content");
-      const icon    = item.querySelector(".icon");
+      const icon = item.querySelector(".icon");
       if (!btn || !content || !icon) return;
 
       btn.addEventListener("click", () => {
@@ -4221,14 +4311,14 @@ if (safeProductData.availableVariants.length > 1) {
   // ═══════════════════════════════════════════════════════════════════════════
 
   async function fillBoughtTogether() {
-    const div     = document.getElementById("boughtTogether");
+    const div = document.getElementById("boughtTogether");
     const section = document.getElementById("boughtTogetherSection");
     if (!div) return;
 
     const addonProducts = await fetchAddonProducts(safeProductData.addonKeys);
 
-     // PATCH 1C — Cap at 4 items max regardless of API response
-     const cappedProducts = addonProducts.slice(0, 4);
+    // PATCH 1C — Cap at 4 items max regardless of API response
+    const cappedProducts = addonProducts.slice(0, 4);
 
     if (!addonProducts.length) {
       // Nothing to show — hide entire section cleanly
@@ -4240,10 +4330,10 @@ if (safeProductData.availableVariants.length > 1) {
 
     let html = cappedProducts
       .map((p) => {
-        const img        = absUrl(p.mainImage) || FALLBACK_IMG;
-        const price      = p.currentSellingPrice;
-        const mrp        = p.currentMrpPrice;
-        const discPct    = calcDiscount(price, mrp);
+        const img = absUrl(p.mainImage) || FALLBACK_IMG;
+        const price = p.currentSellingPrice;
+        const mrp = p.currentMrpPrice;
+        const discPct = calcDiscount(price, mrp);
         return `
           <div class="flex items-center justify-between bg-white border border-[#e5e7eb] rounded-xl p-3 hover:shadow-sm transition">
             <div class="flex gap-3 items-center flex-1 min-w-0">
@@ -4256,8 +4346,8 @@ if (safeProductData.availableVariants.length > 1) {
                   <span class="font-semibold font-lexend text-[#1D3C4A]">₹${price.toLocaleString("en-IN")}</span>
                   ${mrp > price ? `<span class="line-through font-lexend text-gray-400 text-xs">₹${mrp.toLocaleString("en-IN")}</span>` : ""}
                   ${discPct > 0
-                    ? `<span class="bg-[#e39f32]/20 text-[#e39f32] text-[10px] px-2 py-[2px] rounded-full">${discPct}% OFF</span>`
-                    : ""}
+            ? `<span class="bg-[#e39f32]/20 text-[#e39f32] text-[10px] px-2 py-[2px] rounded-full">${discPct}% OFF</span>`
+            : ""}
                 </div>
               </div>
             </div>
@@ -4280,7 +4370,7 @@ if (safeProductData.availableVariants.length > 1) {
     div.innerHTML = html;
 
     const checkboxes = div.querySelectorAll(".product-check");
-    const btn        = document.getElementById("addToCartBtn");
+    const btn = document.getElementById("addToCartBtn");
 
     function updateTotal() {
       let total = 0, count = 0;
@@ -4358,29 +4448,43 @@ if (safeProductData.availableVariants.length > 1) {
       const cartBtn = target.closest(".card-add-cart");
       if (cartBtn) {
         e.stopPropagation();
-        const pid   = parseInt(cartBtn.dataset.productId);
+
+        // ── Already added → redirect ──────────────────────────────────────
+        if (cartBtn.dataset.added === "true") {
+            window.location.href = "/Cart/cart.html";
+            return;
+        }
+
+        const pid = parseInt(cartBtn.dataset.productId);
         const price = parseFloat(cartBtn.dataset.price);
-        const sku   = cartBtn.dataset.sku || "";
+        const sku = cartBtn.dataset.sku || "";
         if (!pid) return;
         const payload = {
-          userId:           USER_ID,
-          sessionId:        null,
-          productId:        pid,
-          variantId:        null,
+          userId: USER_ID,
+          sessionId: null,
+          productId: pid,
+          variantId: null,
           sku,
-          unitPrice:        price,
-          mrpPrice:         price,
-          quantity:         1,
+          unitPrice: price,
+          mrpPrice: price,
+          quantity: 1,
           customFieldsJson: null,
         };
-        try {
-          await apiAddToCart(payload);
-          showToast("Added to cart! 🛒", "success");
-          window.dispatchEvent(new CustomEvent('cart:updated'));
-        } catch (err) {
-          showToast("Could not add to cart.", "error");
+       try {
+  await apiAddToCart(payload);
+  addedToCartSet.add(pid);
+  showToast("Added to cart! 🛒", "success");
+  window.dispatchEvent(new CustomEvent('cart:updated'));
 
-        }
+  cartBtn.innerHTML = '<i class="fa-solid fa-bag-shopping text-xs"></i> Go to Cart';
+  cartBtn.style.background = "#e39f32";
+  cartBtn.style.color = "#1D3C4A";
+  cartBtn.style.fontWeight = "600";
+  cartBtn.style.borderColor = "#e39f32";
+  cartBtn.dataset.added = "true";
+} catch (err) {
+  showToast("Could not add to cart.", "error");
+}
         return;
       }
 
@@ -4388,21 +4492,21 @@ if (safeProductData.availableVariants.length > 1) {
       const wishlistBtn = target.closest(".wishlist-icon-btn");
       if (wishlistBtn) {
         e.stopPropagation();
-        const card    = wishlistBtn.closest("[data-product-id]");
-        const pid     = card ? parseInt(card.dataset.productId) : null;
-        const price   = card ? parseFloat(card.dataset.price) : 0;
-        const sku     = card ? (card.dataset.sku || "") : "";
+        const card = wishlistBtn.closest("[data-product-id]");
+        const pid = card ? parseInt(card.dataset.productId) : null;
+        const price = card ? parseFloat(card.dataset.price) : 0;
+        const sku = card ? (card.dataset.sku || "") : "";
         const productName = cart ? (card.dataset.productName) : "Artezo Premium Product";
         if (!pid) return;
         const payload = {
-          userId:          USER_ID,
-          wishlistName:    "My Wishlist",
-          productId:       pid,
-          variantId:       null,
+          userId: USER_ID,
+          wishlistName: "My Wishlist",
+          productId: pid,
+          variantId: null,
           sku,
-          selectedColor:   "",
-          selectedSize:    null,
-          titleName:      productName,
+          selectedColor: "",
+          selectedSize: null,
+          titleName: productName,
           wishlistedPrice: price,
           customFieldsJson: null,
         };
@@ -4439,14 +4543,14 @@ if (safeProductData.availableVariants.length > 1) {
    * Wishlist and add-to-cart buttons use data-product-id for delegation lookup.
    */
   function productCardHTML(p) {
-    const img     = absUrl(p.mainImage) || FALLBACK_IMG;
-    const price   = p.currentSellingPrice;
-    const mrp     = p.currentMrpPrice;
+    const img = absUrl(p.mainImage) || FALLBACK_IMG;
+    const price = p.currentSellingPrice;
+    const mrp = p.currentMrpPrice;
     const discPct = calcDiscount(price, mrp);
     // const url     = `../Product-Details/product-detail.html?id=${p.productPrimeId}`;
 
     // Generate SEO-friendly URL for product cards
-const url = generateProductSEOUrl(p) || `/products/product-detail.html?id=${p.productPrimeId}`;
+    const url = generateProductSEOUrl(p) || `/products/product-detail.html?id=${p.productPrimeId}`;
 
     return `
       <div class="product-card-clickable group relative flex flex-col bg-white rounded-2xl border border-[#e5e7eb] shadow-sm
@@ -4456,8 +4560,8 @@ const url = generateProductSEOUrl(p) || `/products/product-detail.html?id=${p.pr
            data-sku="${escapeHtml(p.currentSku || "")}"
            data-product-url="${url}">
         ${discPct > 0
-          ? `<span class="absolute top-2 left-2 z-10 bg-[#e39f32] text-white text-[9px] font-bold px-2 py-0.5 rounded-full">${discPct}% OFF</span>`
-          : ""}
+        ? `<span class="absolute top-2 left-2 z-10 bg-[#e39f32] text-white text-[9px] font-bold px-2 py-0.5 rounded-full">${discPct}% OFF</span>`
+        : ""}
         <button class="wishlist-icon-btn absolute top-2 right-2 z-10 w-8 h-8 flex items-center justify-center
                        bg-white border border-[#e5e7eb] rounded-full shadow-sm hover:border-[#e39f32] transition-all"
                 type="button">
@@ -4518,7 +4622,7 @@ const url = generateProductSEOUrl(p) || `/products/product-detail.html?id=${p.pr
 
     transformedData.stats.forEach((stat) => {
       let stars = "";
-      if (stat.stars === 5)     stars = `<i class="fa-solid fa-star"></i>`.repeat(5);
+      if (stat.stars === 5) stars = `<i class="fa-solid fa-star"></i>`.repeat(5);
       if (stat.stars === "4.5") stars = `<i class="fa-solid fa-star"></i>`.repeat(4) + `<i class="fa-solid fa-star-half-alt"></i>`;
       html += `
         <div class="bg-gradient-to-br from-white to-[#fefaf5] rounded-2xl border border-[#e5e7eb] p-6 text-center shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
@@ -4562,56 +4666,56 @@ const url = generateProductSEOUrl(p) || `/products/product-detail.html?id=${p.pr
   }
 
   // ─── PATCH 3: REVIEWS RENDERER ────────────────────────────────────────────────
-// Amazon-style layout:
-//   • Star aggregate breakdown at top
-//   • All review photos in a horizontal strip (click → lightbox)
-//   • Individual review cards below
-// Called async after renderPage() — does not block initial render.
+  // Amazon-style layout:
+  //   • Star aggregate breakdown at top
+  //   • All review photos in a horizontal strip (click → lightbox)
+  //   • Individual review cards below
+  // Called async after renderPage() — does not block initial render.
 
-async function fillReviews() {
-  const sec = document.getElementById("socialSection");
-  if (!sec) return;
+  async function fillReviews() {
+    const sec = document.getElementById("socialSection");
+    if (!sec) return;
 
-  const reviews = await fetchProductReviews(safeProductData.productId);
+    const reviews = await fetchProductReviews(safeProductData.productId);
 
-  // ── Aggregate stats ──────────────────────────────────────────────────────
-  const total     = reviews.length;
-  const avgRating = total
-    ? (reviews.reduce((s, r) => s + (r.rating || 0), 0) / total).toFixed(1)
-    : "0.0";
+    // ── Aggregate stats ──────────────────────────────────────────────────────
+    const total = reviews.length;
+    const avgRating = total
+      ? (reviews.reduce((s, r) => s + (r.rating || 0), 0) / total).toFixed(1)
+      : "0.0";
 
-  // Count per star level 5→1
-  const starCounts = [5, 4, 3, 2, 1].map((star) => ({
-    star,
-    count: reviews.filter((r) => Math.round(r.rating) === star).length,
-  }));
+    // Count per star level 5→1
+    const starCounts = [5, 4, 3, 2, 1].map((star) => ({
+      star,
+      count: reviews.filter((r) => Math.round(r.rating) === star).length,
+    }));
 
-  // ── All images for top strip ─────────────────────────────────────────────
-  const reviewsWithImages = reviews.filter((r) => r.imageUrl);
+    // ── All images for top strip ─────────────────────────────────────────────
+    const reviewsWithImages = reviews.filter((r) => r.imageUrl);
 
-  // ── Build HTML ───────────────────────────────────────────────────────────
-  let html = "";
+    // ── Build HTML ───────────────────────────────────────────────────────────
+    let html = "";
 
-  // Section heading
-  html += `
+    // Section heading
+    html += `
     <div class="mb-6">
       <h2 class="text-2xl md:text-3xl font-semibold font-zain text-[#1D3C4A]">
         Customer Reviews
       </h2>
     </div>`;
 
-  if (!total) {
-    html += `
+    if (!total) {
+      html += `
       <div class="text-center py-16 border border-[#e5e7eb] rounded-2xl bg-white">
         <i class="fa-regular fa-star text-4xl text-gray-300 mb-3 block"></i>
         <p class="text-gray-400 font-lexend">No reviews yet. Be the first to review!</p>
       </div>`;
-    sec.innerHTML = html;
-    return;
-  }
+      sec.innerHTML = html;
+      return;
+    }
 
-  // ── Rating aggregate block ───────────────────────────────────────────────
-  html += `
+    // ── Rating aggregate block ───────────────────────────────────────────────
+    html += `
     <div class="flex flex-col sm:flex-row gap-6 bg-white border border-[#e5e7eb] rounded-2xl p-6 mb-6">
 
       <!-- Average score -->
@@ -4624,8 +4728,8 @@ async function fillReviews() {
       <!-- Star breakdown bars -->
       <div class="flex-1 space-y-2">
         ${starCounts.map(({ star, count }) => {
-          const pct = total ? Math.round((count / total) * 100) : 0;
-          return `
+      const pct = total ? Math.round((count / total) * 100) : 0;
+      return `
             <div class="flex items-center gap-3">
               <span class="text-xs font-lexend text-[#1D3C4A] w-4 text-right shrink-0">${star}</span>
               <i class="fa-solid fa-star text-[#e39f32] text-[10px] shrink-0"></i>
@@ -4635,14 +4739,14 @@ async function fillReviews() {
               </div>
               <span class="text-xs text-gray-400 font-lexend w-6 shrink-0">${count}</span>
             </div>`;
-        }).join("")}
+    }).join("")}
       </div>
 
     </div>`;
 
-  // ── All photos strip ─────────────────────────────────────────────────────
-  if (reviewsWithImages.length > 0) {
-    html += `
+    // ── All photos strip ─────────────────────────────────────────────────────
+    if (reviewsWithImages.length > 0) {
+      html += `
       <div class="mb-6">
         <h3 class="text-sm font-semibold font-lexend text-[#1D3C4A] mb-3">
           Photos from customers (${reviewsWithImages.length})
@@ -4660,23 +4764,23 @@ async function fillReviews() {
           `).join("")}
         </div>
       </div>`;
-  }
+    }
 
-  // ── Individual review cards ──────────────────────────────────────────────
-  html += `<div class="space-y-4" id="reviewCardsList">`;
+    // ── Individual review cards ──────────────────────────────────────────────
+    html += `<div class="space-y-4" id="reviewCardsList">`;
 
-  reviews.forEach((r) => {
-    const name      = escapeHtml(r.customerName || "Anonymous");
-    const initials  = name.slice(0, 2).toUpperCase();
-    const rating    = r.rating || 0;
-    const comment   = escapeHtml(r.comment || "");
-    const dateStr   = r.createdAt
-      ? new Date(r.createdAt).toLocaleDateString("en-IN", {
+    reviews.forEach((r) => {
+      const name = escapeHtml(r.customerName || "Anonymous");
+      const initials = name.slice(0, 2).toUpperCase();
+      const rating = r.rating || 0;
+      const comment = escapeHtml(r.comment || "");
+      const dateStr = r.createdAt
+        ? new Date(r.createdAt).toLocaleDateString("en-IN", {
           day: "numeric", month: "short", year: "numeric",
         })
-      : "";
+        : "";
 
-    html += `
+      html += `
       <div class="bg-white border border-[#e5e7eb] rounded-2xl p-5 hover:shadow-sm transition-shadow">
 
         <!-- Reviewer row -->
@@ -4690,8 +4794,8 @@ async function fillReviews() {
             <div class="flex items-center justify-between gap-2 flex-wrap">
               <span class="font-semibold font-lexend text-[#1D3C4A] text-sm">${name}</span>
               ${r.createdAt
-                ? `<span class="text-xs text-gray-400 font-lexend">${dateStr}</span>`
-                : ""}
+          ? `<span class="text-xs text-gray-400 font-lexend">${dateStr}</span>`
+          : ""}
             </div>
             <!-- Stars -->
             <div class="flex items-center gap-1 mt-0.5">
@@ -4725,24 +4829,24 @@ async function fillReviews() {
           : ""}
 
       </div>`;
-  });
+    });
 
-  html += `</div>`; // close reviewCardsList
+    html += `</div>`; // close reviewCardsList
 
-  sec.innerHTML = html;
+    sec.innerHTML = html;
 
-  // ── Wire lightbox ────────────────────────────────────────────────────────
-  buildReviewLightbox(reviewsWithImages);
-  wireReviewLightbox(reviewsWithImages);
-}
-// ─── END PATCH 3 RENDERER ─────────────────────────────────────────────────────
+    // ── Wire lightbox ────────────────────────────────────────────────────────
+    buildReviewLightbox(reviewsWithImages);
+    wireReviewLightbox(reviewsWithImages);
+  }
+  // ─── END PATCH 3 RENDERER ─────────────────────────────────────────────────────
 
 
-// ─── PATCH 3: LIGHTBOX ────────────────────────────────────────────────────────
-function buildReviewLightbox(reviewsWithImages) {
-  if (document.getElementById("reviewLightbox")) return;
+  // ─── PATCH 3: LIGHTBOX ────────────────────────────────────────────────────────
+  function buildReviewLightbox(reviewsWithImages) {
+    if (document.getElementById("reviewLightbox")) return;
 
-  document.body.insertAdjacentHTML("beforeend", `
+    document.body.insertAdjacentHTML("beforeend", `
     <div id="reviewLightbox"
          class="fixed inset-0 z-[999] hidden flex items-center justify-center"
          style="background:rgba(0,0,0,0.88)">
@@ -4797,107 +4901,107 @@ function buildReviewLightbox(reviewsWithImages) {
 
     </div>
   `);
-}
-
-function wireReviewLightbox(reviewsWithImages) {
-  if (!reviewsWithImages.length) return;
-
-  let currentIdx = 0;
-
-  function openLightbox(idx) {
-    currentIdx = idx;
-    renderLightboxSlide();
-    document.getElementById("reviewLightbox").classList.remove("hidden");
-    document.getElementById("reviewLightbox").classList.add("flex");
-    document.body.style.overflow = "hidden";
   }
 
-  function closeLightbox() {
-    document.getElementById("reviewLightbox").classList.add("hidden");
-    document.getElementById("reviewLightbox").classList.remove("flex");
-    document.body.style.overflow = "";
+  function wireReviewLightbox(reviewsWithImages) {
+    if (!reviewsWithImages.length) return;
+
+    let currentIdx = 0;
+
+    function openLightbox(idx) {
+      currentIdx = idx;
+      renderLightboxSlide();
+      document.getElementById("reviewLightbox").classList.remove("hidden");
+      document.getElementById("reviewLightbox").classList.add("flex");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeLightbox() {
+      document.getElementById("reviewLightbox").classList.add("hidden");
+      document.getElementById("reviewLightbox").classList.remove("flex");
+      document.body.style.overflow = "";
+    }
+
+    function renderLightboxSlide() {
+      const r = reviewsWithImages[currentIdx];
+      const mainImg = document.getElementById("lbMainImg");
+      const nameEl = document.getElementById("lbReviewerName");
+      const counterEl = document.getElementById("lbCounter");
+
+      if (mainImg) mainImg.src = `${BASE_URL}${r.imageUrl}`;
+      if (nameEl) nameEl.textContent = r.customerName || "Customer";
+      if (counterEl) counterEl.textContent = `${currentIdx + 1} / ${reviewsWithImages.length}`;
+
+      // Highlight active thumb in strip
+      document.querySelectorAll(".lb-thumb").forEach((t, i) => {
+        t.classList.toggle("border-[#e39f32]", i === currentIdx);
+        t.classList.toggle("opacity-100", i === currentIdx);
+        t.classList.toggle("opacity-60", i !== currentIdx);
+      });
+
+      // Scroll active thumb into view
+      const activeThumb = document.querySelector(`.lb-thumb[data-lb-idx="${currentIdx}"]`);
+      activeThumb?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+
+      // Show/hide prev-next
+      const prev = document.getElementById("lbPrev");
+      const next = document.getElementById("lbNext");
+      if (prev) prev.style.visibility = currentIdx === 0 ? "hidden" : "visible";
+      if (next) next.style.visibility = currentIdx === reviewsWithImages.length - 1 ? "hidden" : "visible";
+    }
+
+    // ── Strip thumbnails in review section ──────────────────────────────────
+    document.querySelectorAll(".review-strip-thumb").forEach((img) => {
+      img.addEventListener("click", () => {
+        openLightbox(parseInt(img.dataset.reviewIdx));
+      });
+    });
+
+    // ── Individual card images ───────────────────────────────────────────────
+    document.querySelectorAll(".review-card-img").forEach((img) => {
+      img.addEventListener("click", () => {
+        // Find index in reviewsWithImages by matching src
+        const fullSrc = img.dataset.fullSrc;
+        const idx = reviewsWithImages.findIndex(
+          (r) => `${BASE_URL}${r.imageUrl}` === fullSrc
+        );
+        openLightbox(idx >= 0 ? idx : 0);
+      });
+    });
+
+    // ── Lightbox controls ────────────────────────────────────────────────────
+    document.getElementById("lbClose")?.addEventListener("click", closeLightbox);
+
+    document.getElementById("lbPrev")?.addEventListener("click", () => {
+      if (currentIdx > 0) { currentIdx--; renderLightboxSlide(); }
+    });
+
+    document.getElementById("lbNext")?.addEventListener("click", () => {
+      if (currentIdx < reviewsWithImages.length - 1) { currentIdx++; renderLightboxSlide(); }
+    });
+
+    // Keyboard nav
+    document.addEventListener("keydown", (e) => {
+      const lb = document.getElementById("reviewLightbox");
+      if (lb?.classList.contains("hidden")) return;
+      if (e.key === "ArrowLeft" && currentIdx > 0) { currentIdx--; renderLightboxSlide(); }
+      if (e.key === "ArrowRight" && currentIdx < reviewsWithImages.length - 1) { currentIdx++; renderLightboxSlide(); }
+      if (e.key === "Escape") closeLightbox();
+    });
+
+    // Click backdrop to close
+    document.getElementById("reviewLightbox")?.addEventListener("click", (e) => {
+      if (e.target === document.getElementById("reviewLightbox")) closeLightbox();
+    });
+
+    // Lightbox strip thumbs
+    document.querySelectorAll(".lb-thumb").forEach((thumb) => {
+      thumb.addEventListener("click", () => {
+        openLightbox(parseInt(thumb.dataset.lbIdx));
+      });
+    });
   }
-
-  function renderLightboxSlide() {
-    const r         = reviewsWithImages[currentIdx];
-    const mainImg   = document.getElementById("lbMainImg");
-    const nameEl    = document.getElementById("lbReviewerName");
-    const counterEl = document.getElementById("lbCounter");
-
-    if (mainImg)   mainImg.src         = `${BASE_URL}${r.imageUrl}`;
-    if (nameEl)    nameEl.textContent  = r.customerName || "Customer";
-    if (counterEl) counterEl.textContent = `${currentIdx + 1} / ${reviewsWithImages.length}`;
-
-    // Highlight active thumb in strip
-    document.querySelectorAll(".lb-thumb").forEach((t, i) => {
-      t.classList.toggle("border-[#e39f32]", i === currentIdx);
-      t.classList.toggle("opacity-100",      i === currentIdx);
-      t.classList.toggle("opacity-60",       i !== currentIdx);
-    });
-
-    // Scroll active thumb into view
-    const activeThumb = document.querySelector(`.lb-thumb[data-lb-idx="${currentIdx}"]`);
-    activeThumb?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-
-    // Show/hide prev-next
-    const prev = document.getElementById("lbPrev");
-    const next = document.getElementById("lbNext");
-    if (prev) prev.style.visibility = currentIdx === 0 ? "hidden" : "visible";
-    if (next) next.style.visibility = currentIdx === reviewsWithImages.length - 1 ? "hidden" : "visible";
-  }
-
-  // ── Strip thumbnails in review section ──────────────────────────────────
-  document.querySelectorAll(".review-strip-thumb").forEach((img) => {
-    img.addEventListener("click", () => {
-      openLightbox(parseInt(img.dataset.reviewIdx));
-    });
-  });
-
-  // ── Individual card images ───────────────────────────────────────────────
-  document.querySelectorAll(".review-card-img").forEach((img) => {
-    img.addEventListener("click", () => {
-      // Find index in reviewsWithImages by matching src
-      const fullSrc = img.dataset.fullSrc;
-      const idx = reviewsWithImages.findIndex(
-        (r) => `${BASE_URL}${r.imageUrl}` === fullSrc
-      );
-      openLightbox(idx >= 0 ? idx : 0);
-    });
-  });
-
-  // ── Lightbox controls ────────────────────────────────────────────────────
-  document.getElementById("lbClose")?.addEventListener("click", closeLightbox);
-
-  document.getElementById("lbPrev")?.addEventListener("click", () => {
-    if (currentIdx > 0) { currentIdx--; renderLightboxSlide(); }
-  });
-
-  document.getElementById("lbNext")?.addEventListener("click", () => {
-    if (currentIdx < reviewsWithImages.length - 1) { currentIdx++; renderLightboxSlide(); }
-  });
-
-  // Keyboard nav
-  document.addEventListener("keydown", (e) => {
-    const lb = document.getElementById("reviewLightbox");
-    if (lb?.classList.contains("hidden")) return;
-    if (e.key === "ArrowLeft"  && currentIdx > 0)                          { currentIdx--; renderLightboxSlide(); }
-    if (e.key === "ArrowRight" && currentIdx < reviewsWithImages.length - 1) { currentIdx++; renderLightboxSlide(); }
-    if (e.key === "Escape") closeLightbox();
-  });
-
-  // Click backdrop to close
-  document.getElementById("reviewLightbox")?.addEventListener("click", (e) => {
-    if (e.target === document.getElementById("reviewLightbox")) closeLightbox();
-  });
-
-  // Lightbox strip thumbs
-  document.querySelectorAll(".lb-thumb").forEach((thumb) => {
-    thumb.addEventListener("click", () => {
-      openLightbox(parseInt(thumb.dataset.lbIdx));
-    });
-  });
-}
-// ─── END PATCH 3 LIGHTBOX ────────────────────────────────────────────────────
+  // ─── END PATCH 3 LIGHTBOX ────────────────────────────────────────────────────
 
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -4930,11 +5034,11 @@ function wireReviewLightbox(reviewsWithImages) {
             <p class="text-gray-600 mb-6 font-lexend font-light leading-relaxed">${escapeHtml(step.desc)}</p>
             <ul class="space-y-3 text-gray-600 font-lexend font-light mb-6">
               ${step.list
-                .map(
-                  (l) =>
-                    `<li class="flex items-start gap-3"><span class="w-2 h-2 bg-[#e39f32] rounded-full mt-2"></span>${escapeHtml(l)}</li>`
-                )
-                .join("")}
+          .map(
+            (l) =>
+              `<li class="flex items-start gap-3"><span class="w-2 h-2 bg-[#e39f32] rounded-full mt-2"></span>${escapeHtml(l)}</li>`
+          )
+          .join("")}
             </ul>
             <div class="bg-[#1D3C4A]/5 border border-[#e5e7eb] rounded-xl p-4 text-sm font-lexend text-gray-600">
               <span class="font-normal text-[#1D3C4A]">Estimated Time:</span> ${escapeHtml(step.time)}
@@ -4943,11 +5047,11 @@ function wireReviewLightbox(reviewsWithImages) {
           <div class="relative ${even ? "" : "order-1 md:order-2"}">
             <div class="h-[380px] bg-gray-50 rounded-2xl border border-[#e5e7eb] flex items-center justify-center p-6">
               ${step.videoUrl
-                ? `<video src="${step.videoUrl}" class="max-h-full max-w-full rounded-xl" controls muted></video>`
-                : step.img
-                ? `<img src="${step.img}" alt="${escapeHtml(step.alt)}" class="max-h-full max-w-full object-contain"
+          ? `<video src="${step.videoUrl}" class="max-h-full max-w-full rounded-xl" controls muted></video>`
+          : step.img
+            ? `<img src="${step.img}" alt="${escapeHtml(step.alt)}" class="max-h-full max-w-full object-contain"
                         onerror="this.style.display='none'"/>`
-                : `<div class="flex flex-col items-center gap-3 text-gray-400">
+            : `<div class="flex flex-col items-center gap-3 text-gray-400">
                      <i class="fas fa-image text-4xl"></i>
                      <p class="text-sm font-lexend">Step ${step.step} visual</p>
                    </div>`}
@@ -4963,7 +5067,7 @@ function wireReviewLightbox(reviewsWithImages) {
     const ytUrl = safeProductData.youtubeUrl;
     if (ytUrl) {
       const ytMatch = ytUrl.match(/(?:v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
-      const ytId    = ytMatch ? ytMatch[1] : null;
+      const ytId = ytMatch ? ytMatch[1] : null;
       if (ytId) {
         html += `
           <div class="grid md:grid-cols-2 gap-12 items-center pt-6">
@@ -5064,7 +5168,7 @@ bg-gray-100 px-2 py-0.5 rounded-md">
   function setupEventListeners() {
     // Share button
     setTimeout(() => {
-      const shareBtn   = document.getElementById("shareButton");
+      const shareBtn = document.getElementById("shareButton");
       const sharePopup = document.getElementById("sharePopup");
       if (shareBtn && sharePopup) {
         shareBtn.addEventListener("click", (e) => {
@@ -5087,7 +5191,7 @@ bg-gray-100 px-2 py-0.5 rounded-md">
 
     // Quantity
     // ── Quantity — PATCH 2: qty only manages count; stock label via syncStockUI ──
-    let qty    = 1;
+    let qty = 1;
     const qtyEl = document.getElementById("quantity");
 
     function getStock() {
@@ -5118,10 +5222,10 @@ bg-gray-100 px-2 py-0.5 rounded-md">
       const s = document.getElementById("timerSeconds");
       if (!h || !m || !s) return;
       let hours = parseInt(h.textContent) || 0;
-      let mins  = parseInt(m.textContent) || 0;
-      let secs  = parseInt(s.textContent) || 0;
-      if (secs > 0)       secs--;
-      else if (mins > 0)  { mins--; secs = 59; }
+      let mins = parseInt(m.textContent) || 0;
+      let secs = parseInt(s.textContent) || 0;
+      if (secs > 0) secs--;
+      else if (mins > 0) { mins--; secs = 59; }
       else if (hours > 0) { hours--; mins = 59; secs = 59; }
       s.textContent = secs.toString().padStart(2, "0");
       m.textContent = mins.toString().padStart(2, "0");
@@ -5130,12 +5234,12 @@ bg-gray-100 px-2 py-0.5 rounded-md">
     setInterval(updateTimer, 1000);
 
     // Offer overlay
-    const overlay  = document.getElementById("offerOverlay");
-    const modal    = document.getElementById("offerModal");
+    const overlay = document.getElementById("offerOverlay");
+    const modal = document.getElementById("offerModal");
 
-    const viewBtn  = document.getElementById("viewMoreBtn");
+    const viewBtn = document.getElementById("viewMoreBtn");
 
-    
+
     const closeBtn = document.getElementById("closeOffersBtn");
 
     if (overlay && modal && viewBtn && closeBtn) {
