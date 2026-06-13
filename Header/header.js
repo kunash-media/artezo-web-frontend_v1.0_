@@ -159,7 +159,7 @@ async function fetchCategoryThumbnail(categoryName, redirectUrl) {
 
   try {
     // Hit the same products API your category page uses
-    const url = `http://localhost:8085/api/products/get-all?category=${encodeURIComponent(categoryName)}&page=0&size=1`;
+    const url = `http://localhost:8085/api/products/get-by-category?category=${encodeURIComponent(categoryName)}&page=0&size=1`;
     const res  = await fetch(url);
     if (!res.ok) throw new Error("no products");
     const data = await res.json();
@@ -1258,88 +1258,109 @@ function setBadge(type, count) {
     });
 }
 
-function syncCounts() {
-    console.log("[CountSync] syncCounts() called");
+// ─── Count Sync — Event-driven, no polling ───────────────────────────────────
+// Strategy:
+//   1. Fetch once on load
+//   2. Re-fetch on cart:updated / wishlist:updated events (fired by your pages)
+//   3. Fallback: ONE refresh on tab focus (if data is stale > 5 min)
+//   4. NO setInterval — eliminates 429 entirely
 
-    const userId = localStorage.getItem("userId");
-    if (!userId) {
-        console.log("[CountSync] No userId → skipping (user not logged in)");
+const COUNT_STALE_MS  = 5 * 60 * 1000; // 5 minutes — consider counts stale after this
+const COUNT_COOLDOWN_MS = 3000;         // minimum gap between two syncs (debounce)
+
+let lastSyncTime   = 0;   // timestamp of last successful sync
+let syncInFlight   = false; // prevent concurrent fetches
+let syncDebounceTimer = null;
+
+// Core fetch — called max once per COUNT_COOLDOWN_MS
+function syncCounts() {
+    const userId = localStorage.getItem('userId');
+    if (!userId) return;
+
+    // Debounce: if called rapidly (e.g. two events fire together), wait a tick
+    clearTimeout(syncDebounceTimer);
+    syncDebounceTimer = setTimeout(_doSyncCounts, 300);
+}
+
+async function _doSyncCounts() {
+    if (syncInFlight) return; // already fetching, skip
+
+    const userId = localStorage.getItem('userId');
+    if (!userId) return;
+
+    const now = Date.now();
+
+    // Cooldown guard: never fire more than once per COUNT_COOLDOWN_MS
+    if (now - lastSyncTime < COUNT_COOLDOWN_MS) {
+        console.log('[CountSync] Cooldown active — skipping');
         return;
     }
 
-    const token = localStorage.getItem("token");
+    syncInFlight = true;
 
-    console.log(`[CountSync] Fetching counts for userId: ${userId}`);
-
-    const headers = {
-        "Content-Type": "application/json"
-    };
+    const token = localStorage.getItem('token');
+    const headers = { 'Content-Type': 'application/json' };
     if (token) headers.Authorization = `Bearer ${token}`;
 
-    Promise.allSettled([
-        fetch(`${BASE_URL_HEADER}/api/v1/cart/count?userId=${userId}`, { headers }),
-        fetch(`${BASE_URL_HEADER}/api/v1/wishlist/count?userId=${userId}`, { headers })
-    ])
-    .then(([cartRes, wishlistRes]) => {
-        if (cartRes.status === "fulfilled" && cartRes.value.ok) {
-            cartRes.value.json().then(data => {
-                if (data.success) setBadge("cart", data.data?.count || 0);
-            });
+    try {
+        const [cartRes, wishlistRes] = await Promise.allSettled([
+            fetch(`${BASE_URL_HEADER}/api/v1/cart/count?userId=${userId}`, { headers }),
+            fetch(`${BASE_URL_HEADER}/api/v1/wishlist/count?userId=${userId}`, { headers })
+        ]);
+
+        if (cartRes.status === 'fulfilled') {
+            if (cartRes.value.status === 429) {
+                console.warn('[CountSync] Cart count rate limited — will retry on next event');
+            } else if (cartRes.value.ok) {
+                const data = await cartRes.value.json();
+                if (data.success) setBadge('cart', data.data?.count || 0);
+            }
         }
 
-        if (wishlistRes.status === "fulfilled" && wishlistRes.value.ok) {
-            wishlistRes.value.json().then(data => {
-                if (data.success) setBadge("wishlist", data.data?.count || 0);
-            });
+        if (wishlistRes.status === 'fulfilled') {
+            if (wishlistRes.value.status === 429) {
+                console.warn('[CountSync] Wishlist count rate limited — will retry on next event');
+            } else if (wishlistRes.value.ok) {
+                const data = await wishlistRes.value.json();
+                if (data.success) setBadge('wishlist', data.data?.count || 0);
+            }
         }
-    })
-    .catch(err => console.error("[CountSync] Error:", err));
+
+        lastSyncTime = Date.now();
+
+    } catch (err) {
+        console.error('[CountSync] Fetch error:', err);
+    } finally {
+        syncInFlight = false;
+    }
 }
 
-// Initial call + polling
+// ─── Trigger on tab becoming visible (stale check, not always) ───────────────
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') return;
+    const stale = Date.now() - lastSyncTime > COUNT_STALE_MS;
+    if (stale) {
+        console.log('[CountSync] Tab focused, counts stale — refreshing');
+        syncCounts();
+    }
+});
+
+// ─── Initial fetch on load ────────────────────────────────────────────────────
 function startCountSync() {
+    // NO setInterval — just one fetch on start
     syncCounts();
-    if (pollTimer) clearInterval(pollTimer);
-    pollTimer = setInterval(syncCounts, POLL_MS);
 }
 
-// Run when header is ready
-document.addEventListener("DOMContentLoaded", () => {
-    console.log("[CountSync] DOM ready → starting count sync");
+document.addEventListener('DOMContentLoaded', () => {
     startCountSync();
 });
 
-// Also expose globally so you can call it from anywhere
+// ─── Re-sync on cart/wishlist mutations (fired by cart.js, wishlist.js etc.) ──
+window.addEventListener('cart:updated',     () => syncCounts());
+window.addEventListener('wishlist:updated', () => syncCounts());
+
+// ─── Global export so any page can trigger a manual refresh ──────────────────
 window.refreshCartWishlistCount = syncCounts;
-
-// ─── Global Exports ──────────────────────────────────────────────────────────
-window.openMobileMenu = openMobileMenu;
-window.closeMobileMenu = closeMobileMenu;
-window.showMobileSearch = showMobileSearch;
-window.hideMobileSearch = hideMobileSearch;
-window.toggleWishlist = toggleWishlist;
-window.quickSearch = quickSearch;
-window.logout = logout;
-window.toggleCartPreview = toggleCartPreview;
-window.toggleLoginState = toggleLoginState;
-window.handleMobileProfileClick = handleMobileProfileClick; // NEW for mobile top bar Profile icon
-// ─── Auto Start ──────────────────────────────────────────────────────────────
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => {
-    if (!window.headerInitialized) {
-      window.headerInitialized = true;
-      initializeHeader();
-    }
-  });
-} else {
-  if (!window.headerInitialized) {
-    window.headerInitialized = true;
-    initializeHeader();
-  }
-}
-
-window.addEventListener('cart:updated', syncCounts);
-window.addEventListener('wishlist:updated', syncCounts);
 
 
 //========================================= END  ===============================================//

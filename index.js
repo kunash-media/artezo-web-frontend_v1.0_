@@ -157,7 +157,12 @@
           };
         });
 
-        return mappedSlides;
+     return {
+          slides: mappedSlides,
+          corporateBanner1: BASE_URL + (bannerData.bannerFileTwoUrl   || ""),
+          corporateBanner2: BASE_URL + (bannerData.bannerFileThreeUrl  || ""),
+          dealsBanner:      BASE_URL + (bannerData.bannerFileFourUrl   || ""),
+        };
       });
   }
 
@@ -737,10 +742,13 @@ async function fetchAndRenderAddonSections() {
     }
 
     fetchBannerFromAPI("home")
-      .then(function (apiSlides) {
-        if (apiSlides && apiSlides.length > 0) {
-          window.artezoData.bannerSlides = apiSlides;
-          console.info("[Artezo] Banner loaded from API: " + apiSlides.length + " slide(s).");
+      .then(function (result) {
+        if (result && result.slides && result.slides.length > 0) {
+          window.artezoData.bannerSlides      = result.slides;
+          window.artezoData.corporateBanner1  = result.corporateBanner1;
+          window.artezoData.corporateBanner2  = result.corporateBanner2;
+          window.artezoData.dealsBannerImage  = result.dealsBanner;
+          console.info("[Artezo] Banner loaded from API: " + result.slides.length + " slide(s).");
         } else {
           console.info("[Artezo] Using default static banner slides from data.js.");
         }
@@ -1210,10 +1218,12 @@ async function fetchAndRenderAddonSections() {
           <section class="py-8 px-4 sm:px-6 lg:px-8">
             <div class="max-w-7xl mx-auto">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                ${data.corporateBanners.map((banner) => `
+               ${[
+                { url: data.corporateBanner1 || (data.corporateBanners[0] && data.corporateBanners[0].image) || "", link: data.corporateBanners[0]?.link || "#" },
+                { url: data.corporateBanner2 || (data.corporateBanners[1] && data.corporateBanners[1].image) || "", link: data.corporateBanners[1]?.link || "#" },
+              ].map((banner) => `
                   <a href="${banner.link}" class="relative block overflow-hidden rounded-2xl group">
-                    <img src="${banner.image}" alt="${banner.title}" class="w-full h-[220px] sm:h-[260px] md:h-[280px] lg:h-[300px] object-cover transition duration-500 group-hover:scale-105" />
-                    ${banner.showText ? `<div class="absolute top-6 left-6 text-[#1D3C4A]" style="text-shadow: 0 2px 6px rgba(0,0,0,0.5)"><h3 class="text-xl sm:text-2xl md:text-2xl lg:text-3xl font-lexend font-semibold">${banner.title}</h3><p class="text-sm sm:text-base md:text-base lg:text-base font-lexend mt-1 max-w-xs">${banner.subtitle}</p></div>` : ""}
+                    <img src="${banner.url}" alt="Corporate Banner" class="w-full h-[220px] sm:h-[260px] md:h-[280px] lg:h-[300px] object-cover transition duration-500 group-hover:scale-105" />
                   </a>
                 `).join("")}
               </div>
