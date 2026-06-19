@@ -286,30 +286,6 @@ async function apiAddWishlist(userId, productId, item) {
 }
 
 
-// async function apiAddToCart(userId, product) {
-//     try {
-//         const res = await fetchWithTimeout(`${BASE_URL}/api/v1/cart/add`, {
-//             method: 'POST',
-//             headers: { 'Content-Type': 'application/json' },
-//             body: JSON.stringify({
-//                 userId:       userId,
-//                 productId:    product.productPrimeId,
-//                 productName:  product.productName,
-//                 variantId:    null,
-//                 sku:          product.currentSku || null,
-//                 selectedColor:product.selectedColor || null,
-//                 selectedSize: null,
-//                 unitPrice:    product.currentSellingPrice,
-//                 mrpPrice:     product.currentMrpPrice || product.currentSellingPrice,
-//                 quantity:     1,
-//                 customFieldsJson: null
-//             })
-//         });
-//         if (!res.ok) return false;
-//         const json = await res.json();
-//         return json.success === true;
-//     } catch { return false; }
-// }
 
 
 async function apiAddToCart(userId, product) {
@@ -432,6 +408,7 @@ function renderFromLocalStorage() {
 
 // ─── Paint Cart ───────────────────────────────────────────────────────────────
 
+
 function paintCart(items) {
     if (!items || items.length === 0) {
         if (emptyCartMessage)   emptyCartMessage.classList.remove('hidden');
@@ -446,110 +423,125 @@ function paintCart(items) {
     let html = '';
 
     items.forEach(item => {
-        const itemId     = item.itemId || item.productId;
-        const productId  = item.productId;
-        const variantId  = item.variantId || '';
-        const name       = item.titleName || 'Product';
-        const unitPrice  = parseFloat(item.unitPrice) || 0;
-        const mrpPrice   = parseFloat(item.mrpPrice)  || 0;
-        const quantity   = parseInt(item.quantity)    || 1;
-        const itemTotal  = parseFloat(item.itemTotal) || unitPrice * quantity;
-        const imageUrl   = resolveImageUrl(item.productImageUrl);
+        const itemId    = item.itemId || item.productId;
+        const productId = item.productId;
+        const variantId = item.variantId || '';
+        const name      = item.titleName || 'Product';
+        const unitPrice = parseFloat(item.unitPrice) || 0;
+        const mrpPrice  = parseFloat(item.mrpPrice)  || 0;
+        const quantity  = parseInt(item.quantity)    || 1;
+        const itemTotal = unitPrice * quantity;
+        const imageUrl  = resolveImageUrl(item.productImageUrl);
 
-        // Customizable detection
         const isCustom = !!(item.isCustomized || item.isCustomizable
             || (item.customFieldsJson && item.customFieldsJson !== 'null' && item.customFieldsJson !== '{}'));
 
-        // Discount — only if mrp > selling price
         const hasDiscount = mrpPrice > unitPrice && mrpPrice > 0;
-        const discountAmt = hasDiscount ? Math.round(mrpPrice - unitPrice) : 0;
         const discountPct = hasDiscount ? Math.round(((mrpPrice - unitPrice) / mrpPrice) * 100) : 0;
 
-        // Return policy
-        const returnBadge = isCustom
-            ? `<span class="inline-flex items-center gap-1 text-xs text-orange-600 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full">
-                   <i class="fas fa-info-circle text-xs"></i> No returns on customized items
-               </span>`
-            : `<span class="inline-flex items-center gap-1 text-xs text-green-600 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
-                   <i class="fas fa-rotate-left text-xs"></i> 7-day return available
-               </span>`;
+        const stockBadge = (item.currentStock != null && item.currentStock <= 10 && item.currentStock > 0)
+            ? `<p class="text-[11px] text-orange-500 flex items-center gap-1">
+                   <i class="fas fa-bolt text-[9px]"></i>${item.currentStock} units left
+               </p>` : '';
+
+        const returnRow = isCustom
+            ? `<p class="text-[11px] text-orange-400 flex items-center gap-1">
+                   <i class="fas fa-info-circle text-[9px]"></i>No returns on customized items
+               </p>`
+            : ``;
 
         html += `
-        <div class="cart-item bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition-shadow"
+        <div class="cart-item cursor-pointer bg-white rounded-xl  py-2 sm:px-4 sm:py-4"
              data-item-id="${escapeHtml(String(itemId))}"
              data-product-id="${escapeHtml(String(productId))}"
              data-variant-id="${escapeHtml(variantId)}"
-             data-is-custom="${isCustom}">
-            <div class="flex flex-col md:flex-row gap-4">
+             data-unit-price="${unitPrice}"
+             data-mrp-price="${mrpPrice}"
+             data-is-custom="${isCustom}"
+             onclick="window.location.href='/products/product-detail.html?id=${productId}&sku=${escapeHtml(item.sku || '')}&brand=artezo&category=${escapeHtml(item.productCategory || '')}&variant=${escapeHtml(item.variantId || item.sku || '')}'"
+             >
 
-                <div class="w-full md:w-24 h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                    <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(name)}"
+            <div class="flex items-start gap-3">
+
+                <!-- Image -->
+                <div class="flex-shrink-0 w-[92px] h-[100px] sm:w-[80px] sm:h-[80px] rounded-lg overflow-hidden bg-gray-100">
+                    <img src="${escapeHtml(imageUrl)}"
+                         alt="${escapeHtml(name)}"
                          class="w-full h-full object-cover"
-                         onerror="this.src='https://placehold.co/400x300/e2e8f0/475569?text=Product'">
+                         onerror="this.src=''">
                 </div>
 
-                <div class="flex-grow">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-grow">
-                            <h3 class="font-semibold text-gray-800 mb-1 line-clamp-2">${escapeHtml(name)}</h3>
-                            ${item.selectedColor ? `<p class="text-sm text-gray-500">Color: ${escapeHtml(item.selectedColor)}</p>` : ''}
-                            ${item.selectedSize  ? `<p class="text-sm text-gray-500">Size: ${escapeHtml(item.selectedSize)}</p>`   : ''}
-                            ${item.sku           ? `<p class="text-xs text-gray-400 mt-1">SKU: ${escapeHtml(item.sku)}</p>`        : ''}
-                            ${isCustom           ? `<p class="text-xs text-purple-600 mt-0.5"><i class="fas fa-magic text-xs"></i> Customized Item</p>` : ''}
-                            <div class="mt-1.5">${returnBadge}</div>
-                        </div>
+               
 
-                        <div class="text-right flex-shrink-0 min-w-[100px]">
-                            <div class="font-bold text-lg" style="color:#1D3C4A;">₹${unitPrice.toLocaleString('en-IN')}</div>
-                            ${hasDiscount ? `
-                                <div class="text-xs text-gray-400 line-through">MRP ₹${mrpPrice.toLocaleString('en-IN')}</div>
-                                <div class="text-xs font-medium text-green-600">${discountPct}% off</div>
-                                <div class="text-xs text-green-600">Save ₹${discountAmt.toLocaleString('en-IN')}</div>
-                            ` : ''}
-                        </div>
-                    </div>
+                <!-- Middle: name + meta + qty -->
+                <div class="flex-1 min-w-0 flex flex-col gap-1">
+                    <h3 class="text-[13px] sm:text-sm font-semibold text-gray-800 line-clamp-2 leading-snug">${escapeHtml(name)}</h3>
+                    ${item.selectedColor ? `<p class="text-[11px] text-gray-500">Color: ${escapeHtml(item.selectedColor)}</p>` : ''}
+                    ${isCustom ? `<p class="text-[11px] text-purple-500 flex items-center gap-1"><i class="fas fa-magic text-[9px]"></i>Customized</p>` : ''}
+                    ${stockBadge}
+                    ${returnRow}
+
+                  
 
                     ${isCustom && item.customization ? buildCustomizationAccordion(item) : ''}
+                </div>
 
-                    <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-                        <div class="flex items-center gap-3">
-                            <button class="quantity-decrease w-8 h-8 rounded-full border border-gray-300 hover:border-accent hover:bg-accent hover:text-white transition-all duration-300 flex items-center justify-center"
-                                    data-product-id="${escapeHtml(String(productId))}"
-                                    data-variant-id="${escapeHtml(variantId)}"
-                                    data-item-id="${escapeHtml(String(itemId))}"
-                                    ${quantity <= 1 ? 'disabled' : ''}>
-                                <i class="fas fa-minus text-xs"></i>
-                            </button>
-                            <span class="quantity-value w-12 text-center font-medium">${quantity}</span>
-                            <button class="quantity-increase w-8 h-8 rounded-full border border-gray-300 hover:border-accent hover:bg-accent hover:text-white transition-all duration-300 flex items-center justify-center"
-                                    data-product-id="${escapeHtml(String(productId))}"
-                                    data-variant-id="${escapeHtml(variantId)}"
-                                    data-item-id="${escapeHtml(String(itemId))}">
-                                <i class="fas fa-plus text-xs"></i>
-                            </button>
-                        </div>
+                <!-- Right: price + remove -->
+                <div class="flex-shrink-0 flex flex-col items-end gap-0.5 min-w-[72px]">
+                    <button class="remove-item mb-1 w-6 h-6 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors"
+                            
+                            onclick="event.stopPropagation()"
+                            data-product-id="${escapeHtml(String(productId))}"
+                            data-variant-id="${escapeHtml(variantId)}"
+                            data-item-id="${escapeHtml(String(itemId))}"
+                            title="Remove item">
+                        <i class="fas fa-times text-xs"></i>
+                    </button>
+                    <div>
+                        <span class="item-total text-sm font-bold text-gray-900">₹${itemTotal.toLocaleString('en-IN')}</span>
+                        ${hasDiscount ? `
+                        <span class="item-mrp text-[11px] text-gray-400 line-through">₹${(mrpPrice * quantity).toLocaleString('en-IN')}</span> 
+                    </div>
+                    
+                    <span class="text-[11px] font-semibold text-green-600 bg-green-50 px-1.5 py-0.5 rounded mt-0.5">${discountPct}% OFF</span>
+                    ` : ''}
 
-                        <div class="flex items-center gap-4">
-                            <div class="text-right">
-                                <span class="font-semibold" style="color:#1D3C4A;">₹${itemTotal.toLocaleString('en-IN')}</span>
-                                ${quantity > 1 ? `<p class="text-xs text-gray-400">${quantity} × ₹${unitPrice.toLocaleString('en-IN')}</p>` : ''}
-                            </div>
-                            <button class="remove-item text-gray-400 hover:text-red-500 transition-colors"
-                                    data-product-id="${escapeHtml(String(productId))}"
-                                    data-variant-id="${escapeHtml(variantId)}"
-                                    data-item-id="${escapeHtml(String(itemId))}"
-                                    title="Remove item">
-                                <i class="far fa-trash-alt"></i>
-                            </button>
-                        </div>
+                      <!-- Qty — style pill -->
+                    <div class="flex items-center mt-1.5 w-fit border border-gray-300 rounded-full overflow-hidden divide-x divide-gray-300">
+                        <button class="quantity-decrease w-7 h-7 flex items-center justify-center text-gray-600
+                                       hover:bg-[#1D3C4A] hover:text-white transition-colors duration-150
+                                       disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0"
+                                onclick="event.stopPropagation()"
+                                       data-product-id="${escapeHtml(String(productId))}"
+                                data-variant-id="${escapeHtml(variantId)}"
+                                data-item-id="${escapeHtml(String(itemId))}"
+                                ${quantity <= 1 ? 'disabled' : ''}>
+                            <i class="fas fa-minus" style="font-size:9px;"></i>
+                        </button>
+                        <span class="quantity-value w-8 text-center text-[13px] font-medium text-gray-800 select-none py-1">${quantity}</span>
+                        <button class="quantity-increase w-7 h-7 flex items-center justify-center text-gray-600
+                                       hover:bg-[#1D3C4A] hover:text-white transition-colors duration-150 flex-shrink-0"
+                           
+                                onclick="event.stopPropagation()"
+                                data-product-id="${escapeHtml(String(productId))}"
+                                data-variant-id="${escapeHtml(variantId)}"
+                                data-item-id="${escapeHtml(String(itemId))}">
+                            <i class="fas fa-plus" style="font-size:9px;"></i>
+                        </button>
                     </div>
                 </div>
+
+                
+
             </div>
+            <p class="text-sm text-gray-400">
+              Standard Delivery: 5-7 days
+            </p>
         </div>`;
     });
 
-  if (cartItemsContainer) {
-        cartItemsContainer.innerHTML = '';  // clear before paint — prevents duplicates
+    if (cartItemsContainer) {
+        cartItemsContainer.innerHTML = '';
         cartItemsContainer.innerHTML = html;
     }
     attachCartEventListeners();
@@ -612,45 +604,7 @@ function attachCartEventListeners() {
 }
 
 // ─── Quantity Handlers ────────────────────────────────────────────────────────
-
-// async function handleQuantityDecrease(e) {
-//     e.preventDefault(); e.stopPropagation();
-//     const btn       = e.currentTarget;
-//     const productId = btn.getAttribute('data-product-id');
-//     const variantId = btn.getAttribute('data-variant-id') || null;
-//     const itemId    = btn.getAttribute('data-item-id');
-//     const cartItem  = btn.closest('.cart-item');
-//     const current   = parseInt(cartItem?.querySelector('.quantity-value')?.textContent || '1', 10);
-
-//     if (current <= 1) { confirmAndRemove(productId, variantId, cartItem); return; }
-
-//     const newQty = current - 1;
-//     updateQtyInDom(cartItem, newQty);
-//     updateLocalStorageQty(productId, variantId, newQty);
-//     recalcSummaryFromDom();
-
-//     if (currentUserId && itemId) {
-//         setCheckoutBtnLoading(true);
-//         const ok = await apiUpdateQuantity(currentUserId, itemId, newQty);
-//         setCheckoutBtnLoading(false);
-//         // if (!ok) { showToast('Quantity update failed. Refreshing...', 'error'); await renderCart(); return; }
-        
-//         if (ok === 'rate_limited') {
-//           showToast('Too many requests — please wait a moment', 'info');
-//           const allQtyBtns = cartItem?.querySelectorAll('.quantity-decrease, .quantity-increase');
-//           allQtyBtns?.forEach(b => { b.disabled = true; b.classList.add('opacity-50', 'cursor-not-allowed'); });
-//           setTimeout(() => {
-//             allQtyBtns?.forEach(b => { b.disabled = false; b.classList.remove('opacity-50', 'cursor-not-allowed'); });
-//           }, 5000); // freeze for 5s
-//           return;
-//         }
-//         if (!ok) { showToast('Quantity update failed. Refreshing...', 'error'); await renderCart(); return; }
-//     }
-//     showToast('Quantity updated', 'success');
-// }
-
-
-// ─── Replace handleQuantityDecrease ──────────────────────────────────────────
+// ─── handleQuantityDecrease ──────────────────────────────────────────
 async function handleQuantityDecrease(e) {
     e.preventDefault(); e.stopPropagation();
     const btn       = e.currentTarget;
@@ -716,41 +670,6 @@ async function handleQuantityDecrease(e) {
     showToast('Quantity updated', 'success');
 }
 
-// async function handleQuantityIncrease(e) {
-//     e.preventDefault(); e.stopPropagation();
-//     const btn       = e.currentTarget;
-//     const productId = btn.getAttribute('data-product-id');
-//     const variantId = btn.getAttribute('data-variant-id') || null;
-//     const itemId    = btn.getAttribute('data-item-id');
-//     const cartItem  = btn.closest('.cart-item');
-//     const current   = parseInt(cartItem?.querySelector('.quantity-value')?.textContent || '1', 10);
-//     const newQty    = current + 1;
-
-//     updateQtyInDom(cartItem, newQty);
-//     updateLocalStorageQty(productId, variantId, newQty);
-//     recalcSummaryFromDom();
-
-//     if (currentUserId && itemId) {
-//         setCheckoutBtnLoading(true);
-//         const ok = await apiUpdateQuantity(currentUserId, itemId, newQty);
-//         setCheckoutBtnLoading(false);
-//         // if (!ok) { showToast('Quantity update failed. Refreshing...', 'error'); await renderCart(); return; }
-
-//         // if (ok === 'rate_limited') { showToast('Too many requests — please wait a moment', 'info'); return; }
-
-//         if (ok === 'rate_limited') {
-//           showToast('Too many requests — please wait a moment', 'info');
-//           const allQtyBtns = cartItem?.querySelectorAll('.quantity-decrease, .quantity-increase');
-//           allQtyBtns?.forEach(b => { b.disabled = true; b.classList.add('opacity-50', 'cursor-not-allowed'); });
-//           setTimeout(() => {
-//             allQtyBtns?.forEach(b => { b.disabled = false; b.classList.remove('opacity-50', 'cursor-not-allowed'); });
-//           }, 5000); // freeze for 5s
-//           return;
-//         }
-//         if (!ok) { showToast('Quantity update failed. Refreshing...', 'error'); await renderCart(); return; }
-//     }
-//     showToast('Quantity updated', 'success');
-// }
 
 // ─── Replace handleQuantityIncrease ──────────────────────────────────────────
 async function handleQuantityIncrease(e) {
@@ -838,22 +757,25 @@ function disableQtyButtons(cartItemEl, disabled) {
 
 function updateQtyInDom(cartItemEl, newQty) {
     if (!cartItemEl) return;
+
     const qtySpan = cartItemEl.querySelector('.quantity-value');
     if (qtySpan) qtySpan.textContent = newQty;
 
     const decBtn = cartItemEl.querySelector('.quantity-decrease');
     if (decBtn) decBtn.disabled = newQty <= 1;
 
-    const priceEl    = cartItemEl.querySelector('.flex-shrink-0 .font-bold');
-    const subtotalEl = cartItemEl.querySelector('.flex.items-center.gap-4 .font-semibold');
-    const qtyLabelEl = cartItemEl.querySelector('.flex.items-center.gap-4 .text-xs.text-gray-400');
+    const unitPrice = parseFloat(cartItemEl.getAttribute('data-unit-price')) || 0;
+    const mrpPrice  = parseFloat(cartItemEl.getAttribute('data-mrp-price'))  || 0;
+    const newTotal  = unitPrice * newQty;
 
-    if (priceEl && subtotalEl) {
-        const unitPrice = parseFloat(priceEl.textContent.replace('₹', '').replace(/,/g, '')) || 0;
-        subtotalEl.textContent = `₹${(unitPrice * newQty).toLocaleString('en-IN')}`;
-        if (qtyLabelEl) qtyLabelEl.textContent = newQty > 1 ? `${newQty} × ₹${unitPrice.toLocaleString('en-IN')}` : '';
-    }
+    const totalEl = cartItemEl.querySelector('.item-total');
+    if (totalEl) totalEl.textContent = `₹${newTotal.toLocaleString('en-IN')}`;
+
+    const mrpEl = cartItemEl.querySelector('.item-mrp');
+    if (mrpEl && mrpPrice > 0) mrpEl.textContent = `₹${(mrpPrice * newQty).toLocaleString('en-IN')}`;
 }
+
+
 
 function updateLocalStorageQty(productId, variantId, newQty) {
     try {
@@ -1011,94 +933,99 @@ function updateCartSummaryFromApi(data) {
 
 function updateCartSummaryRaw({ totalAmount, totalMrp, totalDiscount, totalItems }) {
     const subtotal    = parseFloat(totalAmount) || 0;
-    const mrpTotal    = parseFloat(totalMrp)    || subtotal;   // fallback: mrp = subtotal (no discount)
+    const mrpTotal    = parseFloat(totalMrp)    || subtotal;
     const savedAmount = mrpTotal > subtotal ? Math.round(mrpTotal - subtotal) : 0;
     const shippingCost = subtotal > 0
         ? (subtotal >= SHIPPING_THRESHOLD ? FREE_SHIPPING_COST : SHIPPING_COST)
         : 0;
     const grandTotal  = Math.round((subtotal + shippingCost) * 100) / 100;
-    const itemLabel   = `${totalItems || ''} item${totalItems !== 1 ? 's' : ''}`.trim();
+    const itemCount   = parseInt(totalItems) || 0;
 
-    // Inject into dedicated breakdown container (see HTML note below)
+    // ── Savings banner (top of cart) ─────────────────────────────────────────
+    let banner = document.getElementById('cart-savings-banner');
+    if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'cart-savings-banner';
+        // Insert above the cart items list
+        const anchor = cartItemsContainer?.parentElement || cartContent;
+        anchor?.insertBefore(banner, anchor.firstChild);
+    }
+    if (savedAmount > 0) {
+        banner.className = 'text-center text-xs font-semibold text-green-700 bg-green-50 border-b border-green-200 py-2 px-4 rounded-t-xl -mx-0 mb-3';
+        banner.textContent = `You are saving ₹${savedAmount.toLocaleString('en-IN')} today!`;
+        banner.classList.remove('hidden');
+    } else {
+        banner.classList.add('hidden');
+    }
+
+    // ── Order summary breakdown (style) ────────────────────────────────
     const summaryEl = document.getElementById('order-summary-breakdown');
     if (summaryEl) {
         summaryEl.innerHTML = `
-            <div class="space-y-2.5 text-sm">
+            <p class="text-sm font-semibold text-gray-800 mb-3">Total Bill Breakdown</p>
+            <div class="space-y-2 text-sm">
                 <div class="flex justify-between">
-                    <span class="text-gray-600">Price (${itemLabel})</span>
+                    <span class="text-gray-600">${itemCount} Item total (MRP)</span>
                     <span class="font-medium text-gray-900">₹${mrpTotal.toLocaleString('en-IN')}</span>
                 </div>
                 ${savedAmount > 0 ? `
                 <div class="flex justify-between">
                     <span class="text-gray-600">Discount</span>
-                    <span class="font-medium text-green-600">− ₹${savedAmount.toLocaleString('en-IN')}</span>
+                    <span class="font-medium text-green-600">−₹${savedAmount.toLocaleString('en-IN')}</span>
                 </div>` : ''}
-                <!-- <div class="flex justify-between">
-                    <span class="text-gray-600">Delivery Charges</span>
-                    ${subtotal === 0
-                        ? `<span class="text-gray-400">—</span>`
-                        : shippingCost === 0
-                            ? `<span class="font-medium"><s class="text-gray-400 text-xs mr-1">₹${SHIPPING_COST}</s><span class="text-green-600 font-semibold">FREE</span></span>`
-                            : `<span class="font-medium text-gray-900">₹${shippingCost}</span>`
-                    }
-                </div> -->
+                
             </div>
 
             <div class="border-t border-dashed border-gray-300 my-3"></div>
 
-            <div class="flex justify-between font-semibold text-base">
-                <span class="text-gray-900">Total Amount</span>
+            <div class="flex justify-between font-semibold text-sm">
+                <span class="text-gray-800">Payable Amount <span class="text-xs text-gray-400 font-normal">(Tax Included)</span></span>
                 <span style="color:#1D3C4A;">₹${grandTotal.toLocaleString('en-IN')}</span>
             </div>
 
             ${savedAmount > 0 ? `
-            <div class="mt-3 bg-green-50 border border-green-200 rounded-lg px-3 py-2 text-xs text-green-700 font-medium text-center">
-                🎉 You will save ₹${savedAmount.toLocaleString('en-IN')} on this order
-            </div>` : ''}
-
-            ${subtotal > 0 && subtotal < SHIPPING_THRESHOLD ? `
-            <p class="text-xs text-gray-500 mt-2 text-center">
-                Add ₹${(SHIPPING_THRESHOLD - subtotal).toLocaleString('en-IN')} more for <span class="text-green-600 font-medium">FREE delivery</span>
-            </p>` : ''}`;
+            <div class="mt-3 bg-green-50 border border-green-200 rounded-lg px-3 py-2 text-xs text-green-700 font-medium flex justify-between">
+                <span>Total Savings</span>
+                <span>Saving ₹${savedAmount.toLocaleString('en-IN')}</span>
+            </div>` : ''}`;
     }
 
     // Legacy element fallbacks
     if (cartSubtotal) cartSubtotal.innerText = `₹${subtotal.toLocaleString('en-IN')}`;
     if (cartShipping) {
-        if (subtotal === 0)       { cartShipping.innerText = '—'; cartShipping.className = 'font-medium text-gray-400'; }
-        else if (shippingCost === 0) { cartShipping.innerText = 'FREE'; cartShipping.className = 'font-medium text-green-600'; }
-        else { cartShipping.innerText = `₹${shippingCost}`; cartShipping.className = 'font-medium text-gray-900'; }
+        if (subtotal === 0)         { cartShipping.innerText = '—'; cartShipping.className = 'font-medium text-gray-400'; }
+        else if (shippingCost === 0){ cartShipping.innerText = 'FREE'; cartShipping.className = 'font-medium text-green-600'; }
+        else                        { cartShipping.innerText = `₹${shippingCost}`; cartShipping.className = 'font-medium text-gray-900'; }
     }
     if (cartTotal) cartTotal.innerText = `₹${grandTotal.toLocaleString('en-IN')}`;
 
-    if (cartService && typeof cartService.updateBadge === 'function') cartService.updateBadge(totalItems || 0);
+    if (cartService && typeof cartService.updateBadge === 'function') cartService.updateBadge(itemCount);
 }
 
 function recalcSummaryFromDom() {
     let subtotal   = 0;
-    let totalItems = 0;
     let mrpTotal   = 0;
+    let totalItems = 0;
 
     document.querySelectorAll('.cart-item').forEach(el => {
-        const subtotalEl = el.querySelector('.flex.items-center.gap-4 .font-semibold');
-        const qtyEl      = el.querySelector('.quantity-value');
-        const mrpEl      = el.querySelector('.flex-shrink-0 .line-through');
-        const unitEl     = el.querySelector('.flex-shrink-0 .font-bold');
-        const qty        = parseInt(qtyEl?.textContent || '1', 10);
+        const unitPrice = parseFloat(el.getAttribute('data-unit-price')) || 0;
+        const mrpPrice  = parseFloat(el.getAttribute('data-mrp-price'))  || 0;
+        const qty       = parseInt(el.querySelector('.quantity-value')?.textContent || '1', 10);
 
-        if (subtotalEl) subtotal += parseFloat(subtotalEl.textContent.replace('₹', '').replace(/,/g, '')) || 0;
-        if (qtyEl)      totalItems += qty;
-
-        if (mrpEl) {
-            const mrpRaw = mrpEl.textContent.replace(/MRP|₹|,/g, '').trim();
-            mrpTotal += (parseFloat(mrpRaw) || 0) * qty;
-        } else if (unitEl) {
-            mrpTotal += (parseFloat(unitEl.textContent.replace('₹', '').replace(/,/g, '')) || 0) * qty;
-        }
+        subtotal   += unitPrice * qty;
+        mrpTotal   += (mrpPrice  || unitPrice) * qty;
+        totalItems += qty;
     });
 
-    updateCartSummaryRaw({ totalAmount: subtotal, totalMrp: mrpTotal, totalDiscount: mrpTotal - subtotal, totalItems });
+    updateCartSummaryRaw({
+        totalAmount:   subtotal,
+        totalMrp:      mrpTotal,
+        totalDiscount: mrpTotal - subtotal,
+        totalItems
+    });
 }
+
+
 
 // ─── Recommended Products from Category API ───────────────────────────────────
 
@@ -1140,56 +1067,57 @@ async function loadRecommendedProducts(items) {
     if (oldMore) oldMore.remove();
 
     recommendedGrid.innerHTML = products.map(p => {
-        const imgUrl      = resolveImageUrl(p.mainImage);
-        const hasDiscount = p.currentMrpPrice > p.currentSellingPrice && p.currentMrpPrice > 0;
-        const discPct     = hasDiscount ? Math.round(((p.currentMrpPrice - p.currentSellingPrice) / p.currentMrpPrice) * 100) : 0;
-        const isWishlisted = wishlistStates[p.productPrimeId] || false;
-        const stockLabel   = p.currentStock === 0
-            ? `<p class="text-xs text-red-500 mt-1 font-medium">Out of stock</p>`
-            : p.currentStock <= 10
-                ? `<p class="text-xs text-orange-500 mt-1">Only ${p.currentStock} left</p>`
-                : '';
+    const imgUrl      = resolveImageUrl(p.mainImage);
+    const hasDiscount = p.currentMrpPrice > p.currentSellingPrice && p.currentMrpPrice > 0;
+    const discPct     = hasDiscount ? Math.round(((p.currentMrpPrice - p.currentSellingPrice) / p.currentMrpPrice) * 100) : 0;
+    const isWishlisted = wishlistStates[p.productPrimeId] || false;
+    const stockLabel   = p.currentStock === 0
+        ? `<p class="text-[11px] text-red-500 mt-1 font-medium">Out of stock</p>`
+        : p.currentStock <= 10
+            ? `<p class="text-[11px] text-orange-500 mt-1">Only ${p.currentStock} left</p>`
+            : '';
 
-        return `
-        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer group relative"
-             onclick="window.location.href='/products/product-detail.html?id=${p.productPrimeId}'">
+    return `
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer group relative"
+         onclick="window.location.href='/products/product-detail.html?id=${p.productPrimeId}&sku=${p.currentSku || ''}&brand=artezo&category=${p.productCategory || ''}&variant=${p.variantId || p.currentSku || ''}'">
 
-            <button class="wishlist-rec-btn absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow-sm hover:scale-110 transition-transform"
+        <!-- Wishlist btn -->
+        <button class="wishlist-rec-btn absolute top-1.5 right-1.5 z-10 w-7 h-7 rounded-full bg-white/90 flex items-center justify-center shadow-sm hover:scale-110 transition-transform"
+                data-product-id="${p.productPrimeId}"
+                data-wishlisted="${isWishlisted}"
+                onclick="event.stopPropagation(); toggleRecommendedWishlist(this, ${p.productPrimeId})"
+                title="${isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}">
+            <i class="${isWishlisted ? 'fas' : 'far'} fa-heart text-xs ${isWishlisted ? 'text-red-500' : 'text-gray-400'}"></i>
+        </button>
+
+        <!-- Image — square aspect -->
+        <div class="aspect-square bg-gray-100 overflow-hidden">
+            <img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(p.productName)}"
+                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                 onerror="this.src='https://placehold.co/400x300/e2e8f0/475569?text=Product'">
+        </div>
+
+        <!-- Info -->
+        <div class="p-2 sm:p-3">
+            <h3 class="text-[12px] sm:text-sm font-medium text-gray-800 line-clamp-2 leading-snug mb-1.5">${escapeHtml(p.productName)}</h3>
+            <div class="flex items-center gap-1 flex-wrap">
+                <span class="font-bold text-[13px] sm:text-sm" style="color:#1D3C4A;">₹${p.currentSellingPrice.toLocaleString('en-IN')}</span>
+                ${hasDiscount ? `
+                    <span class="text-[10px] text-gray-400 line-through">₹${p.currentMrpPrice.toLocaleString('en-IN')}</span>
+                    <span class="text-[10px] font-semibold text-green-600">${discPct}%</span>
+                ` : ''}
+            </div>
+            ${stockLabel}
+            <button class="rec-add-to-cart-btn mt-2 w-full bg-[#1D3C4A] text-white text-[11px] sm:text-xs font-medium py-1.5 rounded-lg transition flex items-center justify-center gap-1 ${p.currentStock === 0 ? 'opacity-50 cursor-not-allowed' : ''}"
                     data-product-id="${p.productPrimeId}"
-                    data-wishlisted="${isWishlisted}"
-                    onclick="event.stopPropagation(); toggleRecommendedWishlist(this, ${p.productPrimeId})"
-                    title="${isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}">
-                <i class="${isWishlisted ? 'fas' : 'far'} fa-heart text-sm ${isWishlisted ? 'text-red-500' : 'text-gray-400'}"></i>
+                    onclick="event.stopPropagation(); handleRecAddToCart(this, ${JSON.stringify(p).replace(/"/g, '&quot;')})"
+                    ${p.currentStock === 0 ? 'disabled' : ''}>
+                <i class="fas fa-cart-plus text-[10px]"></i>
+                <span>${p.currentStock === 0 ? 'Out of Stock' : 'Add to Cart'}</span>
             </button>
-
-           
-
-            <div class="aspect-square bg-gray-100 overflow-hidden">
-                <img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(p.productName)}"
-                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                     onerror="this.src='https://placehold.co/400x300/e2e8f0/475569?text=Product'">
-            </div>
-
-            <div class="p-3">
-                <h3 class="text-sm font-medium text-gray-800 line-clamp-2 mb-2">${escapeHtml(p.productName)}</h3>
-                <div class="flex items-baseline gap-2 flex-wrap">
-                    <span class="font-bold text-base" style="color:#1D3C4A;">₹${p.currentSellingPrice.toLocaleString('en-IN')}</span>
-                    ${hasDiscount ? `
-                        <span class="text-xs text-gray-400 line-through">₹${p.currentMrpPrice.toLocaleString('en-IN')}</span>
-                        <span class="text-xs font-semibold text-green-600">${discPct}% off</span>
-                    ` : ''}
-                </div>
-                ${stockLabel}
-                <button class="rec-add-to-cart-btn mt-2.5 w-full bg-[#1D3C4A] text-white text-xs font-medium border border-gray-300 hover:border-accent hover:bg-accent hover:text-white text-gray-700 py-1.5 rounded-lg transition flex items-center justify-center gap-1.5 ${p.currentStock === 0 ? 'opacity-50 cursor-not-allowed' : ''}"
-                        data-product-id="${p.productPrimeId}"
-                        onclick="event.stopPropagation(); handleRecAddToCart(this, ${JSON.stringify(p).replace(/"/g, '&quot;')})"
-                        ${p.currentStock === 0 ? 'disabled' : ''}>
-                    <i class="fas fa-cart-plus text-xs"></i>
-                    ${p.currentStock === 0 ? 'Out of Stock' : 'Add to Cart'}
-                </button>
-            </div>
-        </div>`;
-    }).join('');
+        </div>
+    </div>`;
+}).join('');
 
     // Insert "View More" button after the grid
     const moreUrl = `/HomeCategory/homecategory.html?category=${encodeURIComponent(category)}`;
@@ -1408,7 +1336,4 @@ if (clearCartBtn) clearCartBtn.addEventListener('click', handleClearCart);
 window.addEventListener('cartServiceReady', () => { initAttempts = 0; initCartPage(); });
 window.addEventListener('storage', e => { if (e.key === 'artezocart') renderCart(); });
 document.addEventListener('DOMContentLoaded', () => initCartPage());
-
 console.log('[Cart] cart.js loaded ✓');
-
-

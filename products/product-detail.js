@@ -1,170 +1,170 @@
-// // ═══════════════════════════════════════════════════════════════════════════
-// //  ARTEZO LOGGING SYSTEM (Non-conflicting)
-// // ═══════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
+//  ARTEZO LOGGING SYSTEM (Non-conflicting)
+// ═══════════════════════════════════════════════════════════════════════════
 
-// window.artezoLog = {
-//     info: (msg, ...args) => {
-//         const formatted = msg.replace(/{}/g, () => {
-//             const arg = args.shift();
-//             return typeof arg === 'object' ? JSON.stringify(arg) : arg;
-//         });
-//         console.log(`%c[✅ INFO] ${formatted}`, 'color: #4CAF50; font-weight: bold; font-size: 12px;');
-//     },
-//     error: (msg, ...args) => {
-//         const formatted = msg.replace(/{}/g, () => {
-//             const arg = args.shift();
-//             return typeof arg === 'object' ? JSON.stringify(arg) : arg;
-//         });
-//         console.error(`%c[❌ ERROR] ${formatted}`, 'color: #F44336; font-weight: bold; font-size: 12px;');
-//     },
-//     warn: (msg, ...args) => {
-//         const formatted = msg.replace(/{}/g, () => {
-//             const arg = args.shift();
-//             return typeof arg === 'object' ? JSON.stringify(arg) : arg;
-//         });
-//         console.warn(`%c[⚠️ WARN] ${formatted}`, 'color: #FF9800; font-weight: bold; font-size: 12px;');
-//     },
-//     debug: (msg, ...args) => {
-//         const formatted = msg.replace(/{}/g, () => {
-//             const arg = args.shift();
-//             return typeof arg === 'object' ? JSON.stringify(arg) : arg;
-//         });
-//         console.log(`%c[🔍 DEBUG] ${formatted}`, 'color: #2196F3; font-weight: normal; font-size: 11px;');
-//     }
-// };
+window.artezoLog = {
+    info: (msg, ...args) => {
+        const formatted = msg.replace(/{}/g, () => {
+            const arg = args.shift();
+            return typeof arg === 'object' ? JSON.stringify(arg) : arg;
+        });
+        console.log(`%c[✅ INFO] ${formatted}`, 'color: #4CAF50; font-weight: bold; font-size: 12px;');
+    },
+    error: (msg, ...args) => {
+        const formatted = msg.replace(/{}/g, () => {
+            const arg = args.shift();
+            return typeof arg === 'object' ? JSON.stringify(arg) : arg;
+        });
+        console.error(`%c[❌ ERROR] ${formatted}`, 'color: #F44336; font-weight: bold; font-size: 12px;');
+    },
+    warn: (msg, ...args) => {
+        const formatted = msg.replace(/{}/g, () => {
+            const arg = args.shift();
+            return typeof arg === 'object' ? JSON.stringify(arg) : arg;
+        });
+        console.warn(`%c[⚠️ WARN] ${formatted}`, 'color: #FF9800; font-weight: bold; font-size: 12px;');
+    },
+    debug: (msg, ...args) => {
+        const formatted = msg.replace(/{}/g, () => {
+            const arg = args.shift();
+            return typeof arg === 'object' ? JSON.stringify(arg) : arg;
+        });
+        console.log(`%c[🔍 DEBUG] ${formatted}`, 'color: #2196F3; font-weight: normal; font-size: 11px;');
+    }
+};
 
-// // Shorter alias
-// const L = window.artezoLog;
+// Shorter alias
+const L = window.artezoLog;
 
-// L.info("═══════════════════════════════════════════════════════════");
-// L.info("  ARTEZO PRODUCT DETAILS PAGE INITIALIZED");
-// L.info("═══════════════════════════════════════════════════════════");
-
-
-
-// // ═══════════════════════════════════════════════════════════════════════════
-// //  SHIPROCKET DYNAMIC SCRIPT INJECTION (WORKAROUND)
-// // ═══════════════════════════════════════════════════════════════════════════
-
-// L.info("Attempting Shiprocket script injection...");
-
-// // Remove any existing script tag to avoid duplicates
-// const existingScript = document.querySelector('script[src*="shiprocket-checkout"]');
-// if (existingScript) {
-//     L.warn("Removing existing Shiprocket script tag");
-//     existingScript.remove();
-// }
-
-// // Create and inject new script
-// const shiprocketScript = document.createElement('script');
-// shiprocketScript.src = 'https://cdn.shiprocket.in/checkout/js/shiprocket-checkout.js';
-// shiprocketScript.type = 'text/javascript';
-// shiprocketScript.async = true;
-// shiprocketScript.charset = 'UTF-8';
-
-// shiprocketScript.onload = function() {
-//     L.info("✅ Shiprocket script loaded successfully!");
-//     window.shiprocketScriptLoaded = true;
-
-//     // Verify window.Shiprocket exists
-//     if (typeof window.Shiprocket !== "undefined") {
-//         L.info("✅ window.Shiprocket is available");
-//         L.info("  Methods: {}", Object.keys(window.Shiprocket).join(", "));
-//     } else {
-//         L.error("❌ Script loaded but window.Shiprocket is still undefined");
-//     }
-// };
-
-// shiprocketScript.onerror = function() {
-//     L.error("❌ Failed to load Shiprocket script");
-//     L.error("Possible reasons:");
-//     L.error("  1. CORS blocked the request");
-//     L.error("  2. Network/internet issue");
-//     L.error("  3. Shiprocket service down");
-//     L.error("  Check Network tab for details");
-// };
-
-// // Append to head
-// document.head.appendChild(shiprocketScript);
-// L.debug("Shiprocket script injection initiated");
+L.info("═══════════════════════════════════════════════════════════");
+L.info("  ARTEZO PRODUCT DETAILS PAGE INITIALIZED");
+L.info("═══════════════════════════════════════════════════════════");
 
 
-// // ═══════════════════════════════════════════════════════════════════════════
-// //  SHIPROCKET SDK INITIALIZATION CHECKER
-// // ═══════════════════════════════════════════════════════════════════════════
 
-// L.info("🔍 Checking Shiprocket SDK availability...");
+// ═══════════════════════════════════════════════════════════════════════════
+//  SHIPROCKET DYNAMIC SCRIPT INJECTION (WORKAROUND)
+// ═══════════════════════════════════════════════════════════════════════════
 
-// // Add a global flag to track if script loaded
-// window.shiprocketScriptLoaded = false;
+L.info("Attempting Shiprocket script injection...");
 
-// (function initializeShiprocketCheck() {
-//     let checkCount = 0;
-//     const maxChecks = 50;
+// Remove any existing script tag to avoid duplicates
+const existingScript = document.querySelector('script[src*="shiprocket-checkout"]');
+if (existingScript) {
+    L.warn("Removing existing Shiprocket script tag");
+    existingScript.remove();
+}
 
-//     const checkSRSDK = setInterval(() => {
-//         checkCount++;
+// Create and inject new script
+const shiprocketScript = document.createElement('script');
+shiprocketScript.src = 'https://cdn.shiprocket.in/checkout/js/shiprocket-checkout.js';
+shiprocketScript.type = 'text/javascript';
+shiprocketScript.async = true;
+shiprocketScript.charset = 'UTF-8';
 
-//         L.debug("SR SDK Check #{}: window.Shiprocket = {}",
-//             checkCount,
-//             typeof window.Shiprocket);
+shiprocketScript.onload = function() {
+    L.info("✅ Shiprocket script loaded successfully!");
+    window.shiprocketScriptLoaded = true;
 
-//         if (typeof window.Shiprocket !== "undefined") {
-//             clearInterval(checkSRSDK);
-//             window.shiprocketScriptLoaded = true;
+    // Verify window.Shiprocket exists
+    if (typeof window.Shiprocket !== "undefined") {
+        L.info("✅ window.Shiprocket is available");
+        L.info("  Methods: {}", Object.keys(window.Shiprocket).join(", "));
+    } else {
+        L.error("❌ Script loaded but window.Shiprocket is still undefined");
+    }
+};
 
-//             L.info("✅ SHIPROCKET SDK LOADED SUCCESSFULLY!");
-//             L.info("  window.Shiprocket type: {}", typeof window.Shiprocket);
-//             L.info("  window.Shiprocket.checkout type: {}", typeof window.Shiprocket.checkout);
-//             L.debug("  Available methods: {}", Object.keys(window.Shiprocket).join(", "));
+shiprocketScript.onerror = function() {
+    L.error("❌ Failed to load Shiprocket script");
+    L.error("Possible reasons:");
+    L.error("  1. CORS blocked the request");
+    L.error("  2. Network/internet issue");
+    L.error("  3. Shiprocket service down");
+    L.error("  Check Network tab for details");
+};
 
-//             return;
-//         }
+// Append to head
+document.head.appendChild(shiprocketScript);
+L.debug("Shiprocket script injection initiated");
 
-//         if (checkCount >= maxChecks) {
-//             clearInterval(checkSRSDK);
-//             window.shiprocketScriptLoaded = false;
 
-//             L.error("❌ SHIPROCKET SDK FAILED TO LOAD AFTER 5 SECONDS");
-//             L.error("Checking script tag status...");
+// ═══════════════════════════════════════════════════════════════════════════
+//  SHIPROCKET SDK INITIALIZATION CHECKER
+// ═══════════════════════════════════════════════════════════════════════════
 
-//             const scriptTag = document.querySelector('script[src*="shiprocket-checkout"]');
-//             if (scriptTag) {
-//                 L.error("  ✅ Script tag found");
-//                 L.error("  Script src: {}", scriptTag.src);
-//                 L.error("  Script async: {}", scriptTag.async);
-//                 L.error("  Script loaded: {}", scriptTag.loaded);
-//                 L.error("  ⚠️ Script tag exists but window.Shiprocket is undefined");
-//                 L.error("  Possible causes:");
-//                 L.error("    → CORS blocking (check Network tab)");
-//                 L.error("    → Script didn't execute/initialize");
-//                 L.error("    → Wrong URL");
-//                 L.error("    → Third-party script error");
-//             } else {
-//                 L.error("  ❌ NO SCRIPT TAG FOUND!");
-//                 L.error("  Make sure <script src=\"https://checkout.shiprocket.in/js/shiprocket-checkout.js\"></script> is in <head>");
-//             }
-//         }
-//     }, 100);
-// })();
+L.info("🔍 Checking Shiprocket SDK availability...");
 
-// // Check on page load events
-// document.addEventListener('DOMContentLoaded', () => {
-//     L.debug("DOMContentLoaded: window.Shiprocket = {}", typeof window.Shiprocket);
-// });
+// Add a global flag to track if script loaded
+window.shiprocketScriptLoaded = false;
 
-// window.addEventListener('load', () => {
-//     L.debug("Window load: window.Shiprocket = {}", typeof window.Shiprocket);
+(function initializeShiprocketCheck() {
+    let checkCount = 0;
+    const maxChecks = 50;
 
-//     // If still not loaded, it's definitely a script issue
-//     if (typeof window.Shiprocket === "undefined") {
-//         L.error("❌ CRITICAL: Shiprocket still not loaded at window.load");
-//         L.error("This means the script failed to execute. Check:");
-//         L.error("  1. Network tab - did shiprocket-checkout.js load with 200 status?");
-//         L.error("  2. Console - any CORS errors?");
-//         L.error("  3. Is your internet connection working?");
-//     }
-// });
+    const checkSRSDK = setInterval(() => {
+        checkCount++;
+
+        L.debug("SR SDK Check #{}: window.Shiprocket = {}",
+            checkCount,
+            typeof window.Shiprocket);
+
+        if (typeof window.Shiprocket !== "undefined") {
+            clearInterval(checkSRSDK);
+            window.shiprocketScriptLoaded = true;
+
+            L.info("✅ SHIPROCKET SDK LOADED SUCCESSFULLY!");
+            L.info("  window.Shiprocket type: {}", typeof window.Shiprocket);
+            L.info("  window.Shiprocket.checkout type: {}", typeof window.Shiprocket.checkout);
+            L.debug("  Available methods: {}", Object.keys(window.Shiprocket).join(", "));
+
+            return;
+        }
+
+        if (checkCount >= maxChecks) {
+            clearInterval(checkSRSDK);
+            window.shiprocketScriptLoaded = false;
+
+            L.error("❌ SHIPROCKET SDK FAILED TO LOAD AFTER 5 SECONDS");
+            L.error("Checking script tag status...");
+
+            const scriptTag = document.querySelector('script[src*="shiprocket-checkout"]');
+            if (scriptTag) {
+                L.error("  ✅ Script tag found");
+                L.error("  Script src: {}", scriptTag.src);
+                L.error("  Script async: {}", scriptTag.async);
+                L.error("  Script loaded: {}", scriptTag.loaded);
+                L.error("  ⚠️ Script tag exists but window.Shiprocket is undefined");
+                L.error("  Possible causes:");
+                L.error("    → CORS blocking (check Network tab)");
+                L.error("    → Script didn't execute/initialize");
+                L.error("    → Wrong URL");
+                L.error("    → Third-party script error");
+            } else {
+                L.error("  ❌ NO SCRIPT TAG FOUND!");
+                L.error("  Make sure <script src=\"https://checkout.shiprocket.in/js/shiprocket-checkout.js\"></script> is in <head>");
+            }
+        }
+    }, 100);
+})();
+
+// Check on page load events
+document.addEventListener('DOMContentLoaded', () => {
+    L.debug("DOMContentLoaded: window.Shiprocket = {}", typeof window.Shiprocket);
+});
+
+window.addEventListener('load', () => {
+    L.debug("Window load: window.Shiprocket = {}", typeof window.Shiprocket);
+
+    // If still not loaded, it's definitely a script issue
+    if (typeof window.Shiprocket === "undefined") {
+        L.error("❌ CRITICAL: Shiprocket still not loaded at window.load");
+        L.error("This means the script failed to execute. Check:");
+        L.error("  1. Network tab - did shiprocket-checkout.js load with 200 status?");
+        L.error("  2. Console - any CORS errors?");
+        L.error("  3. Is your internet connection working?");
+    }
+});
 
 
 (function () {
@@ -178,7 +178,38 @@
   const USER_ID = localStorage.getItem('userId');
   // ─── CART STATE ───────────────────────────────────────────────────────────
   const addedToCartSet = new Set();
+  const addedToWishlistSet = new Set();
 
+
+  // ── Dual-dispatch: fires on both window AND document so any listener pattern works ──
+function dispatchCartEvent()     { const e = 'cart:updated';     window.dispatchEvent(new CustomEvent(e)); document.dispatchEvent(new CustomEvent(e)); }
+function dispatchWishlistEvent() { const e = 'wishlist:updated'; window.dispatchEvent(new CustomEvent(e)); document.dispatchEvent(new CustomEvent(e)); }
+
+
+// Add this new function
+function syncCardCartStates() {
+  document.querySelectorAll(".card-add-cart").forEach((btn) => {
+    const pid = parseInt(btn.dataset.productId);
+    if (addedToCartSet.has(pid)) {
+      btn.innerHTML = '<i class="fa-solid fa-bag-shopping text-xs"></i> Go to Cart';
+      btn.style.background  = "#e39f32";
+      btn.style.color       = "#1D3C4A";
+      btn.style.fontWeight  = "600";
+      btn.style.borderColor = "#e39f32";
+      btn.dataset.added     = "true";
+    } else {
+      // Revert if item was removed from cart externally
+      if (btn.dataset.added === "true") {
+        btn.innerHTML         = "Add to Cart";
+        btn.style.background  = "";
+        btn.style.color       = "";
+        btn.style.fontWeight  = "";
+        btn.style.borderColor = "";
+        btn.dataset.added     = "false";
+      }
+    }
+  });
+}
 
 
   // ── SIMPLE LOGGING HELPER ──────────────────────────────────────────────
@@ -1084,13 +1115,6 @@
   let customFieldValues = {};
 
   // ─── INIT ──────────────────────────────────────────────────────────────────
-  // document.addEventListener("DOMContentLoaded", function () {
-  //   if (!productPrimeId) {
-  //     showFatalError("No product ID found in URL.");
-  //     return;
-  //   }
-  //   fetchProductFromAPI(productPrimeId);
-  // });
 
   document.addEventListener("DOMContentLoaded", function () {
 
@@ -1121,23 +1145,6 @@
   // ═══════════════════════════════════════════════════════════════════════════
   //   API CALLS
   // ═══════════════════════════════════════════════════════════════════════════
-
-  // async function fetchProductFromAPI(id) {
-  //   try {
-  //     const res = await fetch(`${BASE_URL}/api/products/get-by-productPrimeId/${id}`, {
-  //       method: "GET",
-  //       headers: { "Content-Type": "application/json" },
-  //     });
-  //     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  //     rawProduct = await res.json();
-  //     buildSafeProductData(rawProduct);
-  //     renderPage();
-  //   } catch (err) {
-  //     console.error("[ProductDetail] fetch error:", err);
-  //     showFatalError("Could not load product. Please try again.");
-  //   }
-  // }
-
 
   async function fetchProductFromAPI(id) {
     try {
@@ -1194,16 +1201,50 @@
     }
   }
 
-  async function apiAddToWishlist(payload) {
-    const res = await fetch(`${BASE_URL}/api/v1/wishlist/add`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+  async function loadWishlistItems() {
+  const userId = localStorage.getItem("userId") || sessionStorage.getItem("userId");
+  if (!userId) return;
+  try {
+    const res = await fetch(`${BASE_URL}/api/v1/wishlist?userId=${userId}`);
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data.success || !data.data?.items) return;
+    data.data.items.forEach(item => {
+      if (item.productId) addedToWishlistSet.add(Number(item.productId));
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
+  } catch (err) {
+    console.warn("[Wishlist] loadWishlistItems failed:", err);
   }
+}
 
+function syncCardWishlistStates() {
+  document.querySelectorAll(".product-card-clickable").forEach(card => {
+    const pid = parseInt(card.dataset.productId);
+    if (!pid) return;
+    const btn  = card.querySelector(".wishlist-icon-btn");
+    const icon = btn?.querySelector("i");
+    if (!btn || !icon) return;
+
+    if (addedToWishlistSet.has(pid)) {
+      icon.className = "fa-solid fa-heart text-red-500 text-xs";
+      btn.classList.add("wishlisted");
+    } else {
+      icon.className = "fa-regular fa-heart text-[#1D3C4A] text-xs";
+      btn.classList.remove("wishlisted");
+    }
+  });
+}
+
+ async function apiAddToWishlist(payload) {
+  const res = await fetch(`${BASE_URL}/api/v1/wishlist/add`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const text = await res.text();
+  try { return text ? JSON.parse(text) : {}; } catch (_) { return {}; }
+}
 
   // ── PATCH: Wishlist icon sync ────────────────────────────────────────────────
   async function initWishlistIcon() {
@@ -1231,7 +1272,9 @@
       if (res.ok) {
         const json = await res.json();
         setWishlistIcon(btn, json?.data === true);
-        window.dispatchEvent(new CustomEvent('wishlist:updated')); // ← ADD
+
+        // dispatchWishlistEvent();
+
       }
     } catch (e) {
       console.warn("[Wishlist] Check failed:", e);
@@ -1259,7 +1302,10 @@
             showToast("Removed from wishlist", "info");
             // Sync header wishlist count
             // document.dispatchEvent(new CustomEvent("wishlist:updated"));
-            window.dispatchEvent(new CustomEvent('wishlist:updated')); // ← ADD
+            // window.dispatchEvent(new CustomEvent('wishlist:updated')); // ← ADD
+
+            dispatchWishlistEvent();
+
           } else {
             showToast("Failed to remove from wishlist", "error");
           }
@@ -1452,6 +1498,7 @@
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
+
       if (!res.ok) return [];
       const data = await res.json();
       return (data.data || []).filter((p) => p.productPrimeId !== productId);
@@ -1556,7 +1603,7 @@
     // Must be declared BEFORE safeProductData assignment so [baseVariant, ...variants]
     // reference below is valid. Base uses root-level product fields.
     const baseVariant = {
-      variantId: p.variantId,
+      variantId: p.variantId || null,
       color: p.selectedColor || "Default",
       sku: p.currentSku,
       price: p.currentSellingPrice,
@@ -1669,7 +1716,6 @@
     rewriteURLToSEO(initialVariantSku);
 
     buildCompleteHTML();
-    buildCompleteHTML();
    
    loadCartItems().then(() => {
       const pid = Number(safeProductData.productPrimeId);
@@ -1683,6 +1729,10 @@
           addBtn.style.borderColor = "#e39f32";
         });
       }
+        syncCardCartStates(); // ← ADD: sync suggestion/recent cards too
+          syncCardWishlistStates();  // ← hearts restored on page load
+
+
     });
 
     fillAccordion();
@@ -1690,7 +1740,7 @@
     fillHeroBanner();
     fillStickyBar();
     setupEventListeners();
-    initWishlistIcon();
+    // initWishlistIcon();
 
     // Async fills
     fillBoughtTogether();
@@ -1715,6 +1765,8 @@
           if (code) applyCoupon(code);
         })
       );
+          initWishlistIcon();   // ← runs LAST, after all DOM mutations are done
+
     }, 100);
   }
 
@@ -2201,30 +2253,6 @@
   //  CART
   // ═══════════════════════════════════════════════════════════════════════════
 
-  // async function handleAddToCart(e) {
-  //   e.preventDefault();
-  //   e.stopPropagation();
-
-  //   if (safeProductData.isCustomizable) {
-  //     openCustomizationOverlay();
-  //     return;
-  //   }
-
-  //   const variant = getSelectedVariant();
-  //   const quantity = parseInt(document.getElementById("quantity")?.textContent || 1);
-  //   const payload = buildCartPayload(variant, quantity, null);
-
-  //   try {
-  //     await apiAddToCart(payload);
-  //     showToast("Added to cart! 🛒", "success");
-  //     window.dispatchEvent(new CustomEvent('cart:updated'));
-  //   } catch (err) {
-  //     console.error("[Cart] add error:", err);
-  //     showToast("Could not add to cart. Please try again.", "error");
-  //   }
-  // }
-
-
 
   async function handleAddToCart(e) {
     e.preventDefault();
@@ -2250,7 +2278,8 @@
       await apiAddToCart(payload);
       addedToCartSet.add(pid);
       showToast("Added to cart! 🛒", "success");
-      window.dispatchEvent(new CustomEvent('cart:updated'));
+      // window.dispatchEvent(new CustomEvent('cart:updated'));
+      dispatchCartEvent();
 
       // ── Update ALL add-to-cart buttons (main + sticky) ─────────────────
       document.querySelectorAll(".add-to-cart-btn").forEach(addBtn => {
@@ -2705,43 +2734,66 @@
     const discPct = getDiscountPercent();
 
     const overlayHTML = `
-      <div id="customizationOverlay"
-           class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden opacity-0 transition-all duration-300 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl transform transition-all duration-300 scale-95 border border-[#e5e7eb]">
-
+       <div id="customizationOverlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden opacity-0 transition-all duration-300 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-4xl h-[95vh] overflow-hidden shadow-2xl transform transition-all duration-300 scale-95 border border-[#e5e7eb] flex flex-col">
+ 
           <!-- HEADER -->
-          <div class="sticky top-0 bg-gradient-to-b from-[#fff7d6] via-[#fffdf5] to-white border-b border-[#e5e7eb] px-6 py-6 z-10 rounded-t-2xl shadow-sm">
-            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6">
-              <div class="flex-1">
-                <h2 class="text-2xl font-semibold font-zain text-[#1D3C4A] leading-tight mb-4">
-                  ${escapeHtml(safeProductData.productName)}
-                </h2>
-                <div class="flex items-center flex-wrap gap-4">
-                  <span class="text-3xl font-bold font-lexend text-[#1D3C4A]">
-                    ₹${safeProductData.currentSellingPrice.toLocaleString("en-IN")}
-                  </span>
-                  ${safeProductData.currentMrpPrice > safeProductData.currentSellingPrice
-        ? `<span class="text-2xl text-gray-400 font-lexend line-through">₹${safeProductData.currentMrpPrice.toLocaleString("en-IN")}</span>`
-        : ""}
-                  ${discPct
-        ? `<span class="bg-[#e39f32] text-white font-bold px-4 py-1.5 rounded-2xl text-sm shadow-sm">${discPct}% OFF</span>`
-        : ""}
-                </div>
-              </div>
-              <button id="closeCustomOverlayBtn"
-                      class="text-gray-400 hover:text-[#1D3C4A] hover:bg-gray-100 p-3 rounded-2xl transition-all flex-shrink-0 self-start">
-                <i class="fas fa-times text-3xl"></i>
-              </button>
-            </div>
-          </div>
-
+          <div class="sticky top-0 bg-gradient-to-b from-[#fff7d6] via-[#fffdf5] to-white border-b border-[#e5e7eb] px-3 sm:px-4 py-3 z-10 rounded-t-2xl shadow-sm">
+                      <div class="flex items-start justify-between gap-3">
+ 
+                        <div class="flex-1 min-w-0">
+ 
+                          <h2 class="text-lg sm:text-xl font-semibold font-zain text-[#1D3C4A] leading-tight break-words mb-2">
+                            ${escapeHtml(safeProductData.productName)}
+                          </h2>
+ 
+                          <div class="flex flex-wrap items-center gap-2">
+ 
+                            <span class="text-xl sm:text-2xl font-bold font-lexend text-[#1D3C4A]">
+                              ₹${safeProductData.currentSellingPrice.toLocaleString("en-IN")}
+                            </span>
+ 
+                            ${
+                              safeProductData.currentMrpPrice > safeProductData.currentSellingPrice
+                                ? `
+                            <span class="text-sm sm:text-base text-gray-400 font-lexend line-through">
+                              ₹${safeProductData.currentMrpPrice.toLocaleString("en-IN")}
+                            </span>
+                            `
+                                : ""
+                            }
+ 
+                            ${
+                              discPct
+                                ? `
+                            <span class="bg-[#e39f32] text-white text-xs font-semibold px-2 py-1 rounded-md">
+                              ${discPct}% OFF
+                            </span>
+                            `
+                                : ""
+                            }
+ 
+                          </div>
+ 
+                        </div>
+ 
+                        <button
+                          id="closeCustomOverlayBtn"
+                          class="flex-shrink-0 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-[#1D3C4A] hover:bg-gray-100 rounded-lg transition-all">
+                          <i class="fas fa-times text-lg"></i>
+                        </button>
+ 
+                      </div>
+ 
+                    </div>
+ 
           <!-- BODY -->
-          <div class="p-6">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
+         <div class="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-8">
+ 
               <!-- LEFT: Preview + Summary -->
               <div class="space-y-4">
-                <div class="bg-gray-100 rounded-xl overflow-hidden aspect-square border border-[#e5e7eb]">
+                <div class="bg-gray-100 rounded-xl overflow-hidden aspect-square border border-[#e5e7eb] max-w-md mx-auto lg:max-w-none">
                   <img id="customPreviewImage"
                        src="${safeProductData.mainImage}"
                        alt="Product preview"
@@ -2761,51 +2813,89 @@
                   </div>
                 </div>
               </div>
-
-              <!-- RIGHT: Custom Fields -->
-              <div class="space-y-6">
-                <div id="customFieldsContainer" class="space-y-5 max-h-[52vh] overflow-y-auto pr-2 custom-scrollbar"></div>
-
+ 
+                    <!-- RIGHT: Custom Fields -->
+                    <div class="space-y-6">
+                      <div id="customFieldsContainer"
+                       class="space-y-5 max-h-[45vh] lg:max-h-[52vh] overflow-y-auto pr-1 sm:pr-2 custom-scrollbar">
+                      </div>
+ 
                 <!-- WhatsApp Number -->
                 <div class="bg-white border border-[#e5e7eb] rounded-xl p-5 shadow-sm">
-                  <div class="flex items-start gap-4">
-                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <i class="fab fa-whatsapp text-2xl text-green-600"></i>
-                    </div>
-                    <div class="flex-1">
-                      <h4 class="font-semibold text-gray-900">WhatsApp Number</h4>
-                      <p class="text-sm text-gray-500 mt-1">We'll send your design preview here before processing.</p>
-                      <div class="mt-4 flex items-center border border-[#e5e7eb] rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-green-500">
-                        <span class="px-3 bg-gray-50 text-gray-600 text-sm border-r">+91</span>
-                        <input type="tel" id="customerWhatsappNumber"
-                               placeholder="Enter your WhatsApp number"
-                               maxlength="10"
-                               class="w-full px-3 py-2 outline-none text-sm"/>
+ 
+                    <div class="flex items-start gap-3">
+ 
+                      <div class="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <i class="fab fa-whatsapp text-xl sm:text-2xl text-green-600"></i>
+                      </div>
+ 
+                      <div class="flex-1">
+ 
+                        <h4 class="font-semibold text-gray-900">
+                          WhatsApp Number
+                        </h4>
+ 
+                        <p class="text-sm text-gray-500 mt-1">
+                          Enter your WhatsApp number so we can send you the preview of your customized design.
+                        </p>
+ 
+                        <div class="mt-4 flex items-center border border-[#e5e7eb] rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-green-500">
+ 
+                          <span class="px-3 bg-gray-50 text-gray-600 text-sm border-r">
+                            +91
+                          </span>
+ 
+                          <input
+                            type="tel"
+                            id="customerWhatsappNumber"
+                            placeholder="Enter your WhatsApp number"
+                            maxlength="10"
+                            class="w-full px-3 py-2 outline-none text-sm"/>
+ 
+                        </div>
+ 
+                        <p class="text-xs text-gray-400 mt-2">
+                          Our designer will send the customized design preview to this number before final processing.
+                        </p>
                       </div>
                     </div>
                   </div>
-                </div>
+ 
+            <!-- IMPORTANT NOTE -->
+              <div class="bg-orange-50 border border-orange-200 rounded-lg p-3 flex gap-3">
+                  <i class="fas fa-exclamation-circle text-orange-600 mt-0.5 flex-shrink-0"></i>
+ 
+                  <p class="text-xs text-gray-700 leading-relaxed">
+                      <span class="font-semibold">Important:</span>
+                      Customized products cannot be returned or exchanged after confirmation.
+                      A design preview will be shared on WhatsApp for approval before production.
+                  </p>
               </div>
-
+              </div>  
             </div>
           </div>
-
+ 
           <!-- FOOTER -->
-          <div class="sticky bottom-0 bg-white border-t border-[#e5e7eb] px-6 py-4 flex justify-end gap-3">
-            <button id="cancelCustomBtn"
-                    class="px-6 py-2.5 border border-[#e5e7eb] rounded-lg hover:bg-gray-50 transition font-medium text-[#1D3C4A]">
-              Cancel
-            </button>
-            <button id="addCustomizedToCartBtn"
-                    class="px-6 py-2.5 bg-[#1D3C4A] text-white rounded-lg hover:opacity-90 transition font-medium flex items-center gap-2">
-              <i class="fas fa-cart-plus"></i> Add to Cart
-            </button>
-            <button id="buyCustomizedNowBtn"
-                    class="px-6 py-2.5 bg-[#e39f32] text-white rounded-lg hover:opacity-90 transition font-medium flex items-center gap-2">
-              <i class="fas fa-bolt"></i> Buy Now
-            </button>
-          </div>
-
+          <div class="sticky bottom-0 bg-white border-t border-[#e5e7eb] px-3 sm:px-5 py-3 flex flex-col sm:flex-row justify-end gap-2">
+ 
+                <button id="cancelCustomBtn"
+                  class="w-full sm:w-auto px-4 py-2 border border-[#e5e7eb] rounded-lg hover:bg-gray-50 transition text-sm font-medium text-[#1D3C4A]">
+                  Cancel
+                </button>
+ 
+                <button id="addCustomizedToCartBtn"
+                  class="w-full sm:w-auto px-4 py-2 bg-[#1D3C4A] text-white rounded-lg hover:opacity-90 transition text-sm font-medium flex items-center justify-center gap-1.5">
+                  <i class="fas fa-cart-plus text-xs"></i>
+                  Add to Cart
+                </button>
+ 
+                <button id="buyCustomizedNowBtn"
+                  class="w-full sm:w-auto px-4 py-2 bg-[#e39f32] text-white rounded-lg hover:opacity-90 transition text-sm font-medium flex items-center justify-center gap-1.5">
+                  <i class="fas fa-arrow-right text-xs"></i>
+                  Buy Now
+                </button>
+ 
+            </div>
         </div>
       </div>`;
 
@@ -3657,30 +3747,36 @@
             const thumbImg = v.mainImage || FALLBACK_IMG;
             const isDefault = idx === 0;
             return `
-              <button class="variant-card group flex flex-col items-center gap-1.5
-                             rounded-xl border-2 p-2 transition-all duration-200
-                             w-[80px] cursor-pointer
-                             ${isDefault
-                ? "border-[#1D3C4A] shadow-md"
-                : "border-gray-200 hover:border-[#1D3C4A]"}"
-                      data-variant-id="${escapeHtml(v.variantId)}"
-                      data-size="${escapeHtml(v.size || "")}"
-                      style="${!isDefault ? "display:none" : ""}">
-                <div class="w-full aspect-square rounded-lg overflow-hidden bg-gray-50">
+            <button class="variant-card group flex flex-col items-center gap-1.5
+               rounded-xl border-2 transition-all duration-200
+               w-[90px] cursor-pointer overflow-hidden
+               ${isDefault
+              ? "border-[#1D3C4A] shadow-md"
+              : "border-gray-200 hover:border-[#1D3C4A]"}"
+                  data-variant-id="${escapeHtml(v.variantId)}"
+                  data-size="${escapeHtml(v.size || "")}"
+                  style="${!isDefault ? "display:none" : ""}">
+
+              <!-- Image fills full width, no padding -->
+              <div class="w-full aspect-square overflow-hidden bg-gray-50">
                   <img src="${thumbImg}"
-                       class="w-full h-full object-cover transition-transform
+                      class="w-full h-full object-cover transition-transform
                               duration-300 group-hover:scale-105"
-                       alt="${escapeHtml(v.color)}"
-                       onerror="this.src='${FALLBACK_IMG}'"/>
-                </div>
-                <span class="text-[10px] font-lexend text-center text-[#1D3C4A]
-                             leading-tight line-clamp-2 w-full">
-                  ${escapeHtml(v.color)}
-                </span>
-                <span class="text-[10px] font-lexend font-semibold text-[#e39f32]">
-                  ₹${v.price.toLocaleString("en-IN")}
-                </span>
-              </button>`;
+                      alt="${escapeHtml(v.color)}"
+                      onerror="this.src='${FALLBACK_IMG}'"/>
+              </div>
+
+              <!-- Text section has its own padding -->
+              <div class="w-full px-2 pb-2 flex flex-col items-center gap-0.5">
+                  <span class="text-[10px] font-lexend text-center text-[#1D3C4A]
+                              leading-tight line-clamp-2 w-full">
+                      ${escapeHtml(v.color)}
+                  </span>
+                  <span class="text-[10px] font-lexend font-semibold text-[#e39f32]">
+                      ₹${v.price.toLocaleString("en-IN")}
+                  </span>
+              </div>
+          </button>`; 
           }).join("")}
         </div>
       </div>
@@ -3781,27 +3877,35 @@
                         </div>`;
           }
           return `
-                      <img src="${item.url}"
-                           data-media-index="${idx}" data-media-type="image" data-media-url="${item.url}"
-                           class="w-full h-16 object-cover rounded-md cursor-pointer border-2
-                                  ${idx === 0 ? "border-[#e39f32]" : "border-transparent hover:border-[#e39f32]"}"
-                           onerror="this.src='${FALLBACK_IMG}'"/>`;
+                <img src="${item.url}"
+                      data-media-index="${idx}" data-media-type="image" data-media-url="${item.url}"
+                      class="w-full h-16 object-cover rounded-md cursor-pointer border-2
+                            ${idx === 0 ? "border-[#e39f32]" : "border-transparent hover:border-[#e39f32]"}"
+                      onerror="this.src='${FALLBACK_IMG}'"/>`;
         })
         .join("")}
               </div>
 
               <!-- Main display area -->
-              <div class="relative flex-1 bg-white rounded-xl border border-stone-100 shadow-sm
-                          flex items-center justify-center p-2 h-[340px] overflow-hidden" id="mainDisplayArea">
-                <img id="mainProductImage"
+              <div class="relative flex-1 h-[340px] overflow-hidden flex items-center justify-center"
+     id="mainDisplayArea">
+                  <img id="mainProductImage"
                      src="${initialThumbItems[0]?.type === "image" ? initialThumbItems[0].url : safeProductData.mainImage}"
                      alt="${escapeHtml(safeProductData.productName)}"
-                     class="max-h-full max-w-full object-contain"
+                     class="w-full h-full object-cover"
                      onerror="this.src='${FALLBACK_IMG}'"/>
-                ${discountPercent > 0
-        ? `<span class="discount-badge absolute top-2 left-2 text-white text-[10px] font-semibold px-2.5 py-1 rounded-full shadow"
-                          style="background:#e6a62c">${discountPercent}% OFF</span>`
-        : ""}
+                      ${
+                        discountPercent > 0
+                          ? `
+    <span class="absolute top-3 left-3 z-10
+                 bg-[#E6A62C] text-white
+                 text-[11px] font-semibold
+                 px-3 py-1 rounded-full shadow-md">
+      ${discountPercent}% OFF
+    </span>
+  `
+                          : ""
+                      }
               </div>
             </div>
           </div>
@@ -3810,12 +3914,12 @@
         <!-- RIGHT: Details -->
         <div class="md:col-span-7">
           <div class=" pr-2 space-y-3 hide-scrollbar">
-
+ 
             <!-- Product name + Trending badge -->
-            <h1 class="text-3xl md:text-2xl font-normal font-zain leading-tight text-[#033E59]">
+            <h1 class="text-xl md:text-2xl font-normal font-zain leading-tight text-[#033E59]">
               ${escapeHtml(safeProductData.productName)}${trendingBadgeHTML()}
             </h1>
-
+ 
             <!-- Rating + Brand + Share -->
             <div class="flex items-start justify-between gap-3 mb-2">
               <div class="flex items-center gap-2 flex-wrap flex-1">
@@ -3828,13 +3932,13 @@
                   </span>
                 </div>
               </div>
-
+ 
              <div class="flex items-center gap-2 flex-shrink-0">
               <!-- Wishlist Button -->
               <button class="wishlist-icon-btn w-9 h-9 rounded-full border border-stone-200 flex items-center justify-center hover:bg-stone-100 transition bg-white shadow-sm">
                 <i class="fa-regular fa-heart text-[#033E59]"></i>
               </button>
-    
+   
     <!-- Share Button -->
       <div class="relative" id="shareContainer" style="z-index: 30;">
         <button id="shareButton" class="w-9 h-9 rounded-full border border-stone-200 flex items-center justify-center hover:bg-stone-100 transition bg-white shadow-sm">
@@ -3856,6 +3960,7 @@
       </div>
     </div>
   </div>
+ 
 
             <!-- SKU / Color info -->
             <div class="flex items-center gap-4 text-xs text-gray-500">
@@ -3873,9 +3978,18 @@
                     ₹${safeProductData.currentSellingPrice.toLocaleString("en-IN")}
                   </span>
                   ${safeProductData.currentMrpPrice > safeProductData.currentSellingPrice
-        ? `<span class="text-xs text-[#e39f32] line-through">₹${safeProductData.currentMrpPrice.toLocaleString("en-IN")}</span>
-                       ${discountPercent > 0 ? `<span class="discount-badge bg-[#e39f32] text-white text-[8px] px-1.5 py-[2px] rounded-full">${discountPercent}% OFF</span>` : ""}`
-        : ""}
+                    ? `<span class="text-xs text-[#e39f32] line-through">₹${safeProductData.currentMrpPrice.toLocaleString("en-IN")}</span>
+                                  ${discountPercent > 0 ? `<span class="discount-badge bg-[#e39f32] text-white text-[8px] px-1.5 py-[2px] rounded-full">${discountPercent}% OFF</span>` : ""}`
+                    : ""}
+
+                    <!-- Tax info badge -->
+                    <div class="mt-1 inline-flex items-center gap-1.5 w-fit px-2 py-0.5 rounded-full bg-[#e39f32]/10 border border-[#e39f32]/20">
+                        <i class="fa-solid fa-shield-check text-[9px] text-[#e39f32]"></i>
+                              <span class="text-[10px] font-medium text-[#1D3C4A]/80">
+                                Inclusive of all taxes
+                              </span>
+                    </div>
+
                 </div>
                 <div class="hidden md:block w-px h-7 bg-[#e5e7eb]"></div>
                 <div class="flex items-center gap-1">
@@ -3932,20 +4046,20 @@
             <!-- Variant Cards -->
             ${variantCardsHTML}
 
-            <!-- Quantity + Add to Cart + Buy Now -->
+           <!-- Quantity + Add to Cart + Buy Now -->
             <div class="mt-6 bg-white p-4 rounded-xl border border-[#e5e7eb] shadow-sm space-y-3">
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                <div class="flex items-center justify-between border border-[#e5e7eb] rounded-lg overflow-hidden">
+                <div class="flex items-center justify-between border border-[#e5e7eb] rounded-lg overflow-hidden h-12">
                   <button id="decreaseBtn" class="px-4 py-2 text-lg hover:bg-stone-50 w-1/3 border-r border-[#e5e7eb]">−</button>
                   <span id="quantity" class="text-sm text-center w-1/3 border-r border-[#e5e7eb] py-2">1</span>
                   <button id="increaseBtn" class="px-4 py-2 text-lg hover:bg-stone-50 w-1/3">+</button>
                 </div>
-                <button class="add-to-cart-btn flex items-center justify-center gap-2 border border-[#e5e7eb] rounded-lg bg-white text-[#1D3C4A] font-medium px-4 py-2 hover:bg-[#e39f32] hover:text-white transition">
+                <button class="add-to-cart-btn h-12 flex items-center justify-center gap-2 border border-[#e5e7eb] rounded-lg bg-white text-[#1D3C4A] font-medium px-4 hover:bg-[#e39f32] hover:text-white transition"
                   ${addCartIcon}
                   <span class="text-sm whitespace-nowrap">${addCartText}</span>
                 </button>
-                <button class="buy-now-btn flex items-center justify-center gap-2 bg-[#1D3C4A] text-white rounded-lg font-medium px-4 py-2 hover:bg-[#e39f32] transition">
-                  <i class="fa-solid fa-bolt"></i>
+                <button class="buy-now-btn h-12 flex items-center justify-center gap-2 bg-[#1D3C4A] text-white rounded-lg font-medium px-4 hover:bg-[#e39f32] transition">
+                  <i class="fa-solid fa-arrow-right"></i>
                   <span class="text-sm whitespace-nowrap">${buyNowText}</span>
                 </button>
               </div>
@@ -3953,14 +4067,16 @@
                 <p id="stockInfo" class="text-green-600 font-semibold">
                   Only ${safeProductData.currentStock} items left in stock
                 </p>
-                ${safeProductData.isCustomizable
-        ? `<span class="text-gray-300">|</span>
+                ${
+                  safeProductData.isCustomizable
+                    ? `<span class="text-gray-300">|</span>
                      <a href="https://wa.me/919876543210" target="_blank"
                         class="flex items-center gap-1.5 bg-green-50 border border-green-500 text-green-700 px-2.5 py-1 rounded-md font-medium hover:bg-green-100 transition">
                        <i class="fa-brands fa-whatsapp text-green-600 text-sm"></i>
                        Need bulk quantities? Chat with us
                      </a>`
-        : ""}
+                    : ""
+                }
               </div>
             </div>
 
@@ -4000,11 +4116,11 @@
               </div>
             </div>
 
-            <!-- Accordion placeholder -->
-            <section class="max-w-3xl mx-auto px-4 pt-8 pb-0 font-sans text-[#1D3C4A]">
+             <!-- Accordion placeholder -->
+            <section class="max-w-4xl mx-auto pt-8 pb-0 font-sans text-[#1D3C4A]">
               <div class="border border-[#e5e7eb] rounded-xl divide-y divide-[#e5e7eb] bg-white" id="accordionContainer"></div>
             </section>
-
+            
             <!-- Bought Together placeholder (async filled) -->
             <section class="max-w-4xl mx-auto mt-4 mb-12 px-4" id="boughtTogetherSection">
               <h2 class="text-xl font-normal font-lexend text-[#1D3C4A] mb-5">Frequently Bought Together</h2>
@@ -4033,7 +4149,7 @@
     // Wire up the initial thumb strip click handlers
     wireInitialThumbClicks(initialThumbItems);
     // Sync wishlist heart icon state
-    initWishlistIcon();
+    // initWishlistIcon();
 
     // ── PATCH: Populate teaser coupon card async ─────────────────────────────
     fetchUserCoupons().then((coupons) => {
@@ -4115,8 +4231,7 @@
     if (aboutItems.length > 0) {
       accHtml += `
         <div class="item">
-          <button class="toggle w-full flex justify-between items-center px-6 py-4
-                         text-left font-medium font-lexend text-[#1D3C4A]">
+         <button class="toggle w-full flex justify-between items-center px-4 py-2 text-left font-medium font-lexend">
             About This Item
             <span class="icon text-xl transition-transform duration-300">+</span>
           </button>
@@ -4141,8 +4256,7 @@
       const descHTML = descItems.map((d) => `<p>${escapeHtml(d)}</p>`).join("");
       accHtml += `
         <div class="item">
-          <button class="toggle w-full flex justify-between items-center px-6 py-4
-                         text-left font-medium font-lexend text-[#1D3C4A]">
+         <button class="toggle w-full flex justify-between items-center px-4 py-2 text-left font-medium font-lexend">
             Product Description
             <span class="icon text-xl transition-transform duration-300">+</span>
           </button>
@@ -4161,8 +4275,7 @@
     if (specEntries.length > 0) {
       accHtml += `
         <div class="item">
-          <button class="toggle w-full flex justify-between items-center px-6 py-4
-                         text-left font-medium font-lexend text-[#1D3C4A]">
+          <button class="toggle w-full flex justify-between items-center px-4 py-2 text-left font-medium font-lexend">
             Specifications
             <span class="icon text-xl transition-transform duration-300">+</span>
           </button>
@@ -4200,8 +4313,7 @@
     if (addInfoEntries.length > 0) {
       accHtml += `
         <div class="item">
-          <button class="toggle w-full flex justify-between items-center px-6 py-4
-                         text-left font-medium font-lexend text-[#1D3C4A]">
+         <button class="toggle w-full flex justify-between items-center px-4 py-2 text-left font-medium font-lexend">
             Additional Information
             <span class="icon text-lg transition-transform duration-300">+</span>
           </button>
@@ -4238,8 +4350,7 @@
     if (faqEntries.length > 0) {
       accHtml += `
         <div class="item">
-          <button class="toggle w-full flex justify-between items-center px-6 py-4
-                         text-left font-medium font-lexend text-[#1D3C4A]">
+         <button class="toggle w-full flex justify-between items-center px-4 py-2 text-left font-medium font-lexend">
             FAQs
             <span class="icon text-lg transition-transform duration-300">+</span>
           </button>
@@ -4439,6 +4550,10 @@
 
     section.innerHTML = html;
 
+    syncCardCartStates(); // sync states for freshly rendered cards
+    syncCardWishlistStates();   // ← hearts sync on fresh card render too
+
+
     // ── Event delegation on section — handles card click, wishlist, add-to-cart ──
     // This replaces the broken inline onclick approach. One listener, no conflicts.
     section.addEventListener("click", async function (e) {
@@ -4459,32 +4574,37 @@
         const price = parseFloat(cartBtn.dataset.price);
         const sku = cartBtn.dataset.sku || "";
         if (!pid) return;
+         const titleName = cartBtn.dataset.productName || "Artezo Product";
         const payload = {
           userId: USER_ID,
           sessionId: null,
           productId: pid,
           variantId: null,
           sku,
+          selectedColor: "",
+          selectedSize: null,
+          titleName,                 // ← was missing entirely
           unitPrice: price,
           mrpPrice: price,
           quantity: 1,
           customFieldsJson: null,
         };
        try {
-  await apiAddToCart(payload);
-  addedToCartSet.add(pid);
-  showToast("Added to cart! 🛒", "success");
-  window.dispatchEvent(new CustomEvent('cart:updated'));
+          await apiAddToCart(payload);
+          addedToCartSet.add(pid);
+          showToast("Added to cart! 🛒", "success");
+          // window.dispatchEvent(new CustomEvent('cart:updated'));
+          dispatchCartEvent();
 
-  cartBtn.innerHTML = '<i class="fa-solid fa-bag-shopping text-xs"></i> Go to Cart';
-  cartBtn.style.background = "#e39f32";
-  cartBtn.style.color = "#1D3C4A";
-  cartBtn.style.fontWeight = "600";
-  cartBtn.style.borderColor = "#e39f32";
-  cartBtn.dataset.added = "true";
-} catch (err) {
-  showToast("Could not add to cart.", "error");
-}
+          cartBtn.innerHTML = '<i class="fa-solid fa-bag-shopping text-xs"></i> Go to Cart';
+          cartBtn.style.background = "#e39f32";
+          cartBtn.style.color = "#1D3C4A";
+          cartBtn.style.fontWeight = "600";
+          cartBtn.style.borderColor = "#e39f32";
+          cartBtn.dataset.added = "true";
+        } catch (err) {
+          showToast("Could not add to cart.", "error");
+        }
         return;
       }
 
@@ -4492,12 +4612,22 @@
       const wishlistBtn = target.closest(".wishlist-icon-btn");
       if (wishlistBtn) {
         e.stopPropagation();
-        const card = wishlistBtn.closest("[data-product-id]");
-        const pid = card ? parseInt(card.dataset.productId) : null;
-        const price = card ? parseFloat(card.dataset.price) : 0;
-        const sku = card ? (card.dataset.sku || "") : "";
-        const productName = cart ? (card.dataset.productName) : "Artezo Premium Product";
+        const card = wishlistBtn.closest(".product-card-clickable"); // ← explicit class, not attr selector
+        const pid   = card ? parseInt(card.dataset.productId)          : null;
+        const price = card ? parseFloat(card.dataset.price)            : 0;
+        const sku   = card ? (card.dataset.sku || "")                  : "";
+        // Walk down to find the cart button which also carries the name
+        const cartBtnInCard = card ? card.querySelector(".card-add-cart") : null;
+        const productName   = card?.dataset.productName
+                           || cartBtnInCard?.dataset.productName
+                           || "Artezo Premium Product";
+
+
+
         if (!pid) return;
+        const titleName = card?.dataset.productName
+                       || card?.querySelector(".card-add-cart")?.dataset.productName
+                       || "Artezo Product";
         const payload = {
           userId: USER_ID,
           wishlistName: "My Wishlist",
@@ -4506,7 +4636,7 @@
           sku,
           selectedColor: "",
           selectedSize: null,
-          titleName: productName,
+          titleName,                  // ← now correctly sourced
           wishlistedPrice: price,
           customFieldsJson: null,
         };
@@ -4519,8 +4649,16 @@
               ? "fa-regular fa-heart text-[#1D3C4A] text-xs"
               : "fa-solid fa-heart text-red-500 text-xs";
           }
+
+          // ── Keep set in sync ──────────────────────────────────────────
+          if (isFilled) {
+            addedToWishlistSet.delete(pid);
+          } else {
+            addedToWishlistSet.add(pid);
+          }
           showToast("Wishlist updated ❤️", "info");
-          window.dispatchEvent(new CustomEvent('wishlist:updated'));
+          // window.dispatchEvent(new CustomEvent('wishlist:updated'));
+          dispatchWishlistEvent();
         } catch (err) {
           showToast("Could not update wishlist.", "error");
         }
@@ -4558,6 +4696,7 @@
            data-product-id="${p.productPrimeId}"
            data-price="${price}"
            data-sku="${escapeHtml(p.currentSku || "")}"
+           data-product-name="${escapeHtml(p.productName || "")}"
            data-product-url="${url}">
         ${discPct > 0
         ? `<span class="absolute top-2 left-2 z-10 bg-[#e39f32] text-white text-[9px] font-bold px-2 py-0.5 rounded-full">${discPct}% OFF</span>`
@@ -4584,6 +4723,7 @@
                   type="button"
                   data-product-id="${p.productPrimeId}"
                   data-price="${price}"
+                  data-product-name="${escapeHtml(p.productName || "")}"
                   data-sku="${escapeHtml(p.currentSku || "")}">Add to Cart</button>
         </div>
       </div>`;
@@ -5355,5 +5495,17 @@ bg-gray-100 px-2 py-0.5 rounded-md">
         </div>`;
     }
   }
+
+  // Add once during init / at bottom of your script
+["cart:updated", "cart:itemRemoved"].forEach(evt => {
+  window.addEventListener(evt, async () => {
+    await loadCartItems();   // refresh addedToCartSet
+    syncCardCartStates();    // revert any removed items
+  });
+  document.addEventListener(evt, async () => {
+    await loadCartItems();
+    syncCardCartStates();
+  });
+});
 
 })();

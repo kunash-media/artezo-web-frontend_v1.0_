@@ -14,8 +14,8 @@ function isUserLoggedIn() {
 
 
 
-let cartCount = 4;
-let wishlistCount = 3;
+let cartCount = 0;
+let wishlistCount = 0;
 let showingAllCategories = false;
 
 // ─── Category Data (Fallback) ────────────────────────────────────────────────
@@ -119,7 +119,7 @@ const quickAccessLinks = [
   },
   {
     icon: "fa-box",
-    label: "My Orders",
+    label: "Orders",
     url: "../Myorders/orders.html",
     requiresAuth: true,
     guestUrl: "#",
@@ -133,17 +133,16 @@ const quickAccessLinks = [
   },
   {
     icon: "fa-phone",
-    label: "Contact Us",
-    url: "#",
+    label: "Contact",
+    url: "../Contact/contact.html",
     onClick: function () {
-      window.open("https://wa.me/1234567890", "_blank");
-      return false;
+      return true;
     },
   },
   {
     icon: "fa-info-circle",
-    label: "About Us",
-    url: "/about.html",
+    label: "About",
+    url: "../About/about.html",
     onClick: function () {
       return true;
     },
@@ -638,13 +637,13 @@ function initBannerCarousel() {
 }
 
 // ─── Cart Preview ────────────────────────────────────────────────────────────
-function toggleCartPreview() {
-  cartCount = cartCount === 4 ? 5 : 4;
-  document.querySelectorAll("#cart-count, #mobile-cart-count").forEach((el) => {
-    if (el) el.textContent = cartCount;
-  });
-  alert(`🛒 Cart updated! You have ${cartCount} items (demo)`);
-}
+// function toggleCartPreview() {
+//   cartCount = cartCount === 0;
+//   document.querySelectorAll("#cart-count, #mobile-cart-count").forEach((el) => {
+//     if (el) el.textContent = cartCount;
+//   });
+
+// }
 
 // ─── Account Dropdown ────────────────────────────────────────────────────────
 // ─── Account Dropdown ────────────────────────────────────────────────────────
@@ -762,7 +761,7 @@ function toggleWishlist() {
   els.forEach((el) => {
     if (el) el.textContent = wishlistCount;
   });
-  alert("❤️ Added to Wishlist (demo)");
+  // alert("❤️ Added to Wishlist!");
 }
 
 // ─── Search Helpers ──────────────────────────────────────────────────────────
@@ -771,7 +770,7 @@ function quickSearch(el) {
   const input = document.getElementById("search-input");
   if (input) input.value = term;
   document.getElementById("search-suggestions")?.classList.add("hidden");
-  setTimeout(() => alert(`🔍 Searching for "${term}"... (demo)`), 300);
+  setTimeout(() => alert(`🔍 Searching for "${term}"...`), 300);
 }
 
 // ─── Mobile Menu ─────────────────────────────────────────────────────────────
@@ -837,9 +836,9 @@ function initMobileMenu() {
     });
 
   // Mobile cart
-  document
-    .getElementById("mobile-cart-btn")
-    ?.addEventListener("click", toggleCartPreview);
+  // document
+  //   .getElementById("mobile-cart-btn")
+  //   ?.addEventListener("click", toggleCartPreview);
 
   // NEW: Mobile Profile icon in top bar
   // Mobile Profile Button
@@ -912,7 +911,7 @@ function toggleMobileProfileDropdown() {
         </a>
         <a href="../Myorders/orders.html" class="flex items-center gap-x-3 px-5 py-3.5 hover:bg-zinc-50 text-sm font-medium text-gray-700">
           <i class="fa-solid fa-box w-5 text-gray-400"></i>
-          <span>My Orders</span>
+          <span>Orders</span>
         </a>
         <div class="border-t border-gray-100 my-1 mx-4"></div>
         <button onclick="performLogout()" 
@@ -1183,9 +1182,9 @@ async function initializeHeader() {
   document
     .getElementById("cart-btn")
     ?.addEventListener("click", toggleCartPreview);
-  document
-    .getElementById("mobile-cart-btn")
-    ?.addEventListener("click", toggleCartPreview);
+  // document
+  //   .getElementById("mobile-cart-btn")
+  //   ?.addEventListener("click", toggleCartPreview);
   document
     .getElementById("account-btn")
     ?.addEventListener("click", toggleAccountDropdown);
@@ -1377,6 +1376,7 @@ console.log('🔍 Live Search script loading...');
 
 // Config
 const SEARCH_API_BASE = 'http://localhost:8085/api/products/search';
+const BASE_API_URL = 'http://localhost:8085';
 const SEARCH_DEBOUNCE_MS = 300;
 const SEARCH_MIN_CHARS = 2;
 const SEARCH_MAX_RESULTS = 8;
@@ -1459,7 +1459,7 @@ function renderSearchResults(results, keyword) {
             : '';
         const highlighted = highlightMatch(p.productName, keyword);
         
-        const imageUrl = p.mainImageUrl || `http://localhost:8085/api/products/${p.productPrimeId}/main`;
+        const imageUrl = `http://localhost:8085/api/products/${p.productPrimeId}/main`;
 
         return `
             <div
@@ -1694,9 +1694,7 @@ function initMobileSearchFeature() {
         ? `<span class="line-through text-gray-400 text-[11px] ml-1">${formatPrice(p.currentMrpPrice)}</span>`
         : "";
       const highlighted = highlightMatch(p.productName, keyword);
-      const imageUrl    = p.mainImageUrl
-        || (p.mainImage?.startsWith("/") ? "http://localhost:8085" + p.mainImage : p.mainImage)
-        || `http://localhost:8085/api/products/${p.productPrimeId}/main`;
+      const imageUrl    = `http://localhost:8085/api/products/${p.productPrimeId}/main`;
 
       return `
         <div class="artezo-suggestion-item flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-zinc-50 transition-colors"
@@ -1843,7 +1841,7 @@ function initHamburgerSearch() {
         ? `<span class="line-through text-gray-400 text-[11px] ml-1">${formatPrice(p.currentMrpPrice)}</span>`
         : "";
       const highlighted = highlightMatch(p.productName, keyword);
-      const imageUrl = p.mainImageUrl || `http://localhost:8085/api/products/${p.productPrimeId}/main`;
+      const imageUrl = `http://localhost:8085/api/products/${p.productPrimeId}/main`;
 
       return `
         <div class="artezo-suggestion-item flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-zinc-50 transition-colors"
@@ -1943,4 +1941,3 @@ if (document.readyState === 'loading') {
     // ── Wire mobile search overlay input to same live search ──
     initMobileSearchFeature();
 }
-

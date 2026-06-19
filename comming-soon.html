@@ -1,0 +1,193 @@
+
+<style>
+  * { box-sizing: border-box; }
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: #F2F2E8; }
+  ::-webkit-scrollbar-thumb { background: #D89F34; border-radius: 10px; }
+
+  .cs-wrap {
+    min-height: 100vh;
+    background-color: #F8F8EA;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cs-wrap::before {
+    content: '';
+    position: absolute;
+    top: -120px;
+    right: -120px;
+    width: 380px;
+    height: 380px;
+    border-radius: 50%;
+    background-color: #EDE8C8;
+    z-index: 0;
+  }
+
+  .cs-wrap::after {
+    content: '';
+    position: absolute;
+    bottom: -100px;
+    left: -100px;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background-color: #EDE8C8;
+    z-index: 0;
+  }
+
+  .cs-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 560px;
+    width: 100%;
+  }
+
+  .cs-logo {
+    width: 72px;
+    height: 72px;
+    border-radius: 16px;
+    background-color: #133F53;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2rem;
+    overflow: hidden;
+  }
+
+  .cs-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .cs-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    border-radius: 9999px;
+    background-color: #133F53;
+    color: #F8F8EA;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+
+  .cs-pill span.dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #D89F34;
+    display: inline-block;
+  }
+
+  .cs-heading {
+    font-size: 2.6rem;
+    font-weight: 600;
+    color: #133F53;
+    line-height: 1.2;
+    margin: 0 0 1.25rem;
+    letter-spacing: -0.02em;
+  }
+
+  .cs-heading em {
+    font-style: normal;
+    color: #D89F34;
+  }
+
+  .cs-sub {
+    font-size: 1rem;
+    color: #3a5a68;
+    line-height: 1.75;
+    margin: 0 0 2.5rem;
+    max-width: 420px;
+  }
+
+  .cs-divider {
+    width: 48px;
+    height: 3px;
+    border-radius: 9999px;
+    background-color: #D89F34;
+    margin: 0 auto 2.5rem;
+  }
+
+  .cs-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .cs-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    border-radius: 9999px;
+    border: 1px solid #c9c9aa;
+    background-color: #ffffff;
+    color: #133F53;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .cs-tag i {
+    font-size: 15px;
+    color: #D89F34;
+  }
+
+  .cs-footer {
+    font-size: 12px;
+    color: #7a8a8f;
+    margin-top: 1rem;
+  }
+</style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+
+<div class="cs-wrap">
+  <div class="cs-inner">
+
+    <div class="cs-logo">
+      <img src="../Images/faviconlogo.png" alt="Logo">
+    </div>
+
+    <div class="cs-pill">
+      <span class="dot"></span>
+      Something special is on the way
+    </div>
+
+    <h1 class="cs-heading">Where <em>Art</em> Meets<br>Every Occasion</h1>
+
+    <div class="cs-divider"></div>
+
+    <p class="cs-sub">
+      Thoughtfully crafted photo frames, custom creations, and premium corporate gifts —
+      curated for those who believe every gesture deserves to be beautiful.
+    </p>
+
+    <div class="cs-tags">
+      <span class="cs-tag"><i class="ti ti-photo" aria-hidden="true"></i> Custom Frames</span>
+      <span class="cs-tag"><i class="ti ti-palette" aria-hidden="true"></i> Artisan Crafts</span>
+      <span class="cs-tag"><i class="ti ti-gift" aria-hidden="true"></i> Corporate Gifts</span>
+      <span class="cs-tag"><i class="ti ti-sparkles" aria-hidden="true"></i> Personalized</span>
+    </div>
+
+    <p class="cs-footer">We're putting the finishing touches on something you'll love.</p>
+
+  </div>
+</div>

@@ -557,7 +557,7 @@
   //  to create a PENDING order so you can track it
   // ─────────────────────────────────────────────
   async function notifyBackendPreCheckout(orderRef) {
-    const backendUrl = document.getElementById('cfg_backendUrl').value.trim();
+    const backendUrl = 'http://localhost:8085';
     if (!backendUrl || backendUrl.includes('api.artezo.in')) return; // skip if still dummy
 
     try {

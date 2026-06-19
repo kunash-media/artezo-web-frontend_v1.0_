@@ -426,7 +426,7 @@ function buildAddonCard(p, containerClass) {
   const productUrl = `/products/product-detail.html?id=${pid}&sku=${resolvedSku}&brand=${trendingSlugify(p.brandName)}&category=${trendingSlugify(p.productCategory)}&product=${trendingSlugify(nameClean || p.productName)}`;
 
   return `
-    <div class="relative ${containerClass} flex-shrink-0 bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 snap-start ${isOOS ? "grayscale opacity-70" : ""}">
+     <div class="relative ${containerClass} flex-shrink-0 flex-grow-0 overflow-hidden bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 snap-start ${isOOS ? "grayscale opacity-70" : ""}">
 
       ${discount > 0 ? `<span class="absolute top-3 left-3 bg-[#E39F32] text-white text-[10px] font-semibold px-2 py-1 rounded-md z-20">${discount}% OFF</span>` : ""}
 
@@ -448,7 +448,7 @@ function buildAddonCard(p, containerClass) {
       </div>
 
       <div class="px-2.5 pb-2 pt-1">
-        <h3 class="addon-nav-img text-sm text-gray-700 line-clamp-2 font-medium leading-tight min-h-[20px] cursor-pointer hover:underline"
+        <h3 class="addon-nav-img text-sm text-gray-700 line-clamp-2 font-medium leading-tight min-h-[20px] max-w-full break-words cursor-pointer hover:underline"
             data-href="${productUrl}">${trendingEsc(p.productName)}</h3>
         <p class="text-[10px] text-gray-400 mt-0.5">${trendingEsc(p.productSubCategory || p.productCategory || "")}</p>
         <div class="flex items-center gap-1 mt-1 flex-wrap">
@@ -579,10 +579,17 @@ function addonSkeletonCard(containerClass) {
 
 // ── Addon sections: Discover / Best Sellers / Photo Frames ──
 
+// const ADDON_CONFIG = [
+//   { key: "discover new",  sliderId: "discoverSlider",       containerClass: "min-w-[48%] sm:min-w-[48%] md:min-w-[31%] lg:min-w-[250px] xl:min-w-[270px]" },
+//   { key: "best seller",   sliderId: "topRatedSlider",        containerClass: "min-w-[48%] sm:min-w-[48%] md:min-w-[32%] lg:min-w-[250px] xl:min-w-[270px]" },
+//   { key: "photo frames",  sliderId: "photoFramesContainer",  containerClass: "w-[170px] sm:w-[220px] md:w-[250px] lg:w-[250px] xl:w-[270px]" },
+// ];
+
 const ADDON_CONFIG = [
-  { key: "discover new",  sliderId: "discoverSlider",       containerClass: "min-w-[48%] sm:min-w-[48%] md:min-w-[31%] lg:min-w-[250px] xl:min-w-[270px]" },
-  { key: "best seller",   sliderId: "topRatedSlider",        containerClass: "min-w-[48%] sm:min-w-[48%] md:min-w-[32%] lg:min-w-[250px] xl:min-w-[270px]" },
-  { key: "photo frames",  sliderId: "photoFramesContainer",  containerClass: "w-[170px] sm:w-[220px] md:w-[250px] lg:w-[250px] xl:w-[270px]" },
+  // PATCHED: changed min-w to fixed w so cards don't expand with long titles
+  { key: "discover new",  sliderId: "discoverSlider",       containerClass: "w-[170px] sm:w-[200px] md:w-[230px] lg:w-[250px] xl:w-[270px]" },
+  { key: "best seller",   sliderId: "topRatedSlider",        containerClass: "w-[170px] sm:w-[200px] md:w-[230px] lg:w-[250px] xl:w-[270px]" },
+  { key: "photo frames",  sliderId: "photoFramesContainer",  containerClass: "w-[170px] sm:w-[200px] md:w-[230px] lg:w-[250px] xl:w-[270px]" },
 ];
 
 function injectAddonSkeletons() {
