@@ -1,170 +1,170 @@
-// ═══════════════════════════════════════════════════════════════════════════
-//  ARTEZO LOGGING SYSTEM (Non-conflicting)
-// ═══════════════════════════════════════════════════════════════════════════
+// // ═══════════════════════════════════════════════════════════════════════════
+// //  ARTEZO LOGGING SYSTEM (Non-conflicting)
+// // ═══════════════════════════════════════════════════════════════════════════
 
-window.artezoLog = {
-    info: (msg, ...args) => {
-        const formatted = msg.replace(/{}/g, () => {
-            const arg = args.shift();
-            return typeof arg === 'object' ? JSON.stringify(arg) : arg;
-        });
-        console.log(`%c[✅ INFO] ${formatted}`, 'color: #4CAF50; font-weight: bold; font-size: 12px;');
-    },
-    error: (msg, ...args) => {
-        const formatted = msg.replace(/{}/g, () => {
-            const arg = args.shift();
-            return typeof arg === 'object' ? JSON.stringify(arg) : arg;
-        });
-        console.error(`%c[❌ ERROR] ${formatted}`, 'color: #F44336; font-weight: bold; font-size: 12px;');
-    },
-    warn: (msg, ...args) => {
-        const formatted = msg.replace(/{}/g, () => {
-            const arg = args.shift();
-            return typeof arg === 'object' ? JSON.stringify(arg) : arg;
-        });
-        console.warn(`%c[⚠️ WARN] ${formatted}`, 'color: #FF9800; font-weight: bold; font-size: 12px;');
-    },
-    debug: (msg, ...args) => {
-        const formatted = msg.replace(/{}/g, () => {
-            const arg = args.shift();
-            return typeof arg === 'object' ? JSON.stringify(arg) : arg;
-        });
-        console.log(`%c[🔍 DEBUG] ${formatted}`, 'color: #2196F3; font-weight: normal; font-size: 11px;');
-    }
-};
+// window.artezoLog = {
+//     info: (msg, ...args) => {
+//         const formatted = msg.replace(/{}/g, () => {
+//             const arg = args.shift();
+//             return typeof arg === 'object' ? JSON.stringify(arg) : arg;
+//         });
+//         console.log(`%c[✅ INFO] ${formatted}`, 'color: #4CAF50; font-weight: bold; font-size: 12px;');
+//     },
+//     error: (msg, ...args) => {
+//         const formatted = msg.replace(/{}/g, () => {
+//             const arg = args.shift();
+//             return typeof arg === 'object' ? JSON.stringify(arg) : arg;
+//         });
+//         console.error(`%c[❌ ERROR] ${formatted}`, 'color: #F44336; font-weight: bold; font-size: 12px;');
+//     },
+//     warn: (msg, ...args) => {
+//         const formatted = msg.replace(/{}/g, () => {
+//             const arg = args.shift();
+//             return typeof arg === 'object' ? JSON.stringify(arg) : arg;
+//         });
+//         console.warn(`%c[⚠️ WARN] ${formatted}`, 'color: #FF9800; font-weight: bold; font-size: 12px;');
+//     },
+//     debug: (msg, ...args) => {
+//         const formatted = msg.replace(/{}/g, () => {
+//             const arg = args.shift();
+//             return typeof arg === 'object' ? JSON.stringify(arg) : arg;
+//         });
+//         console.log(`%c[🔍 DEBUG] ${formatted}`, 'color: #2196F3; font-weight: normal; font-size: 11px;');
+//     }
+// };
 
-// Shorter alias
-const L = window.artezoLog;
+// // Shorter alias
+// const L = window.artezoLog;
 
-L.info("═══════════════════════════════════════════════════════════");
-L.info("  ARTEZO PRODUCT DETAILS PAGE INITIALIZED");
-L.info("═══════════════════════════════════════════════════════════");
-
-
-
-// ═══════════════════════════════════════════════════════════════════════════
-//  SHIPROCKET DYNAMIC SCRIPT INJECTION (WORKAROUND)
-// ═══════════════════════════════════════════════════════════════════════════
-
-L.info("Attempting Shiprocket script injection...");
-
-// Remove any existing script tag to avoid duplicates
-const existingScript = document.querySelector('script[src*="shiprocket-checkout"]');
-if (existingScript) {
-    L.warn("Removing existing Shiprocket script tag");
-    existingScript.remove();
-}
-
-// Create and inject new script
-const shiprocketScript = document.createElement('script');
-shiprocketScript.src = 'https://cdn.shiprocket.in/checkout/js/shiprocket-checkout.js';
-shiprocketScript.type = 'text/javascript';
-shiprocketScript.async = true;
-shiprocketScript.charset = 'UTF-8';
-
-shiprocketScript.onload = function() {
-    L.info("✅ Shiprocket script loaded successfully!");
-    window.shiprocketScriptLoaded = true;
-
-    // Verify window.Shiprocket exists
-    if (typeof window.Shiprocket !== "undefined") {
-        L.info("✅ window.Shiprocket is available");
-        L.info("  Methods: {}", Object.keys(window.Shiprocket).join(", "));
-    } else {
-        L.error("❌ Script loaded but window.Shiprocket is still undefined");
-    }
-};
-
-shiprocketScript.onerror = function() {
-    L.error("❌ Failed to load Shiprocket script");
-    L.error("Possible reasons:");
-    L.error("  1. CORS blocked the request");
-    L.error("  2. Network/internet issue");
-    L.error("  3. Shiprocket service down");
-    L.error("  Check Network tab for details");
-};
-
-// Append to head
-document.head.appendChild(shiprocketScript);
-L.debug("Shiprocket script injection initiated");
+// L.info("═══════════════════════════════════════════════════════════");
+// L.info("  ARTEZO PRODUCT DETAILS PAGE INITIALIZED");
+// L.info("═══════════════════════════════════════════════════════════");
 
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  SHIPROCKET SDK INITIALIZATION CHECKER
-// ═══════════════════════════════════════════════════════════════════════════
 
-L.info("🔍 Checking Shiprocket SDK availability...");
+// // ═══════════════════════════════════════════════════════════════════════════
+// //  SHIPROCKET DYNAMIC SCRIPT INJECTION (WORKAROUND)
+// // ═══════════════════════════════════════════════════════════════════════════
 
-// Add a global flag to track if script loaded
-window.shiprocketScriptLoaded = false;
+// L.info("Attempting Shiprocket script injection...");
 
-(function initializeShiprocketCheck() {
-    let checkCount = 0;
-    const maxChecks = 50;
+// // Remove any existing script tag to avoid duplicates
+// const existingScript = document.querySelector('script[src*="shiprocket-checkout"]');
+// if (existingScript) {
+//     L.warn("Removing existing Shiprocket script tag");
+//     existingScript.remove();
+// }
 
-    const checkSRSDK = setInterval(() => {
-        checkCount++;
+// // Create and inject new script
+// const shiprocketScript = document.createElement('script');
+// shiprocketScript.src = 'https://cdn.shiprocket.in/checkout/js/shiprocket-checkout.js';
+// shiprocketScript.type = 'text/javascript';
+// shiprocketScript.async = true;
+// shiprocketScript.charset = 'UTF-8';
 
-        L.debug("SR SDK Check #{}: window.Shiprocket = {}",
-            checkCount,
-            typeof window.Shiprocket);
+// shiprocketScript.onload = function() {
+//     L.info("✅ Shiprocket script loaded successfully!");
+//     window.shiprocketScriptLoaded = true;
 
-        if (typeof window.Shiprocket !== "undefined") {
-            clearInterval(checkSRSDK);
-            window.shiprocketScriptLoaded = true;
+//     // Verify window.Shiprocket exists
+//     if (typeof window.Shiprocket !== "undefined") {
+//         L.info("✅ window.Shiprocket is available");
+//         L.info("  Methods: {}", Object.keys(window.Shiprocket).join(", "));
+//     } else {
+//         L.error("❌ Script loaded but window.Shiprocket is still undefined");
+//     }
+// };
 
-            L.info("✅ SHIPROCKET SDK LOADED SUCCESSFULLY!");
-            L.info("  window.Shiprocket type: {}", typeof window.Shiprocket);
-            L.info("  window.Shiprocket.checkout type: {}", typeof window.Shiprocket.checkout);
-            L.debug("  Available methods: {}", Object.keys(window.Shiprocket).join(", "));
+// shiprocketScript.onerror = function() {
+//     L.error("❌ Failed to load Shiprocket script");
+//     L.error("Possible reasons:");
+//     L.error("  1. CORS blocked the request");
+//     L.error("  2. Network/internet issue");
+//     L.error("  3. Shiprocket service down");
+//     L.error("  Check Network tab for details");
+// };
 
-            return;
-        }
+// // Append to head
+// document.head.appendChild(shiprocketScript);
+// L.debug("Shiprocket script injection initiated");
 
-        if (checkCount >= maxChecks) {
-            clearInterval(checkSRSDK);
-            window.shiprocketScriptLoaded = false;
 
-            L.error("❌ SHIPROCKET SDK FAILED TO LOAD AFTER 5 SECONDS");
-            L.error("Checking script tag status...");
+// // ═══════════════════════════════════════════════════════════════════════════
+// //  SHIPROCKET SDK INITIALIZATION CHECKER
+// // ═══════════════════════════════════════════════════════════════════════════
 
-            const scriptTag = document.querySelector('script[src*="shiprocket-checkout"]');
-            if (scriptTag) {
-                L.error("  ✅ Script tag found");
-                L.error("  Script src: {}", scriptTag.src);
-                L.error("  Script async: {}", scriptTag.async);
-                L.error("  Script loaded: {}", scriptTag.loaded);
-                L.error("  ⚠️ Script tag exists but window.Shiprocket is undefined");
-                L.error("  Possible causes:");
-                L.error("    → CORS blocking (check Network tab)");
-                L.error("    → Script didn't execute/initialize");
-                L.error("    → Wrong URL");
-                L.error("    → Third-party script error");
-            } else {
-                L.error("  ❌ NO SCRIPT TAG FOUND!");
-                L.error("  Make sure <script src=\"https://checkout.shiprocket.in/js/shiprocket-checkout.js\"></script> is in <head>");
-            }
-        }
-    }, 100);
-})();
+// L.info("🔍 Checking Shiprocket SDK availability...");
 
-// Check on page load events
-document.addEventListener('DOMContentLoaded', () => {
-    L.debug("DOMContentLoaded: window.Shiprocket = {}", typeof window.Shiprocket);
-});
+// // Add a global flag to track if script loaded
+// window.shiprocketScriptLoaded = false;
 
-window.addEventListener('load', () => {
-    L.debug("Window load: window.Shiprocket = {}", typeof window.Shiprocket);
+// (function initializeShiprocketCheck() {
+//     let checkCount = 0;
+//     const maxChecks = 50;
 
-    // If still not loaded, it's definitely a script issue
-    if (typeof window.Shiprocket === "undefined") {
-        L.error("❌ CRITICAL: Shiprocket still not loaded at window.load");
-        L.error("This means the script failed to execute. Check:");
-        L.error("  1. Network tab - did shiprocket-checkout.js load with 200 status?");
-        L.error("  2. Console - any CORS errors?");
-        L.error("  3. Is your internet connection working?");
-    }
-});
+//     const checkSRSDK = setInterval(() => {
+//         checkCount++;
+
+//         L.debug("SR SDK Check #{}: window.Shiprocket = {}",
+//             checkCount,
+//             typeof window.Shiprocket);
+
+//         if (typeof window.Shiprocket !== "undefined") {
+//             clearInterval(checkSRSDK);
+//             window.shiprocketScriptLoaded = true;
+
+//             L.info("✅ SHIPROCKET SDK LOADED SUCCESSFULLY!");
+//             L.info("  window.Shiprocket type: {}", typeof window.Shiprocket);
+//             L.info("  window.Shiprocket.checkout type: {}", typeof window.Shiprocket.checkout);
+//             L.debug("  Available methods: {}", Object.keys(window.Shiprocket).join(", "));
+
+//             return;
+//         }
+
+//         if (checkCount >= maxChecks) {
+//             clearInterval(checkSRSDK);
+//             window.shiprocketScriptLoaded = false;
+
+//             L.error("❌ SHIPROCKET SDK FAILED TO LOAD AFTER 5 SECONDS");
+//             L.error("Checking script tag status...");
+
+//             const scriptTag = document.querySelector('script[src*="shiprocket-checkout"]');
+//             if (scriptTag) {
+//                 L.error("  ✅ Script tag found");
+//                 L.error("  Script src: {}", scriptTag.src);
+//                 L.error("  Script async: {}", scriptTag.async);
+//                 L.error("  Script loaded: {}", scriptTag.loaded);
+//                 L.error("  ⚠️ Script tag exists but window.Shiprocket is undefined");
+//                 L.error("  Possible causes:");
+//                 L.error("    → CORS blocking (check Network tab)");
+//                 L.error("    → Script didn't execute/initialize");
+//                 L.error("    → Wrong URL");
+//                 L.error("    → Third-party script error");
+//             } else {
+//                 L.error("  ❌ NO SCRIPT TAG FOUND!");
+//                 L.error("  Make sure <script src=\"https://checkout.shiprocket.in/js/shiprocket-checkout.js\"></script> is in <head>");
+//             }
+//         }
+//     }, 100);
+// })();
+
+// // Check on page load events
+// document.addEventListener('DOMContentLoaded', () => {
+//     L.debug("DOMContentLoaded: window.Shiprocket = {}", typeof window.Shiprocket);
+// });
+
+// window.addEventListener('load', () => {
+//     L.debug("Window load: window.Shiprocket = {}", typeof window.Shiprocket);
+
+//     // If still not loaded, it's definitely a script issue
+//     if (typeof window.Shiprocket === "undefined") {
+//         L.error("❌ CRITICAL: Shiprocket still not loaded at window.load");
+//         L.error("This means the script failed to execute. Check:");
+//         L.error("  1. Network tab - did shiprocket-checkout.js load with 200 status?");
+//         L.error("  2. Console - any CORS errors?");
+//         L.error("  3. Is your internet connection working?");
+//     }
+// });
 
 
 (function () {
@@ -1113,6 +1113,7 @@ function syncCardCartStates() {
 
   let currentCustomFields = {};
   let customFieldValues = {};
+  
 
   // ─── INIT ──────────────────────────────────────────────────────────────────
 
@@ -1588,11 +1589,51 @@ function syncCardWishlistStates() {
   // END PATCH 4 media resolver
 
   function buildSafeProductData(p) {
+
     let customFields = [];
+
+    let frameCount     = null;
+    let frameStructure = null;
+
     if (p.customFields) {
-      try { customFields = JSON.parse(p.customFields); }
-      catch (e) { console.warn("[ProductDetail] customFields parse error:", e); }
+    try {
+      const parsed = JSON.parse(p.customFields);
+
+      // ── DEBUG LOG 1: raw parsed object ──────────────────────────────
+      console.log("[DEBUG-1] parsed type:", typeof parsed);
+      console.log("[DEBUG-2] is Array?:", Array.isArray(parsed));
+      console.log("[DEBUG-3] parsed object:", parsed);
+      // ────────────────────────────────────────────────────────────────
+
+      if (Array.isArray(parsed)) {
+        customFields   = parsed;
+        frameCount     = null;
+        frameStructure = null;
+
+      } else if (parsed && typeof parsed === "object") {
+
+        // ── DEBUG LOG 2: object keys and values ──────────────────────
+        console.log("[DEBUG-4] object keys:", Object.keys(parsed));
+        console.log("[DEBUG-5] parsed.frameCount:", parsed.frameCount);
+        console.log("[DEBUG-6] parsed.frameCount type:", typeof parsed.frameCount);
+        console.log("[DEBUG-7] parsed.frameStructure:", parsed.frameStructure);
+        console.log("[DEBUG-8] parsed.fields length:", parsed.fields?.length);
+        // ─────────────────────────────────────────────────────────────
+
+        frameCount     = parsed.frameCount     || null;
+        frameStructure = parsed.frameStructure || null;
+        customFields   = Array.isArray(parsed.fields) ? parsed.fields : [];
+
+        // ── DEBUG LOG 3: after assignment ────────────────────────────
+        console.log("[DEBUG-9] frameCount assigned:", frameCount);
+        console.log("[DEBUG-10] frameStructure assigned:", frameStructure);
+        // ─────────────────────────────────────────────────────────────
+      }
+
+    } catch (e) {
+      console.warn("[ProductDetail] customFields parse error:", e);
     }
+  }
 
     // ── 1. Normalise API variants first ───────────────────────────────────
     const variants = (p.availableVariants || []).map((v) =>
@@ -1610,7 +1651,7 @@ function syncCardWishlistStates() {
       mrp: p.currentMrpPrice,
       stock: p.currentStock || 0,
       mainImage: absUrl(p.mainImage) || FALLBACK_IMG,
-      mockupImages: null,                  // null = inherit product-level mockups
+      mockupImages: null,                               // null = inherit product-level mockups
       productVideoUrl: absUrl(p.productVideoUrl) || null,
       size: p.productSize || "",
       sizes: p.productSize ? [p.productSize] : [],
@@ -1676,6 +1717,22 @@ function syncCardWishlistStates() {
       availabeCoupons,
       isCustomizable: p.isCustomizable || false,
       customFields,
+
+      // ── CUSTOMIZATION: Wire frame config ─────────────────────────────────
+      // frameCount     : how many user photos this product needs
+      //                  0 or null → no wire frame, just collect uploads silently
+      //                  > 0       → show wire frame with live slot preview
+      // frameStructure : how slots are arranged visually in the left panel
+      //                  "grid-2"  → 2 slots side by side
+      //                  "grid-3"  → 3 slots in a row
+      //                  "grid-4"  → 2×2 grid
+      //                  "stack-2" → 2 slots top/bottom
+      //                  "single"  → 1 full-size slot
+      //      null      → fallback to product image (no wire frame)
+      frameCount,
+      frameStructure,
+
+
       productCategory: p.productCategory,
       productSubCategory: p.productSubCategory,
       subcategory: p.productSubCategory,
@@ -1691,6 +1748,7 @@ function syncCardWishlistStates() {
       height: p.height,
       hsnCode: p.hsnCode,
       hasVariants: p.hasVariants,
+
     };
 
     // ── 6. Set initial active variant — always base first ─────────────────
@@ -2252,8 +2310,6 @@ function syncCardWishlistStates() {
   // ═══════════════════════════════════════════════════════════════════════════
   //  CART
   // ═══════════════════════════════════════════════════════════════════════════
-
-
   async function handleAddToCart(e) {
     e.preventDefault();
     e.stopPropagation();
@@ -2793,13 +2849,58 @@ function syncCardWishlistStates() {
  
               <!-- LEFT: Preview + Summary -->
               <div class="space-y-4">
-                <div class="bg-gray-100 rounded-xl overflow-hidden aspect-square border border-[#e5e7eb] max-w-md mx-auto lg:max-w-none">
-                  <img id="customPreviewImage"
-                       src="${safeProductData.mainImage}"
-                       alt="Product preview"
-                       class="w-full h-full object-cover"
-                       onerror="this.src='${FALLBACK_IMG}'">
-                </div>
+                <!-- LEFT: Wire Frame OR Product Image + Summary -->
+<div class="space-y-4">
+ 
+  ${
+    // ── Decision: show wire frame OR product image ──────────────────────
+    // Wire frame shown ONLY when both conditions met:
+    //   1. frameCount > 0  (product needs user photos)
+    //   2. frameStructure set  (we know how to lay them out)
+    // Otherwise fall back to static product image
+    safeProductData.frameCount > 0 && safeProductData.frameStructure
+      ? `
+        <!-- WIRE FRAME: empty slots, fills live when user uploads -->
+        <div class="rounded-xl overflow-hidden border border-[#e5e7eb] bg-gray-50 p-3">
+          <p class="text-xs text-gray-400 text-center mb-2 font-medium tracking-wide uppercase">
+            Your Photo Preview
+          </p>
+          <!-- renderWireFrame() targets this container -->
+          <div id="wireFrameContainer"
+               data-frame-count="${safeProductData.frameCount}"
+               data-frame-structure="${safeProductData.frameStructure}"
+               class="w-full">
+            <!-- slots injected by renderWireFrame() on overlay open -->
+          </div>
+        </div>
+      `
+      : `
+        <!-- PRODUCT IMAGE: static, shown when no wire frame needed -->
+        <div class="bg-gray-100 rounded-xl overflow-hidden aspect-square border border-[#e5e7eb] max-w-md mx-auto lg:max-w-none">
+          <img id="customPreviewImage"
+               src="${safeProductData.mainImage}"
+               alt="Product preview"
+               class="w-full h-full object-cover"
+               onerror="this.src='${FALLBACK_IMG}'">
+        </div>
+      `
+  }
+ 
+  <!-- Customization Summary box (always shown) -->
+  <div class="bg-gray-50 rounded-xl p-4 border border-[#e5e7eb]">
+    <h3 class="font-semibold text-[#1D3C4A] mb-2">Customization Summary</h3>
+    <div id="customSummary" class="text-sm text-gray-600 space-y-1 max-h-40 overflow-y-auto"></div>
+    <div class="mt-3 pt-3 border-t border-[#e5e7eb]">
+      <div class="flex justify-between items-center">
+        <span class="font-semibold text-gray-700">Total Price</span>
+        <span id="customTotalPrice" class="text-2xl font-bold text-[#e39f32]">
+          ₹${safeProductData.currentSellingPrice.toLocaleString("en-IN")}
+        </span>
+      </div>
+    </div>
+  </div>
+ 
+</div>
                 <div class="bg-gray-50 rounded-xl p-4 border border-[#e5e7eb]">
                   <h3 class="font-semibold text-[#1D3C4A] mb-2">Customization Summary</h3>
                   <div id="customSummary" class="text-sm text-gray-600 space-y-1 max-h-40 overflow-y-auto"></div>
@@ -3155,24 +3256,58 @@ function syncCardWishlistStates() {
       });
     });
 
+
+    // ── Wire up image upload preview ─────────────────────────────────────────
+    // Track slot numbers across image fields (1st image input = slot 1, etc.)
+    let imageSlotCounter = 0;
+
     // ── Wire up image upload preview ─────────────────────────────────────────
     container.querySelectorAll('input[type="file"]').forEach((fileInput) => {
+  
+      // REPLACE WITH:
+       // ── Each image field gets its own slot number (1-based) ────────────────
+      imageSlotCounter++;
+      const thisSlotNumber = imageSlotCounter; // capture for closure
+    
       const preview = document.getElementById(`${fileInput.id}_preview`);
-      fileInput.addEventListener("change", function () {
-        const file = this.files?.[0];
-        if (file && preview) {
+    
+        fileInput.addEventListener("change", function () {
+          const file = this.files?.[0];
+          if (!file) return;
+      
           const reader = new FileReader();
           reader.onload = (e) => {
-            preview.src = e.target.result;
-            preview.style.display = "block";
-            // Store base64 for payload
-            customFieldValues[this.name] = e.target.result;
+            const dataUrl = e.target.result;
+      
+            // ── Show small inline preview below the upload box ─────────────
+            if (preview) {
+              preview.src = dataUrl;
+              preview.style.display = "block";  
+            }
+      
+            // ── Store placeholder (NOT base64) — actual File read later ────
+            // base64 kept out of customFieldValues to keep payload lean
+            // getUploadedImageFiles() reads files[0] directly from input
+            customFieldValues[this.name] = "[Image attached]";
+      
+            // ── WIRE FRAME MODE: fill the matching slot with live preview ───
+            // frameCount > 0 + frameStructure set = wire frame is active
+            if (safeProductData.frameCount > 0 && safeProductData.frameStructure) {
+              fillWireFrameSlot(thisSlotNumber, dataUrl);
+            } else {
+              // ── NON-WIRE-FRAME MODE: update left panel product image ──────
+              // Shows uploaded image in place of product image for reference
+              const leftPreview = document.getElementById("customPreviewImage");
+              if (leftPreview) leftPreview.src = dataUrl;
+            }
+      
             updateCustomizationPrice();
           };
           reader.readAsDataURL(file);
-        }
-      });
+        });
+      
     });
+    
 
     // ── Wire up other inputs ──────────────────────────────────────────────
     container
@@ -3184,6 +3319,141 @@ function syncCardWishlistStates() {
 
     updateCustomizationPrice();
   }
+
+
+  
+function renderWireFrame() {
+  // ── Guard: only run if wire frame container exists ──────────────────────
+  const container = document.getElementById("wireFrameContainer");
+  if (!container) return; // no wire frame mode → exit silently
+ 
+  const frameCount     = safeProductData.frameCount     || 0;
+  const frameStructure = safeProductData.frameStructure || "grid-2";
+ 
+  // ── Nothing to render if no slots needed ───────────────────────────────
+  if (frameCount === 0) return;
+ 
+  // ── Slot HTML builder ───────────────────────────────────────────────────
+  // Each slot = a dashed box with a camera icon + slot number
+  // When user uploads, fillWireFrameSlot() replaces the icon with their image
+  const buildSlot = (slotNum) => `
+    <div id="wireSlot_${slotNum}"
+         class="wire-slot relative bg-white border-2 border-dashed border-gray-300
+                rounded-xl flex items-center justify-center overflow-hidden
+                transition-all duration-300"
+         style="min-height: 120px;">
+      <!-- Empty state: camera icon + label -->
+      <div class="wire-slot-empty flex flex-col items-center gap-1 text-gray-300 p-4">
+        <i class="fas fa-camera text-3xl"></i>
+        <span class="text-xs font-medium">Photo ${slotNum}</span>
+      </div>
+      <!-- Filled state: user's uploaded image (hidden until upload) -->
+      <img id="wireSlotImg_${slotNum}"
+           class="wire-slot-img absolute inset-0 w-full h-full object-cover hidden"
+           alt="Slot ${slotNum} preview">
+    </div>
+  `;
+ 
+  // ── Layout builder based on frameStructure ──────────────────────────────
+  let layoutHTML = "";
+ 
+  switch (frameStructure) {
+ 
+    // ── grid-2: [ slot1 | slot2 ]  side by side ──────────────────────────
+    case "grid-2":
+      layoutHTML = `
+        <div class="grid grid-cols-2 gap-2">
+          ${buildSlot(1)}
+          ${buildSlot(2)}
+        </div>`;
+      break;
+ 
+    // ── grid-3: [ slot1 | slot2 | slot3 ]  3 equal columns ───────────────
+    case "grid-3":
+      layoutHTML = `
+        <div class="grid grid-cols-3 gap-2">
+          ${buildSlot(1)}
+          ${buildSlot(2)}
+          ${buildSlot(3)}
+        </div>`;
+      break;
+ 
+    // ── grid-4: [ slot1 | slot2 ]  2×2 grid ──────────────────────────────
+    //           [ slot3 | slot4 ]
+    case "grid-4":
+      layoutHTML = `
+        <div class="grid grid-cols-2 gap-2">
+          ${buildSlot(1)}
+          ${buildSlot(2)}
+          ${buildSlot(3)}
+          ${buildSlot(4)}
+        </div>`;
+      break;
+ 
+    // ── stack-2: slot1 on top, slot2 below ───────────────────────────────
+    case "stack-2":
+      layoutHTML = `
+        <div class="flex flex-col gap-2">
+          ${buildSlot(1)}
+          ${buildSlot(2)}
+        </div>`;
+      break;
+ 
+    // ── single: one full-width slot ───────────────────────────────────────
+    case "single":
+      layoutHTML = `
+        <div class="w-full">
+          ${buildSlot(1)}
+        </div>`;
+      break;
+ 
+    // ── fallback: treat as grid-2 if unknown structure passed ─────────────
+    default:
+      layoutHTML = `
+        <div class="grid grid-cols-2 gap-2">
+          ${buildSlot(1)}
+          ${buildSlot(2)}
+        </div>`;
+  }
+ 
+  // ── Inject into container ───────────────────────────────────────────────
+  container.innerHTML = layoutHTML;
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  PATCH 4 — fillWireFrameSlot()   [NEW FUNCTION]
+//  WHERE : Add right after renderWireFrame()
+//  WHAT  : Called when user uploads an image in a custom field
+//          Finds the matching wire frame slot and shows the uploaded image
+//
+//  slotNumber : 1-based index matching field order (1st image field = slot 1)
+//  imageDataUrl: base64 string from FileReader (for instant local preview)
+// ═══════════════════════════════════════════════════════════════════════════
+ 
+function fillWireFrameSlot(slotNumber, imageDataUrl) {
+  // ── Guard: wire frame mode only ─────────────────────────────────────────
+  const frameCount = safeProductData.frameCount || 0;
+  if (frameCount === 0) return; // no wire frame → do nothing
+ 
+  // ── Find the slot img element ───────────────────────────────────────────
+  const slotImg   = document.getElementById(`wireSlotImg_${slotNumber}`);
+  const slotEmpty = document.querySelector(`#wireSlot_${slotNumber} .wire-slot-empty`);
+ 
+  if (!slotImg) return; // slot doesn't exist for this number → skip
+ 
+  // ── Fill the slot with uploaded image ──────────────────────────────────
+  slotImg.src = imageDataUrl;
+  slotImg.classList.remove("hidden");   // show the image
+  if (slotEmpty) slotEmpty.classList.add("hidden"); // hide camera icon
+ 
+  // ── Visual feedback: slot border turns gold when filled ─────────────────
+  const slotBox = document.getElementById(`wireSlot_${slotNumber}`);
+  if (slotBox) {
+    slotBox.classList.remove("border-gray-300");
+    slotBox.classList.add("border-[#e39f32]"); // gold border = uploaded ✅
+  }
+}
 
   function updateCustomizationPrice() {
     let total = safeProductData.currentSellingPrice;
@@ -3266,11 +3536,15 @@ function syncCardWishlistStates() {
     const customFields = safeProductData.customFields || [];
     if (customFields.length > 0) {
       buildCustomFieldsUI(customFields);
+    
+      // ── CUSTOMIZATION PATCH: render wire frame after fields are built ────
+      // renderWireFrame() checks frameCount + frameStructure internally
+      // Does nothing if frameCount is 0/null (non-wire-frame products)
+      renderWireFrame();
     } else {
       const c = document.getElementById("customFieldsContainer");
-      if (c)
-        c.innerHTML =
-          '<div class="text-center text-gray-500 py-8">No customization options available</div>';
+      if (c) c.innerHTML =
+        '<div class="text-center text-gray-500 py-8">No customization options available</div>';
     }
 
     const overlay = document.getElementById("customizationOverlay");
@@ -3284,6 +3558,13 @@ function syncCardWishlistStates() {
       });
       document.body.style.overflow = "hidden";
     }
+
+    // Browser console mein paste karo after product loads:
+    console.log("frameCount:", safeProductData.frameCount);
+    console.log("frameStructure:", safeProductData.frameStructure);
+    console.log("customFields:", safeProductData.customFields);
+
+
   }
 
   function closeCustomizationOverlay() {
@@ -3300,72 +3581,548 @@ function syncCardWishlistStates() {
     }
   }
 
-  async function addCustomizedToCart() {
-    const variant = getSelectedVariant();
-    const quantity = parseInt(document.getElementById("quantity")?.textContent || 1);
-    const totalText = document.getElementById("customTotalPrice")?.textContent || "";
+
+  // ═══════════════════════════════════════════════════════════════════════════
+//  PATCH 7 — validateCustomFields()   [NEW FUNCTION]
+//  WHERE : Add before addCustomizedToCart()
+//  WHAT  : Checks all required fields before submission
+//          Returns { valid: true } or { valid: false, message: "..." }
+// ═══════════════════════════════════════════════════════════════════════════
+ 
+function validateCustomFields() {
+  // ── Loop through all custom fields and validate required ones ───────────
+  for (const [fieldId, field] of Object.entries(currentCustomFields)) {
+    if (!field.required) continue; // skip optional fields
+ 
+    const inputType = field.inputType;
+ 
+    if (inputType === "image") {
+      // ── Image field: check if file input has a file selected ────────────
+      const fileInput = document.getElementById(fieldId);
+      if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+        return {
+          valid:   false,
+          message: `Please upload an image for "${field.fieldLabel || field.fieldName}"`,
+        };
+      }
+ 
+    } else if (inputType === "radio") {
+      // ── Radio field: check if any option selected ───────────────────────
+      const checked = document.querySelector(
+        `input[name="${field.fieldName}"]:checked`
+      );
+      if (!checked) {
+        return {
+          valid:   false,
+          message: `Please select an option for "${field.fieldLabel || field.fieldName}"`,
+        };
+      }
+ 
+    } else if (inputType === "checkbox") {
+      // ── Checkbox: skip — optional by nature even if marked required ──────
+      continue;
+ 
+    } else {
+      // ── Text / number / textarea / dropdown ─────────────────────────────
+      const el    = document.getElementById(fieldId);
+      const value = el ? el.value.trim() : "";
+      if (!value) {
+        return {
+          valid:   false,
+          message: `Please fill in "${field.fieldLabel || field.fieldName}"`,
+        };
+      }
+    }
+  }
+ 
+  // ── WhatsApp number: optional, but must be 10 digits if filled ──────────
+  const waInput = document.getElementById("customerWhatsappNumber");
+  if (waInput && waInput.value.trim()) {
+    const digits = waInput.value.trim().replace(/\D/g, "");
+    if (digits.length !== 10) {
+      return {
+        valid:   false,
+        message: "Please enter a valid 10-digit WhatsApp number",
+      };
+    }
+  }
+ 
+  // ── All validations passed ──────────────────────────────────────────────
+  return { valid: true };
+}
+ 
+// ═══════════════════════════════════════════════════════════════════════════
+//  PATCH 8 — uploadCustomizationImage()   [NEW FUNCTION]
+//  WHERE : Add near addCustomizedToCart()
+//  WHAT  : Uploads a single File object to backend
+//          Returns assetUuid string on success, null on failure
+//          Called once per image field inside addCustomizedToCart()
+// ═══════════════════════════════════════════════════════════════════════════
+ 
+async function uploadCustomizationImage(imageFile) {
+  try {
+    const userId = USER_ID; // your existing helper
+ 
+    // ── Build multipart form data ───────────────────────────────────────
+    const formData = new FormData();
+    formData.append("file", imageFile);
+    if (userId) formData.append("userId", String(userId));
+ 
+    // ── POST to upload endpoint ─────────────────────────────────────────
+    // NOTE: Do NOT set Content-Type header manually
+    // Browser automatically sets multipart/form-data with correct boundary
+    const res = await fetch(`${BASE_URL}/api/v1/customize/upload-image`, {
+      method: "POST",
+      body:   formData,
+    });
+ 
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || `Upload failed: HTTP ${res.status}`);
+    }
+ 
+    const data      = await res.json();
+    const assetUuid = data?.data?.assetUuid;
+ 
+    if (!assetUuid) throw new Error("No assetUuid returned from upload");
+ 
+    console.log("[Customize] Image uploaded successfully | assetUuid:", assetUuid);
+    return assetUuid;
+ 
+  } catch (err) {
+    console.error("[Customize] Image upload error:", err.message);
+    return null; // caller handles null as upload failure
+  }
+}
+ 
+
+  
+
+  // ═══════════════════════════════════════════════════════════════════════════
+//  PATCH 9 — addCustomizedToCart()   [FULL REPLACE]
+//  WHERE : Replace existing addCustomizedToCart() entirely
+//  WHAT  : New multi-image flow:
+//            1. Validate required fields
+//            2. Upload all image files sequentially → collect assetUuids
+//            3. Build assetSlots array for backend
+//            4. Build customFieldsJson (text fields only, NO base64)
+//            5. POST to /api/v1/customize/add-to-cart
+//            6. On success: update cart badge, close overlay
+// ═══════════════════════════════════════════════════════════════════════════
+ 
+async function addCustomizedToCart() {
+  const btn = document.getElementById("addCustomizedToCartBtn");
+ 
+  try {
+    // ── STEP 1: Validate all required custom fields ─────────────────────
+    const validation = validateCustomFields();
+    if (!validation.valid) {
+      showToast(validation.message, "error");
+      return;
+    }
+ 
+    // ── STEP 2: Show uploading state on button ──────────────────────────
+    if (btn) {
+      btn.disabled   = true;
+      btn.innerHTML  = `<i class="fas fa-spinner fa-spin text-xs"></i> Uploading...`;
+    }
+ 
+    // ── STEP 3: Collect all image files from custom field inputs ────────
+    // Returns: [{ slotNumber, fieldName, fieldId, file }, ...]
+    const uploadedFiles = getUploadedImageFiles();
+ 
+    // ── STEP 4: Upload each image sequentially → collect assetSlots ────
+    // assetSlots = array backend expects: [{ slotNumber, assetUuid, fieldName }]
+    const assetSlots = [];
+ 
+    for (const fileEntry of uploadedFiles) {
+      const uuid = await uploadCustomizationImage(fileEntry.file);
+ 
+      if (!uuid) {
+        // Upload failed for this slot — stop and show error
+        showToast(
+          `Failed to upload image for "${fileEntry.fieldName}". Please try again.`,
+          "error"
+        );
+        return; // finally block will restore button
+      }
+ 
+      assetSlots.push({
+        slotNumber: fileEntry.slotNumber,  // 1, 2, 3 ...
+        assetUuid:  uuid,                   // UUID from backend upload response
+        fieldName:  fileEntry.fieldName,    // "upload image", "upload image - 2"
+      });
+    }
+ 
+    // ── STEP 5: Build customFieldsJson (text fields ONLY) ───────────────
+    // Strip base64 / "[Image attached]" — images tracked via assetSlots
+    const textOnlyFields = {};
+ 
+    for (const [key, value] of Object.entries(customFieldValues)) {
+      // Skip image placeholders — image data goes in assetSlots, not here
+      if (typeof value === "string" && value.startsWith("data:image")) continue;
+      if (value === "[Image attached]") continue;
+      textOnlyFields[key] = value;
+    }
+ 
+    // ── STEP 6: Add frameCount to customFieldsJson for admin reference ──
+    // Admin panel reads this to know how many images to expect
+    if (safeProductData.frameCount) {
+      textOnlyFields["frameCount"] = safeProductData.frameCount;
+    }
+ 
+    // ── STEP 7: Add frameStructure to customFieldsJson ──────────────────
+    if (safeProductData.frameStructure) {
+      textOnlyFields["frameStructure"] = safeProductData.frameStructure;
+    }
+ 
+    // ── STEP 8: WhatsApp number from dedicated input (if filled) ────────
+    const waNumber = document.getElementById("customerWhatsappNumber")?.value?.trim();
+    if (waNumber) {
+      textOnlyFields["whatsappNumber"] = waNumber;
+    }
+ 
+    // ── STEP 9: Calculate final price from overlay total display ────────
+    const totalText  = document.getElementById("customTotalPrice")?.textContent || "";
     const finalPrice =
-      parseInt(totalText.replace(/[^0-9]/g, "")) ||
+      parseInt(totalText.replace(/[^0-9]/g, ""), 10) ||
       safeProductData.currentSellingPrice;
+ 
+    // ── STEP 10: Get selected variant and quantity ───────────────────────
+    const variant  = getSelectedVariant();
+    const quantity = parseInt(
+      document.getElementById("quantity")?.textContent || "1",
+      10
+    );
+ 
+    // ── STEP 11: Update button to "Adding..." ────────────────────────────
+    if (btn) {
+      btn.innerHTML = `<i class="fas fa-spinner fa-spin text-xs"></i> Adding...`;
+    }
+ 
+    // ── STEP 12: Build final payload for /customize/add-to-cart ─────────
+    const customPayload = {
+      userId:          USER_ID,
+      sessionId:       null,
+      productId:       safeProductData.productId,
+      variantId:       variant?.variantId || null,
+      sku:             variant?.sku       || safeProductData.currentSku,
+      selectedColor:   variant?.color     || safeProductData.selectedColor || null,
+      selectedSize:    variant?.size      || safeProductData.productSize   || null,
+      productName:     safeProductData.productName,
+      titleName:       safeProductData.productName,
+      unitPrice:       finalPrice,
+      mrpPrice:        safeProductData.currentMrpPrice,
+      quantity:        quantity,
+      // Text-only fields: size selection, mobile number, frameCount etc.
+      customFieldsJson: Object.keys(textOnlyFields).length > 0
+        ? JSON.stringify(textOnlyFields)
+        : null,
+      // Image slots: [{ slotNumber:1, assetUuid:"uuid-1", fieldName:"upload image" }, ...]
+      // Empty array if product has no image fields (text-only customization)
+      assetSlots: assetSlots,
+    };
+ 
+    // ── STEP 13: POST to new customized cart endpoint ────────────────────
+    // NOTE: This hits /customize/add-to-cart NOT /cart/add
+    // Existing cart/add is completely untouched
+    const res = await fetch(`${BASE_URL}/api/v1/customize/add-to-cart`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify(customPayload),
+    });
+ 
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || `HTTP ${res.status}`);
+    }
+ 
+    // ── STEP 14: Success — update UI ─────────────────────────────────────
+    const pid = Number(safeProductData.productId);
+    addedToCartSet.add(pid); // mark as added (prevents duplicate add)
+ 
+    showToast("Customized product added to cart! 🛒", "success");
+    dispatchCartEvent(); // fires CustomEvent → header badge updates
+ 
+    // ── Update Add to Cart buttons → "Go to Cart" ───────────────────────
+    document.querySelectorAll(".add-to-cart-btn").forEach((addBtn) => {
+      addBtn.innerHTML    = `<i class="fa-solid fa-bag-shopping"></i> <span class="text-sm whitespace-nowrap">Go to Cart</span>`;
+      addBtn.style.background  = "#e39f32";
+      addBtn.style.color       = "#1D3C4A";
+      addBtn.style.fontWeight  = "600";
+      addBtn.style.borderColor = "#e39f32";
+    });
+ 
+    closeCustomizationOverlay(); // close overlay after success
+ 
+  } catch (err) {
+    console.error("[CustomCart] Add to cart error:", err);
+    showToast(err.message || "Could not add to cart. Please try again.", "error");
+ 
+  } finally {
+    // ── Always restore button regardless of success/failure ─────────────
+    if (btn) {
+      btn.disabled  = false;
+      btn.innerHTML = `<i class="fas fa-cart-plus text-xs"></i> Add to Cart`;
+    }
+  }
+}
 
-    // Build customFieldsJson — strip base64 image data to keep payload lean;
-    // keep the "[Image attached]" placeholder so backend knows it was provided.
-    const payloadFields = { ...customFieldValues };
-    const payload = buildCartPayload(variant, quantity, JSON.stringify(payloadFields));
-    payload.unitPrice = finalPrice;
 
-    try {
-      await apiAddToCart(payload);
-      showToast("Customized product added to cart! 🛒", "success");
-      closeCustomizationOverlay();
-    } catch (err) {
-      console.error("[CustomCart] error:", err);
-      showToast("Could not add to cart. Please try again.", "error");
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  PATCH 6 — getUploadedImageFiles()   [NEW FUNCTION]
+//  WHERE : Add near addCustomizedToCart()
+//  WHAT  : Collects all File objects from image inputs in the overlay
+//          Returns array of { slotNumber, fieldName, fieldId, file }
+//          slotNumber matches wire frame slots (1-based, image fields only)
+// ═══════════════════════════════════════════════════════════════════════════
+ 
+function getUploadedImageFiles() {
+  const container = document.getElementById("customFieldsContainer");
+  if (!container) return [];
+ 
+  const fileInputs = container.querySelectorAll('input[type="file"]');
+  const uploadedFiles = [];
+  let slotCounter = 0;
+ 
+  fileInputs.forEach((input) => {
+    slotCounter++; // slot numbers are 1-based across image fields only
+ 
+    // ── Only include inputs that actually have a file selected ──────────
+    if (input.files && input.files.length > 0) {
+      uploadedFiles.push({
+        slotNumber: slotCounter,          // wire frame slot number
+        fieldName:  input.name,           // e.g. "upload image", "upload image - 2"
+        fieldId:    input.dataset.fieldId, // e.g. "custom_1", "custom_4"
+        file:       input.files[0],        // actual File object
+      });
+    }
+  });
+ 
+  // Returns: [{ slotNumber:1, fieldName:"upload image", file:File }, ...]
+  return uploadedFiles;
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// NEW FUNCTION — Upload image to backend, return assetUuid
+// Called from addCustomizedToCart() before cart add
+// ═══════════════════════════════════════════════════════════════════════════
+async function uploadCustomizationImage(imageFile) {
+  try {
+    const userId = USER_ID;
+    const formData = new FormData();
+    formData.append("file", imageFile);
+
+    if (userId) formData.append("userId", userId);
+
+    const res = await fetch(
+      `${BASE_URL}/api/v1/customize/upload-image`, {
+        method: "POST",
+        body: formData,
+        // Note: NO Content-Type header — browser sets multipart boundary automatically
+      }
+    );
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || `Upload failed: HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    const assetUuid = data?.data?.assetUuid;
+
+    if (!assetUuid) throw new Error("No assetUuid in upload response");
+
+    console.log("[Customize] Image uploaded | assetUuid:", assetUuid);
+    return assetUuid;
+
+  } catch (err) {
+    console.error("[Customize] Upload error:", err);
+    return null;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// NEW FUNCTION — Validate required custom fields before submission
+// Returns { valid: true } or { valid: false, message: "..." }
+// ═══════════════════════════════════════════════════════════════════════════
+function validateCustomFields() {
+  for (const [fieldId, field] of Object.entries(currentCustomFields)) {
+    if (!field.required) continue;
+
+    const inputType = field.inputType;
+
+    if (inputType === "image") {
+      // Check actual file input
+      const fileInput = document.getElementById(fieldId);
+      if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+        return {
+          valid: false,
+          message: `Please upload an image for "${field.fieldLabel || field.fieldName}"`,
+        };
+      }
+
+    } else if (inputType === "radio") {
+      const checked = document.querySelector(
+        `input[name="${field.fieldName}"]:checked`
+      );
+      if (!checked) {
+        return {
+          valid: false,
+          message: `Please select an option for "${field.fieldLabel || field.fieldName}"`,
+        };
+      }
+
+    } else if (inputType === "checkbox") {
+      // Checkboxes are optional by nature — skip required check
+
+    } else {
+      const el = document.getElementById(fieldId);
+      const value = el ? el.value.trim() : "";
+      if (!value) {
+        return {
+          valid: false,
+          message: `Please fill in "${field.fieldLabel || field.fieldName}"`,
+        };
+      }
     }
   }
 
-  async function buyCustomizedNow() {
-    const variant = getSelectedVariant();
-    const quantity = parseInt(document.getElementById("quantity")?.textContent || 1);
-    const totalText = document.getElementById("customTotalPrice")?.textContent || "";
-    const finalPrice =
-      parseInt(totalText.replace(/[^0-9]/g, "")) ||
-      safeProductData.currentSellingPrice;
+  // WhatsApp number — optional but if filled must be 10 digits
+  const waInput = document.getElementById("customerWhatsappNumber");
+  if (waInput && waInput.value.trim()) {
+    const digits = waInput.value.trim().replace(/\D/g, "");
+    if (digits.length !== 10) {
+      return {
+        valid: false,
+        message: "Please enter a valid 10-digit WhatsApp number",
+      };
+    }
+  }
 
-    const payloadFields = { ...customFieldValues };
-    const payload = buildCartPayload(variant, quantity, JSON.stringify(payloadFields));
-    payload.unitPrice = finalPrice;
+  return { valid: true };
+}
 
-    try {
-      await apiAddToCart(payload);
+//=========== patch end for customized cart ==========//
+
+  // ═══════════════════════════════════════════════════════════════════════════
+//  PATCH 10 — buyCustomizedNow()   [FULL REPLACE]
+//  WHERE : Replace existing buyCustomizedNow() entirely
+//  WHAT  : Same flow as addCustomizedToCart() but redirects to checkout
+//          after successful cart add instead of just closing overlay
+// ═══════════════════════════════════════════════════════════════════════════
+ 
+async function buyCustomizedNow() {
+  const btn = document.getElementById("buyCustomizedNowBtn");
+ 
+  try {
+    // ── STEP 1: Validate required fields (same as addCustomizedToCart) ──
+    const validation = validateCustomFields();
+    if (!validation.valid) {
+      showToast(validation.message, "error");
+      return;
+    }
+ 
+    // ── STEP 2: Show loading state ───────────────────────────────────────
+    if (btn) {
+      btn.disabled  = true;
+      btn.innerHTML = `<i class="fas fa-spinner fa-spin text-xs"></i> Processing...`;
+    }
+ 
+    // ── STEP 3–13: Exact same upload + cart add flow as addCustomizedToCart
+    // (keeping DRY — call addCustomizedToCart logic inline)
+    const uploadedFiles = getUploadedImageFiles();
+    const assetSlots    = [];
+ 
+    for (const fileEntry of uploadedFiles) {
+      const uuid = await uploadCustomizationImage(fileEntry.file);
+      if (!uuid) {
+        showToast(
+          `Failed to upload image for "${fileEntry.fieldName}". Please try again.`,
+          "error"
+        );
+        return;
+      }
+      assetSlots.push({
+        slotNumber: fileEntry.slotNumber,
+        assetUuid:  uuid,
+        fieldName:  fileEntry.fieldName,
+      });
+    }
+ 
+    const textOnlyFields = {};
+    for (const [key, value] of Object.entries(customFieldValues)) {
+      if (typeof value === "string" && value.startsWith("data:image")) continue;
+      if (value === "[Image attached]") continue;
+      textOnlyFields[key] = value;
+    }
+    if (safeProductData.frameCount)     textOnlyFields["frameCount"]     = safeProductData.frameCount;
+    if (safeProductData.frameStructure) textOnlyFields["frameStructure"] = safeProductData.frameStructure;
+ 
+    const waNumber = document.getElementById("customerWhatsappNumber")?.value?.trim();
+    if (waNumber) textOnlyFields["whatsappNumber"] = waNumber;
+ 
+    const totalText  = document.getElementById("customTotalPrice")?.textContent || "";
+    const finalPrice = parseInt(totalText.replace(/[^0-9]/g, ""), 10) || safeProductData.currentSellingPrice;
+    const variant    = getSelectedVariant();
+    const quantity   = parseInt(document.getElementById("quantity")?.textContent || "1", 10);
+ 
+    const customPayload = {
+      userId:           USER_ID,
+      sessionId:        null,
+      productId:        safeProductData.productId,
+      variantId:        variant?.variantId || null,
+      sku:              variant?.sku        || safeProductData.currentSku,
+      selectedColor:    variant?.color      || safeProductData.selectedColor || null,
+      selectedSize:     variant?.size       || safeProductData.productSize   || null,
+      productName:      safeProductData.productName,
+      titleName:        safeProductData.productName,
+      unitPrice:        finalPrice,
+      mrpPrice:         safeProductData.currentMrpPrice,
+      quantity:         quantity,
+      customFieldsJson: Object.keys(textOnlyFields).length > 0
+        ? JSON.stringify(textOnlyFields)
+        : null,
+      assetSlots: assetSlots,
+    };
+ 
+    const res = await fetch(`${BASE_URL}/api/v1/customize/add-to-cart`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify(customPayload),
+    });
+ 
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || `HTTP ${res.status}`);
+    }
+ 
+    // ── STEP 14: Success → go directly to checkout ───────────────────────
+    showToast("Redirecting to checkout...", "success");
+    setTimeout(() => {
+      // Replace with your actual checkout page path
       window.location.href = "/Checkout/checkout.html";
-    } catch (err) {
-      console.error("[CustomBuy] error:", err);
-      showToast("Could not process. Please try again.", "error");
+    }, 800);
+ 
+  } catch (err) {
+    console.error("[BuyNow] Error:", err);
+    showToast(err.message || "Could not process. Please try again.", "error");
+ 
+  } finally {
+    // ── Always restore button ────────────────────────────────────────────
+    if (btn) {
+      btn.disabled  = false;
+      btn.innerHTML = `<i class="fas fa-arrow-right text-xs"></i> Buy Now`;
     }
   }
+}
+ 
 
   // ═══════════════════════════════════════════════════════════════════════════
   //  COUPON
   // ═══════════════════════════════════════════════════════════════════════════
-
-  // ── PATCH: Fetch user coupons from API ──────────────────────────────────────
-  // async function fetchUserCoupons() {
-  //   try {
-  //     const userId = localStorage.getItem("userId") || sessionStorage.getItem("userId");
-  //     const productPrimeId = safeProductData?.productPrimeId;
-  //     if (!userId || !productPrimeId) return [];
-  //     const res = await fetch(
-  //       `${BASE_URL}/api/v1/coupons/get-by-product?userId=${userId}&productPrimeId=${productPrimeId}`
-  //     );
-  //     if (!res.ok) return [];
-  //     const data = await res.json();
-  //     return Array.isArray(data) ? data : [];
-  //   } catch (e) {
-  //     console.warn("[Coupons] Failed to fetch user coupons:", e);
-  //     return [];
-  //   }
-  // }
 
   async function fetchUserCoupons() {
     try {

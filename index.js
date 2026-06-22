@@ -438,7 +438,7 @@ function buildAddonCard(p, containerClass) {
         <i class="${isWL ? "fa-solid fa-heart" : "fa-regular fa-heart"}" style="color:${isWL ? "#e39f32" : "#6b7280"};font-size:13px;"></i>
       </button>
 
-      <div class="addon-nav-img p-1.5 cursor-pointer" data-href="${productUrl}">
+      <div class="addon-nav-img cursor-pointer" data-href="${productUrl}">
         <div class="border border-gray-200 rounded-xl overflow-hidden h-[130px] sm:h-[155px] bg-gray-100">
           <img src="${imageUrl}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                alt="${trendingEsc(p.productName)}" loading="lazy"
@@ -907,7 +907,7 @@ async function fetchAndRenderAddonSections() {
                       </button>
             
                       <!-- Product Image -->
-                      <div class="p-1.5">
+                      <div class="">
                         <div class="border border-gray-200 rounded-xl overflow-hidden h-[120px] sm:h-[150px] bg-gray-100">
                           <img
                             src="${prod.image}"
@@ -1037,7 +1037,7 @@ async function fetchAndRenderAddonSections() {
           </button>
  
           <!-- Product Image -->
-          <div class="p-1.5">
+          <div class="">
             <div class="border border-gray-200 rounded-xl overflow-hidden h-[150px] sm:h-[180px] bg-gray-100">
               <img
                 src="${prod.image}"
@@ -1162,7 +1162,7 @@ async function fetchAndRenderAddonSections() {
                     </button>
           
                     <!-- Product Image -->
-                  <div class="p-1.5">
+                  <div class="">
                       <div class="w-full h-[130px] sm:h-[150px] border border-gray-200 rounded-xl overflow-hidden bg-gray-100">
                         <img
                           src="${frame.image}"
