@@ -1,170 +1,170 @@
-// // ═══════════════════════════════════════════════════════════════════════════
-// //  ARTEZO LOGGING SYSTEM (Non-conflicting)
-// // ═══════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
+//  ARTEZO LOGGING SYSTEM (Non-conflicting)
+// ═══════════════════════════════════════════════════════════════════════════
 
-// window.artezoLog = {
-//     info: (msg, ...args) => {
-//         const formatted = msg.replace(/{}/g, () => {
-//             const arg = args.shift();
-//             return typeof arg === 'object' ? JSON.stringify(arg) : arg;
-//         });
-//         console.log(`%c[✅ INFO] ${formatted}`, 'color: #4CAF50; font-weight: bold; font-size: 12px;');
-//     },
-//     error: (msg, ...args) => {
-//         const formatted = msg.replace(/{}/g, () => {
-//             const arg = args.shift();
-//             return typeof arg === 'object' ? JSON.stringify(arg) : arg;
-//         });
-//         console.error(`%c[❌ ERROR] ${formatted}`, 'color: #F44336; font-weight: bold; font-size: 12px;');
-//     },
-//     warn: (msg, ...args) => {
-//         const formatted = msg.replace(/{}/g, () => {
-//             const arg = args.shift();
-//             return typeof arg === 'object' ? JSON.stringify(arg) : arg;
-//         });
-//         console.warn(`%c[⚠️ WARN] ${formatted}`, 'color: #FF9800; font-weight: bold; font-size: 12px;');
-//     },
-//     debug: (msg, ...args) => {
-//         const formatted = msg.replace(/{}/g, () => {
-//             const arg = args.shift();
-//             return typeof arg === 'object' ? JSON.stringify(arg) : arg;
-//         });
-//         console.log(`%c[🔍 DEBUG] ${formatted}`, 'color: #2196F3; font-weight: normal; font-size: 11px;');
-//     }
-// };
+window.artezoLog = {
+    info: (msg, ...args) => {
+        const formatted = msg.replace(/{}/g, () => {
+            const arg = args.shift();
+            return typeof arg === 'object' ? JSON.stringify(arg) : arg;
+        });
+        console.log(`%c[✅ INFO] ${formatted}`, 'color: #4CAF50; font-weight: bold; font-size: 12px;');
+    },
+    error: (msg, ...args) => {
+        const formatted = msg.replace(/{}/g, () => {
+            const arg = args.shift();
+            return typeof arg === 'object' ? JSON.stringify(arg) : arg;
+        });
+        console.error(`%c[❌ ERROR] ${formatted}`, 'color: #F44336; font-weight: bold; font-size: 12px;');
+    },
+    warn: (msg, ...args) => {
+        const formatted = msg.replace(/{}/g, () => {
+            const arg = args.shift();
+            return typeof arg === 'object' ? JSON.stringify(arg) : arg;
+        });
+        console.warn(`%c[⚠️ WARN] ${formatted}`, 'color: #FF9800; font-weight: bold; font-size: 12px;');
+    },
+    debug: (msg, ...args) => {
+        const formatted = msg.replace(/{}/g, () => {
+            const arg = args.shift();
+            return typeof arg === 'object' ? JSON.stringify(arg) : arg;
+        });
+        console.log(`%c[🔍 DEBUG] ${formatted}`, 'color: #2196F3; font-weight: normal; font-size: 11px;');
+    }
+};
 
-// // Shorter alias
-// const L = window.artezoLog;
+// Shorter alias
+const L = window.artezoLog;
 
-// L.info("═══════════════════════════════════════════════════════════");
-// L.info("  ARTEZO PRODUCT DETAILS PAGE INITIALIZED");
-// L.info("═══════════════════════════════════════════════════════════");
-
-
-
-// // ═══════════════════════════════════════════════════════════════════════════
-// //  SHIPROCKET DYNAMIC SCRIPT INJECTION (WORKAROUND)
-// // ═══════════════════════════════════════════════════════════════════════════
-
-// L.info("Attempting Shiprocket script injection...");
-
-// // Remove any existing script tag to avoid duplicates
-// const existingScript = document.querySelector('script[src*="shiprocket-checkout"]');
-// if (existingScript) {
-//     L.warn("Removing existing Shiprocket script tag");
-//     existingScript.remove();
-// }
-
-// // Create and inject new script
-// const shiprocketScript = document.createElement('script');
-// shiprocketScript.src = 'https://cdn.shiprocket.in/checkout/js/shiprocket-checkout.js';
-// shiprocketScript.type = 'text/javascript';
-// shiprocketScript.async = true;
-// shiprocketScript.charset = 'UTF-8';
-
-// shiprocketScript.onload = function() {
-//     L.info("✅ Shiprocket script loaded successfully!");
-//     window.shiprocketScriptLoaded = true;
-
-//     // Verify window.Shiprocket exists
-//     if (typeof window.Shiprocket !== "undefined") {
-//         L.info("✅ window.Shiprocket is available");
-//         L.info("  Methods: {}", Object.keys(window.Shiprocket).join(", "));
-//     } else {
-//         L.error("❌ Script loaded but window.Shiprocket is still undefined");
-//     }
-// };
-
-// shiprocketScript.onerror = function() {
-//     L.error("❌ Failed to load Shiprocket script");
-//     L.error("Possible reasons:");
-//     L.error("  1. CORS blocked the request");
-//     L.error("  2. Network/internet issue");
-//     L.error("  3. Shiprocket service down");
-//     L.error("  Check Network tab for details");
-// };
-
-// // Append to head
-// document.head.appendChild(shiprocketScript);
-// L.debug("Shiprocket script injection initiated");
+L.info("═══════════════════════════════════════════════════════════");
+L.info("  ARTEZO PRODUCT DETAILS PAGE INITIALIZED");
+L.info("═══════════════════════════════════════════════════════════");
 
 
-// // ═══════════════════════════════════════════════════════════════════════════
-// //  SHIPROCKET SDK INITIALIZATION CHECKER
-// // ═══════════════════════════════════════════════════════════════════════════
 
-// L.info("🔍 Checking Shiprocket SDK availability...");
+// ═══════════════════════════════════════════════════════════════════════════
+//  SHIPROCKET DYNAMIC SCRIPT INJECTION (WORKAROUND)
+// ═══════════════════════════════════════════════════════════════════════════
 
-// // Add a global flag to track if script loaded
-// window.shiprocketScriptLoaded = false;
+L.info("Attempting Shiprocket script injection...");
 
-// (function initializeShiprocketCheck() {
-//     let checkCount = 0;
-//     const maxChecks = 50;
+// Remove any existing script tag to avoid duplicates
+const existingScript = document.querySelector('script[src*="shiprocket-checkout"]');
+if (existingScript) {
+    L.warn("Removing existing Shiprocket script tag");
+    existingScript.remove();
+}
 
-//     const checkSRSDK = setInterval(() => {
-//         checkCount++;
+// Create and inject new script
+const shiprocketScript = document.createElement('script');
+shiprocketScript.src = 'https://cdn.shiprocket.in/checkout/js/shiprocket-checkout.js';
+shiprocketScript.type = 'text/javascript';
+shiprocketScript.async = true;
+shiprocketScript.charset = 'UTF-8';
 
-//         L.debug("SR SDK Check #{}: window.Shiprocket = {}",
-//             checkCount,
-//             typeof window.Shiprocket);
+shiprocketScript.onload = function() {
+    L.info("✅ Shiprocket script loaded successfully!");
+    window.shiprocketScriptLoaded = true;
 
-//         if (typeof window.Shiprocket !== "undefined") {
-//             clearInterval(checkSRSDK);
-//             window.shiprocketScriptLoaded = true;
+    // Verify window.Shiprocket exists
+    if (typeof window.Shiprocket !== "undefined") {
+        L.info("✅ window.Shiprocket is available");
+        L.info("  Methods: {}", Object.keys(window.Shiprocket).join(", "));
+    } else {
+        L.error("❌ Script loaded but window.Shiprocket is still undefined");
+    }
+};
 
-//             L.info("✅ SHIPROCKET SDK LOADED SUCCESSFULLY!");
-//             L.info("  window.Shiprocket type: {}", typeof window.Shiprocket);
-//             L.info("  window.Shiprocket.checkout type: {}", typeof window.Shiprocket.checkout);
-//             L.debug("  Available methods: {}", Object.keys(window.Shiprocket).join(", "));
+shiprocketScript.onerror = function() {
+    L.error("❌ Failed to load Shiprocket script");
+    L.error("Possible reasons:");
+    L.error("  1. CORS blocked the request");
+    L.error("  2. Network/internet issue");
+    L.error("  3. Shiprocket service down");
+    L.error("  Check Network tab for details");
+};
 
-//             return;
-//         }
+// Append to head
+document.head.appendChild(shiprocketScript);
+L.debug("Shiprocket script injection initiated");
 
-//         if (checkCount >= maxChecks) {
-//             clearInterval(checkSRSDK);
-//             window.shiprocketScriptLoaded = false;
 
-//             L.error("❌ SHIPROCKET SDK FAILED TO LOAD AFTER 5 SECONDS");
-//             L.error("Checking script tag status...");
+// ═══════════════════════════════════════════════════════════════════════════
+//  SHIPROCKET SDK INITIALIZATION CHECKER
+// ═══════════════════════════════════════════════════════════════════════════
 
-//             const scriptTag = document.querySelector('script[src*="shiprocket-checkout"]');
-//             if (scriptTag) {
-//                 L.error("  ✅ Script tag found");
-//                 L.error("  Script src: {}", scriptTag.src);
-//                 L.error("  Script async: {}", scriptTag.async);
-//                 L.error("  Script loaded: {}", scriptTag.loaded);
-//                 L.error("  ⚠️ Script tag exists but window.Shiprocket is undefined");
-//                 L.error("  Possible causes:");
-//                 L.error("    → CORS blocking (check Network tab)");
-//                 L.error("    → Script didn't execute/initialize");
-//                 L.error("    → Wrong URL");
-//                 L.error("    → Third-party script error");
-//             } else {
-//                 L.error("  ❌ NO SCRIPT TAG FOUND!");
-//                 L.error("  Make sure <script src=\"https://checkout.shiprocket.in/js/shiprocket-checkout.js\"></script> is in <head>");
-//             }
-//         }
-//     }, 100);
-// })();
+L.info("🔍 Checking Shiprocket SDK availability...");
 
-// // Check on page load events
-// document.addEventListener('DOMContentLoaded', () => {
-//     L.debug("DOMContentLoaded: window.Shiprocket = {}", typeof window.Shiprocket);
-// });
+// Add a global flag to track if script loaded
+window.shiprocketScriptLoaded = false;
 
-// window.addEventListener('load', () => {
-//     L.debug("Window load: window.Shiprocket = {}", typeof window.Shiprocket);
+(function initializeShiprocketCheck() {
+    let checkCount = 0;
+    const maxChecks = 50;
 
-//     // If still not loaded, it's definitely a script issue
-//     if (typeof window.Shiprocket === "undefined") {
-//         L.error("❌ CRITICAL: Shiprocket still not loaded at window.load");
-//         L.error("This means the script failed to execute. Check:");
-//         L.error("  1. Network tab - did shiprocket-checkout.js load with 200 status?");
-//         L.error("  2. Console - any CORS errors?");
-//         L.error("  3. Is your internet connection working?");
-//     }
-// });
+    const checkSRSDK = setInterval(() => {
+        checkCount++;
+
+        L.debug("SR SDK Check #{}: window.Shiprocket = {}",
+            checkCount,
+            typeof window.Shiprocket);
+
+        if (typeof window.Shiprocket !== "undefined") {
+            clearInterval(checkSRSDK);
+            window.shiprocketScriptLoaded = true;
+
+            L.info("✅ SHIPROCKET SDK LOADED SUCCESSFULLY!");
+            L.info("  window.Shiprocket type: {}", typeof window.Shiprocket);
+            L.info("  window.Shiprocket.checkout type: {}", typeof window.Shiprocket.checkout);
+            L.debug("  Available methods: {}", Object.keys(window.Shiprocket).join(", "));
+
+            return;
+        }
+
+        if (checkCount >= maxChecks) {
+            clearInterval(checkSRSDK);
+            window.shiprocketScriptLoaded = false;
+
+            L.error("❌ SHIPROCKET SDK FAILED TO LOAD AFTER 5 SECONDS");
+            L.error("Checking script tag status...");
+
+            const scriptTag = document.querySelector('script[src*="shiprocket-checkout"]');
+            if (scriptTag) {
+                L.error("  ✅ Script tag found");
+                L.error("  Script src: {}", scriptTag.src);
+                L.error("  Script async: {}", scriptTag.async);
+                L.error("  Script loaded: {}", scriptTag.loaded);
+                L.error("  ⚠️ Script tag exists but window.Shiprocket is undefined");
+                L.error("  Possible causes:");
+                L.error("    → CORS blocking (check Network tab)");
+                L.error("    → Script didn't execute/initialize");
+                L.error("    → Wrong URL");
+                L.error("    → Third-party script error");
+            } else {
+                L.error("  ❌ NO SCRIPT TAG FOUND!");
+                L.error("  Make sure <script src=\"https://checkout.shiprocket.in/js/shiprocket-checkout.js\"></script> is in <head>");
+            }
+        }
+    }, 100);
+})();
+
+// Check on page load events
+document.addEventListener('DOMContentLoaded', () => {
+    L.debug("DOMContentLoaded: window.Shiprocket = {}", typeof window.Shiprocket);
+});
+
+window.addEventListener('load', () => {
+    L.debug("Window load: window.Shiprocket = {}", typeof window.Shiprocket);
+
+    // If still not loaded, it's definitely a script issue
+    if (typeof window.Shiprocket === "undefined") {
+        L.error("❌ CRITICAL: Shiprocket still not loaded at window.load");
+        L.error("This means the script failed to execute. Check:");
+        L.error("  1. Network tab - did shiprocket-checkout.js load with 200 status?");
+        L.error("  2. Console - any CORS errors?");
+        L.error("  3. Is your internet connection working?");
+    }
+});
 
 
 (function () {
@@ -2886,81 +2886,68 @@ function syncCardWishlistStates() {
       `
   }
  
-  <!-- Customization Summary box (always shown) -->
-  <div class="bg-gray-50 rounded-xl p-4 border border-[#e5e7eb]">
-    <h3 class="font-semibold text-[#1D3C4A] mb-2">Customization Summary</h3>
-    <div id="customSummary" class="text-sm text-gray-600 space-y-1 max-h-40 overflow-y-auto"></div>
-    <div class="mt-3 pt-3 border-t border-[#e5e7eb]">
-      <div class="flex justify-between items-center">
-        <span class="font-semibold text-gray-700">Total Price</span>
-        <span id="customTotalPrice" class="text-2xl font-bold text-[#e39f32]">
-          ₹${safeProductData.currentSellingPrice.toLocaleString("en-IN")}
-        </span>
+    <!-- Customization Summary box (always shown) -->
+    <div class="bg-gray-50 rounded-xl p-4 border border-[#e5e7eb]">
+        <h3 class="font-semibold text-[#1D3C4A] mb-2">Customization Summary</h3>
+        <div id="customSummary" class="text-sm text-gray-600 space-y-1 max-h-40 overflow-y-auto"></div>
+        <div class="mt-3 pt-3 border-t border-[#e5e7eb]">
+          <div class="flex justify-between items-center">
+             <span class="font-semibold text-gray-700">Total Price</span> 
+             <span id="customTotalPrice" class="text-2xl font-bold text-[#e39f32]">₹${safeProductData.currentSellingPrice.toLocaleString("en-IN")}</span>
+          </div>
+        </div>
       </div>
+    
     </div>
+    
   </div>
- 
-</div>
-                <div class="bg-gray-50 rounded-xl p-4 border border-[#e5e7eb]">
-                  <h3 class="font-semibold text-[#1D3C4A] mb-2">Customization Summary</h3>
-                  <div id="customSummary" class="text-sm text-gray-600 space-y-1 max-h-40 overflow-y-auto"></div>
-                  <div class="mt-3 pt-3 border-t border-[#e5e7eb]">
-                    <div class="flex justify-between items-center">
-                      <span class="font-semibold text-gray-700">Total Price</span>
-                      <span id="customTotalPrice" class="text-2xl font-bold text-[#e39f32]">
-                        ₹${safeProductData.currentSellingPrice.toLocaleString("en-IN")}
-                      </span>
-                    </div>
+
+    <!-- RIGHT: Custom Fields -->
+    <div class="space-y-6">
+      <div id="customFieldsContainer"
+      class="space-y-5  pr-1 sm:pr-2 custom-scrollbar">
+      </div>
+
+          <!-- WhatsApp Number -->
+          <div class="bg-white border border-[#e5e7eb] rounded-xl p-5 shadow-sm">
+
+              <div class="flex items-start gap-3">
+
+                <div class="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <i class="fab fa-whatsapp text-xl sm:text-2xl text-green-600"></i>
+                </div>
+
+                <div class="flex-1">
+
+                  <h4 class="font-semibold text-gray-900">
+                    WhatsApp Number
+                  </h4>
+
+                  <p class="text-sm text-gray-500 mt-1">
+                    Enter your WhatsApp number so we can send you the preview of your customized design.
+                  </p>
+
+                  <div class="mt-4 flex items-center border border-[#e5e7eb] rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-green-500">
+
+                    <span class="px-3 bg-gray-50 text-gray-600 text-sm border-r">
+                      +91
+                    </span>
+
+                    <input
+                      type="tel"
+                      id="customerWhatsappNumber"
+                      placeholder="Enter your WhatsApp number"
+                      maxlength="10"
+                      class="w-full px-3 py-2 outline-none text-sm"/>
+
                   </div>
+
+                  <p class="text-xs text-gray-400 mt-2">
+                    Our designer will send the customized design preview to this number before final processing.
+                  </p>
                 </div>
               </div>
- 
-                    <!-- RIGHT: Custom Fields -->
-                    <div class="space-y-6">
-                      <div id="customFieldsContainer"
-                       class="space-y-5 max-h-[45vh] lg:max-h-[52vh] overflow-y-auto pr-1 sm:pr-2 custom-scrollbar">
-                      </div>
- 
-                <!-- WhatsApp Number -->
-                <div class="bg-white border border-[#e5e7eb] rounded-xl p-5 shadow-sm">
- 
-                    <div class="flex items-start gap-3">
- 
-                      <div class="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <i class="fab fa-whatsapp text-xl sm:text-2xl text-green-600"></i>
-                      </div>
- 
-                      <div class="flex-1">
- 
-                        <h4 class="font-semibold text-gray-900">
-                          WhatsApp Number
-                        </h4>
- 
-                        <p class="text-sm text-gray-500 mt-1">
-                          Enter your WhatsApp number so we can send you the preview of your customized design.
-                        </p>
- 
-                        <div class="mt-4 flex items-center border border-[#e5e7eb] rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-green-500">
- 
-                          <span class="px-3 bg-gray-50 text-gray-600 text-sm border-r">
-                            +91
-                          </span>
- 
-                          <input
-                            type="tel"
-                            id="customerWhatsappNumber"
-                            placeholder="Enter your WhatsApp number"
-                            maxlength="10"
-                            class="w-full px-3 py-2 outline-none text-sm"/>
- 
-                        </div>
- 
-                        <p class="text-xs text-gray-400 mt-2">
-                          Our designer will send the customized design preview to this number before final processing.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+            </div>
  
             <!-- IMPORTANT NOTE -->
               <div class="bg-orange-50 border border-orange-200 rounded-lg p-3 flex gap-3">
@@ -3341,7 +3328,7 @@ function renderWireFrame() {
          class="wire-slot relative bg-white border-2 border-dashed border-gray-300
                 rounded-xl flex items-center justify-center overflow-hidden
                 transition-all duration-300"
-         style="min-height: 120px;">
+         style="min-height: 220px; min-width: 140px;">
       <!-- Empty state: camera icon + label -->
       <div class="wire-slot-empty flex flex-col items-center gap-1 text-gray-300 p-4">
         <i class="fas fa-camera text-3xl"></i>

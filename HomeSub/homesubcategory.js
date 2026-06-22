@@ -594,118 +594,122 @@ async function handleCartClick(btn) {
     const discount = mrp > 0 ? Math.round(((mrp - selling) / mrp) * 100) : 0;
     const pid      = Number(p.productPrimeId);
     const isWL     = wishlistSet.has(pid);
+    const isAdded  = addedToCartSet.has(pid);
 
     const imageUrl = p.mainImage
       ? (p.mainImage.startsWith("http") ? p.mainImage : `${BASE_URL}${p.mainImage}`)
       : FALLBACK_IMG;
 
-    const name   = escapeHtml(p.productName        || "Unnamed Product");
-    const color  = escapeHtml(p.selectedColor      || "");
-    const subCat = escapeHtml(p.productSubCategory || "");
-
+    const name     = escapeHtml(p.productName        || "Unnamed Product");
+    const subCat   = escapeHtml(p.productSubCategory || p.productCategory || "");
     const isOutOfStock = (p.currentStock != null && p.currentStock <= 0);
-    let badge = "";
-    if (isOutOfStock) {
-        badge = `<span class="absolute top-2 left-2 bg-gray-700 text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10 shadow">OUT OF STOCK</span>`;
-    } else if (p.isCustomizable) {
-        badge = `<span class="absolute top-2 left-2 bg-purple-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10 shadow">CUSTOMIZABLE</span>`;
-    } else if (discount >= 10) {
-        badge = `<span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10 shadow">${discount}% OFF</span>`;
-    }
 
-    // ─── KEY FIX ──────────────────────────────────────────────────────────────
-    // Resolve fallback here — the SINGLE source of truth for both add and remove.
-    // addToWishlist reads d.variantId / d.sku directly from btn.dataset, so
-    // whatever we write here is exactly what lands in the DB and what remove sends.
-    // Result: add sends "VAR-1", remove reads "VAR-1" from the button → keys match.
-    const resolvedVariantId = p.variantId || null;
-    const resolvedSku       = p.currentSku        || `PROD-${pid}`;
+    const resolvedVariantId = p.variantId  || null;
+    const resolvedSku       = p.currentSku || `PROD-${pid}`;
 
-    // Replace old cta-btn button entirely
-    const isAdded = addedToCartSet.has(pid);
-    const cartBtnContent = isOutOfStock
-      ? `<i class="fa-solid fa-ban text-xs opacity-60"></i> Out of Stock`
-      : isAdded
-        ? `<i class="fa-solid fa-bag-shopping text-xs"></i> Go to Cart`
-        : `<i class="fa-solid fa-cart-shopping text-xs" style="color:#e39f32;"></i> Add to Cart`;
-    const cartBtnStyle = isAdded ? `background:#e39f32;color:#1D3C4A;font-weight:600;` : "";
+    const resolvedSku_safe = escapeHtml(resolvedSku);
+    const resolvedVI_safe  = escapeHtml(resolvedVariantId);
+    const color_safe       = escapeHtml(p.selectedColor || "");
+    const size_safe        = escapeHtml(p.selectedSize  || "");
+    const title_safe       = escapeHtml(p.productName   || "");
 
+    // ── Badge ─────────────────────────────────────────────────────────────────
+    const topBadge = isOutOfStock
+      ? `<div class="absolute inset-0 flex items-center justify-center bg-black/30 z-10">
+           <span class="bg-gray-800 text-white text-[10px] font-bold px-2 py-1 rounded-full">OUT OF STOCK</span>
+         </div>`
+      : p.isCustomizable
+        ? `<span class="absolute top-2 left-2 bg-purple-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10 shadow">CUSTOMIZABLE</span>`
+        : discount > 0
+          ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10 shadow">${discount}% OFF</span>`
+          : "";
+
+    // ── Heart ─────────────────────────────────────────────────────────────────
     const heartIcon = isWL
-      ? `<i class="fa-solid fa-heart" style="color:#e39f32;font-size:14px;"></i>`
-      : `<i class="fa-regular fa-heart" style="color:#9ca3af;font-size:14px;"></i>`;
+      ? `<i class="fa-solid fa-heart" style="color:#e39f32;font-size:12px;"></i>`
+      : `<i class="fa-regular fa-heart" style="color:#6b7280;font-size:12px;"></i>`;
+
+    // ── Cart ──────────────────────────────────────────────────────────────────
+    const cartLabel    = isOutOfStock ? "Out of Stock" : isAdded ? "Go to Cart" : "Add to Cart";
+    const cartBtnStyle = isAdded ? "background:#e39f32;color:#1D3C4A;font-weight:600;" : "";
 
     return `
-      <div class="product-card bg-white h-[350px] border border-[#e39f32] rounded-xl overflow-hidden flex flex-col shadow-sm group cursor-pointer hover:-translate-y-1 hover:shadow-md transition-all duration-300 ${isOutOfStock ? 'grayscale opacity-75' : ''}"
+      <div class="product-card bg-white rounded-xl overflow-hidden
+                  shadow-sm hover:-translate-y-1 hover:shadow-md transition-all duration-300
+                  flex flex-col cursor-pointer group
+                  ${isOutOfStock ? "grayscale opacity-70" : ""}"
            data-pid="${pid}"
-           data-brand="${escapeHtml(p.brandName || '')}"
-           data-product-name="${escapeHtml(p.productName || '')}"
-           data-category="${escapeHtml(p.productCategory || '')}"
-           data-sku="${escapeHtml(resolvedSku)}">
+           data-brand="${escapeHtml(p.brandName || "")}"
+           data-product-name="${title_safe}"
+           data-category="${escapeHtml(p.productCategory || "")}"
+           data-sku="${resolvedSku_safe}">
 
-        <div class="aspect-square bg-gray-100 relative overflow-hidden">
-          <img src="${imageUrl}"
-               alt="${name}"
-               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+        <!-- Image — exact trending height -->
+        <div class="relative border border-gray-100 rounded-t-xl overflow-hidden bg-gray-50">
+          <img src="${imageUrl}" alt="${name}"
+               class="w-full h-[140px] sm:h-[150px] md:h-[170px] object-cover
+                      group-hover:scale-105 transition-transform duration-500"
                loading="lazy"
                onerror="this.src='${FALLBACK_IMG}'">
-          ${badge}
-
-          <button
-            class="wl-btn absolute top-2 right-2 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow hover:bg-white transition-all duration-200"
-            data-product-id="${pid}"
-            data-product-name="${escapeHtml(p.productName || '')}"
-            data-variant-id="${escapeHtml(resolvedVariantId)}"
-            data-sku="${escapeHtml(resolvedSku)}"
-            data-color="${escapeHtml(p.selectedColor || "")}"
-            data-size="${escapeHtml(p.selectedSize   || "")}"
-            data-price="${selling}"
-            aria-label="${isWL ? "Remove from wishlist" : "Add to wishlist"}"
-            title="${isWL ? "Remove from wishlist" : "Add to wishlist"}">
+          ${topBadge}
+          <button class="wl-btn absolute top-2 right-2 w-7 h-7 sm:w-8 sm:h-8 bg-white rounded-full
+                         shadow flex items-center justify-center hover:scale-110 transition z-20"
+                  data-product-id="${pid}"
+                  data-product-name="${title_safe}"
+                  data-variant-id="${resolvedVI_safe}"
+                  data-sku="${resolvedSku_safe}"
+                  data-color="${color_safe}"
+                  data-size="${size_safe}"
+                  data-price="${selling}"
+                  aria-label="${isWL ? "Remove from wishlist" : "Add to wishlist"}"
+                  title="${isWL ? "Remove from wishlist" : "Add to wishlist"}">
             ${heartIcon}
           </button>
         </div>
 
-        <div class="p-3 flex-1 flex flex-col">
-          <h3 class="font-medium text-gray-800 border-t border-gray-400 text-sm mb-1 line-clamp-2 min-h-[25px]">${name}</h3>
+        <!-- Info — exact trending structure -->
+        <div class="p-3 flex flex-col flex-grow justify-between">
 
-          ${color
-            ? `<span class="text-xs text-gray-500 mb-1">Color: <span class="font-medium text-gray-700">${color}</span></span>`
-            : ""}
-
-          ${subCat
-            ? `<span class="text-xs border border-[#fccd81] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full w-fit mb-2">${subCat}</span>`
-            : ""}
-
-          <div class="mt-auto">
-            <div class="flex items-baseline gap-2 flex-wrap">
-              <span class="font-bold text-base" style="color:#1D3C4A;">₹${selling.toLocaleString("en-IN")}</span>
+          <div>
+            <h3 class="text-xs sm:text-sm font-semibold text-[#1D3C4A] leading-snug mb-1"
+                style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+                       overflow:hidden;min-height:2.6em;">
+              ${name}
+            </h3>
+            <p class="text-[9px] sm:text-xs text-gray-500 mb-1">${subCat}</p>
+            <div class="flex items-center gap-2 mt-1 flex-wrap">
+              <span class="text-[#1D3C4A] font-semibold text-xs sm:text-sm">
+                ₹${selling.toLocaleString("en-IN")}
+              </span>
               ${mrp > selling
-                ? `<span class="text-xs text-gray-400 line-through">₹${mrp.toLocaleString("en-IN")}</span>`
-                : ""}
-              ${discount > 0
-                ? `<span class="text-xs font-semibold text-green-600">${discount}% off</span>`
+                ? `<span class="text-gray-400 line-through text-[9px] sm:text-xs">₹${mrp.toLocaleString("en-IN")}</span>
+                   <span class="text-green-600 text-[9px] sm:text-xs font-semibold">${discount}% OFF</span>`
                 : ""}
             </div>
           </div>
-        </div>
 
-       <button
-  class="cart-btn border-t border-[#e39f32] mt-auto w-full bg-gray-100 hover:bg-[#1D3C4A] hover:text-white transition-all duration-300 text-gray-800 text-sm py-2.5 rounded-b-xl flex items-center justify-center gap-2 font-medium"
-  style="${cartBtnStyle}"
-  data-pid="${pid}"
-  data-variant-id="${escapeHtml(resolvedVariantId)}"
-  data-sku="${escapeHtml(resolvedSku)}"
-  data-color="${escapeHtml(p.selectedColor || "")}"
-  data-size="${escapeHtml(p.selectedSize   || "")}"
-  data-title="${escapeHtml(p.productName   || "")}"
-  data-price="${selling}"
-  data-mrp-price="${mrp}"
-  data-added="${isAdded ? "true" : "false"}"
-  ${isOutOfStock ? "disabled" : ""}>
-  ${cartBtnContent}
-</button>
-      </div>
-    `;
+          <!-- Cart btn — exact trending -->
+          <button class="cart-btn group mt-2 sm:mt-3 w-full bg-[#1D3C4A] text-white
+                         text-[10px] sm:text-sm py-1.5 sm:py-2 rounded-md
+                         hover:bg-[#E39F32] transition flex items-center justify-center gap-2"
+                  style="${cartBtnStyle}"
+                  data-pid="${pid}"
+                  data-variant-id="${resolvedVI_safe}"
+                  data-sku="${resolvedSku_safe}"
+                  data-color="${color_safe}"
+                  data-size="${size_safe}"
+                  data-title="${title_safe}"
+                  data-price="${selling}"
+                  data-mrp-price="${mrp}"
+                  data-added="${isAdded ? "true" : "false"}"
+                  ${isOutOfStock ? "disabled" : ""}>
+            <i class="fa-solid fa-cart-shopping text-[#E39F32] group-hover:text-[#1D3C4A]
+                      transition text-[10px] sm:text-xs"></i>
+            ${cartLabel}
+          </button>
+
+        </div>
+      </div>`;
   }
 
   // ─── FILTER UI ────────────────────────────────────────────────────────────────

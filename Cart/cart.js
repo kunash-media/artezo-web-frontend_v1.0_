@@ -448,10 +448,10 @@ function paintCart(items) {
             ? `<p class="text-[11px] text-orange-400 flex items-center gap-1">
                    <i class="fas fa-info-circle text-[9px]"></i>No returns on customized items
                </p>`
-            : ``;
+            : '';
 
         html += `
-        <div class="cart-item cursor-pointer bg-white rounded-xl  py-2 sm:px-4 sm:py-4"
+        <div class="cart-item cursor-pointer bg-white rounded-xl px-2 py-3 sm:px-2 sm:py-2"
              data-item-id="${escapeHtml(String(itemId))}"
              data-product-id="${escapeHtml(String(productId))}"
              data-variant-id="${escapeHtml(variantId)}"
@@ -459,37 +459,40 @@ function paintCart(items) {
              data-mrp-price="${mrpPrice}"
              data-is-custom="${isCustom}"
              onclick="window.location.href='/products/product-detail.html?id=${productId}&sku=${escapeHtml(item.sku || '')}&brand=artezo&category=${escapeHtml(item.productCategory || '')}&variant=${escapeHtml(item.variantId || item.sku || '')}'"
-             >
-
+        >
+            <!-- 3-col: image | middle | price+remove -->
             <div class="flex items-start gap-3">
 
-                <!-- Image -->
-                <div class="flex-shrink-0 w-[92px] h-[100px] sm:w-[80px] sm:h-[80px] rounded-lg overflow-hidden bg-gray-100">
+                <!-- Col 1: Image -->
+                <div class="flex-shrink-0 w-[80px] h-[80px] sm:w-[90px] sm:h-[90px] rounded-lg overflow-hidden bg-gray-100">
                     <img src="${escapeHtml(imageUrl)}"
                          alt="${escapeHtml(name)}"
                          class="w-full h-full object-cover"
                          onerror="this.src=''">
                 </div>
 
-               
+                 <!-- Col 2: Name + meta + delivery only (NO qty here) -->
+                <div class="flex-1 min-w-0 flex flex-col gap-0.5">
 
-                <!-- Middle: name + meta + qty -->
-                <div class="flex-1 min-w-0 flex flex-col gap-1">
                     <h3 class="text-[13px] sm:text-sm font-semibold text-gray-800 line-clamp-2 leading-snug">${escapeHtml(name)}</h3>
+
                     ${item.selectedColor ? `<p class="text-[11px] text-gray-500">Color: ${escapeHtml(item.selectedColor)}</p>` : ''}
                     ${isCustom ? `<p class="text-[11px] text-purple-500 flex items-center gap-1"><i class="fas fa-magic text-[9px]"></i>Customized</p>` : ''}
                     ${stockBadge}
                     ${returnRow}
 
-                  
+                    <p class="text-[11px] text-gray-400 flex items-center gap-1 mt-0.5">
+                        <i class="fas fa-truck text-[9px]"></i>Standard Delivery: 5-7 days
+                    </p>
 
                     ${isCustom && item.customization ? buildCustomizationAccordion(item) : ''}
+
                 </div>
 
-                <!-- Right: price + remove -->
+                <!-- Col 3: Remove × + price + mrp + discount + qty pill -->
                 <div class="flex-shrink-0 flex flex-col items-end gap-0.5 min-w-[72px]">
-                    <button class="remove-item mb-1 w-6 h-6 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors"
-                            
+
+                    <button class="remove-item w-6 h-6 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors mb-1"
                             onclick="event.stopPropagation()"
                             data-product-id="${escapeHtml(String(productId))}"
                             data-variant-id="${escapeHtml(variantId)}"
@@ -497,22 +500,27 @@ function paintCart(items) {
                             title="Remove item">
                         <i class="fas fa-times text-xs"></i>
                     </button>
-                    <div>
-                        <span class="item-total text-sm font-bold text-gray-900">₹${itemTotal.toLocaleString('en-IN')}</span>
-                        ${hasDiscount ? `
-                        <span class="item-mrp text-[11px] text-gray-400 line-through">₹${(mrpPrice * quantity).toLocaleString('en-IN')}</span> 
-                    </div>
-                    
-                    <span class="text-[11px] font-semibold text-green-600 bg-green-50 px-1.5 py-0.5 rounded mt-0.5">${discountPct}% OFF</span>
+
+                    <span class="item-total text-sm font-bold text-gray-900 leading-tight">
+                        ₹${itemTotal.toLocaleString('en-IN')}
+                    </span>
+
+                    ${hasDiscount ? `
+                    <span class="item-mrp text-[11px] text-gray-400 line-through leading-none">
+                        ₹${(mrpPrice * quantity).toLocaleString('en-IN')}
+                    </span>
+                    <span class="text-[11px] font-semibold text-green-600 bg-green-50 px-1.5 py-0.5 rounded mt-0.5 leading-none">
+                        ${discountPct}% OFF
+                    </span>
                     ` : ''}
 
-                      <!-- Qty — style pill -->
-                    <div class="flex items-center mt-1.5 w-fit border border-gray-300 rounded-full overflow-hidden divide-x divide-gray-300">
+                    <!-- Qty pill — parallel to price, bottom of right col -->
+                    <div class="flex items-center mt-2 w-fit border border-gray-300 rounded-full overflow-hidden divide-x divide-gray-300">
                         <button class="quantity-decrease w-7 h-7 flex items-center justify-center text-gray-600
                                        hover:bg-[#1D3C4A] hover:text-white transition-colors duration-150
                                        disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0"
                                 onclick="event.stopPropagation()"
-                                       data-product-id="${escapeHtml(String(productId))}"
+                                data-product-id="${escapeHtml(String(productId))}"
                                 data-variant-id="${escapeHtml(variantId)}"
                                 data-item-id="${escapeHtml(String(itemId))}"
                                 ${quantity <= 1 ? 'disabled' : ''}>
@@ -521,7 +529,6 @@ function paintCart(items) {
                         <span class="quantity-value w-8 text-center text-[13px] font-medium text-gray-800 select-none py-1">${quantity}</span>
                         <button class="quantity-increase w-7 h-7 flex items-center justify-center text-gray-600
                                        hover:bg-[#1D3C4A] hover:text-white transition-colors duration-150 flex-shrink-0"
-                           
                                 onclick="event.stopPropagation()"
                                 data-product-id="${escapeHtml(String(productId))}"
                                 data-variant-id="${escapeHtml(variantId)}"
@@ -529,14 +536,10 @@ function paintCart(items) {
                             <i class="fas fa-plus" style="font-size:9px;"></i>
                         </button>
                     </div>
+
                 </div>
 
-                
-
             </div>
-            <p class="text-sm text-gray-400">
-              Standard Delivery: 5-7 days
-            </p>
         </div>`;
     });
 
@@ -1067,54 +1070,95 @@ async function loadRecommendedProducts(items) {
     if (oldMore) oldMore.remove();
 
     recommendedGrid.innerHTML = products.map(p => {
-    const imgUrl      = resolveImageUrl(p.mainImage);
-    const hasDiscount = p.currentMrpPrice > p.currentSellingPrice && p.currentMrpPrice > 0;
-    const discPct     = hasDiscount ? Math.round(((p.currentMrpPrice - p.currentSellingPrice) / p.currentMrpPrice) * 100) : 0;
+    const imgUrl       = resolveImageUrl(p.mainImage);
+    const hasDiscount  = p.currentMrpPrice > p.currentSellingPrice && p.currentMrpPrice > 0;
+    const discPct      = hasDiscount ? Math.round(((p.currentMrpPrice - p.currentSellingPrice) / p.currentMrpPrice) * 100) : 0;
     const isWishlisted = wishlistStates[p.productPrimeId] || false;
-    const stockLabel   = p.currentStock === 0
-        ? `<p class="text-[11px] text-red-500 mt-1 font-medium">Out of stock</p>`
-        : p.currentStock <= 10
-            ? `<p class="text-[11px] text-orange-500 mt-1">Only ${p.currentStock} left</p>`
-            : '';
+    const isOOS        = p.currentStock === 0;
+
+    const stockLabel = isOOS
+      ? `<p class="text-[9px] sm:text-xs text-red-500 font-medium">Out of stock</p>`
+      : p.currentStock <= 10
+        ? `<p class="text-[9px] sm:text-xs text-orange-500">Only ${p.currentStock} left</p>`
+        : '';
+
+    const topBadge = isOOS
+      ? `<div class="absolute inset-0 flex items-center justify-center bg-black/30 z-10">
+           <span class="bg-gray-800 text-white text-[10px] font-bold px-2 py-1 rounded-full">OUT OF STOCK</span>
+         </div>`
+      : discPct > 0
+        ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10 shadow">${discPct}% OFF</span>`
+        : '';
+
+    const heartIcon = isWishlisted
+      ? `<i class="fa-solid fa-heart" style="color:#e39f32;font-size:12px;"></i>`
+      : `<i class="fa-regular fa-heart" style="color:#6b7280;font-size:12px;"></i>`;
+
+    const cartLabel    = isOOS ? "Out of Stock" : "Add to Cart";
+
+    const productUrl = `/products/product-detail.html?id=${p.productPrimeId}&sku=${p.currentSku || ''}&brand=artezo&category=${p.productCategory || ''}&variant=${p.variantId || p.currentSku || ''}`;
 
     return `
-    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer group relative"
-         onclick="window.location.href='/products/product-detail.html?id=${p.productPrimeId}&sku=${p.currentSku || ''}&brand=artezo&category=${p.productCategory || ''}&variant=${p.variantId || p.currentSku || ''}'">
+    <div class="bg-white rounded-xl overflow-hidden
+                hover:shadow-md transition-all duration-300 hover:-translate-y-1
+                cursor-pointer group relative flex flex-col"
+         onclick="window.location.href='${productUrl}'">
 
-        <!-- Wishlist btn -->
-        <button class="wishlist-rec-btn absolute top-1.5 right-1.5 z-10 w-7 h-7 rounded-full bg-white/90 flex items-center justify-center shadow-sm hover:scale-110 transition-transform"
-                data-product-id="${p.productPrimeId}"
-                data-wishlisted="${isWishlisted}"
-                onclick="event.stopPropagation(); toggleRecommendedWishlist(this, ${p.productPrimeId})"
-                title="${isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}">
-            <i class="${isWishlisted ? 'fas' : 'far'} fa-heart text-xs ${isWishlisted ? 'text-red-500' : 'text-gray-400'}"></i>
-        </button>
-
-        <!-- Image — square aspect -->
-        <div class="aspect-square bg-gray-100 overflow-hidden">
+        <!-- Image — exact trending height -->
+        <div class="relative border border-gray-100 rounded-t-xl overflow-hidden bg-gray-50 flex-shrink-0">
             <img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(p.productName)}"
-                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                 class="w-full h-[140px] sm:h-[150px] md:h-[170px] object-cover
+                        group-hover:scale-105 transition-transform duration-300"
                  onerror="this.src='https://placehold.co/400x300/e2e8f0/475569?text=Product'">
+            ${topBadge}
+            <button class="wishlist-rec-btn absolute top-2 right-2 w-7 h-7 sm:w-8 sm:h-8
+                           bg-white rounded-full shadow flex items-center justify-center
+                           hover:scale-110 transition z-20"
+                    data-product-id="${p.productPrimeId}"
+                    data-wishlisted="${isWishlisted}"
+                    onclick="event.stopPropagation(); toggleRecommendedWishlist(this, ${p.productPrimeId})"
+                    title="${isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}">
+                ${heartIcon}
+            </button>
         </div>
 
-        <!-- Info -->
-        <div class="p-2 sm:p-3">
-            <h3 class="text-[12px] sm:text-sm font-medium text-gray-800 line-clamp-2 leading-snug mb-1.5">${escapeHtml(p.productName)}</h3>
-            <div class="flex items-center gap-1 flex-wrap">
-                <span class="font-bold text-[13px] sm:text-sm" style="color:#1D3C4A;">₹${p.currentSellingPrice.toLocaleString('en-IN')}</span>
-                ${hasDiscount ? `
-                    <span class="text-[10px] text-gray-400 line-through">₹${p.currentMrpPrice.toLocaleString('en-IN')}</span>
-                    <span class="text-[10px] font-semibold text-green-600">${discPct}%</span>
-                ` : ''}
+        <!-- Info — exact trending structure -->
+        <div class="p-3 flex flex-col flex-grow justify-between">
+
+            <div>
+                <h3 class="text-xs sm:text-sm font-semibold text-[#1D3C4A] leading-snug mb-1"
+                    style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+                           overflow:hidden;min-height:2.6em;">
+                    ${escapeHtml(p.productName)}
+                </h3>
+                <p class="text-[9px] sm:text-xs text-gray-500 mb-1">
+                    ${escapeHtml(p.productSubCategory || p.productCategory || '')}
+                </p>
+                <div class="flex items-center gap-2 mt-1 flex-wrap">
+                    <span class="text-[#1D3C4A] font-semibold text-xs sm:text-sm">
+                        ₹${p.currentSellingPrice.toLocaleString('en-IN')}
+                    </span>
+                    ${hasDiscount
+                        ? `<span class="text-gray-400 line-through text-[9px] sm:text-xs">₹${p.currentMrpPrice.toLocaleString('en-IN')}</span>
+                           <span class="text-green-600 text-[9px] sm:text-xs font-semibold">${discPct}% OFF</span>`
+                        : ''}
+                </div>
+                ${stockLabel}
             </div>
-            ${stockLabel}
-            <button class="rec-add-to-cart-btn mt-2 w-full bg-[#1D3C4A] text-white text-[11px] sm:text-xs font-medium py-1.5 rounded-lg transition flex items-center justify-center gap-1 ${p.currentStock === 0 ? 'opacity-50 cursor-not-allowed' : ''}"
+
+            <!-- Cart btn — exact trending -->
+            <button class="rec-add-to-cart-btn group mt-2 sm:mt-3 w-full bg-[#1D3C4A] text-white
+                           text-[10px] sm:text-sm py-1.5 sm:py-2 rounded-md
+                           hover:bg-[#E39F32] transition flex items-center justify-center gap-2
+                           ${isOOS ? 'opacity-50 cursor-not-allowed' : ''}"
                     data-product-id="${p.productPrimeId}"
                     onclick="event.stopPropagation(); handleRecAddToCart(this, ${JSON.stringify(p).replace(/"/g, '&quot;')})"
-                    ${p.currentStock === 0 ? 'disabled' : ''}>
-                <i class="fas fa-cart-plus text-[10px]"></i>
-                <span>${p.currentStock === 0 ? 'Out of Stock' : 'Add to Cart'}</span>
+                    ${isOOS ? 'disabled' : ''}>
+                <i class="fa-solid fa-cart-shopping text-[#E39F32] group-hover:text-[#1D3C4A]
+                          transition text-[10px] sm:text-xs"></i>
+                ${cartLabel}
             </button>
+
         </div>
     </div>`;
 }).join('');
