@@ -36,7 +36,7 @@
 
         /* ── Form Sections ──────────────────────────────────────────── */
         .form-section {
-            background:#fff; padding:24px; border-radius:12px;
+            background:#fff; padding:10px; border-radius:12px;
             border:1px solid #e5e7eb; margin-bottom:20px;
         }
         .form-group { margin-bottom:14px; }
@@ -372,8 +372,8 @@
 
     <div id="header-container"></div>
 
-    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
+    <!-- <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8"> -->
+<main class="max-w-6xl mx-auto px-2 sm:px-6 lg:px-8 py-4 sm:py-8">
         <!-- Breadcrumb -->
         <div class="flex items-center gap-2 text-sm text-gray-500 mb-5">
             <a href="/" class="hover:text-primary">Home</a>
@@ -386,7 +386,8 @@
         <h1 class="text-2xl font-semibold mb-7 text-gray-900">Checkout</h1>
 
         <!-- ── 3-Step Indicator (Delivery step removed) ── -->
-        <div class="step-indicator mb-7">
+        <!-- <div class="step-indicator mb-7"> -->
+            <div class="step-indicator mb-4 sm:mb-7">
             <div class="step active" id="step-ind-1">
                 <div class="step-number">1</div>
                 <div class="step-label">Address</div>
@@ -404,10 +405,10 @@
         </div>
 
         <!-- Main Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-7">
-
+        <!-- <div class="grid grid-cols-1 lg:grid-cols-3 gap-7"> -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 sm:gap-5 lg:gap-7">
             <!-- ── LEFT: Form Steps ── -->
-            <div class="lg:col-span-2">
+            <div class="lg:col-span-2 -mb-3">
 
                 <!-- ── STEP 1: Address ── -->
                 <div id="checkout-step-1" class="checkout-step">
@@ -460,37 +461,6 @@
                                 <div class="text-xs text-gray-500 mt-1">Pay with cash when your order arrives</div>
                             </div>
                         </label>
-
-                        <!-- Delivery notes -->
-                        <!-- <div class="form-group mt-2">
-                            <label class="form-label">
-                                Delivery Instructions
-                                <span class="text-gray-400 font-normal">(Optional)</span>
-                            </label>
-                            <textarea class="form-textarea" id="deliveryNotes"
-                                placeholder="e.g., Please leave at the door, Ring bell twice…"></textarea>
-                        </div> -->
-
-                        <!-- ── Return / Exchange Policy ── -->
-                        <!-- Shown here so customer knows before paying -->
-                        <div class="policy-banner">
-                            <div class="policy-banner-title">
-                                <i class="fa-solid fa-circle-info"></i>
-                                Return, Exchange &amp; Cancellation Policy
-                            </div>
-                            <div class="policy-item">
-                                <i class="fa-solid fa-xmark text-red-500"></i>
-                                <span><strong>Customised products</strong> (personalised frames, name prints, custom wall art) are <strong>non-returnable and non-exchangeable</strong> once production begins.</span>
-                            </div>
-                            <div class="policy-item">
-                                <i class="fa-solid fa-xmark text-red-500"></i>
-                                <span><strong>Order cancellation</strong> is not applicable after the order is confirmed and sent to production (typically within 2 hours of placement).</span>
-                            </div>
-                            <div class="policy-item">
-                                <i class="fa-solid fa-check text-green-600"></i>
-                                <span>In case of a <strong>damaged or defective</strong> item received, please raise a complaint within 48 hours with unboxing photos — we'll make it right.</span>
-                            </div>
-                        </div>
 
                         <div class="secure-badge">
                             <i class="fa-solid fa-lock text-green-600"></i>
@@ -546,34 +516,27 @@
                 </div>
 
                 <!-- Navigation buttons -->
-                <div class="flex gap-3 mt-5">
-                    <button id="btn-back" type="button" onclick="previousStep()"
-                        class="btn-secondary hidden" style="width:auto;padding:12px 20px;">
-                        <i class="fa-solid fa-chevron-left mr-1"></i> Back
-                    </button>
-                    <button id="btn-next" type="button" onclick="nextStep()" class="btn-primary">
-                        Continue <i class="fa-solid fa-chevron-right ml-1"></i>
-                    </button>
-                </div>
+                
             </div>
 
-            <!-- ── RIGHT: Order Summary Panel ── -->
-            <div>
-                <div class="order-summary">
-    <div class="cart-section-header">
-        <span class="font-semibold text-base text-gray-900">Order Summary</span>
-        <button id="clear-cart-btn" onclick="clearCart()" class="btn-danger-sm hidden">
-            <i class="fa-solid fa-trash-can mr-1"></i>Clear All
-        </button>
-    </div>
+        <!-- ── RIGHT: Order Summary Panel ── -->
+        <div>
+            <div class="order-summary">
+                <div class="cart-section-header">
+                    <span class="font-semibold text-base text-gray-900">Order Summary</span>
+                    <button id="clear-cart-btn" onclick="clearCart()" class="btn-danger-sm hidden">
+                        <i class="fa-solid fa-trash-can mr-1"></i>Clear All
+                    </button>
+                </div>
 
-    <!-- Cart items rendered by JS -->
-    <div id="order-items-list" class="mb-4">
-        <div class="loading-skeleton h-16 mb-2 rounded-lg"></div>
-        <div class="loading-skeleton h-16 mb-2 rounded-lg"></div>
-    </div>
+                <!-- Cart items rendered by JS -->
+                <div id="order-items-list" class="mb-4">
+                    <div class="loading-skeleton h-16 mb-2 rounded-lg"></div>
+                    <div class="loading-skeleton h-16 mb-2 rounded-lg"></div>
+                </div>
 
-    <div class="summary-divider"></div>
+        <div class="summary-divider"></div>
+
 
     <!-- ── Coupon Section ──────────────────────────────────── -->
     <div id="coupon-section" class="py-3" style="border-bottom: 1px dashed #e5e7eb;">
@@ -669,62 +632,70 @@
             </span>
             <span id="sum-mrp" class="font-medium">₹0</span>
         </div>
-
+    
         <div class="summary-row" id="sum-discount-row" style="display:none; color:#16a34a;">
             <span><i class="fa-solid fa-tag mr-1"></i> Product Discount</span>
             <span id="sum-discount" class="font-medium">-₹0</span>
         </div>
-
+    
         <!-- Coupon discount row — shown only when coupon applied -->
         <div class="summary-row hidden" id="sum-coupon-row" style="color:#16a34a;">
             <span>
                 <i class="fa-solid fa-scissors mr-1"></i>
                 Coupon
-                <span id="sum-coupon-code-badge"
-                      class="text-xs font-bold ml-1 px-1.5 py-0.5 rounded"
-                      style="background:#dcfce7; color:#15803d; letter-spacing:0.04em;"></span>
+                <!-- <span id="sum-coupon-code-badge" class="text-xs font-bold ml-1 px-1.5 py-0.5 rounded"
+                    style="background:#dcfce7; color:#15803d; letter-spacing:0.04em;"></span> -->
             </span>
             <span id="sum-coupon-discount" class="font-medium">-₹0</span>
         </div>
-
+    
         <div class="summary-row">
             <span class="text-gray-500">Delivery Charges</span>
             <span id="sum-shipping" class="text-green-600 font-medium">FREE</span>
         </div>
-
+    
         <div class="summary-row" id="sum-cod-fee-row" style="display:none;">
             <span class="text-gray-500">COD Convenience Fee</span>
             <span id="sum-cod-fee" class="font-medium" style="color:#d97706;">+₹100</span>
         </div>
-
+    
         <div class="summary-row">
             <span class="text-gray-500">GST</span>
             <span id="sum-gst" class="text-gray-500">Included in price</span>
         </div>
     </div>
-
+    
     <div class="summary-divider"></div>
-
+    
     <div class="summary-total">
         <span>Total Amount</span>
         <span id="sum-total">₹0</span>
     </div>
-
+    
     <!-- Savings callout — shows product discount + coupon savings combined -->
-    <div id="sum-savings-msg"
-         class="hidden mt-3 text-xs font-medium rounded-lg px-3 py-2 flex items-center gap-2"
-         style="background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0;">
+    <div id="sum-savings-msg" class="hidden mt-3 text-xs font-medium rounded-lg px-3 py-2 flex items-center gap-2"
+        style="background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0;">
         <i class="fa-solid fa-circle-check"></i>
         <span>You save <span id="sum-savings-amount" class="font-bold">₹0</span> on this order 🎉</span>
     </div>
-
+    
     <div class="secure-badge">
         <i class="fa-solid fa-lock text-green-600"></i>
         <span>Secure &amp; Encrypted Checkout</span>
     </div>
-</div>
-            </div>
+        <div class="flex gap-3 mt-5">
+            <button id="btn-back" type="button" onclick="previousStep()"
+                class="btn-secondary hidden" style="width:auto;padding:12px 20px;">
+                <i class="fa-solid fa-chevron-left mr-1"></i> Back
+            </button>
+            <button id="btn-next" type="button" onclick="nextStep()" class="btn-primary">
+                Continue <i class="fa-solid fa-chevron-right ml-1"></i>
+            </button>
         </div>
+        </div>
+    </div>
+    
+    </div>
     </main>
 
     <div id="footer-container"></div>

@@ -337,3 +337,471 @@
     padding: 10px;
   }
 }
+
+
+/*thumbnail*/
+/* ============================================================
+   MOBILE GALLERY PATCH — CSS
+   ============================================================ */
+ 
+/* ─── PATCH CSS-1: Main display area — mobile full-bleed ───────── */
+@media (max-width: 767px) {
+ 
+  /* Outer image column — remove default padding so image reaches edges */
+  .md\:col-span-5 {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+ 
+  /* Sticky wrapper inside left column */
+  .md\:col-span-5 > .sticky {
+    padding: 0 !important;
+  }
+ 
+  /* The flex row that holds [thumbContainer] + [mainDisplayArea] */
+  .md\:col-span-5 .flex.gap-3 {
+    gap: 0 !important;
+  }
+ 
+  /* ─── PATCH CSS-2: Carousel track ─────────────────────────────── */
+  /* Replace mainDisplayArea with a horizontally scrollable carousel */
+  #mainDisplayArea {
+    position: relative !important;
+    height: 360px !important;         /* generous height for art/product */
+    border-radius: 0 !important;      /* full-bleed on mobile */
+    border: none !important;
+    background: #f5f5f3 !important;
+    overflow: hidden !important;
+    cursor: grab !important;
+  }
+ 
+  #mainDisplayArea:active {
+    cursor: grabbing !important;
+  }
+ 
+  /* The inner carousel track — flex of slides */
+  #carouselTrack {
+    display: flex !important;
+    height: 100% !important;
+    transition: transform 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
+    touch-action: pan-y pinch-zoom;   /* allow vertical scroll passthrough */
+  }
+ 
+  /* Each individual slide */
+  .carousel-slide {
+    flex: 0 0 92% !important;        /* 92% width = 8% peek of next slide */
+    height: 100% !important;
+    position: relative !important;
+    margin-right: 8px !important;    /* gap between slides creates peek effect */
+    border-radius: 0 !important;
+    overflow: hidden !important;
+    background: #f5f5f3 !important;
+  }
+ 
+  /* Last slide has no right margin to avoid dead space */
+  .carousel-slide:last-child {
+    margin-right: 0 !important;
+    flex: 0 0 100% !important;       /* last slide fills fully */
+  }
+ 
+  /* Images inside slides */
+  .carousel-slide img,
+  .carousel-slide video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+    transition: opacity 0.25s ease !important;
+    border-radius: 0 !important;
+  }
+ 
+  /* Discount badge repositioned for carousel */
+  #mainDisplayArea > .absolute.top-3.left-3 {
+    z-index: 10 !important;
+  }
+ 
+  /* Hide the "click to enlarge" hover hint on mobile (tap-hint replaces it) */
+  #mainDisplayArea .group-hover\:opacity-100 {
+    display: none !important;
+  }
+ 
+  /* Hide next-image-preview overlay (carousel peek handles this natively) */
+  .next-image-preview {
+    display: none !important;
+  }
+ 
+  /* ─── PATCH CSS-3: Pill navigation indicators ──────────────────── */
+  #mobileNavDots {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 5px !important;
+    padding: 10px 0 6px !important;
+    margin: 0 !important;
+  }
+ 
+  .mobile-nav-dot {
+    display: block !important;
+    height: 5px !important;
+    border-radius: 100px !important;
+    background: #d1d5db !important;
+    border: none !important;
+    cursor: pointer !important;
+    padding: 0 !important;
+    transition: width 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                background 0.25s ease,
+                opacity 0.2s ease !important;
+    opacity: 0.6 !important;
+    width: 6px !important;           /* inactive = small circle */
+  }
+ 
+  .mobile-nav-dot.active-dot {
+    background: #e39f32 !important;
+    width: 22px !important;          /* active = stretched pill */
+    opacity: 1 !important;
+    transform: none !important;      /* override any scale from old code */
+  }
+ 
+  /* Override the old scale/color classes applied by JS */
+  .mobile-nav-dot.bg-\[\#E39F32\] {
+    background: #e39f32 !important;
+    width: 22px !important;
+    opacity: 1 !important;
+  }
+  .mobile-nav-dot.bg-gray-300 {
+    width: 6px !important;
+    opacity: 0.6 !important;
+  }
+  .mobile-nav-dot.scale-125,
+  .mobile-nav-dot.scale-110 {
+    transform: none !important;      /* pills don't scale, they stretch */
+  }
+ 
+  /* ─── PATCH CSS-4: Thumbnail strip — hide on mobile ───────────── */
+  /* We replace thumbnails with carousel + dots */
+  #thumbContainer {
+    display: none !important;
+  }
+ 
+  #mobileThumbContainer {
+    display: none !important;        /* hidden; dots serve as navigation */
+  }
+ 
+  /* Scroll buttons also hidden */
+  #thumbScrollLeft,
+  #thumbScrollRight {
+    display: none !important;
+  }
+ 
+  /* ─── PATCH CSS-5: Tap-to-expand hint overlay ──────────────────── */
+  #mobileTapHint {
+    position: absolute !important;
+    bottom: 12px !important;
+    right: 12px !important;
+    background: rgba(0, 0, 0, 0.45) !important;
+    color: #fff !important;
+    font-size: 11px !important;
+    font-family: Lexend, sans-serif !important;
+    padding: 4px 10px !important;
+    border-radius: 100px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    z-index: 10 !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+    transition: opacity 0.4s ease !important;
+  }
+ 
+  #mainDisplayArea:hover #mobileTapHint,
+  #mainDisplayArea.show-hint #mobileTapHint {
+    opacity: 1 !important;
+  }
+ 
+  /* ─── PATCH CSS-6: Video play overlay on carousel slides ──────── */
+  .carousel-video-overlay {
+    position: absolute !important;
+    inset: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(0, 0, 0, 0.3) !important;
+    z-index: 5 !important;
+  }
+ 
+  .carousel-video-overlay i {
+    color: #fff !important;
+    font-size: 36px !important;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4)) !important;
+  }
+ 
+  /* ─── PATCH CSS-7: Fullscreen mobile lightbox ──────────────────── */
+  #mobileLightbox {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 99999 !important;
+    background: #000 !important;
+    display: none !important;        /* shown via JS */
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overscroll-behavior: contain !important;
+  }
+ 
+  #mobileLightbox.lb-open {
+    display: flex !important;
+  }
+ 
+  /* Lightbox inner track — same carousel logic */
+  #lbTrack {
+    display: flex !important;
+    width: 100% !important;
+    height: 80vh !important;
+    transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+    will-change: transform !important;
+  }
+ 
+  .lb-slide {
+    flex: 0 0 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 16px !important;
+  }
+ 
+  .lb-slide img,
+  .lb-slide video {
+    max-width: 100% !important;
+    max-height: 78vh !important;
+    object-fit: contain !important;
+    border-radius: 4px !important;
+  }
+ 
+  /* Lightbox top bar */
+  #lbTopBar {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    padding: 14px 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent) !important;
+    z-index: 10 !important;
+  }
+ 
+  #lbCounter {
+    color: rgba(255,255,255,0.85) !important;
+    font-size: 13px !important;
+    font-family: Lexend, sans-serif !important;
+  }
+ 
+  #lbCloseBtn {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
+    background: rgba(255,255,255,0.15) !important;
+    border: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #fff !important;
+    font-size: 18px !important;
+    cursor: pointer !important;
+  }
+ 
+  /* Lightbox bottom thumbnail strip */
+  #lbThumbRow {
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    padding: 12px 16px !important;
+    display: flex !important;
+    gap: 8px !important;
+    overflow-x: auto !important;
+    justify-content: center !important;
+    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent) !important;
+    scrollbar-width: none !important;
+  }
+ 
+  #lbThumbRow::-webkit-scrollbar {
+    display: none !important;
+  }
+ 
+  .lb-thumb {
+    flex-shrink: 0 !important;
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 6px !important;
+    object-fit: cover !important;
+    border: 2px solid transparent !important;
+    opacity: 0.55 !important;
+    cursor: pointer !important;
+    transition: opacity 0.2s, border-color 0.2s !important;
+  }
+ 
+  .lb-thumb.lb-active {
+    border-color: #e39f32 !important;
+    opacity: 1 !important;
+  }
+ 
+  /* ─── PATCH CSS-8: Smooth image fade on main display ───────────── */
+  #mainProductImage {
+    transition: opacity 0.28s ease !important;
+  }
+}   
+
+
+/* Mobile */
+@media (max-width: 767px) {
+  #recentSuggestionSection .cards-wrapper {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+ 
+  #recentSuggestionSection .cards-wrapper::-webkit-scrollbar {
+    display: none;
+  }
+ 
+  #recentSuggestionSection .card {
+    flex: 0 0 calc(50% - 6px);
+    min-width: calc(50% - 6px);
+    scroll-snap-align: start;
+  }
+}
+ 
+/* Desktop */
+@media (min-width: 768px) {
+  #recentSuggestionSection .cards-wrapper {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+  }
+ 
+  #recentSuggestionSection .card {
+    min-width: auto;
+  }
+}
+
+/* Mobile Only */
+
+@media (max-width: 767px) {
+ 
+  .mobile-card-slider {
+
+    display: flex;
+
+    gap: 12px;
+
+    overflow-x: auto;
+
+    scroll-snap-type: x mandatory;
+
+    scrollbar-width: none;
+
+    -ms-overflow-style: none;
+
+  }
+ 
+  .mobile-card-slider::-webkit-scrollbar {
+
+    display: none;
+
+  }
+ 
+  .mobile-slider-card {
+
+    flex: 0 0 calc(50% - 6px);
+
+    min-width: calc(50% - 6px);
+
+    scroll-snap-align: start;
+
+  }
+
+}
+ 
+/* Desktop */
+
+@media (min-width: 768px) {
+ 
+  .mobile-card-slider {
+
+    display: grid;
+
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+
+    gap: 20px;
+
+  }
+ 
+  .mobile-slider-card {
+
+    min-width: auto;
+
+  }
+
+}
+ .slider-wrapper {
+  position: relative;
+}
+ 
+.slider-arrow {
+  display: none;
+}
+ 
+@media (max-width: 767px) {
+ 
+  .slider-wrapper {
+    position: relative;
+  }
+ 
+  .slider-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 45%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    z-index: 10;
+    cursor: pointer;
+  }
+ 
+  .slider-prev {
+    left: -8px;
+  }
+ 
+  .slider-next {
+    right: -8px;
+  }
+ 
+  .recent-mobile-slider {
+    display: flex !important;
+    overflow-x: auto;
+    gap: 12px;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+  }
+ 
+  .recent-mobile-slider::-webkit-scrollbar {
+    display: none;
+  }
+ 
+  .recent-mobile-slider > * {
+    flex: 0 0 calc(50% - 6px);
+    min-width: calc(50% - 6px);
+  }
+}

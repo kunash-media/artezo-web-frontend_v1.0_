@@ -725,7 +725,7 @@ function selectPayment(type, mode) {
         }
     });
 
-    // 🔥 IMPORTANT: Refresh summary when payment changes
+    // IMPORTANT: Refresh summary when payment changes
     renderSummaryBreakdown();
 }
 
@@ -760,32 +760,8 @@ function updateStepIndicator(step) {
     }
 }
 
-// Update Back / Continue / Place Order button states per step
-// function updateNavButtons(step) {
-//     const back = document.getElementById('btn-back');
-//     const next = document.getElementById('btn-next');
 
-//     back.classList.toggle('hidden', step === 1);
-
-//     if (step === STATE.totalSteps) {
-//         next.innerHTML = STATE.payment.mode === 'COD'
-//             ? '<i class="fa-solid fa-check mr-2"></i>Place Order'
-//             : '<i class="fa-solid fa-lock mr-2"></i>Proceed to Pay';
-//         next.style.background    = '#10b981';
-//         next.onmouseover         = () => next.style.background = '#059669';
-//         next.onmouseleave        = () => next.style.background = '#10b981';
-//     } else {
-//         next.innerHTML           = 'Continue <i class="fa-solid fa-chevron-right ml-1"></i>';
-//         next.style.background    = '';
-//         next.onmouseover         = null;
-//         next.onmouseleave        = null;
-//     }
-// }
-
-
-
-// REPLACE the entire updateNavButtons function
-
+// the entire updateNavButtons function
 function updateNavButtons(step) {
     const back = document.getElementById('btn-back');
     const next = document.getElementById('btn-next');
@@ -835,17 +811,7 @@ function previousStep() {
     if (STATE.currentStep > 1) goToStep(STATE.currentStep - 1);
 }
 
-// Validate current step, populate review if going to step 3, advance
-// function nextStep() {
-//     if (STATE.currentStep === STATE.totalSteps) {
-//         placeOrder();
-//     } else {
-//         if (validateStep(STATE.currentStep)) {
-//             if (STATE.currentStep === 2) populateReviewStep(); // payment → review
-//             goToStep(STATE.currentStep + 1);
-//         }
-//     }
-// }
+
 
 function nextStep() {
     if (STATE.currentStep === STATE.totalSteps) {
@@ -1153,16 +1119,7 @@ function buildOrderPayload(addr, s, paymentMethod, paymentMode, razorpayPaymentI
     };
 }
 
-// ── Order Finish ──────────────────────────────────────────────────────────────
-// Update processing text → wait → confetti → success overlay
-// async function finishOrder(orderId) {
-//     localStorage.setItem('lastOrderId', orderId || '');
-//     updateProcessingText('Order confirmed! 🎉', 'Your art is on its way');
-//     await sleep(1200);
-//     hideProcessingOverlay();
-//     launchConfetti();
-//     showSuccessOverlay(orderId);
-// }
+
 
 async function finishOrder(orderId) {
     localStorage.setItem('lastOrderId', orderId || '');

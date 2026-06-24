@@ -1,170 +1,170 @@
-// ═══════════════════════════════════════════════════════════════════════════
-//  ARTEZO LOGGING SYSTEM (Non-conflicting)
-// ═══════════════════════════════════════════════════════════════════════════
+// // ═══════════════════════════════════════════════════════════════════════════
+// //  ARTEZO LOGGING SYSTEM (Non-conflicting)
+// // ═══════════════════════════════════════════════════════════════════════════
 
-window.artezoLog = {
-    info: (msg, ...args) => {
-        const formatted = msg.replace(/{}/g, () => {
-            const arg = args.shift();
-            return typeof arg === 'object' ? JSON.stringify(arg) : arg;
-        });
-        console.log(`%c[✅ INFO] ${formatted}`, 'color: #4CAF50; font-weight: bold; font-size: 12px;');
-    },
-    error: (msg, ...args) => {
-        const formatted = msg.replace(/{}/g, () => {
-            const arg = args.shift();
-            return typeof arg === 'object' ? JSON.stringify(arg) : arg;
-        });
-        console.error(`%c[❌ ERROR] ${formatted}`, 'color: #F44336; font-weight: bold; font-size: 12px;');
-    },
-    warn: (msg, ...args) => {
-        const formatted = msg.replace(/{}/g, () => {
-            const arg = args.shift();
-            return typeof arg === 'object' ? JSON.stringify(arg) : arg;
-        });
-        console.warn(`%c[⚠️ WARN] ${formatted}`, 'color: #FF9800; font-weight: bold; font-size: 12px;');
-    },
-    debug: (msg, ...args) => {
-        const formatted = msg.replace(/{}/g, () => {
-            const arg = args.shift();
-            return typeof arg === 'object' ? JSON.stringify(arg) : arg;
-        });
-        console.log(`%c[🔍 DEBUG] ${formatted}`, 'color: #2196F3; font-weight: normal; font-size: 11px;');
-    }
-};
+// window.artezoLog = {
+//   info: (msg, ...args) => {
+//     const formatted = msg.replace(/{}/g, () => {
+//       const arg = args.shift();
+//       return typeof arg === 'object' ? JSON.stringify(arg) : arg;
+//     });
+//     console.log(`%c[✅ INFO] ${formatted}`, 'color: #4CAF50; font-weight: bold; font-size: 12px;');
+//   },
+//   error: (msg, ...args) => {
+//     const formatted = msg.replace(/{}/g, () => {
+//       const arg = args.shift();
+//       return typeof arg === 'object' ? JSON.stringify(arg) : arg;
+//     });
+//     console.error(`%c[❌ ERROR] ${formatted}`, 'color: #F44336; font-weight: bold; font-size: 12px;');
+//   },
+//   warn: (msg, ...args) => {
+//     const formatted = msg.replace(/{}/g, () => {
+//       const arg = args.shift();
+//       return typeof arg === 'object' ? JSON.stringify(arg) : arg;
+//     });
+//     console.warn(`%c[⚠️ WARN] ${formatted}`, 'color: #FF9800; font-weight: bold; font-size: 12px;');
+//   },
+//   debug: (msg, ...args) => {
+//     const formatted = msg.replace(/{}/g, () => {
+//       const arg = args.shift();
+//       return typeof arg === 'object' ? JSON.stringify(arg) : arg;
+//     });
+//     console.log(`%c[🔍 DEBUG] ${formatted}`, 'color: #2196F3; font-weight: normal; font-size: 11px;');
+//   }
+// };
 
-// Shorter alias
-const L = window.artezoLog;
+// // Shorter alias
+// const L = window.artezoLog;
 
-L.info("═══════════════════════════════════════════════════════════");
-L.info("  ARTEZO PRODUCT DETAILS PAGE INITIALIZED");
-L.info("═══════════════════════════════════════════════════════════");
-
-
-
-// ═══════════════════════════════════════════════════════════════════════════
-//  SHIPROCKET DYNAMIC SCRIPT INJECTION (WORKAROUND)
-// ═══════════════════════════════════════════════════════════════════════════
-
-L.info("Attempting Shiprocket script injection...");
-
-// Remove any existing script tag to avoid duplicates
-const existingScript = document.querySelector('script[src*="shiprocket-checkout"]');
-if (existingScript) {
-    L.warn("Removing existing Shiprocket script tag");
-    existingScript.remove();
-}
-
-// Create and inject new script
-const shiprocketScript = document.createElement('script');
-shiprocketScript.src = 'https://cdn.shiprocket.in/checkout/js/shiprocket-checkout.js';
-shiprocketScript.type = 'text/javascript';
-shiprocketScript.async = true;
-shiprocketScript.charset = 'UTF-8';
-
-shiprocketScript.onload = function() {
-    L.info("✅ Shiprocket script loaded successfully!");
-    window.shiprocketScriptLoaded = true;
-
-    // Verify window.Shiprocket exists
-    if (typeof window.Shiprocket !== "undefined") {
-        L.info("✅ window.Shiprocket is available");
-        L.info("  Methods: {}", Object.keys(window.Shiprocket).join(", "));
-    } else {
-        L.error("❌ Script loaded but window.Shiprocket is still undefined");
-    }
-};
-
-shiprocketScript.onerror = function() {
-    L.error("❌ Failed to load Shiprocket script");
-    L.error("Possible reasons:");
-    L.error("  1. CORS blocked the request");
-    L.error("  2. Network/internet issue");
-    L.error("  3. Shiprocket service down");
-    L.error("  Check Network tab for details");
-};
-
-// Append to head
-document.head.appendChild(shiprocketScript);
-L.debug("Shiprocket script injection initiated");
+// L.info("═══════════════════════════════════════════════════════════");
+// L.info("  ARTEZO PRODUCT DETAILS PAGE INITIALIZED");
+// L.info("═══════════════════════════════════════════════════════════");
 
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  SHIPROCKET SDK INITIALIZATION CHECKER
-// ═══════════════════════════════════════════════════════════════════════════
 
-L.info("🔍 Checking Shiprocket SDK availability...");
+// // ═══════════════════════════════════════════════════════════════════════════
+// //  SHIPROCKET DYNAMIC SCRIPT INJECTION (WORKAROUND)
+// // ═══════════════════════════════════════════════════════════════════════════
 
-// Add a global flag to track if script loaded
-window.shiprocketScriptLoaded = false;
+// L.info("Attempting Shiprocket script injection...");
 
-(function initializeShiprocketCheck() {
-    let checkCount = 0;
-    const maxChecks = 50;
+// // Remove any existing script tag to avoid duplicates
+// const existingScript = document.querySelector('script[src*="shiprocket-checkout"]');
+// if (existingScript) {
+//   L.warn("Removing existing Shiprocket script tag");
+//   existingScript.remove();
+// }
 
-    const checkSRSDK = setInterval(() => {
-        checkCount++;
+// // Create and inject new script
+// const shiprocketScript = document.createElement('script');
+// shiprocketScript.src = 'https://cdn.shiprocket.in/checkout/js/shiprocket-checkout.js';
+// shiprocketScript.type = 'text/javascript';
+// shiprocketScript.async = true;
+// shiprocketScript.charset = 'UTF-8';
 
-        L.debug("SR SDK Check #{}: window.Shiprocket = {}",
-            checkCount,
-            typeof window.Shiprocket);
+// shiprocketScript.onload = function () {
+//   L.info("✅ Shiprocket script loaded successfully!");
+//   window.shiprocketScriptLoaded = true;
 
-        if (typeof window.Shiprocket !== "undefined") {
-            clearInterval(checkSRSDK);
-            window.shiprocketScriptLoaded = true;
+//   // Verify window.Shiprocket exists
+//   if (typeof window.Shiprocket !== "undefined") {
+//     L.info("✅ window.Shiprocket is available");
+//     L.info("  Methods: {}", Object.keys(window.Shiprocket).join(", "));
+//   } else {
+//     L.error("❌ Script loaded but window.Shiprocket is still undefined");
+//   }
+// };
 
-            L.info("✅ SHIPROCKET SDK LOADED SUCCESSFULLY!");
-            L.info("  window.Shiprocket type: {}", typeof window.Shiprocket);
-            L.info("  window.Shiprocket.checkout type: {}", typeof window.Shiprocket.checkout);
-            L.debug("  Available methods: {}", Object.keys(window.Shiprocket).join(", "));
+// shiprocketScript.onerror = function () {
+//   L.error("❌ Failed to load Shiprocket script");
+//   L.error("Possible reasons:");
+//   L.error("  1. CORS blocked the request");
+//   L.error("  2. Network/internet issue");
+//   L.error("  3. Shiprocket service down");
+//   L.error("  Check Network tab for details");
+// };
 
-            return;
-        }
+// // Append to head
+// document.head.appendChild(shiprocketScript);
+// L.debug("Shiprocket script injection initiated");
 
-        if (checkCount >= maxChecks) {
-            clearInterval(checkSRSDK);
-            window.shiprocketScriptLoaded = false;
 
-            L.error("❌ SHIPROCKET SDK FAILED TO LOAD AFTER 5 SECONDS");
-            L.error("Checking script tag status...");
+// // ═══════════════════════════════════════════════════════════════════════════
+// //  SHIPROCKET SDK INITIALIZATION CHECKER
+// // ═══════════════════════════════════════════════════════════════════════════
 
-            const scriptTag = document.querySelector('script[src*="shiprocket-checkout"]');
-            if (scriptTag) {
-                L.error("  ✅ Script tag found");
-                L.error("  Script src: {}", scriptTag.src);
-                L.error("  Script async: {}", scriptTag.async);
-                L.error("  Script loaded: {}", scriptTag.loaded);
-                L.error("  ⚠️ Script tag exists but window.Shiprocket is undefined");
-                L.error("  Possible causes:");
-                L.error("    → CORS blocking (check Network tab)");
-                L.error("    → Script didn't execute/initialize");
-                L.error("    → Wrong URL");
-                L.error("    → Third-party script error");
-            } else {
-                L.error("  ❌ NO SCRIPT TAG FOUND!");
-                L.error("  Make sure <script src=\"https://checkout.shiprocket.in/js/shiprocket-checkout.js\"></script> is in <head>");
-            }
-        }
-    }, 100);
-})();
+// L.info("🔍 Checking Shiprocket SDK availability...");
 
-// Check on page load events
-document.addEventListener('DOMContentLoaded', () => {
-    L.debug("DOMContentLoaded: window.Shiprocket = {}", typeof window.Shiprocket);
-});
+// // Add a global flag to track if script loaded
+// window.shiprocketScriptLoaded = false;
 
-window.addEventListener('load', () => {
-    L.debug("Window load: window.Shiprocket = {}", typeof window.Shiprocket);
+// (function initializeShiprocketCheck() {
+//   let checkCount = 0;
+//   const maxChecks = 50;
 
-    // If still not loaded, it's definitely a script issue
-    if (typeof window.Shiprocket === "undefined") {
-        L.error("❌ CRITICAL: Shiprocket still not loaded at window.load");
-        L.error("This means the script failed to execute. Check:");
-        L.error("  1. Network tab - did shiprocket-checkout.js load with 200 status?");
-        L.error("  2. Console - any CORS errors?");
-        L.error("  3. Is your internet connection working?");
-    }
-});
+//   const checkSRSDK = setInterval(() => {
+//     checkCount++;
+
+//     L.debug("SR SDK Check #{}: window.Shiprocket = {}",
+//       checkCount,
+//       typeof window.Shiprocket);
+
+//     if (typeof window.Shiprocket !== "undefined") {
+//       clearInterval(checkSRSDK);
+//       window.shiprocketScriptLoaded = true;
+
+//       L.info("✅ SHIPROCKET SDK LOADED SUCCESSFULLY!");
+//       L.info("  window.Shiprocket type: {}", typeof window.Shiprocket);
+//       L.info("  window.Shiprocket.checkout type: {}", typeof window.Shiprocket.checkout);
+//       L.debug("  Available methods: {}", Object.keys(window.Shiprocket).join(", "));
+
+//       return;
+//     }
+
+//     if (checkCount >= maxChecks) {
+//       clearInterval(checkSRSDK);
+//       window.shiprocketScriptLoaded = false;
+
+//       L.error("❌ SHIPROCKET SDK FAILED TO LOAD AFTER 5 SECONDS");
+//       L.error("Checking script tag status...");
+
+//       const scriptTag = document.querySelector('script[src*="shiprocket-checkout"]');
+//       if (scriptTag) {
+//         L.error("  ✅ Script tag found");
+//         L.error("  Script src: {}", scriptTag.src);
+//         L.error("  Script async: {}", scriptTag.async);
+//         L.error("  Script loaded: {}", scriptTag.loaded);
+//         L.error("  ⚠️ Script tag exists but window.Shiprocket is undefined");
+//         L.error("  Possible causes:");
+//         L.error("    → CORS blocking (check Network tab)");
+//         L.error("    → Script didn't execute/initialize");
+//         L.error("    → Wrong URL");
+//         L.error("    → Third-party script error");
+//       } else {
+//         L.error("  ❌ NO SCRIPT TAG FOUND!");
+//         L.error("  Make sure <script src=\"https://checkout.shiprocket.in/js/shiprocket-checkout.js\"></script> is in <head>");
+//       }
+//     }
+//   }, 100);
+// })();
+
+// // Check on page load events
+// document.addEventListener('DOMContentLoaded', () => {
+//   L.debug("DOMContentLoaded: window.Shiprocket = {}", typeof window.Shiprocket);
+// });
+
+// window.addEventListener('load', () => {
+//   L.debug("Window load: window.Shiprocket = {}", typeof window.Shiprocket);
+
+//   // If still not loaded, it's definitely a script issue
+//   if (typeof window.Shiprocket === "undefined") {
+//     L.error("❌ CRITICAL: Shiprocket still not loaded at window.load");
+//     L.error("This means the script failed to execute. Check:");
+//     L.error("  1. Network tab - did shiprocket-checkout.js load with 200 status?");
+//     L.error("  2. Console - any CORS errors?");
+//     L.error("  3. Is your internet connection working?");
+//   }
+// });
 
 
 (function () {
@@ -182,34 +182,34 @@ window.addEventListener('load', () => {
 
 
   // ── Dual-dispatch: fires on both window AND document so any listener pattern works ──
-function dispatchCartEvent()     { const e = 'cart:updated';     window.dispatchEvent(new CustomEvent(e)); document.dispatchEvent(new CustomEvent(e)); }
-function dispatchWishlistEvent() { const e = 'wishlist:updated'; window.dispatchEvent(new CustomEvent(e)); document.dispatchEvent(new CustomEvent(e)); }
+  function dispatchCartEvent() { const e = 'cart:updated'; window.dispatchEvent(new CustomEvent(e)); document.dispatchEvent(new CustomEvent(e)); }
+  function dispatchWishlistEvent() { const e = 'wishlist:updated'; window.dispatchEvent(new CustomEvent(e)); document.dispatchEvent(new CustomEvent(e)); }
 
 
-// Add this new function
-function syncCardCartStates() {
-  document.querySelectorAll(".card-add-cart").forEach((btn) => {
-    const pid = parseInt(btn.dataset.productId);
-    if (addedToCartSet.has(pid)) {
-      btn.innerHTML = '<i class="fa-solid fa-bag-shopping text-xs"></i> Go to Cart';
-      btn.style.background  = "#e39f32";
-      btn.style.color       = "#1D3C4A";
-      btn.style.fontWeight  = "600";
-      btn.style.borderColor = "#e39f32";
-      btn.dataset.added     = "true";
-    } else {
-      // Revert if item was removed from cart externally
-      if (btn.dataset.added === "true") {
-        btn.innerHTML         = "Add to Cart";
-        btn.style.background  = "";
-        btn.style.color       = "";
-        btn.style.fontWeight  = "";
-        btn.style.borderColor = "";
-        btn.dataset.added     = "false";
+  // Add this new function
+  function syncCardCartStates() {
+    document.querySelectorAll(".card-add-cart").forEach((btn) => {
+      const pid = parseInt(btn.dataset.productId);
+      if (addedToCartSet.has(pid)) {
+        btn.innerHTML = '<i class="fa-solid fa-bag-shopping text-xs"></i> Go to Cart';
+        btn.style.background = "#e39f32";
+        btn.style.color = "#1D3C4A";
+        btn.style.fontWeight = "600";
+        btn.style.borderColor = "#e39f32";
+        btn.dataset.added = "true";
+      } else {
+        // Revert if item was removed from cart externally
+        if (btn.dataset.added === "true") {
+          btn.innerHTML = "Add to Cart";
+          btn.style.background = "";
+          btn.style.color = "";
+          btn.style.fontWeight = "";
+          btn.style.borderColor = "";
+          btn.dataset.added = "false";
+        }
       }
-    }
-  });
-}
+    });
+  }
 
 
   // ── SIMPLE LOGGING HELPER ──────────────────────────────────────────────
@@ -1030,7 +1030,7 @@ function syncCardCartStates() {
   function rewriteURLToSEO(variantSku) {
     if (!safeProductData) return;
 
-    const baseSku = safeProductData.currentSku || `PROD-${safeProductData.productId}`;
+    const baseSku = safeProductData.currentSku || null;
 
     // Keep the REAL file path — no fake /products/ path that breaks refresh
     // and relative links. Only update query params for SEO signals.
@@ -1113,7 +1113,7 @@ function syncCardCartStates() {
 
   let currentCustomFields = {};
   let customFieldValues = {};
-  
+
 
   // ─── INIT ──────────────────────────────────────────────────────────────────
 
@@ -1203,49 +1203,49 @@ function syncCardCartStates() {
   }
 
   async function loadWishlistItems() {
-  const userId = localStorage.getItem("userId") || sessionStorage.getItem("userId");
-  if (!userId) return;
-  try {
-    const res = await fetch(`${BASE_URL}/api/v1/wishlist?userId=${userId}`);
-    if (!res.ok) return;
-    const data = await res.json();
-    if (!data.success || !data.data?.items) return;
-    data.data.items.forEach(item => {
-      if (item.productId) addedToWishlistSet.add(Number(item.productId));
-    });
-  } catch (err) {
-    console.warn("[Wishlist] loadWishlistItems failed:", err);
-  }
-}
-
-function syncCardWishlistStates() {
-  document.querySelectorAll(".product-card-clickable").forEach(card => {
-    const pid = parseInt(card.dataset.productId);
-    if (!pid) return;
-    const btn  = card.querySelector(".wishlist-icon-btn");
-    const icon = btn?.querySelector("i");
-    if (!btn || !icon) return;
-
-    if (addedToWishlistSet.has(pid)) {
-      icon.className = "fa-solid fa-heart text-red-500 text-xs";
-      btn.classList.add("wishlisted");
-    } else {
-      icon.className = "fa-regular fa-heart text-[#1D3C4A] text-xs";
-      btn.classList.remove("wishlisted");
+    const userId = localStorage.getItem("userId") || sessionStorage.getItem("userId");
+    if (!userId) return;
+    try {
+      const res = await fetch(`${BASE_URL}/api/v1/wishlist?userId=${userId}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data.success || !data.data?.items) return;
+      data.data.items.forEach(item => {
+        if (item.productId) addedToWishlistSet.add(Number(item.productId));
+      });
+    } catch (err) {
+      console.warn("[Wishlist] loadWishlistItems failed:", err);
     }
-  });
-}
+  }
 
- async function apiAddToWishlist(payload) {
-  const res = await fetch(`${BASE_URL}/api/v1/wishlist/add`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const text = await res.text();
-  try { return text ? JSON.parse(text) : {}; } catch (_) { return {}; }
-}
+  function syncCardWishlistStates() {
+    document.querySelectorAll(".product-card-clickable").forEach(card => {
+      const pid = parseInt(card.dataset.productId);
+      if (!pid) return;
+      const btn = card.querySelector(".wishlist-icon-btn");
+      const icon = btn?.querySelector("i");
+      if (!btn || !icon) return;
+
+      if (addedToWishlistSet.has(pid)) {
+        icon.className = "fa-solid fa-heart text-red-500 text-xs";
+        btn.classList.add("wishlisted");
+      } else {
+        icon.className = "fa-regular fa-heart text-[#1D3C4A] text-xs";
+        btn.classList.remove("wishlisted");
+      }
+    });
+  }
+
+  async function apiAddToWishlist(payload) {
+    const res = await fetch(`${BASE_URL}/api/v1/wishlist/add`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text = await res.text();
+    try { return text ? JSON.parse(text) : {}; } catch (_) { return {}; }
+  }
 
   // ── PATCH: Wishlist icon sync ────────────────────────────────────────────────
   async function initWishlistIcon() {
@@ -1592,48 +1592,48 @@ function syncCardWishlistStates() {
 
     let customFields = [];
 
-    let frameCount     = null;
+    let frameCount = null;
     let frameStructure = null;
 
     if (p.customFields) {
-    try {
-      const parsed = JSON.parse(p.customFields);
+      try {
+        const parsed = JSON.parse(p.customFields);
 
-      // ── DEBUG LOG 1: raw parsed object ──────────────────────────────
-      console.log("[DEBUG-1] parsed type:", typeof parsed);
-      console.log("[DEBUG-2] is Array?:", Array.isArray(parsed));
-      console.log("[DEBUG-3] parsed object:", parsed);
-      // ────────────────────────────────────────────────────────────────
+        // ── DEBUG LOG 1: raw parsed object ──────────────────────────────
+        console.log("[DEBUG-1] parsed type:", typeof parsed);
+        console.log("[DEBUG-2] is Array?:", Array.isArray(parsed));
+        console.log("[DEBUG-3] parsed object:", parsed);
+        // ────────────────────────────────────────────────────────────────
 
-      if (Array.isArray(parsed)) {
-        customFields   = parsed;
-        frameCount     = null;
-        frameStructure = null;
+        if (Array.isArray(parsed)) {
+          customFields = parsed;
+          frameCount = null;
+          frameStructure = null;
 
-      } else if (parsed && typeof parsed === "object") {
+        } else if (parsed && typeof parsed === "object") {
 
-        // ── DEBUG LOG 2: object keys and values ──────────────────────
-        console.log("[DEBUG-4] object keys:", Object.keys(parsed));
-        console.log("[DEBUG-5] parsed.frameCount:", parsed.frameCount);
-        console.log("[DEBUG-6] parsed.frameCount type:", typeof parsed.frameCount);
-        console.log("[DEBUG-7] parsed.frameStructure:", parsed.frameStructure);
-        console.log("[DEBUG-8] parsed.fields length:", parsed.fields?.length);
-        // ─────────────────────────────────────────────────────────────
+          // ── DEBUG LOG 2: object keys and values ──────────────────────
+          console.log("[DEBUG-4] object keys:", Object.keys(parsed));
+          console.log("[DEBUG-5] parsed.frameCount:", parsed.frameCount);
+          console.log("[DEBUG-6] parsed.frameCount type:", typeof parsed.frameCount);
+          console.log("[DEBUG-7] parsed.frameStructure:", parsed.frameStructure);
+          console.log("[DEBUG-8] parsed.fields length:", parsed.fields?.length);
+          // ─────────────────────────────────────────────────────────────
 
-        frameCount     = parsed.frameCount     || null;
-        frameStructure = parsed.frameStructure || null;
-        customFields   = Array.isArray(parsed.fields) ? parsed.fields : [];
+          frameCount = parsed.frameCount || null;
+          frameStructure = parsed.frameStructure || null;
+          customFields = Array.isArray(parsed.fields) ? parsed.fields : [];
 
-        // ── DEBUG LOG 3: after assignment ────────────────────────────
-        console.log("[DEBUG-9] frameCount assigned:", frameCount);
-        console.log("[DEBUG-10] frameStructure assigned:", frameStructure);
-        // ─────────────────────────────────────────────────────────────
+          // ── DEBUG LOG 3: after assignment ────────────────────────────
+          console.log("[DEBUG-9] frameCount assigned:", frameCount);
+          console.log("[DEBUG-10] frameStructure assigned:", frameStructure);
+          // ─────────────────────────────────────────────────────────────
+        }
+
+      } catch (e) {
+        console.warn("[ProductDetail] customFields parse error:", e);
       }
-
-    } catch (e) {
-      console.warn("[ProductDetail] customFields parse error:", e);
     }
-  }
 
     // ── 1. Normalise API variants first ───────────────────────────────────
     const variants = (p.availableVariants || []).map((v) =>
@@ -1767,6 +1767,16 @@ function syncCardWishlistStates() {
       updateSEOMetaTags(safeProductData, window.currentSEOData);
     }
 
+    //==== latest PATCH-1 =====//
+    //Initialize lightbox
+    initLightbox();
+ 
+    // Store lightbox functions globally for onclick
+    window.openLightbox = window.openLightbox || function () {};
+    window.closeLightbox = window.closeLightbox || function () {};
+    //==== latest patch end =======//
+
+
     // Rewrite browser URL to SEO format now that we have real product data.
     // Uses history.replaceState — no reload, back button still works.
     // The initial variant is the first variant's SKU (or null if no variants).
@@ -1774,58 +1784,112 @@ function syncCardWishlistStates() {
     rewriteURLToSEO(initialVariantSku);
 
     buildCompleteHTML();
-   
-   loadCartItems().then(() => {
-      const pid = Number(safeProductData.productPrimeId);
-      if (addedToCartSet.has(pid)) {
-        // ── Update ALL add-to-cart buttons (main + sticky) ──────────────
-        document.querySelectorAll(".add-to-cart-btn").forEach(addBtn => {
-          addBtn.innerHTML = `<i class="fa-solid fa-bag-shopping"></i> <span class="text-sm whitespace-nowrap">Go to Cart</span>`;
-          addBtn.style.background = "#e39f32";
-          addBtn.style.color = "#1D3C4A";
-          addBtn.style.fontWeight = "600";
-          addBtn.style.borderColor = "#e39f32";
-        });
-      }
-        syncCardCartStates(); // ← ADD: sync suggestion/recent cards too
-          syncCardWishlistStates();  // ← hearts restored on page load
+
+    // loadCartItems().then(() => {
+    //   const pid = Number(safeProductData.productPrimeId);
+    //   if (addedToCartSet.has(pid)) {
+    //     // ── Update ALL add-to-cart buttons (main + sticky) ──────────────
+    //     document.querySelectorAll(".add-to-cart-btn").forEach(addBtn => {
+    //       addBtn.innerHTML = `<i class="fa-solid fa-bag-shopping"></i> <span class="text-sm whitespace-nowrap">Go to Cart</span>`;
+    //       addBtn.style.background = "#e39f32";
+    //       addBtn.style.color = "#1D3C4A";
+    //       addBtn.style.fontWeight = "600";
+    //       addBtn.style.borderColor = "#e39f32";
+    //     });
+    //   }
+    //   syncCardCartStates(); // ← ADD: sync suggestion/recent cards too
+    //   syncCardWishlistStates();  // ← hearts restored on page load
 
 
-    });
+    // });
 
-    fillAccordion();
-    fillInstallation();
-    fillHeroBanner();
-    fillStickyBar();
-    setupEventListeners();
-    // initWishlistIcon();
+    // fillAccordion();
+    // fillInstallation();
+    // fillHeroBanner();
+    // fillStickyBar();
+    // setupEventListeners();
+    // // initWishlistIcon();
 
-    // Async fills
-    fillBoughtTogether();
-    fillRecentAndSuggestions();
-    fillReviews(); // PATCH 3 — async, non-blocking
+    // // Async fills
+    // fillBoughtTogether();
+    // fillRecentAndSuggestions();
+    // fillReviews(); // PATCH 3 — async, non-blocking
 
 
+    // setTimeout(() => {
+
+    //   setupVariantSelection();
+    //   setupDynamicVariants();
+
+    //   document.querySelectorAll(".add-to-cart-btn")
+    //     .forEach((btn) => btn.addEventListener("click", handleAddToCart));
+    //   document.querySelectorAll(".buy-now-btn")
+    //     .forEach((btn) => btn.addEventListener("click", handleBuyNow));
+     
+    //   document.querySelectorAll(".apply-coupon-btn").forEach((btn) =>
+    //     btn.addEventListener("click", (e) => {
+    //       e.preventDefault();
+    //       const code = btn.dataset.couponCode;
+    //       if (code) applyCoupon(code);
+    //     })
+    //   );
+    //   initWishlistIcon();   // ← runs LAST, after all DOM mutations are done
+
+    // }, 100);
+
+    // === PATCH-2 Critical: Wait for DOM to be ready before building media gallery
     setTimeout(() => {
-      setupVariantSelection();
-      setupDynamicVariants();
-
-      document.querySelectorAll(".add-to-cart-btn")
-        .forEach((btn) => btn.addEventListener("click", handleAddToCart));
-      document.querySelectorAll(".buy-now-btn")
-        .forEach((btn) => btn.addEventListener("click", handleBuyNow));
-      // document.querySelectorAll(".wishlist-btn, .wishlist-icon-btn")
-      //     .forEach((btn) => btn.addEventListener("click", handleWishlistToggle));
-      document.querySelectorAll(".apply-coupon-btn").forEach((btn) =>
-        btn.addEventListener("click", (e) => {
-          e.preventDefault();
-          const code = btn.dataset.couponCode;
-          if (code) applyCoupon(code);
-        })
+      const initialMedia = getVariantMedia(
+        currentVariant || safeProductData.availableVariants[0],
       );
-          initWishlistIcon();   // ← runs LAST, after all DOM mutations are done
+      buildMediaStrip(initialMedia); // ← Ensures desktop/mobile gallery initializes properly
+ 
+      loadCartItems().then(() => {
+        const pid = Number(safeProductData.productPrimeId);
+        if (addedToCartSet.has(pid)) {
+          document.querySelectorAll(".add-to-cart-btn").forEach((addBtn) => {
+            addBtn.innerHTML = `<i class="fa-solid fa-bag-shopping"></i> <span class="text-sm whitespace-nowrap">Go to Cart</span>`;
+            addBtn.style.background = "#e39f32";
+            addBtn.style.color = "#1D3C4A";
+            addBtn.style.fontWeight = "600";
+            addBtn.style.borderColor = "#e39f32";
+          });
+        }
+      });
+ 
+      fillAccordion();
+      fillInstallation();
+      fillHeroBanner();
+      fillStickyBar();
+      setupEventListeners();
+      initWishlistIcon();
+ 
+      // Async fills
+      fillBoughtTogether();
+      fillRecentAndSuggestions();
+      fillReviews();
+ 
+      setTimeout(() => {
+        setupVariantSelection();
+        setupDynamicVariants();
+ 
+        document
+          .querySelectorAll(".add-to-cart-btn")
+          .forEach((btn) => btn.addEventListener("click", handleAddToCart));
+        document
+          .querySelectorAll(".buy-now-btn")
+          .forEach((btn) => btn.addEventListener("click", handleBuyNow));
+        document.querySelectorAll(".apply-coupon-btn").forEach((btn) =>
+          btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            const code = btn.dataset.couponCode;
+            if (code) applyCoupon(code);
+          }),
+        );
+      }, 100);
+      
+    }, 80); // Small delay ensures DOM elements exist
 
-    }, 100);
   }
 
 
@@ -1839,9 +1903,9 @@ function syncCardWishlistStates() {
   function setupShareFunctionality() {
     const shareButton = document.getElementById("shareButton");
     const sharePopup = document.getElementById("sharePopup");
-
+ 
     if (!shareButton || !sharePopup) return;
-
+ 
     // Get current product URL and details
     const currentUrl = window.location.href;
     const productName =
@@ -1855,32 +1919,32 @@ function syncCardWishlistStates() {
       transformedData?.mainImages?.[0]?.full ||
       safeProductData?.mainImage ||
       "";
-
+ 
     // Toggle popup
     shareButton.addEventListener("click", function (e) {
       e.stopPropagation();
       sharePopup.classList.toggle("hidden");
     });
-
+ 
     // Close popup when clicking outside
     document.addEventListener("click", function (e) {
       if (!shareButton.contains(e.target) && !sharePopup.contains(e.target)) {
         sharePopup.classList.add("hidden");
       }
     });
-
+ 
     // Handle share options
     document.querySelectorAll(".share-option").forEach((option) => {
       option.addEventListener("click", function (e) {
         e.stopPropagation();
         const shareType = this.dataset.shareType;
-
+ 
         switch (shareType) {
           case "link":
             copyToClipboard(currentUrl);
             showToast("Link copied to clipboard!", "success");
             break;
-
+ 
           case "email":
             const emailSubject = encodeURIComponent(`Check out ${productName}`);
             const emailBody = encodeURIComponent(
@@ -1888,7 +1952,7 @@ function syncCardWishlistStates() {
             );
             window.location.href = `mailto:?subject=${emailSubject}&body=${emailBody}`;
             break;
-
+ 
           case "whatsapp":
             const whatsappText = encodeURIComponent(
               `Check out ${productName}! ${productPrice ? `Price: ${productPrice} ` : ""}${currentUrl}`,
@@ -1896,7 +1960,7 @@ function syncCardWishlistStates() {
             window.open(`https://wa.me/?text=${whatsappText}`, "_blank");
             break;
         }
-
+ 
         sharePopup.classList.add("hidden");
       });
     });
@@ -1955,7 +2019,7 @@ function syncCardWishlistStates() {
                alt="${escapeHtml(safeProductData.productName)}"
                class="w-full h-auto object-cover"
                onerror="this.src='${FALLBACK_IMG}'"/>
-          <div class="px-4 py-6 text-center">
+          <div class="px-4 py-2 text-center">
             <p class="text-sm tracking-[0.3em] text-gray-500 uppercase mb-4">
               ${escapeHtml(safeProductData.productCategory || "")}
             </p>
@@ -1975,97 +2039,725 @@ function syncCardWishlistStates() {
    * Rebuild the full thumbnail strip (vertical column + main image).
    * Accepts the media object returned by getVariantMedia().
    */
-  function buildMediaStrip(media) {
-    const thumbContainer = document.getElementById("thumbContainer");
-    const mainImg = document.getElementById("mainProductImage");
-    if (!thumbContainer || !mainImg) return;
+  // function buildMediaStrip(media) {
+  //   const thumbContainer = document.getElementById("thumbContainer");
+  //   const mainImg = document.getElementById("mainProductImage");
+  //   if (!thumbContainer || !mainImg) return;
 
-    // Build ordered media list: mainImage first, then video (if any), then mockups
-    const mediaItems = [];
+  //   // Build ordered media list: mainImage first, then video (if any), then mockups
+  //   const mediaItems = [];
 
-    // 1. Main image
-    mediaItems.push({ type: "image", url: media.mainImage || FALLBACK_IMG });
+  //   // 1. Main image
+  //   mediaItems.push({ type: "image", url: media.mainImage || FALLBACK_IMG });
 
-    // 2. Product / variant video — shown as a thumb with a play icon
-    if (media.productVideoUrl) {
-      mediaItems.push({ type: "video", url: media.productVideoUrl });
+  //   // 2. Product / variant video — shown as a thumb with a play icon
+  //   if (media.productVideoUrl) {
+  //     mediaItems.push({ type: "video", url: media.productVideoUrl });
+  //   }
+
+  //   // 3. Mockup images
+  //   (media.mockupImages || []).forEach((img) => {
+  //     if (img) mediaItems.push({ type: "image", url: img });
+  //   });
+
+  //   // Render thumbs
+  //   thumbContainer.innerHTML = mediaItems
+  //     .map((item, idx) => {
+  //       if (item.type === "video") {
+  //         return `
+  //           <div class="thumb-video-wrap relative w-full h-16 rounded-md overflow-hidden border-2 cursor-pointer
+  //                       ${idx === 0 ? "border-[#e39f32]" : "border-transparent hover:border-[#e39f32]"}"
+  //                data-media-index="${idx}" data-media-type="video" data-media-url="${item.url}">
+  //             <video src="${item.url}" class="w-full h-full object-cover" muted preload="metadata"></video>
+  //             <div class="absolute inset-0 flex items-center justify-center bg-black/30">
+  //               <i class="fas fa-play text-white text-xs"></i>
+  //             </div>
+  //           </div>`;
+  //       }
+  //       return `
+  //         <img src="${item.url}"
+  //              data-media-index="${idx}" data-media-type="image" data-media-url="${item.url}"
+  //              class="w-full h-16 object-cover rounded-md cursor-pointer border-2
+  //                     ${idx === 0 ? "border-[#e39f32]" : "border-transparent hover:border-[#e39f32]"}"
+  //              onerror="this.src='${FALLBACK_IMG}'"/>`;
+  //     })
+  //     .join("");
+
+  //   // Set main display to first item
+  //   setMainMedia(mediaItems[0], mainImg);
+
+  //   // Wire thumb clicks
+  //   thumbContainer.querySelectorAll("[data-media-index]").forEach((thumb) => {
+  //     thumb.addEventListener("click", function () {
+  //       // Remove active from all
+  //       thumbContainer.querySelectorAll("[data-media-index]").forEach((t) => {
+  //         t.classList.remove("border-[#e39f32]");
+  //         t.classList.add("border-transparent");
+  //       });
+  //       this.classList.remove("border-transparent");
+  //       this.classList.add("border-[#e39f32]");
+
+  //       const item = mediaItems[parseInt(this.dataset.mediaIndex)];
+  //       setMainMedia(item, mainImg);
+  //     });
+  //   });
+  // }
+
+  // ══════════════════════════════════════════════════════════════
+  //  THUMBNAIL STRIP  —  shared builder used by both initial render + variant switch
+  // 23/6 ---------------------- ui updates----------------------------
+  //══════════════════════════════════════════════════════════════
+ function buildMediaStrip(media) {
+    const isMobile = window.innerWidth < 768;
+ 
+    // Always cleanup previous state
+    const displayArea = document.getElementById("mainDisplayArea");
+    if (displayArea && !isMobile) {
+      // Ensure main image exists for desktop
+      if (!document.getElementById("mainProductImage")) {
+        const img = document.createElement("img");
+        img.id = "mainProductImage";
+        img.className =
+          "w-full h-full object-cover cursor-pointer transition-transform duration-300 hover:scale-105";
+        img.onclick = () => window.openLightbox && window.openLightbox(0);
+        displayArea.innerHTML = `<div class="relative w-full h-full overflow-hidden">${img.outerHTML}</div>`;
+      }
     }
-
-    // 3. Mockup images
+ 
+    if (isMobile) {
+      buildMobileCarousel(media);
+      return;
+    }
+ 
+    // Desktop logic...
+    const desktopThumbContainer = document.getElementById("thumbContainer");
+    const mainImg = document.getElementById("mainProductImage");
+ 
+    if (!desktopThumbContainer || !mainImg) {
+      console.warn("[Gallery] Desktop elements not found yet, retrying...");
+      setTimeout(() => buildMediaStrip(media), 100);
+      return;
+    }
+ 
+    // ... rest of your existing desktop code remains unchanged
+ 
+    const mediaItems = [];
+    mediaItems.push({ type: "image", url: media.mainImage || FALLBACK_IMG });
+    if (media.productVideoUrl)
+      mediaItems.push({ type: "video", url: media.productVideoUrl });
     (media.mockupImages || []).forEach((img) => {
       if (img) mediaItems.push({ type: "image", url: img });
     });
-
-    // Render thumbs
-    thumbContainer.innerHTML = mediaItems
+ 
+    /* Populate desktop vertical thumbs */
+    desktopThumbContainer.innerHTML = mediaItems
       .map((item, idx) => {
         if (item.type === "video") {
           return `
-            <div class="thumb-video-wrap relative w-full h-16 rounded-md overflow-hidden border-2 cursor-pointer
-                        ${idx === 0 ? "border-[#e39f32]" : "border-transparent hover:border-[#e39f32]"}"
-                 data-media-index="${idx}" data-media-type="video" data-media-url="${item.url}">
-              <video src="${item.url}" class="w-full h-full object-cover" muted preload="metadata"></video>
-              <div class="absolute inset-0 flex items-center justify-center bg-black/30">
-                <i class="fas fa-play text-white text-xs"></i>
-              </div>
-            </div>`;
+                <div class="thumb-video-wrap relative w-full aspect-[4/3] rounded-2xl overflow-hidden border-2 cursor-pointer transition-all ${idx === 0 ? "border-[#e39f32]" : "border-transparent hover:border-[#e39f32]"}"
+                     data-media-index="${idx}" data-media-type="video" data-media-url="${item.url}">
+                  <video src="${item.url}" class="w-full h-full object-cover" muted preload="metadata"></video>
+                  <div class="absolute inset-0 flex items-center justify-center bg-black/40">
+                    <i class="fas fa-play text-white text-sm"></i>
+                  </div>
+                </div>`;
         }
         return `
-          <img src="${item.url}"
-               data-media-index="${idx}" data-media-type="image" data-media-url="${item.url}"
-               class="w-full h-16 object-cover rounded-md cursor-pointer border-2
-                      ${idx === 0 ? "border-[#e39f32]" : "border-transparent hover:border-[#e39f32]"}"
-               onerror="this.src='${FALLBACK_IMG}'"/>`;
+            <img src="${item.url}"
+                 data-media-index="${idx}" data-media-type="image" data-media-url="${item.url}"
+                 class="w-full aspect-[4/3] object-cover rounded-sm cursor-pointer border-2 transition-all ${idx === 0 ? "border-[#e39f32]" : "border-transparent hover:border-[#e39f32]"}"/>`;
       })
       .join("");
-
-    // Set main display to first item
+ 
+    /* Set main image */
     setMainMedia(mediaItems[0], mainImg);
-
-    // Wire thumb clicks
-    thumbContainer.querySelectorAll("[data-media-index]").forEach((thumb) => {
-      thumb.addEventListener("click", function () {
-        // Remove active from all
-        thumbContainer.querySelectorAll("[data-media-index]").forEach((t) => {
-          t.classList.remove("border-[#e39f32]");
-          t.classList.add("border-transparent");
+ 
+    /* Wire desktop thumb clicks — clean previous listeners if any */
+    desktopThumbContainer
+      .querySelectorAll("[data-media-index]")
+      .forEach((thumb) => {
+        // Remove old listeners to prevent duplicates
+        const newThumb = thumb.cloneNode(true);
+        thumb.parentNode.replaceChild(newThumb, thumb);
+ 
+        newThumb.addEventListener("click", function () {
+          const index = parseInt(this.dataset.mediaIndex);
+          setMainMedia(mediaItems[index], mainImg);
+          updateAllActiveStates(); // Ensure sync
         });
-        this.classList.remove("border-transparent");
-        this.classList.add("border-[#e39f32]");
-
-        const item = mediaItems[parseInt(this.dataset.mediaIndex)];
-        setMainMedia(item, mainImg);
       });
-    });
   }
 
+
+  /** Swap the main display area between image and video. */
+  // function setMainMedia(item, container) {
+  //   if (!container || !item) return;
+
+  //   if (item.type === "video") {
+  //     // Replace the <img> with a <video> if not already a video
+  //     const existing = container.parentElement.querySelector("#mainProductVideo");
+  //     if (existing) existing.remove();
+
+  //     container.style.display = "none";
+  //     const vid = document.createElement("video");
+  //     vid.id = "mainProductVideo";
+  //     vid.src = item.url;
+  //     vid.controls = true;
+  //     vid.autoplay = false;
+  //     vid.muted = false;
+  //     vid.className = "max-h-full max-w-full object-contain rounded-lg";
+  //     container.parentElement.appendChild(vid);
+  //   } else {
+  //     // Remove any video element
+  //     const existing = container.parentElement.querySelector("#mainProductVideo");
+  //     if (existing) existing.remove();
+
+  //     container.style.display = "";
+  //     container.src = item.url;
+  //   }
+  // }
+
+
+  // ══════════════════════════════════════════════════════════════
+  //  THUMBNAIL STRIP  —  shared builder used by both initial render + variant switch
+  // 23/6 ---------------------- ui updates----------------------------
+  //══════════════════════════════════════════════════════════════
+ function buildMediaStrip(media) {
+    const isMobile = window.innerWidth < 768;
+ 
+    // Always cleanup previous state
+    const displayArea = document.getElementById("mainDisplayArea");
+    if (displayArea && !isMobile) {
+      // Ensure main image exists for desktop
+      if (!document.getElementById("mainProductImage")) {
+        const img = document.createElement("img");
+        img.id = "mainProductImage";
+        img.className =
+          "w-full h-full object-cover cursor-pointer transition-transform duration-300 hover:scale-105";
+        img.onclick = () => window.openLightbox && window.openLightbox(0);
+        displayArea.innerHTML = `<div class="relative w-full h-full overflow-hidden">${img.outerHTML}</div>`;
+      }
+    }
+ 
+    if (isMobile) {
+      buildMobileCarousel(media);
+      return;
+    }
+ 
+    // Desktop logic...
+    const desktopThumbContainer = document.getElementById("thumbContainer");
+    const mainImg = document.getElementById("mainProductImage");
+ 
+    if (!desktopThumbContainer || !mainImg) {
+      console.warn("[Gallery] Desktop elements not found yet, retrying...");
+      setTimeout(() => buildMediaStrip(media), 100);
+      return;
+    }
+ 
+    // ... rest of your existing desktop code remains unchanged
+ 
+    const mediaItems = [];
+    mediaItems.push({ type: "image", url: media.mainImage || FALLBACK_IMG });
+    if (media.productVideoUrl)
+      mediaItems.push({ type: "video", url: media.productVideoUrl });
+    (media.mockupImages || []).forEach((img) => {
+      if (img) mediaItems.push({ type: "image", url: img });
+    });
+ 
+    /* Populate desktop vertical thumbs */
+    desktopThumbContainer.innerHTML = mediaItems
+      .map((item, idx) => {
+        if (item.type === "video") {
+          return `
+                <div class="thumb-video-wrap relative w-full aspect-[4/3] rounded-2xl overflow-hidden border-2 cursor-pointer transition-all ${idx === 0 ? "border-[#e39f32]" : "border-transparent hover:border-[#e39f32]"}"
+                     data-media-index="${idx}" data-media-type="video" data-media-url="${item.url}">
+                  <video src="${item.url}" class="w-full h-full object-cover" muted preload="metadata"></video>
+                  <div class="absolute inset-0 flex items-center justify-center bg-black/40">
+                    <i class="fas fa-play text-white text-sm"></i>
+                  </div>
+                </div>`;
+        }
+        return `
+            <img src="${item.url}"
+                 data-media-index="${idx}" data-media-type="image" data-media-url="${item.url}"
+                 class="w-full aspect-[4/3] object-cover rounded-sm cursor-pointer border-2 transition-all ${idx === 0 ? "border-[#e39f32]" : "border-transparent hover:border-[#e39f32]"}"/>`;
+      })
+      .join("");
+ 
+    /* Set main image */
+    setMainMedia(mediaItems[0], mainImg);
+ 
+    /* Wire desktop thumb clicks — clean previous listeners if any */
+    desktopThumbContainer
+      .querySelectorAll("[data-media-index]")
+      .forEach((thumb) => {
+        // Remove old listeners to prevent duplicates
+        const newThumb = thumb.cloneNode(true);
+        thumb.parentNode.replaceChild(newThumb, thumb);
+ 
+        newThumb.addEventListener("click", function () {
+          const index = parseInt(this.dataset.mediaIndex);
+          setMainMedia(mediaItems[index], mainImg);
+          updateAllActiveStates(); // Ensure sync
+        });
+      });
+  }
+ 
+ 
+//=================================================================================
+  // 23/6 ---------------------- ui updates patch end ----------------------------
+  //==================================================================================
+ 
   /** Swap the main display area between image and video. */
   function setMainMedia(item, container) {
     if (!container || !item) return;
-
+ 
+    const displayArea = document.getElementById("mainDisplayArea");
+    const img = container;
+ 
     if (item.type === "video") {
-      // Replace the <img> with a <video> if not already a video
-      const existing = container.parentElement.querySelector("#mainProductVideo");
-      if (existing) existing.remove();
-
-      container.style.display = "none";
-      const vid = document.createElement("video");
-      vid.id = "mainProductVideo";
-      vid.src = item.url;
-      vid.controls = true;
-      vid.autoplay = false;
-      vid.muted = false;
-      vid.className = "max-h-full max-w-full object-contain rounded-lg";
-      container.parentElement.appendChild(vid);
+      // Hide image
+      img.style.display = "none";
+ 
+      // Check if video element exists
+      let video = document.getElementById("mainProductVideo");
+      if (!video) {
+        video = document.createElement("video");
+        video.id = "mainProductVideo";
+        video.className = "w-full h-full object-cover";
+        video.controls = true;
+        video.muted = false;
+        video.style.transition = "opacity 0.3s ease";
+        displayArea?.querySelector(".relative")?.appendChild(video);
+      }
+ 
+      // Fade in video
+      video.style.opacity = "0";
+      video.src = item.url;
+      video.style.display = "block";
+ 
+      // Load and play
+      video.load();
+      video.play().catch(() => {});
+ 
+      // Fade in after load
+      video.oncanplay = () => {
+        video.style.opacity = "1";
+      };
+ 
+      // Hide preview
+      const preview = displayArea?.querySelector(".next-image-preview");
+      if (preview) preview.style.display = "none";
     } else {
-      // Remove any video element
-      const existing = container.parentElement.querySelector("#mainProductVideo");
-      if (existing) existing.remove();
-
-      container.style.display = "";
-      container.src = item.url;
+      // Hide video
+      const video = document.getElementById("mainProductVideo");
+      if (video) video.style.display = "none";
+ 
+      // Fade transition for image
+      img.style.opacity = "0";
+      img.src = item.url;
+      img.style.display = "block";
+ 
+      // Fade in after load
+      img.onload = () => {
+        img.style.opacity = "1";
+      };
+      // If image is cached, load event might not fire
+      setTimeout(() => {
+        img.style.opacity = "1";
+      }, 300);
+    }
+ 
+    // Update active states
+    updateAllActiveStates();
+  }
+ 
+  function updateNextImagePreview() {
+    const displayArea = document.getElementById("mainDisplayArea");
+    if (!displayArea) return;
+ 
+    // Remove existing preview
+    const existingPreview = displayArea.querySelector(".next-image-preview");
+    if (existingPreview) existingPreview.remove();
+ 
+    // Get current media items
+    const allThumbs = document.querySelectorAll(
+      "#thumbContainer [data-media-index]",
+    );
+    const mainImg = document.getElementById("mainProductImage");
+    if (!mainImg || allThumbs.length <= 1) return;
+ 
+    // Find current index
+    let currentIndex = 0;
+    allThumbs.forEach((thumb, idx) => {
+      const thumbUrl =
+        thumb.dataset.mediaUrl || thumb.querySelector("img")?.src;
+      if (thumbUrl === mainImg.src) {
+        currentIndex = idx;
+      }
+    });
+ 
+    // Check if there's a next image (only show for images, not videos)
+    const nextThumb = allThumbs[currentIndex + 1];
+    if (nextThumb && nextThumb.dataset.mediaType !== "video") {
+      const nextUrl =
+        nextThumb.dataset.mediaUrl || nextThumb.querySelector("img")?.src;
+      if (nextUrl) {
+        const preview = document.createElement("div");
+        preview.className =
+          "next-image-preview absolute right-0 top-0 h-full w-20 md:w-24 pointer-events-none";
+        preview.innerHTML = `
+        <div class="h-full w-full bg-gradient-to-l from-black/20 to-transparent">
+          <img src="${nextUrl}"
+               class="h-full w-full object-cover opacity-50"
+               style="mask-image: linear-gradient(to left, rgba(0,0,0,0.6), transparent);"
+               alt="Next image preview"/>
+        </div>
+        <div class="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full w-8 h-8 flex items-center justify-center shadow-md">
+          <i class="fa-solid fa-chevron-right text-xs text-gray-700"></i>
+        </div>
+      `;
+        displayArea.appendChild(preview);
+      }
     }
   }
+ 
+  function updateAllActiveStates() {
+    // Find current active index from desktop thumbs
+    const desktopThumbs = document.querySelectorAll(
+      "#thumbContainer [data-media-index]",
+    );
+    let activeIndex = 0;
+    desktopThumbs.forEach((thumb, idx) => {
+      if (thumb.classList.contains("border-[#e39f32]")) {
+        activeIndex = idx;
+      }
+    });
+ 
+    // Update mobile thumbs
+    const mobileThumbs = document.querySelectorAll(
+      "#mobileThumbContainer .mobile-thumb-item",
+    );
+    mobileThumbs.forEach((thumb, idx) => {
+      thumb.classList.toggle("border-[#e39f32]", idx === activeIndex);
+      thumb.classList.toggle("border-transparent", idx !== activeIndex);
+    });
+ 
+    // Update dots
+    const dots = document.querySelectorAll("#mobileNavDots .mobile-nav-dot");
+    dots.forEach((dot, idx) => {
+      dot.classList.toggle("bg-[#E39F32]", idx === activeIndex);
+      dot.classList.toggle("scale-110", idx === activeIndex);
+      dot.classList.toggle("shadow-lg", idx === activeIndex);
+      dot.classList.toggle("shadow-[#E39F32]/30", idx === activeIndex);
+      dot.classList.toggle("bg-gray-300", idx !== activeIndex);
+    });
+  }
+ 
+  //======================= lightbox=======================================
+  // ─── LIGHTBOX SYSTEM ──────────────────────────────────────────────────────────
+  // Add Lightbox HTML to DOM
+ 
+  function addLightboxHTML() {
+    if (document.getElementById("imageLightbox")) return;
+ 
+    const lightboxHTML = `
+    <div id="imageLightbox" class="fixed inset-0 z-[10000] hidden items-center justify-center bg-black/95 backdrop-blur-md"
+         style="opacity:0; transition:opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+     
+      <button id="lightboxClose"
+              class="absolute top-4 right-4 z-20 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20
+                     flex items-center justify-center transition-all duration-300 text-white text-2xl
+                     hover:scale-110 active:scale-95">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+     
+      <button id="lightboxPrev"
+              class="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full
+                     bg-white/10 hover:bg-white/20 flex items-center justify-center
+                     transition-all duration-300 text-white text-xl hover:scale-110 active:scale-95">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+     
+      <button id="lightboxNext"
+              class="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full
+                     bg-white/10 hover:bg-white/20 flex items-center justify-center
+                     transition-all duration-300 text-white text-xl hover:scale-110 active:scale-95">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+     
+      <div id="lightboxCounter" class="absolute bottom-20 left-1/2 -translate-x-1/2 text-white/70 text-sm font-lexend">
+        1 / 1
+      </div>
+     
+      <div class="relative w-full max-w-7xl max-h-[85vh] flex items-center justify-center p-4">
+        <img id="lightboxImage"
+             src=""
+             alt="Product image"
+             class="max-h-[80vh] max-w-full object-contain rounded-lg shadow-2xl transition-all duration-300"
+             style="opacity:0; transform:scale(0.95);"/>
+       
+        <div id="lightboxLoader" class="absolute inset-0 flex items-center justify-center">
+          <div class="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
+        </div>
+      </div>
+     
+      <div id="lightboxThumbs" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 overflow-x-auto max-w-[90vw] pb-2 px-4"
+           style="scrollbar-width:thin; scrollbar-color:rgba(255,255,255,0.3) transparent;">
+      </div>
+    </div>
+  `;
+ 
+    document.body.insertAdjacentHTML("beforeend", lightboxHTML);
+  }
+ 
+  // Lightbox state
+  let lightboxMediaItems = [];
+  let currentLightboxIndex = 0;
+ 
+  // Open lightbox
+  window.openLightbox = function (index) {
+    // Build media list from all thumbnails
+    const allThumbs = document.querySelectorAll(
+      "#thumbContainer [data-media-index]",
+    );
+    lightboxMediaItems = [];
+ 
+    allThumbs.forEach((thumb) => {
+      const type = thumb.dataset.mediaType || "image";
+      const url = thumb.dataset.mediaUrl || thumb.querySelector("img")?.src;
+      if (url) {
+        lightboxMediaItems.push({ type, url });
+      }
+    });
+ 
+    // If no thumbs, use main image
+    if (lightboxMediaItems.length === 0) {
+      const mainImg = document.getElementById("mainProductImage");
+      if (mainImg) {
+        lightboxMediaItems.push({ type: "image", url: mainImg.src });
+      }
+    }
+ 
+    if (lightboxMediaItems.length === 0) return;
+ 
+    currentLightboxIndex = Math.min(index, lightboxMediaItems.length - 1);
+    renderLightbox(currentLightboxIndex);
+ 
+    const lightbox = document.getElementById("imageLightbox");
+    lightbox.style.display = "flex";
+    document.body.style.overflow = "hidden";
+ 
+    requestAnimationFrame(() => {
+      lightbox.style.opacity = "1";
+      const img = document.getElementById("lightboxImage");
+      if (img) {
+        img.style.opacity = "1";
+        img.style.transform = "scale(1)";
+      }
+    });
+  };
+ 
+  // Close lightbox
+  function closeLightbox() {
+    const lightbox = document.getElementById("imageLightbox");
+    lightbox.style.opacity = "0";
+    document.body.style.overflow = "";
+ 
+    setTimeout(() => {
+      lightbox.style.display = "none";
+      const img = document.getElementById("lightboxImage");
+      if (img) {
+        img.style.opacity = "0";
+        img.style.transform = "scale(0.95)";
+      }
+      // Pause any video
+      const video = document.querySelector("#lightboxVideo");
+      if (video) video.pause();
+    }, 300);
+  }
+ 
+  // Render lightbox slide
+  function renderLightbox(index) {
+    const item = lightboxMediaItems[index];
+    if (!item) return;
+ 
+    const img = document.getElementById("lightboxImage");
+    const loader = document.getElementById("lightboxLoader");
+    const counter = document.getElementById("lightboxCounter");
+    const thumbStrip = document.getElementById("lightboxThumbs");
+    const prevBtn = document.getElementById("lightboxPrev");
+    const nextBtn = document.getElementById("lightboxNext");
+ 
+    // Update counter
+    if (counter) {
+      counter.textContent = `${index + 1} / ${lightboxMediaItems.length}`;
+    }
+ 
+    // Show loader
+    if (loader) loader.style.display = "flex";
+ 
+    // Handle video
+    let videoEl = document.querySelector("#lightboxVideo");
+    if (item.type === "video") {
+      img.style.display = "none";
+      if (!videoEl) {
+        videoEl = document.createElement("video");
+        videoEl.id = "lightboxVideo";
+        videoEl.controls = true;
+        videoEl.autoplay = true;
+        videoEl.className = "max-h-[80vh] max-w-full rounded-lg shadow-2xl";
+        videoEl.style.backgroundColor = "#000";
+        document.querySelector("#imageLightbox .relative").appendChild(videoEl);
+      }
+      videoEl.src = item.url;
+      videoEl.style.display = "block";
+      videoEl.load();
+      videoEl.play().catch(() => {});
+      if (loader) loader.style.display = "none";
+    } else {
+      if (videoEl) videoEl.style.display = "none";
+      img.style.display = "block";
+      img.src = item.url;
+      img.onload = () => {
+        if (loader) loader.style.display = "none";
+        img.style.opacity = "1";
+        img.style.transform = "scale(1)";
+      };
+      img.onerror = () => {
+        if (loader) loader.style.display = "none";
+        img.src =
+          FALLBACK_IMG ||
+          'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23666"%3E%3Cpath d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h2v7H7zm4-3h2v10h-2zm4 6h2v4h-2z"/%3E%3C/svg%3E';
+      };
+    }
+ 
+    // Update thumbnail strip
+    if (thumbStrip) {
+      thumbStrip.innerHTML = lightboxMediaItems
+        .map((media, idx) => {
+          if (media.type === "video") {
+            return `
+          <div class="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 cursor-pointer
+                      ${idx === index ? "border-[#E39F32]" : "border-transparent hover:border-white/50"}
+                      relative bg-black/50" data-lb-index="${idx}">
+            <video src="${media.url}" class="w-full h-full object-cover" muted preload="metadata"></video>
+            <div class="absolute inset-0 flex items-center justify-center bg-black/30">
+              <i class="fas fa-play text-white text-xs"></i>
+            </div>
+          </div>`;
+          }
+          return `
+        <img src="${media.url}"
+             class="flex-shrink-0 w-16 h-16 object-cover rounded-lg border-2 cursor-pointer
+                    ${idx === index ? "border-[#E39F32]" : "border-transparent hover:border-white/50"}"
+             data-lb-index="${idx}"
+             onerror="this.style.display='none'"/>`;
+        })
+        .join("");
+ 
+      // Add click listeners to thumbnails
+      thumbStrip.querySelectorAll("[data-lb-index]").forEach((el) => {
+        el.addEventListener("click", function () {
+          const idx = parseInt(this.dataset.lbIndex);
+          if (idx !== currentLightboxIndex) {
+            currentLightboxIndex = idx;
+            renderLightbox(currentLightboxIndex);
+          }
+        });
+      });
+ 
+      // Scroll active thumbnail into view
+      const activeThumb = thumbStrip.querySelector(
+        `[data-lb-index="${index}"]`,
+      );
+      if (activeThumb) {
+        activeThumb.scrollIntoView({
+          behavior: "smooth",
+          inline: "center",
+          block: "nearest",
+        });
+      }
+    }
+ 
+    // Update navigation visibility
+    if (prevBtn) prevBtn.style.display = index === 0 ? "none" : "flex";
+    if (nextBtn)
+      nextBtn.style.display =
+        index === lightboxMediaItems.length - 1 ? "none" : "flex";
+  }
+ 
+  // Wire lightbox controls
+  function wireLightboxControls() {
+    document
+      .getElementById("lightboxClose")
+      ?.addEventListener("click", closeLightbox);
+ 
+    document
+      .getElementById("lightboxPrev")
+      ?.addEventListener("click", function (e) {
+        e.stopPropagation();
+        if (currentLightboxIndex > 0) {
+          currentLightboxIndex--;
+          renderLightbox(currentLightboxIndex);
+        }
+      });
+ 
+    document
+      .getElementById("lightboxNext")
+      ?.addEventListener("click", function (e) {
+        e.stopPropagation();
+        if (currentLightboxIndex < lightboxMediaItems.length - 1) {
+          currentLightboxIndex++;
+          renderLightbox(currentLightboxIndex);
+        }
+      });
+ 
+    // Keyboard controls
+    document.addEventListener("keydown", function (e) {
+      const lightbox = document.getElementById("imageLightbox");
+      if (
+        !lightbox ||
+        lightbox.style.display === "none" ||
+        lightbox.style.opacity === "0"
+      )
+        return;
+ 
+      if (e.key === "Escape") {
+        e.preventDefault();
+        closeLightbox();
+      }
+      if (e.key === "ArrowLeft" && currentLightboxIndex > 0) {
+        e.preventDefault();
+        currentLightboxIndex--;
+        renderLightbox(currentLightboxIndex);
+      }
+      if (
+        e.key === "ArrowRight" &&
+        currentLightboxIndex < lightboxMediaItems.length - 1
+      ) {
+        e.preventDefault();
+        currentLightboxIndex++;
+        renderLightbox(currentLightboxIndex);
+      }
+    });
+ 
+    // Click outside image to close
+    document
+      .getElementById("imageLightbox")
+      ?.addEventListener("click", function (e) {
+        if (e.target === this) closeLightbox();
+      });
+  }
+ 
+  // Initialize lightbox
+  function initLightbox() {
+    addLightboxHTML();
+    wireLightboxControls();
+  }
+ 
+
+
 
   // ═══════════════════════════════════════════════════════════════════════════
   //  VARIANT SELECTION
@@ -2350,7 +3042,7 @@ function syncCardWishlistStates() {
       showToast("Could not add to cart. Please try again.", "error");
     }
   }
-  
+
   // ═══════════════════════════════════════════════════════════════════════════
   //  BUY NOW — SHIPROCKET CHECKOUT INTEGRATION
   // ═══════════════════════════════════════════════════════════════════════════
@@ -2795,71 +3487,59 @@ function syncCardWishlistStates() {
  
           <!-- HEADER -->
           <div class="sticky top-0 bg-gradient-to-b from-[#fff7d6] via-[#fffdf5] to-white border-b border-[#e5e7eb] px-3 sm:px-4 py-3 z-10 rounded-t-2xl shadow-sm">
-                      <div class="flex items-start justify-between gap-3">
+              <div class="flex items-start justify-between gap-3">
  
-                        <div class="flex-1 min-w-0">
+                <div class="flex-1 min-w-0">
+
+                  <h2 class="text-lg sm:text-xl font-semibold font-zain text-[#1D3C4A] leading-tight break-words mb-2">
+                    ${escapeHtml(safeProductData.productName)}
+                  </h2>
+
+                  <div class="flex flex-wrap items-center gap-2">
+
+                    <span class="text-xl sm:text-2xl font-bold font-lexend text-[#1D3C4A]">
+                      ₹${safeProductData.currentSellingPrice.toLocaleString("en-IN")}
+                    </span>
+
+                    ${safeProductData.currentMrpPrice > safeProductData.currentSellingPrice
+                    ? `
+                    <span class="text-sm sm:text-base text-gray-400 font-lexend line-through">
+                      ₹${safeProductData.currentMrpPrice.toLocaleString("en-IN")}
+                    </span>`: ""}
+                    ${discPct ? `
+                    <span class="bg-[#e39f32] text-white text-xs font-semibold px-2 py-1 rounded-md">
+                      ${discPct}% OFF
+                    </span>` : ""      
+                    }
+                  </div>
+
+              </div>
  
-                          <h2 class="text-lg sm:text-xl font-semibold font-zain text-[#1D3C4A] leading-tight break-words mb-2">
-                            ${escapeHtml(safeProductData.productName)}
-                          </h2>
- 
-                          <div class="flex flex-wrap items-center gap-2">
- 
-                            <span class="text-xl sm:text-2xl font-bold font-lexend text-[#1D3C4A]">
-                              ₹${safeProductData.currentSellingPrice.toLocaleString("en-IN")}
-                            </span>
- 
-                            ${
-                              safeProductData.currentMrpPrice > safeProductData.currentSellingPrice
-                                ? `
-                            <span class="text-sm sm:text-base text-gray-400 font-lexend line-through">
-                              ₹${safeProductData.currentMrpPrice.toLocaleString("en-IN")}
-                            </span>
-                            `
-                                : ""
-                            }
- 
-                            ${
-                              discPct
-                                ? `
-                            <span class="bg-[#e39f32] text-white text-xs font-semibold px-2 py-1 rounded-md">
-                              ${discPct}% OFF
-                            </span>
-                            `
-                                : ""
-                            }
- 
-                          </div>
- 
-                        </div>
- 
-                        <button
-                          id="closeCustomOverlayBtn"
-                          class="flex-shrink-0 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-[#1D3C4A] hover:bg-gray-100 rounded-lg transition-all">
-                          <i class="fas fa-times text-lg"></i>
-                        </button>
- 
-                      </div>
- 
-                    </div>
+              <button
+                id="closeCustomOverlayBtn"
+                class="flex-shrink-0 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-[#1D3C4A] hover:bg-gray-100 rounded-lg transition-all">
+                <i class="fas fa-times text-lg"></i>
+              </button>
+            </div>
+          </div>
  
           <!-- BODY -->
          <div class="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-8">
  
-              <!-- LEFT: Preview + Summary -->
-              <div class="space-y-4">
-                <!-- LEFT: Wire Frame OR Product Image + Summary -->
-<div class="space-y-4">
+      <!-- LEFT: Preview + Summary -->
+      <div class="space-y-4">
+        <!-- LEFT: Wire Frame OR Product Image + Summary -->
+  <div class="space-y-4">
  
   ${
-    // ── Decision: show wire frame OR product image ──────────────────────
-    // Wire frame shown ONLY when both conditions met:
-    //   1. frameCount > 0  (product needs user photos)
-    //   2. frameStructure set  (we know how to lay them out)
-    // Otherwise fall back to static product image
-    safeProductData.frameCount > 0 && safeProductData.frameStructure
-      ? `
+      // ── Decision: show wire frame OR product image ──────────────────────
+      // Wire frame shown ONLY when both conditions met:
+      //   1. frameCount > 0  (product needs user photos)
+      //   2. frameStructure set  (we know how to lay them out)
+      // Otherwise fall back to static product image
+      safeProductData.frameCount > 0 && safeProductData.frameStructure
+        ? `
         <!-- WIRE FRAME: empty slots, fills live when user uploads -->
         <div class="rounded-xl overflow-hidden border border-[#e5e7eb] bg-gray-50 p-3">
           <p class="text-xs text-gray-400 text-center mb-2 font-medium tracking-wide uppercase">
@@ -2874,7 +3554,7 @@ function syncCardWishlistStates() {
           </div>
         </div>
       `
-      : `
+        : `
         <!-- PRODUCT IMAGE: static, shown when no wire frame needed -->
         <div class="bg-gray-100 rounded-xl overflow-hidden aspect-square border border-[#e5e7eb] max-w-md mx-auto lg:max-w-none">
           <img id="customPreviewImage"
@@ -2884,7 +3564,7 @@ function syncCardWishlistStates() {
                onerror="this.src='${FALLBACK_IMG}'">
         </div>
       `
-  }
+      }
  
     <!-- Customization Summary box (always shown) -->
     <div class="bg-gray-50 rounded-xl p-4 border border-[#e5e7eb]">
@@ -3250,51 +3930,51 @@ function syncCardWishlistStates() {
 
     // ── Wire up image upload preview ─────────────────────────────────────────
     container.querySelectorAll('input[type="file"]').forEach((fileInput) => {
-  
+
       // REPLACE WITH:
-       // ── Each image field gets its own slot number (1-based) ────────────────
+      // ── Each image field gets its own slot number (1-based) ────────────────
       imageSlotCounter++;
       const thisSlotNumber = imageSlotCounter; // capture for closure
-    
+
       const preview = document.getElementById(`${fileInput.id}_preview`);
-    
-        fileInput.addEventListener("change", function () {
-          const file = this.files?.[0];
-          if (!file) return;
-      
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            const dataUrl = e.target.result;
-      
-            // ── Show small inline preview below the upload box ─────────────
-            if (preview) {
-              preview.src = dataUrl;
-              preview.style.display = "block";  
-            }
-      
-            // ── Store placeholder (NOT base64) — actual File read later ────
-            // base64 kept out of customFieldValues to keep payload lean
-            // getUploadedImageFiles() reads files[0] directly from input
-            customFieldValues[this.name] = "[Image attached]";
-      
-            // ── WIRE FRAME MODE: fill the matching slot with live preview ───
-            // frameCount > 0 + frameStructure set = wire frame is active
-            if (safeProductData.frameCount > 0 && safeProductData.frameStructure) {
-              fillWireFrameSlot(thisSlotNumber, dataUrl);
-            } else {
-              // ── NON-WIRE-FRAME MODE: update left panel product image ──────
-              // Shows uploaded image in place of product image for reference
-              const leftPreview = document.getElementById("customPreviewImage");
-              if (leftPreview) leftPreview.src = dataUrl;
-            }
-      
-            updateCustomizationPrice();
-          };
-          reader.readAsDataURL(file);
-        });
-      
+
+      fileInput.addEventListener("change", function () {
+        const file = this.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const dataUrl = e.target.result;
+
+          // ── Show small inline preview below the upload box ─────────────
+          if (preview) {
+            preview.src = dataUrl;
+            preview.style.display = "block";
+          }
+
+          // ── Store placeholder (NOT base64) — actual File read later ────
+          // base64 kept out of customFieldValues to keep payload lean
+          // getUploadedImageFiles() reads files[0] directly from input
+          customFieldValues[this.name] = "[Image attached]";
+
+          // ── WIRE FRAME MODE: fill the matching slot with live preview ───
+          // frameCount > 0 + frameStructure set = wire frame is active
+          if (safeProductData.frameCount > 0 && safeProductData.frameStructure) {
+            fillWireFrameSlot(thisSlotNumber, dataUrl);
+          } else {
+            // ── NON-WIRE-FRAME MODE: update left panel product image ──────
+            // Shows uploaded image in place of product image for reference
+            const leftPreview = document.getElementById("customPreviewImage");
+            if (leftPreview) leftPreview.src = dataUrl;
+          }
+
+          updateCustomizationPrice();
+        };
+        reader.readAsDataURL(file);
+      });
+
     });
-    
+
 
     // ── Wire up other inputs ──────────────────────────────────────────────
     container
@@ -3308,22 +3988,22 @@ function syncCardWishlistStates() {
   }
 
 
-  
-function renderWireFrame() {
-  // ── Guard: only run if wire frame container exists ──────────────────────
-  const container = document.getElementById("wireFrameContainer");
-  if (!container) return; // no wire frame mode → exit silently
- 
-  const frameCount     = safeProductData.frameCount     || 0;
-  const frameStructure = safeProductData.frameStructure || "grid-2";
- 
-  // ── Nothing to render if no slots needed ───────────────────────────────
-  if (frameCount === 0) return;
- 
-  // ── Slot HTML builder ───────────────────────────────────────────────────
-  // Each slot = a dashed box with a camera icon + slot number
-  // When user uploads, fillWireFrameSlot() replaces the icon with their image
-  const buildSlot = (slotNum) => `
+
+  function renderWireFrame() {
+    // ── Guard: only run if wire frame container exists ──────────────────────
+    const container = document.getElementById("wireFrameContainer");
+    if (!container) return; // no wire frame mode → exit silently
+
+    const frameCount = safeProductData.frameCount || 0;
+    const frameStructure = safeProductData.frameStructure || "grid-2";
+
+    // ── Nothing to render if no slots needed ───────────────────────────────
+    if (frameCount === 0) return;
+
+    // ── Slot HTML builder ───────────────────────────────────────────────────
+    // Each slot = a dashed box with a camera icon + slot number
+    // When user uploads, fillWireFrameSlot() replaces the icon with their image
+    const buildSlot = (slotNum) => `
     <div id="wireSlot_${slotNum}"
          class="wire-slot relative bg-white border-2 border-dashed border-gray-300
                 rounded-xl flex items-center justify-center overflow-hidden
@@ -3340,107 +4020,107 @@ function renderWireFrame() {
            alt="Slot ${slotNum} preview">
     </div>
   `;
- 
-  // ── Layout builder based on frameStructure ──────────────────────────────
-  let layoutHTML = "";
- 
-  switch (frameStructure) {
- 
-    // ── grid-2: [ slot1 | slot2 ]  side by side ──────────────────────────
-    case "grid-2":
-      layoutHTML = `
+
+    // ── Layout builder based on frameStructure ──────────────────────────────
+    let layoutHTML = "";
+
+    switch (frameStructure) {
+
+      // ── grid-2: [ slot1 | slot2 ]  side by side ──────────────────────────
+      case "grid-2":
+        layoutHTML = `
         <div class="grid grid-cols-2 gap-2">
           ${buildSlot(1)}
           ${buildSlot(2)}
         </div>`;
-      break;
- 
-    // ── grid-3: [ slot1 | slot2 | slot3 ]  3 equal columns ───────────────
-    case "grid-3":
-      layoutHTML = `
+        break;
+
+      // ── grid-3: [ slot1 | slot2 | slot3 ]  3 equal columns ───────────────
+      case "grid-3":
+        layoutHTML = `
         <div class="grid grid-cols-3 gap-2">
           ${buildSlot(1)}
           ${buildSlot(2)}
           ${buildSlot(3)}
         </div>`;
-      break;
- 
-    // ── grid-4: [ slot1 | slot2 ]  2×2 grid ──────────────────────────────
-    //           [ slot3 | slot4 ]
-    case "grid-4":
-      layoutHTML = `
+        break;
+
+      // ── grid-4: [ slot1 | slot2 ]  2×2 grid ──────────────────────────────
+      //           [ slot3 | slot4 ]
+      case "grid-4":
+        layoutHTML = `
         <div class="grid grid-cols-2 gap-2">
           ${buildSlot(1)}
           ${buildSlot(2)}
           ${buildSlot(3)}
           ${buildSlot(4)}
         </div>`;
-      break;
- 
-    // ── stack-2: slot1 on top, slot2 below ───────────────────────────────
-    case "stack-2":
-      layoutHTML = `
+        break;
+
+      // ── stack-2: slot1 on top, slot2 below ───────────────────────────────
+      case "stack-2":
+        layoutHTML = `
         <div class="flex flex-col gap-2">
           ${buildSlot(1)}
           ${buildSlot(2)}
         </div>`;
-      break;
- 
-    // ── single: one full-width slot ───────────────────────────────────────
-    case "single":
-      layoutHTML = `
+        break;
+
+      // ── single: one full-width slot ───────────────────────────────────────
+      case "single":
+        layoutHTML = `
         <div class="w-full">
           ${buildSlot(1)}
         </div>`;
-      break;
- 
-    // ── fallback: treat as grid-2 if unknown structure passed ─────────────
-    default:
-      layoutHTML = `
+        break;
+
+      // ── fallback: treat as grid-2 if unknown structure passed ─────────────
+      default:
+        layoutHTML = `
         <div class="grid grid-cols-2 gap-2">
           ${buildSlot(1)}
           ${buildSlot(2)}
         </div>`;
+    }
+
+    // ── Inject into container ───────────────────────────────────────────────
+    container.innerHTML = layoutHTML;
   }
- 
-  // ── Inject into container ───────────────────────────────────────────────
-  container.innerHTML = layoutHTML;
-}
 
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  PATCH 4 — fillWireFrameSlot()   [NEW FUNCTION]
-//  WHERE : Add right after renderWireFrame()
-//  WHAT  : Called when user uploads an image in a custom field
-//          Finds the matching wire frame slot and shows the uploaded image
-//
-//  slotNumber : 1-based index matching field order (1st image field = slot 1)
-//  imageDataUrl: base64 string from FileReader (for instant local preview)
-// ═══════════════════════════════════════════════════════════════════════════
- 
-function fillWireFrameSlot(slotNumber, imageDataUrl) {
-  // ── Guard: wire frame mode only ─────────────────────────────────────────
-  const frameCount = safeProductData.frameCount || 0;
-  if (frameCount === 0) return; // no wire frame → do nothing
- 
-  // ── Find the slot img element ───────────────────────────────────────────
-  const slotImg   = document.getElementById(`wireSlotImg_${slotNumber}`);
-  const slotEmpty = document.querySelector(`#wireSlot_${slotNumber} .wire-slot-empty`);
- 
-  if (!slotImg) return; // slot doesn't exist for this number → skip
- 
-  // ── Fill the slot with uploaded image ──────────────────────────────────
-  slotImg.src = imageDataUrl;
-  slotImg.classList.remove("hidden");   // show the image
-  if (slotEmpty) slotEmpty.classList.add("hidden"); // hide camera icon
- 
-  // ── Visual feedback: slot border turns gold when filled ─────────────────
-  const slotBox = document.getElementById(`wireSlot_${slotNumber}`);
-  if (slotBox) {
-    slotBox.classList.remove("border-gray-300");
-    slotBox.classList.add("border-[#e39f32]"); // gold border = uploaded ✅
+  // ═══════════════════════════════════════════════════════════════════════════
+  //  PATCH 4 — fillWireFrameSlot()   [NEW FUNCTION]
+  //  WHERE : Add right after renderWireFrame()
+  //  WHAT  : Called when user uploads an image in a custom field
+  //          Finds the matching wire frame slot and shows the uploaded image
+  //
+  //  slotNumber : 1-based index matching field order (1st image field = slot 1)
+  //  imageDataUrl: base64 string from FileReader (for instant local preview)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function fillWireFrameSlot(slotNumber, imageDataUrl) {
+    // ── Guard: wire frame mode only ─────────────────────────────────────────
+    const frameCount = safeProductData.frameCount || 0;
+    if (frameCount === 0) return; // no wire frame → do nothing
+
+    // ── Find the slot img element ───────────────────────────────────────────
+    const slotImg = document.getElementById(`wireSlotImg_${slotNumber}`);
+    const slotEmpty = document.querySelector(`#wireSlot_${slotNumber} .wire-slot-empty`);
+
+    if (!slotImg) return; // slot doesn't exist for this number → skip
+
+    // ── Fill the slot with uploaded image ──────────────────────────────────
+    slotImg.src = imageDataUrl;
+    slotImg.classList.remove("hidden");   // show the image
+    if (slotEmpty) slotEmpty.classList.add("hidden"); // hide camera icon
+
+    // ── Visual feedback: slot border turns gold when filled ─────────────────
+    const slotBox = document.getElementById(`wireSlot_${slotNumber}`);
+    if (slotBox) {
+      slotBox.classList.remove("border-gray-300");
+      slotBox.classList.add("border-[#e39f32]"); // gold border = uploaded ✅
+    }
   }
-}
 
   function updateCustomizationPrice() {
     let total = safeProductData.currentSellingPrice;
@@ -3523,7 +4203,7 @@ function fillWireFrameSlot(slotNumber, imageDataUrl) {
     const customFields = safeProductData.customFields || [];
     if (customFields.length > 0) {
       buildCustomFieldsUI(customFields);
-    
+
       // ── CUSTOMIZATION PATCH: render wire frame after fields are built ────
       // renderWireFrame() checks frameCount + frameStructure internally
       // Does nothing if frameCount is 0/null (non-wire-frame products)
@@ -3570,542 +4250,542 @@ function fillWireFrameSlot(slotNumber, imageDataUrl) {
 
 
   // ═══════════════════════════════════════════════════════════════════════════
-//  PATCH 7 — validateCustomFields()   [NEW FUNCTION]
-//  WHERE : Add before addCustomizedToCart()
-//  WHAT  : Checks all required fields before submission
-//          Returns { valid: true } or { valid: false, message: "..." }
-// ═══════════════════════════════════════════════════════════════════════════
- 
-function validateCustomFields() {
-  // ── Loop through all custom fields and validate required ones ───────────
-  for (const [fieldId, field] of Object.entries(currentCustomFields)) {
-    if (!field.required) continue; // skip optional fields
- 
-    const inputType = field.inputType;
- 
-    if (inputType === "image") {
-      // ── Image field: check if file input has a file selected ────────────
-      const fileInput = document.getElementById(fieldId);
-      if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
-        return {
-          valid:   false,
-          message: `Please upload an image for "${field.fieldLabel || field.fieldName}"`,
-        };
-      }
- 
-    } else if (inputType === "radio") {
-      // ── Radio field: check if any option selected ───────────────────────
-      const checked = document.querySelector(
-        `input[name="${field.fieldName}"]:checked`
-      );
-      if (!checked) {
-        return {
-          valid:   false,
-          message: `Please select an option for "${field.fieldLabel || field.fieldName}"`,
-        };
-      }
- 
-    } else if (inputType === "checkbox") {
-      // ── Checkbox: skip — optional by nature even if marked required ──────
-      continue;
- 
-    } else {
-      // ── Text / number / textarea / dropdown ─────────────────────────────
-      const el    = document.getElementById(fieldId);
-      const value = el ? el.value.trim() : "";
-      if (!value) {
-        return {
-          valid:   false,
-          message: `Please fill in "${field.fieldLabel || field.fieldName}"`,
-        };
-      }
-    }
-  }
- 
-  // ── WhatsApp number: optional, but must be 10 digits if filled ──────────
-  const waInput = document.getElementById("customerWhatsappNumber");
-  if (waInput && waInput.value.trim()) {
-    const digits = waInput.value.trim().replace(/\D/g, "");
-    if (digits.length !== 10) {
-      return {
-        valid:   false,
-        message: "Please enter a valid 10-digit WhatsApp number",
-      };
-    }
-  }
- 
-  // ── All validations passed ──────────────────────────────────────────────
-  return { valid: true };
-}
- 
-// ═══════════════════════════════════════════════════════════════════════════
-//  PATCH 8 — uploadCustomizationImage()   [NEW FUNCTION]
-//  WHERE : Add near addCustomizedToCart()
-//  WHAT  : Uploads a single File object to backend
-//          Returns assetUuid string on success, null on failure
-//          Called once per image field inside addCustomizedToCart()
-// ═══════════════════════════════════════════════════════════════════════════
- 
-async function uploadCustomizationImage(imageFile) {
-  try {
-    const userId = USER_ID; // your existing helper
- 
-    // ── Build multipart form data ───────────────────────────────────────
-    const formData = new FormData();
-    formData.append("file", imageFile);
-    if (userId) formData.append("userId", String(userId));
- 
-    // ── POST to upload endpoint ─────────────────────────────────────────
-    // NOTE: Do NOT set Content-Type header manually
-    // Browser automatically sets multipart/form-data with correct boundary
-    const res = await fetch(`${BASE_URL}/api/v1/customize/upload-image`, {
-      method: "POST",
-      body:   formData,
-    });
- 
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.message || `Upload failed: HTTP ${res.status}`);
-    }
- 
-    const data      = await res.json();
-    const assetUuid = data?.data?.assetUuid;
- 
-    if (!assetUuid) throw new Error("No assetUuid returned from upload");
- 
-    console.log("[Customize] Image uploaded successfully | assetUuid:", assetUuid);
-    return assetUuid;
- 
-  } catch (err) {
-    console.error("[Customize] Image upload error:", err.message);
-    return null; // caller handles null as upload failure
-  }
-}
- 
+  //  PATCH 7 — validateCustomFields()   [NEW FUNCTION]
+  //  WHERE : Add before addCustomizedToCart()
+  //  WHAT  : Checks all required fields before submission
+  //          Returns { valid: true } or { valid: false, message: "..." }
+  // ═══════════════════════════════════════════════════════════════════════════
 
-  
+  function validateCustomFields() {
+    // ── Loop through all custom fields and validate required ones ───────────
+    for (const [fieldId, field] of Object.entries(currentCustomFields)) {
+      if (!field.required) continue; // skip optional fields
+
+      const inputType = field.inputType;
+
+      if (inputType === "image") {
+        // ── Image field: check if file input has a file selected ────────────
+        const fileInput = document.getElementById(fieldId);
+        if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+          return {
+            valid: false,
+            message: `Please upload an image for "${field.fieldLabel || field.fieldName}"`,
+          };
+        }
+
+      } else if (inputType === "radio") {
+        // ── Radio field: check if any option selected ───────────────────────
+        const checked = document.querySelector(
+          `input[name="${field.fieldName}"]:checked`
+        );
+        if (!checked) {
+          return {
+            valid: false,
+            message: `Please select an option for "${field.fieldLabel || field.fieldName}"`,
+          };
+        }
+
+      } else if (inputType === "checkbox") {
+        // ── Checkbox: skip — optional by nature even if marked required ──────
+        continue;
+
+      } else {
+        // ── Text / number / textarea / dropdown ─────────────────────────────
+        const el = document.getElementById(fieldId);
+        const value = el ? el.value.trim() : "";
+        if (!value) {
+          return {
+            valid: false,
+            message: `Please fill in "${field.fieldLabel || field.fieldName}"`,
+          };
+        }
+      }
+    }
+
+    // ── WhatsApp number: optional, but must be 10 digits if filled ──────────
+    const waInput = document.getElementById("customerWhatsappNumber");
+    if (waInput && waInput.value.trim()) {
+      const digits = waInput.value.trim().replace(/\D/g, "");
+      if (digits.length !== 10) {
+        return {
+          valid: false,
+          message: "Please enter a valid 10-digit WhatsApp number",
+        };
+      }
+    }
+
+    // ── All validations passed ──────────────────────────────────────────────
+    return { valid: true };
+  }
 
   // ═══════════════════════════════════════════════════════════════════════════
-//  PATCH 9 — addCustomizedToCart()   [FULL REPLACE]
-//  WHERE : Replace existing addCustomizedToCart() entirely
-//  WHAT  : New multi-image flow:
-//            1. Validate required fields
-//            2. Upload all image files sequentially → collect assetUuids
-//            3. Build assetSlots array for backend
-//            4. Build customFieldsJson (text fields only, NO base64)
-//            5. POST to /api/v1/customize/add-to-cart
-//            6. On success: update cart badge, close overlay
-// ═══════════════════════════════════════════════════════════════════════════
- 
-async function addCustomizedToCart() {
-  const btn = document.getElementById("addCustomizedToCartBtn");
- 
-  try {
-    // ── STEP 1: Validate all required custom fields ─────────────────────
-    const validation = validateCustomFields();
-    if (!validation.valid) {
-      showToast(validation.message, "error");
-      return;
-    }
- 
-    // ── STEP 2: Show uploading state on button ──────────────────────────
-    if (btn) {
-      btn.disabled   = true;
-      btn.innerHTML  = `<i class="fas fa-spinner fa-spin text-xs"></i> Uploading...`;
-    }
- 
-    // ── STEP 3: Collect all image files from custom field inputs ────────
-    // Returns: [{ slotNumber, fieldName, fieldId, file }, ...]
-    const uploadedFiles = getUploadedImageFiles();
- 
-    // ── STEP 4: Upload each image sequentially → collect assetSlots ────
-    // assetSlots = array backend expects: [{ slotNumber, assetUuid, fieldName }]
-    const assetSlots = [];
- 
-    for (const fileEntry of uploadedFiles) {
-      const uuid = await uploadCustomizationImage(fileEntry.file);
- 
-      if (!uuid) {
-        // Upload failed for this slot — stop and show error
-        showToast(
-          `Failed to upload image for "${fileEntry.fieldName}". Please try again.`,
-          "error"
-        );
-        return; // finally block will restore button
-      }
- 
-      assetSlots.push({
-        slotNumber: fileEntry.slotNumber,  // 1, 2, 3 ...
-        assetUuid:  uuid,                   // UUID from backend upload response
-        fieldName:  fileEntry.fieldName,    // "upload image", "upload image - 2"
+  //  PATCH 8 — uploadCustomizationImage()   [NEW FUNCTION]
+  //  WHERE : Add near addCustomizedToCart()
+  //  WHAT  : Uploads a single File object to backend
+  //          Returns assetUuid string on success, null on failure
+  //          Called once per image field inside addCustomizedToCart()
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  async function uploadCustomizationImage(imageFile) {
+    try {
+      const userId = USER_ID; // your existing helper
+
+      // ── Build multipart form data ───────────────────────────────────────
+      const formData = new FormData();
+      formData.append("file", imageFile);
+      if (userId) formData.append("userId", String(userId));
+
+      // ── POST to upload endpoint ─────────────────────────────────────────
+      // NOTE: Do NOT set Content-Type header manually
+      // Browser automatically sets multipart/form-data with correct boundary
+      const res = await fetch(`${BASE_URL}/api/v1/customize/upload-image`, {
+        method: "POST",
+        body: formData,
       });
-    }
- 
-    // ── STEP 5: Build customFieldsJson (text fields ONLY) ───────────────
-    // Strip base64 / "[Image attached]" — images tracked via assetSlots
-    const textOnlyFields = {};
- 
-    for (const [key, value] of Object.entries(customFieldValues)) {
-      // Skip image placeholders — image data goes in assetSlots, not here
-      if (typeof value === "string" && value.startsWith("data:image")) continue;
-      if (value === "[Image attached]") continue;
-      textOnlyFields[key] = value;
-    }
- 
-    // ── STEP 6: Add frameCount to customFieldsJson for admin reference ──
-    // Admin panel reads this to know how many images to expect
-    if (safeProductData.frameCount) {
-      textOnlyFields["frameCount"] = safeProductData.frameCount;
-    }
- 
-    // ── STEP 7: Add frameStructure to customFieldsJson ──────────────────
-    if (safeProductData.frameStructure) {
-      textOnlyFields["frameStructure"] = safeProductData.frameStructure;
-    }
- 
-    // ── STEP 8: WhatsApp number from dedicated input (if filled) ────────
-    const waNumber = document.getElementById("customerWhatsappNumber")?.value?.trim();
-    if (waNumber) {
-      textOnlyFields["whatsappNumber"] = waNumber;
-    }
- 
-    // ── STEP 9: Calculate final price from overlay total display ────────
-    const totalText  = document.getElementById("customTotalPrice")?.textContent || "";
-    const finalPrice =
-      parseInt(totalText.replace(/[^0-9]/g, ""), 10) ||
-      safeProductData.currentSellingPrice;
- 
-    // ── STEP 10: Get selected variant and quantity ───────────────────────
-    const variant  = getSelectedVariant();
-    const quantity = parseInt(
-      document.getElementById("quantity")?.textContent || "1",
-      10
-    );
- 
-    // ── STEP 11: Update button to "Adding..." ────────────────────────────
-    if (btn) {
-      btn.innerHTML = `<i class="fas fa-spinner fa-spin text-xs"></i> Adding...`;
-    }
- 
-    // ── STEP 12: Build final payload for /customize/add-to-cart ─────────
-    const customPayload = {
-      userId:          USER_ID,
-      sessionId:       null,
-      productId:       safeProductData.productId,
-      variantId:       variant?.variantId || null,
-      sku:             variant?.sku       || safeProductData.currentSku,
-      selectedColor:   variant?.color     || safeProductData.selectedColor || null,
-      selectedSize:    variant?.size      || safeProductData.productSize   || null,
-      productName:     safeProductData.productName,
-      titleName:       safeProductData.productName,
-      unitPrice:       finalPrice,
-      mrpPrice:        safeProductData.currentMrpPrice,
-      quantity:        quantity,
-      // Text-only fields: size selection, mobile number, frameCount etc.
-      customFieldsJson: Object.keys(textOnlyFields).length > 0
-        ? JSON.stringify(textOnlyFields)
-        : null,
-      // Image slots: [{ slotNumber:1, assetUuid:"uuid-1", fieldName:"upload image" }, ...]
-      // Empty array if product has no image fields (text-only customization)
-      assetSlots: assetSlots,
-    };
- 
-    // ── STEP 13: POST to new customized cart endpoint ────────────────────
-    // NOTE: This hits /customize/add-to-cart NOT /cart/add
-    // Existing cart/add is completely untouched
-    const res = await fetch(`${BASE_URL}/api/v1/customize/add-to-cart`, {
-      method:  "POST",
-      headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify(customPayload),
-    });
- 
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.message || `HTTP ${res.status}`);
-    }
- 
-    // ── STEP 14: Success — update UI ─────────────────────────────────────
-    const pid = Number(safeProductData.productId);
-    addedToCartSet.add(pid); // mark as added (prevents duplicate add)
- 
-    showToast("Customized product added to cart! 🛒", "success");
-    dispatchCartEvent(); // fires CustomEvent → header badge updates
- 
-    // ── Update Add to Cart buttons → "Go to Cart" ───────────────────────
-    document.querySelectorAll(".add-to-cart-btn").forEach((addBtn) => {
-      addBtn.innerHTML    = `<i class="fa-solid fa-bag-shopping"></i> <span class="text-sm whitespace-nowrap">Go to Cart</span>`;
-      addBtn.style.background  = "#e39f32";
-      addBtn.style.color       = "#1D3C4A";
-      addBtn.style.fontWeight  = "600";
-      addBtn.style.borderColor = "#e39f32";
-    });
- 
-    closeCustomizationOverlay(); // close overlay after success
- 
-  } catch (err) {
-    console.error("[CustomCart] Add to cart error:", err);
-    showToast(err.message || "Could not add to cart. Please try again.", "error");
- 
-  } finally {
-    // ── Always restore button regardless of success/failure ─────────────
-    if (btn) {
-      btn.disabled  = false;
-      btn.innerHTML = `<i class="fas fa-cart-plus text-xs"></i> Add to Cart`;
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || `Upload failed: HTTP ${res.status}`);
+      }
+
+      const data = await res.json();
+      const assetUuid = data?.data?.assetUuid;
+
+      if (!assetUuid) throw new Error("No assetUuid returned from upload");
+
+      console.log("[Customize] Image uploaded successfully | assetUuid:", assetUuid);
+      return assetUuid;
+
+    } catch (err) {
+      console.error("[Customize] Image upload error:", err.message);
+      return null; // caller handles null as upload failure
     }
   }
-}
 
 
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  PATCH 6 — getUploadedImageFiles()   [NEW FUNCTION]
-//  WHERE : Add near addCustomizedToCart()
-//  WHAT  : Collects all File objects from image inputs in the overlay
-//          Returns array of { slotNumber, fieldName, fieldId, file }
-//          slotNumber matches wire frame slots (1-based, image fields only)
-// ═══════════════════════════════════════════════════════════════════════════
- 
-function getUploadedImageFiles() {
-  const container = document.getElementById("customFieldsContainer");
-  if (!container) return [];
- 
-  const fileInputs = container.querySelectorAll('input[type="file"]');
-  const uploadedFiles = [];
-  let slotCounter = 0;
- 
-  fileInputs.forEach((input) => {
-    slotCounter++; // slot numbers are 1-based across image fields only
- 
-    // ── Only include inputs that actually have a file selected ──────────
-    if (input.files && input.files.length > 0) {
-      uploadedFiles.push({
-        slotNumber: slotCounter,          // wire frame slot number
-        fieldName:  input.name,           // e.g. "upload image", "upload image - 2"
-        fieldId:    input.dataset.fieldId, // e.g. "custom_1", "custom_4"
-        file:       input.files[0],        // actual File object
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  //  PATCH 9 — addCustomizedToCart()   [FULL REPLACE]
+  //  WHERE : Replace existing addCustomizedToCart() entirely
+  //  WHAT  : New multi-image flow:
+  //            1. Validate required fields
+  //            2. Upload all image files sequentially → collect assetUuids
+  //            3. Build assetSlots array for backend
+  //            4. Build customFieldsJson (text fields only, NO base64)
+  //            5. POST to /api/v1/customize/add-to-cart
+  //            6. On success: update cart badge, close overlay
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  async function addCustomizedToCart() {
+    const btn = document.getElementById("addCustomizedToCartBtn");
+
+    try {
+      // ── STEP 1: Validate all required custom fields ─────────────────────
+      const validation = validateCustomFields();
+      if (!validation.valid) {
+        showToast(validation.message, "error");
+        return;
+      }
+
+      // ── STEP 2: Show uploading state on button ──────────────────────────
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fas fa-spinner fa-spin text-xs"></i> Uploading...`;
+      }
+
+      // ── STEP 3: Collect all image files from custom field inputs ────────
+      // Returns: [{ slotNumber, fieldName, fieldId, file }, ...]
+      const uploadedFiles = getUploadedImageFiles();
+
+      // ── STEP 4: Upload each image sequentially → collect assetSlots ────
+      // assetSlots = array backend expects: [{ slotNumber, assetUuid, fieldName }]
+      const assetSlots = [];
+
+      for (const fileEntry of uploadedFiles) {
+        const uuid = await uploadCustomizationImage(fileEntry.file);
+
+        if (!uuid) {
+          // Upload failed for this slot — stop and show error
+          showToast(
+            `Failed to upload image for "${fileEntry.fieldName}". Please try again.`,
+            "error"
+          );
+          return; // finally block will restore button
+        }
+
+        assetSlots.push({
+          slotNumber: fileEntry.slotNumber,  // 1, 2, 3 ...
+          assetUuid: uuid,                   // UUID from backend upload response
+          fieldName: fileEntry.fieldName,    // "upload image", "upload image - 2"
+        });
+      }
+
+      // ── STEP 5: Build customFieldsJson (text fields ONLY) ───────────────
+      // Strip base64 / "[Image attached]" — images tracked via assetSlots
+      const textOnlyFields = {};
+
+      for (const [key, value] of Object.entries(customFieldValues)) {
+        // Skip image placeholders — image data goes in assetSlots, not here
+        if (typeof value === "string" && value.startsWith("data:image")) continue;
+        if (value === "[Image attached]") continue;
+        textOnlyFields[key] = value;
+      }
+
+      // ── STEP 6: Add frameCount to customFieldsJson for admin reference ──
+      // Admin panel reads this to know how many images to expect
+      if (safeProductData.frameCount) {
+        textOnlyFields["frameCount"] = safeProductData.frameCount;
+      }
+
+      // ── STEP 7: Add frameStructure to customFieldsJson ──────────────────
+      if (safeProductData.frameStructure) {
+        textOnlyFields["frameStructure"] = safeProductData.frameStructure;
+      }
+
+      // ── STEP 8: WhatsApp number from dedicated input (if filled) ────────
+      const waNumber = document.getElementById("customerWhatsappNumber")?.value?.trim();
+      if (waNumber) {
+        textOnlyFields["whatsappNumber"] = waNumber;
+      }
+
+      // ── STEP 9: Calculate final price from overlay total display ────────
+      const totalText = document.getElementById("customTotalPrice")?.textContent || "";
+      const finalPrice =
+        parseInt(totalText.replace(/[^0-9]/g, ""), 10) ||
+        safeProductData.currentSellingPrice;
+
+      // ── STEP 10: Get selected variant and quantity ───────────────────────
+      const variant = getSelectedVariant();
+      const quantity = parseInt(
+        document.getElementById("quantity")?.textContent || "1",
+        10
+      );
+
+      // ── STEP 11: Update button to "Adding..." ────────────────────────────
+      if (btn) {
+        btn.innerHTML = `<i class="fas fa-spinner fa-spin text-xs"></i> Adding...`;
+      }
+
+      // ── STEP 12: Build final payload for /customize/add-to-cart ─────────
+      const customPayload = {
+        userId: USER_ID,
+        sessionId: null,
+        productId: safeProductData.productId,
+        variantId: variant?.variantId || null,
+        sku: variant?.sku || safeProductData.currentSku,
+        selectedColor: variant?.color || safeProductData.selectedColor || null,
+        selectedSize: variant?.size || safeProductData.productSize || null,
+        productName: safeProductData.productName,
+        titleName: safeProductData.productName,
+        unitPrice: finalPrice,
+        mrpPrice: safeProductData.currentMrpPrice,
+        quantity: quantity,
+        // Text-only fields: size selection, mobile number, frameCount etc.
+        customFieldsJson: Object.keys(textOnlyFields).length > 0
+          ? JSON.stringify(textOnlyFields)
+          : null,
+        // Image slots: [{ slotNumber:1, assetUuid:"uuid-1", fieldName:"upload image" }, ...]
+        // Empty array if product has no image fields (text-only customization)
+        assetSlots: assetSlots,
+      };
+
+      // ── STEP 13: POST to new customized cart endpoint ────────────────────
+      // NOTE: This hits /customize/add-to-cart NOT /cart/add
+      // Existing cart/add is completely untouched
+      const res = await fetch(`${BASE_URL}/api/v1/customize/add-to-cart`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(customPayload),
       });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || `HTTP ${res.status}`);
+      }
+
+      // ── STEP 14: Success — update UI ─────────────────────────────────────
+      const pid = Number(safeProductData.productId);
+      addedToCartSet.add(pid); // mark as added (prevents duplicate add)
+
+      showToast("Customized product added to cart! 🛒", "success");
+      dispatchCartEvent(); // fires CustomEvent → header badge updates
+
+      // ── Update Add to Cart buttons → "Go to Cart" ───────────────────────
+      document.querySelectorAll(".add-to-cart-btn").forEach((addBtn) => {
+        addBtn.innerHTML = `<i class="fa-solid fa-bag-shopping"></i> <span class="text-sm whitespace-nowrap">Go to Cart</span>`;
+        addBtn.style.background = "#e39f32";
+        addBtn.style.color = "#1D3C4A";
+        addBtn.style.fontWeight = "600";
+        addBtn.style.borderColor = "#e39f32";
+      });
+
+      closeCustomizationOverlay(); // close overlay after success
+
+    } catch (err) {
+      console.error("[CustomCart] Add to cart error:", err);
+      showToast(err.message || "Could not add to cart. Please try again.", "error");
+
+    } finally {
+      // ── Always restore button regardless of success/failure ─────────────
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fas fa-cart-plus text-xs"></i> Add to Cart`;
+      }
     }
-  });
- 
-  // Returns: [{ slotNumber:1, fieldName:"upload image", file:File }, ...]
-  return uploadedFiles;
-}
+  }
 
 
-// ═══════════════════════════════════════════════════════════════════════════
-// NEW FUNCTION — Upload image to backend, return assetUuid
-// Called from addCustomizedToCart() before cart add
-// ═══════════════════════════════════════════════════════════════════════════
-async function uploadCustomizationImage(imageFile) {
-  try {
-    const userId = USER_ID;
-    const formData = new FormData();
-    formData.append("file", imageFile);
 
-    if (userId) formData.append("userId", userId);
+  // ═══════════════════════════════════════════════════════════════════════════
+  //  PATCH 6 — getUploadedImageFiles()   [NEW FUNCTION]
+  //  WHERE : Add near addCustomizedToCart()
+  //  WHAT  : Collects all File objects from image inputs in the overlay
+  //          Returns array of { slotNumber, fieldName, fieldId, file }
+  //          slotNumber matches wire frame slots (1-based, image fields only)
+  // ═══════════════════════════════════════════════════════════════════════════
 
-    const res = await fetch(
-      `${BASE_URL}/api/v1/customize/upload-image`, {
+  function getUploadedImageFiles() {
+    const container = document.getElementById("customFieldsContainer");
+    if (!container) return [];
+
+    const fileInputs = container.querySelectorAll('input[type="file"]');
+    const uploadedFiles = [];
+    let slotCounter = 0;
+
+    fileInputs.forEach((input) => {
+      slotCounter++; // slot numbers are 1-based across image fields only
+
+      // ── Only include inputs that actually have a file selected ──────────
+      if (input.files && input.files.length > 0) {
+        uploadedFiles.push({
+          slotNumber: slotCounter,          // wire frame slot number
+          fieldName: input.name,           // e.g. "upload image", "upload image - 2"
+          fieldId: input.dataset.fieldId, // e.g. "custom_1", "custom_4"
+          file: input.files[0],        // actual File object
+        });
+      }
+    });
+
+    // Returns: [{ slotNumber:1, fieldName:"upload image", file:File }, ...]
+    return uploadedFiles;
+  }
+
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // NEW FUNCTION — Upload image to backend, return assetUuid
+  // Called from addCustomizedToCart() before cart add
+  // ═══════════════════════════════════════════════════════════════════════════
+  async function uploadCustomizationImage(imageFile) {
+    try {
+      const userId = USER_ID;
+      const formData = new FormData();
+      formData.append("file", imageFile);
+
+      if (userId) formData.append("userId", userId);
+
+      const res = await fetch(
+        `${BASE_URL}/api/v1/customize/upload-image`, {
         method: "POST",
         body: formData,
         // Note: NO Content-Type header — browser sets multipart boundary automatically
       }
-    );
-
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.message || `Upload failed: HTTP ${res.status}`);
-    }
-
-    const data = await res.json();
-    const assetUuid = data?.data?.assetUuid;
-
-    if (!assetUuid) throw new Error("No assetUuid in upload response");
-
-    console.log("[Customize] Image uploaded | assetUuid:", assetUuid);
-    return assetUuid;
-
-  } catch (err) {
-    console.error("[Customize] Upload error:", err);
-    return null;
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// NEW FUNCTION — Validate required custom fields before submission
-// Returns { valid: true } or { valid: false, message: "..." }
-// ═══════════════════════════════════════════════════════════════════════════
-function validateCustomFields() {
-  for (const [fieldId, field] of Object.entries(currentCustomFields)) {
-    if (!field.required) continue;
-
-    const inputType = field.inputType;
-
-    if (inputType === "image") {
-      // Check actual file input
-      const fileInput = document.getElementById(fieldId);
-      if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
-        return {
-          valid: false,
-          message: `Please upload an image for "${field.fieldLabel || field.fieldName}"`,
-        };
-      }
-
-    } else if (inputType === "radio") {
-      const checked = document.querySelector(
-        `input[name="${field.fieldName}"]:checked`
       );
-      if (!checked) {
-        return {
-          valid: false,
-          message: `Please select an option for "${field.fieldLabel || field.fieldName}"`,
-        };
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || `Upload failed: HTTP ${res.status}`);
       }
 
-    } else if (inputType === "checkbox") {
-      // Checkboxes are optional by nature — skip required check
+      const data = await res.json();
+      const assetUuid = data?.data?.assetUuid;
 
-    } else {
-      const el = document.getElementById(fieldId);
-      const value = el ? el.value.trim() : "";
-      if (!value) {
-        return {
-          valid: false,
-          message: `Please fill in "${field.fieldLabel || field.fieldName}"`,
-        };
-      }
+      if (!assetUuid) throw new Error("No assetUuid in upload response");
+
+      console.log("[Customize] Image uploaded | assetUuid:", assetUuid);
+      return assetUuid;
+
+    } catch (err) {
+      console.error("[Customize] Upload error:", err);
+      return null;
     }
   }
-
-  // WhatsApp number — optional but if filled must be 10 digits
-  const waInput = document.getElementById("customerWhatsappNumber");
-  if (waInput && waInput.value.trim()) {
-    const digits = waInput.value.trim().replace(/\D/g, "");
-    if (digits.length !== 10) {
-      return {
-        valid: false,
-        message: "Please enter a valid 10-digit WhatsApp number",
-      };
-    }
-  }
-
-  return { valid: true };
-}
-
-//=========== patch end for customized cart ==========//
 
   // ═══════════════════════════════════════════════════════════════════════════
-//  PATCH 10 — buyCustomizedNow()   [FULL REPLACE]
-//  WHERE : Replace existing buyCustomizedNow() entirely
-//  WHAT  : Same flow as addCustomizedToCart() but redirects to checkout
-//          after successful cart add instead of just closing overlay
-// ═══════════════════════════════════════════════════════════════════════════
- 
-async function buyCustomizedNow() {
-  const btn = document.getElementById("buyCustomizedNowBtn");
- 
-  try {
-    // ── STEP 1: Validate required fields (same as addCustomizedToCart) ──
-    const validation = validateCustomFields();
-    if (!validation.valid) {
-      showToast(validation.message, "error");
-      return;
-    }
- 
-    // ── STEP 2: Show loading state ───────────────────────────────────────
-    if (btn) {
-      btn.disabled  = true;
-      btn.innerHTML = `<i class="fas fa-spinner fa-spin text-xs"></i> Processing...`;
-    }
- 
-    // ── STEP 3–13: Exact same upload + cart add flow as addCustomizedToCart
-    // (keeping DRY — call addCustomizedToCart logic inline)
-    const uploadedFiles = getUploadedImageFiles();
-    const assetSlots    = [];
- 
-    for (const fileEntry of uploadedFiles) {
-      const uuid = await uploadCustomizationImage(fileEntry.file);
-      if (!uuid) {
-        showToast(
-          `Failed to upload image for "${fileEntry.fieldName}". Please try again.`,
-          "error"
+  // NEW FUNCTION — Validate required custom fields before submission
+  // Returns { valid: true } or { valid: false, message: "..." }
+  // ═══════════════════════════════════════════════════════════════════════════
+  function validateCustomFields() {
+    for (const [fieldId, field] of Object.entries(currentCustomFields)) {
+      if (!field.required) continue;
+
+      const inputType = field.inputType;
+
+      if (inputType === "image") {
+        // Check actual file input
+        const fileInput = document.getElementById(fieldId);
+        if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+          return {
+            valid: false,
+            message: `Please upload an image for "${field.fieldLabel || field.fieldName}"`,
+          };
+        }
+
+      } else if (inputType === "radio") {
+        const checked = document.querySelector(
+          `input[name="${field.fieldName}"]:checked`
         );
+        if (!checked) {
+          return {
+            valid: false,
+            message: `Please select an option for "${field.fieldLabel || field.fieldName}"`,
+          };
+        }
+
+      } else if (inputType === "checkbox") {
+        // Checkboxes are optional by nature — skip required check
+
+      } else {
+        const el = document.getElementById(fieldId);
+        const value = el ? el.value.trim() : "";
+        if (!value) {
+          return {
+            valid: false,
+            message: `Please fill in "${field.fieldLabel || field.fieldName}"`,
+          };
+        }
+      }
+    }
+
+    // WhatsApp number — optional but if filled must be 10 digits
+    const waInput = document.getElementById("customerWhatsappNumber");
+    if (waInput && waInput.value.trim()) {
+      const digits = waInput.value.trim().replace(/\D/g, "");
+      if (digits.length !== 10) {
+        return {
+          valid: false,
+          message: "Please enter a valid 10-digit WhatsApp number",
+        };
+      }
+    }
+
+    return { valid: true };
+  }
+
+  //=========== patch end for customized cart ==========//
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  //  PATCH 10 — buyCustomizedNow()   [FULL REPLACE]
+  //  WHERE : Replace existing buyCustomizedNow() entirely
+  //  WHAT  : Same flow as addCustomizedToCart() but redirects to checkout
+  //          after successful cart add instead of just closing overlay
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  async function buyCustomizedNow() {
+    const btn = document.getElementById("buyCustomizedNowBtn");
+
+    try {
+      // ── STEP 1: Validate required fields (same as addCustomizedToCart) ──
+      const validation = validateCustomFields();
+      if (!validation.valid) {
+        showToast(validation.message, "error");
         return;
       }
-      assetSlots.push({
-        slotNumber: fileEntry.slotNumber,
-        assetUuid:  uuid,
-        fieldName:  fileEntry.fieldName,
+
+      // ── STEP 2: Show loading state ───────────────────────────────────────
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fas fa-spinner fa-spin text-xs"></i> Processing...`;
+      }
+
+      // ── STEP 3–13: Exact same upload + cart add flow as addCustomizedToCart
+      // (keeping DRY — call addCustomizedToCart logic inline)
+      const uploadedFiles = getUploadedImageFiles();
+      const assetSlots = [];
+
+      for (const fileEntry of uploadedFiles) {
+        const uuid = await uploadCustomizationImage(fileEntry.file);
+        if (!uuid) {
+          showToast(
+            `Failed to upload image for "${fileEntry.fieldName}". Please try again.`,
+            "error"
+          );
+          return;
+        }
+        assetSlots.push({
+          slotNumber: fileEntry.slotNumber,
+          assetUuid: uuid,
+          fieldName: fileEntry.fieldName,
+        });
+      }
+
+      const textOnlyFields = {};
+      for (const [key, value] of Object.entries(customFieldValues)) {
+        if (typeof value === "string" && value.startsWith("data:image")) continue;
+        if (value === "[Image attached]") continue;
+        textOnlyFields[key] = value;
+      }
+      if (safeProductData.frameCount) textOnlyFields["frameCount"] = safeProductData.frameCount;
+      if (safeProductData.frameStructure) textOnlyFields["frameStructure"] = safeProductData.frameStructure;
+
+      const waNumber = document.getElementById("customerWhatsappNumber")?.value?.trim();
+      if (waNumber) textOnlyFields["whatsappNumber"] = waNumber;
+
+      const totalText = document.getElementById("customTotalPrice")?.textContent || "";
+      const finalPrice = parseInt(totalText.replace(/[^0-9]/g, ""), 10) || safeProductData.currentSellingPrice;
+      const variant = getSelectedVariant();
+      const quantity = parseInt(document.getElementById("quantity")?.textContent || "1", 10);
+
+      const customPayload = {
+        userId: USER_ID,
+        sessionId: null,
+        productId: safeProductData.productId,
+        variantId: variant?.variantId || null,
+        sku: variant?.sku || safeProductData.currentSku,
+        selectedColor: variant?.color || safeProductData.selectedColor || null,
+        selectedSize: variant?.size || safeProductData.productSize || null,
+        productName: safeProductData.productName,
+        titleName: safeProductData.productName,
+        unitPrice: finalPrice,
+        mrpPrice: safeProductData.currentMrpPrice,
+        quantity: quantity,
+        customFieldsJson: Object.keys(textOnlyFields).length > 0
+          ? JSON.stringify(textOnlyFields)
+          : null,
+        assetSlots: assetSlots,
+      };
+
+      const res = await fetch(`${BASE_URL}/api/v1/customize/add-to-cart`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(customPayload),
       });
-    }
- 
-    const textOnlyFields = {};
-    for (const [key, value] of Object.entries(customFieldValues)) {
-      if (typeof value === "string" && value.startsWith("data:image")) continue;
-      if (value === "[Image attached]") continue;
-      textOnlyFields[key] = value;
-    }
-    if (safeProductData.frameCount)     textOnlyFields["frameCount"]     = safeProductData.frameCount;
-    if (safeProductData.frameStructure) textOnlyFields["frameStructure"] = safeProductData.frameStructure;
- 
-    const waNumber = document.getElementById("customerWhatsappNumber")?.value?.trim();
-    if (waNumber) textOnlyFields["whatsappNumber"] = waNumber;
- 
-    const totalText  = document.getElementById("customTotalPrice")?.textContent || "";
-    const finalPrice = parseInt(totalText.replace(/[^0-9]/g, ""), 10) || safeProductData.currentSellingPrice;
-    const variant    = getSelectedVariant();
-    const quantity   = parseInt(document.getElementById("quantity")?.textContent || "1", 10);
- 
-    const customPayload = {
-      userId:           USER_ID,
-      sessionId:        null,
-      productId:        safeProductData.productId,
-      variantId:        variant?.variantId || null,
-      sku:              variant?.sku        || safeProductData.currentSku,
-      selectedColor:    variant?.color      || safeProductData.selectedColor || null,
-      selectedSize:     variant?.size       || safeProductData.productSize   || null,
-      productName:      safeProductData.productName,
-      titleName:        safeProductData.productName,
-      unitPrice:        finalPrice,
-      mrpPrice:         safeProductData.currentMrpPrice,
-      quantity:         quantity,
-      customFieldsJson: Object.keys(textOnlyFields).length > 0
-        ? JSON.stringify(textOnlyFields)
-        : null,
-      assetSlots: assetSlots,
-    };
- 
-    const res = await fetch(`${BASE_URL}/api/v1/customize/add-to-cart`, {
-      method:  "POST",
-      headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify(customPayload),
-    });
- 
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.message || `HTTP ${res.status}`);
-    }
- 
-    // ── STEP 14: Success → go directly to checkout ───────────────────────
-    showToast("Redirecting to checkout...", "success");
-    setTimeout(() => {
-      // Replace with your actual checkout page path
-      window.location.href = "/Checkout/checkout.html";
-    }, 800);
- 
-  } catch (err) {
-    console.error("[BuyNow] Error:", err);
-    showToast(err.message || "Could not process. Please try again.", "error");
- 
-  } finally {
-    // ── Always restore button ────────────────────────────────────────────
-    if (btn) {
-      btn.disabled  = false;
-      btn.innerHTML = `<i class="fas fa-arrow-right text-xs"></i> Buy Now`;
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || `HTTP ${res.status}`);
+      }
+
+      // ── STEP 14: Success → go directly to checkout ───────────────────────
+      showToast("Redirecting to checkout...", "success");
+      setTimeout(() => {
+        // Replace with your actual checkout page path
+        window.location.href = "/Checkout/checkout.html";
+      }, 800);
+
+    } catch (err) {
+      console.error("[BuyNow] Error:", err);
+      showToast(err.message || "Could not process. Please try again.", "error");
+
+    } finally {
+      // ── Always restore button ────────────────────────────────────────────
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fas fa-arrow-right text-xs"></i> Buy Now`;
+      }
     }
   }
-}
- 
+
 
   // ═══════════════════════════════════════════════════════════════════════════
   //  COUPON
@@ -4430,7 +5110,7 @@ async function buyCustomizedNow() {
       : '<i class="fa-solid fa-cart-shopping"></i>';
     const buyNowText = safeProductData.isCustomizable ? "Customize & Buy" : "Buy Now";
 
-   
+
     // Variant cards HTML
     // ─── PATCH 4: AMAZON-STYLE VARIANT SELECTOR ───────────────────────────────
     let variantCardsHTML = "";
@@ -4495,8 +5175,8 @@ async function buyCustomizedNow() {
                rounded-xl border-2 transition-all duration-200
                w-[90px] cursor-pointer overflow-hidden
                ${isDefault
-              ? "border-[#1D3C4A] shadow-md"
-              : "border-gray-200 hover:border-[#1D3C4A]"}"
+                ? "border-[#1D3C4A] shadow-md"
+                : "border-gray-200 hover:border-[#1D3C4A]"}"
                   data-variant-id="${escapeHtml(v.variantId)}"
                   data-size="${escapeHtml(v.size || "")}"
                   style="${!isDefault ? "display:none" : ""}">
@@ -4520,7 +5200,7 @@ async function buyCustomizedNow() {
                       ₹${v.price.toLocaleString("en-IN")}
                   </span>
               </div>
-          </button>`; 
+          </button>`;
           }).join("")}
         </div>
       </div>
@@ -4599,65 +5279,109 @@ async function buyCustomizedNow() {
     };
 
     root.innerHTML = `
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-10 items-start px-4 md:px-0">
-
-        <!-- LEFT: Images -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-10 items-start px-2 md:px-0">
+ 
+        <!-- LEFT: Images - Sticky on Desktop -->
         <div class="md:col-span-5">
-          <div class="sticky top-20">
-            <div class="flex gap-2">
-              <!-- Thumbnail strip (rebuilt by buildMediaStrip on variant switch) -->
-              <div class="flex flex-col gap-2 w-14 flex-shrink-0" id="thumbContainer">
+          <div class="sticky top-20 md:top-24 lg:top-28 z-10">
+      
+            <!-- Desktop: Vertical Thumbnails + Main Image -->
+            <div class="flex gap-3">
+              <!-- Thumbnail strip - vertical on desktop -->
+              <div class="flex-col gap-2 w-14 flex-shrink-0 hidden md:flex" id="thumbContainer">
                 ${initialThumbItems
-        .map((item, idx) => {
-          if (item.type === "video") {
-            return `
+                  .map((item, idx) => {
+                    if (item.type === "video") {
+                      return `
                         <div class="thumb-video-wrap relative w-full h-16 rounded-md overflow-hidden border-2 cursor-pointer
                                     ${idx === 0 ? "border-[#e39f32]" : "border-transparent hover:border-[#e39f32]"}"
-                             data-media-index="${idx}" data-media-type="video" data-media-url="${item.url}">
+                            data-media-index="${idx}" data-media-type="video" data-media-url="${item.url}">
                           <video src="${item.url}" class="w-full h-full object-cover" muted preload="metadata"></video>
                           <div class="absolute inset-0 flex items-center justify-center bg-black/30">
                             <i class="fas fa-play text-white text-xs"></i>
                           </div>
                         </div>`;
+                    }
+                    return `
+                      <img src="${item.url}"
+                          data-media-index="${idx}" data-media-type="image" data-media-url="${item.url}"
+                          class="w-full h-16 object-cover rounded-md cursor-pointer border-2
+                                  ${idx === 0 ? "border-[#e39f32]" : "border-transparent hover:border-[#e39f32]"}"/>
+                    `;
+            })
+            .join("")}
+        </div>
+ 
+        <!-- Main Display Area - Enhanced with preview -->
+        <div class="relative flex-1 h-[380px] md:h-[460px] lg:h-[470px] overflow-hidden rounded-xl border border-gray-100 bg-gray-50 group"
+             id="mainDisplayArea">
+         
+          <div class="relative w-full h-full overflow-hidden">
+            <img id="mainProductImage"
+                 src="${initialThumbItems[0]?.type === "image" ? initialThumbItems[0].url : safeProductData.mainImage}"
+                 alt="${escapeHtml(safeProductData.productName)}"
+                 class="w-full h-full object-cover cursor-pointer transition-transform duration-300 hover:scale-105"
+                 onerror="this.src='${FALLBACK_IMG}'"
+                 onclick="window.openLightbox && window.openLightbox(0)"/>
+           
+            ${
+              initialThumbItems.length > 1
+                ? `
+              <div class="next-image-preview absolute right-0 top-0 h-full w-20 md:w-24 pointer-events-none">
+                <div class="h-full w-full bg-gradient-to-l from-black/20 to-transparent">
+                  <img src="${initialThumbItems[1]?.url || initialThumbItems[0].url}"
+                       class="h-full w-full object-cover opacity-50"
+                       style="mask-image: linear-gradient(to left, rgba(0,0,0,0.6), transparent);"
+                       alt="Next image preview"/>
+                </div>
+                <div class="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full w-8 h-8 flex items-center justify-center shadow-md">
+                  <i class="fa-solid fa-chevron-right text-xs text-gray-700"></i>
+                </div>
+              </div>
+            `
+                : ""
+            }
+          </div>
+         
+          ${
+            discountPercent > 0
+              ? `
+            <span class="absolute top-3 left-3 z-10 bg-[#E6A62C] text-white text-[11px] font-semibold px-3 py-1 rounded-full shadow-md">
+              ${discountPercent}% OFF
+            </span>
+          `
+              : ""
           }
-          return `
-                <img src="${item.url}"
-                      data-media-index="${idx}" data-media-type="image" data-media-url="${item.url}"
-                      class="w-full h-16 object-cover rounded-md cursor-pointer border-2
-                            ${idx === 0 ? "border-[#e39f32]" : "border-transparent hover:border-[#e39f32]"}"
-                      onerror="this.src='${FALLBACK_IMG}'"/>`;
-        })
-        .join("")}
-              </div>
-
-              <!-- Main display area -->
-              <div class="relative flex-1 h-[340px] overflow-hidden flex items-center justify-center"
-     id="mainDisplayArea">
-                  <img id="mainProductImage"
-                     src="${initialThumbItems[0]?.type === "image" ? initialThumbItems[0].url : safeProductData.mainImage}"
-                     alt="${escapeHtml(safeProductData.productName)}"
-                     class="w-full h-full object-cover"
-                     onerror="this.src='${FALLBACK_IMG}'"/>
-                      ${
-                        discountPercent > 0
-                          ? `
-    <span class="absolute top-3 left-3 z-10
-                 bg-[#E6A62C] text-white
-                 text-[11px] font-semibold
-                 px-3 py-1 rounded-full shadow-md">
-      ${discountPercent}% OFF
-    </span>
-  `
-                          : ""
-                      }
-              </div>
-            </div>
+         
+          <div class="absolute bottom-3 right-3 bg-black/50 backdrop-blur-sm text-white text-[10px] px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-1">
+            <i class="fa-solid fa-expand text-[10px]"></i>
+            <span>Click to enlarge</span>
           </div>
         </div>
+      </div>
+ 
+      <!-- Mobile: Horizontal Scrollable Thumbnails -->
+      <div class="md:hidden mt-6">
+        <!-- Enhanced Mobile Navigation Dots -->
+        <div class="flex justify-center gap-3 mt-4" id="mobileNavDots">
+          ${initialThumbItems
+            .map(
+              (_, idx) => `
+              <button class="mobile-nav-dot w-3 h-3 rounded-full transition-all duration-300
+                            ${idx === 0 ? "bg-[#E39F32] scale-110 shadow-lg shadow-[#E39F32]/30" : "bg-gray-300 hover:bg-gray-400"}"
+                      data-index="${idx}"></button>
+            `,
+            )
+            .join("")}
+        </div>
+      </div>
+    </div>
+  </div>
 
         <!-- RIGHT: Details -->
         <div class="md:col-span-7">
-          <div class=" pr-2 space-y-3 hide-scrollbar">
+           <div class="md:pr-4 lg:pr-6 space-y-3 hide-scrollbar
+                      md:max-h-[calc(100vh-120px)] md:overflow-y-auto">
  
             <!-- Product name + Trending badge -->
             <h1 class="text-xl md:text-2xl font-normal font-zain leading-tight text-[#033E59]">
@@ -4665,11 +5389,11 @@ async function buyCustomizedNow() {
             </h1>
  
             <!-- Rating + Brand + Share -->
-            <div class="flex items-start justify-between gap-3 mb-2">
+            <div class="flex items-start justify-between gap-3 ">
               <div class="flex items-center gap-2 flex-wrap flex-1">
-                <div class="flex text-amber-400 text-sm gap-0.5">${renderStars(4.5)}</div>
+                <div class="flex text-amber-400 text-sm gap-0.5">${renderStars(0)}</div>
                 <span class="text-sm font-lexend text-stone-600">${transformedData.reviewCount} reviews</span>
-                <div class="flex items-center gap-2 px-2 py-0.5 rounded-full border ml-2"
+                <div class="flex items-center gap-2 px-2 py-0.5 rounded-full border"
                      style="background-color:#d6e8f9;border-color:#e5e7eb">
                   <span class="text-xs font-lexend font-semibold text-[#1D3C4A]">
                     Brand: ${escapeHtml(safeProductData.brandName)}
@@ -4684,26 +5408,24 @@ async function buyCustomizedNow() {
               </button>
    
     <!-- Share Button -->
-      <div class="relative" id="shareContainer" style="z-index: 30;">
-        <button id="shareButton" class="w-9 h-9 rounded-full border border-stone-200 flex items-center justify-center hover:bg-stone-100 transition bg-white shadow-sm">
-          <i class="fa-solid fa-share-nodes text-[#033E59]"></i>
-        </button>
-        <div id="sharePopup" class="absolute right-0 mt-2 w-48 bg-white shadow-xl rounded-xl border p-2 z-40 hidden">
-          <div class="flex flex-col gap-1 text-sm">
-            <button class="share-option flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-yellow-50 w-full text-left" data-share-type="link">
-              <i class="fa-solid fa-link font-lexend text-[#E6A62C]"></i>Copy link
-            </button>
-            <button class="share-option flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-yellow-50 w-full text-left" data-share-type="email">
-              <i class="fa-solid fa-envelope font-lexend text-[#E6A62C]"></i>Email
-            </button>
-            <button class="share-option flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-yellow-50 w-full text-left" data-share-type="whatsapp">
-              <i class="fa-brands fa-whatsapp font-lexend text-[#E6A62C]"></i>WhatsApp
-            </button>
+      <!-- Share -->
+                <div class="relative" id="shareContainer" style="z-index: 30;">
+                  <button id="shareButton" class="w-9 h-9 rounded-full border border-stone-200 flex items-center justify-center hover:bg-stone-100 transition bg-white shadow-sm">
+                    <i class="fa-solid fa-share-nodes text-[#033E59]"></i>
+                  </button>
+                  <div id="sharePopup" class="absolute right-0 mt-2 w-48 bg-white shadow-xl rounded-xl border p-2 z-40 hidden">
+                    <div class="flex flex-col gap-1 text-sm">
+                      <button class="share-option flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-yellow-50 w-full text-left" data-share-type="link">
+                        <i class="fa-solid fa-link font-lexend text-[#E6A62C]"></i>Copy link
+                      </button>
+                      <button class="share-option flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-yellow-50 w-full text-left" data-share-type="whatsapp">
+                        <i class="fa-brands fa-whatsapp font-lexend text-[#E6A62C]"></i>WhatsApp
+                      </button>
+                    </div>
+                  </div>
+                </div>
+            </div>
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
  
 
             <!-- SKU / Color info -->
@@ -4714,78 +5436,84 @@ async function buyCustomizedNow() {
             </div>
 
             <!-- Price + Coupon card -->
-            <div class="max-w-[520px] p-2.5 rounded-2xl bg-gradient-to-br from-[#e39f32]/5 to-[#1D3C4A]/5 border border-[#e5e7eb] relative space-y-2 overflow-hidden">
-              <div class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-[#e39f32]/10 to-[#1D3C4A]/10 rounded-bl-full"></div>
-              <div class="relative z-10 bg-white/85 backdrop-blur rounded-xl border border-[#e5e7eb] px-2.5 py-2 flex items-center justify-between gap-2.5">
-                <div class="flex items-end gap-1">
-                  <span class="text-xl md:text-2xl font-bold text-[#1D3C4A] price-display">
-                    ₹${safeProductData.currentSellingPrice.toLocaleString("en-IN")}
-                  </span>
-                  ${safeProductData.currentMrpPrice > safeProductData.currentSellingPrice
-                    ? `<span class="text-xs text-[#e39f32] line-through">₹${safeProductData.currentMrpPrice.toLocaleString("en-IN")}</span>
-                                  ${discountPercent > 0 ? `<span class="discount-badge bg-[#e39f32] text-white text-[8px] px-1.5 py-[2px] rounded-full">${discountPercent}% OFF</span>` : ""}`
-                    : ""}
+          <!-- // Price + Coupon card -->
+          <div class="max-w-[520px] p-2.5 rounded-2xl bg-gradient-to-br from-[#e39f32]/5 to-[#1D3C4A]/5 border border-[#e5e7eb] relative space-y-2 overflow-hidden">
+          <div class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-[#e39f32]/10 to-[#1D3C4A]/10 rounded-bl-full"></div>
+          <div class="relative z-10 bg-white/85 backdrop-blur rounded-xl border border-[#e5e7eb] px-2.5 py-2 flex items-center justify-between gap-2.5 flex-wrap sm:flex-nowrap">
+          <!-- LEFT: Price Section -->
+          <div class="price-container flex flex-col sm:flex-row sm:items-end gap-1 sm:gap-2">
+          <span class="text-lg md:text-xl font-bold text-[#1D3C4A] price-display">
+                  ₹${safeProductData.currentSellingPrice.toLocaleString("en-IN")}
+          </span>
+          <div class="price-extras flex items-center gap-1.5 flex-wrap">
+                  ${safeProductData.currentMrpPrice > safeProductData.currentSellingPrice ? `
+          <span class="text-xs text-[#e39f32] line-through">₹${safeProductData.currentMrpPrice.toLocaleString("en-IN")}</span>
+                    ${discountPercent > 0 ? `<span class="discount-badge bg-[#e39f32] text-white text-[8px] px-1.5 py-[2px] rounded-full">${discountPercent}% OFF</span>` : ""}
+                  ` : ""}
+          </div>
+          </div>
+          <div class="price-divider hidden sm:block w-px h-7 bg-[#e5e7eb]"></div>
+          <!-- MIDDLE: Tax info badge -->
+          <div class="tax-badge inline-flex items-center gap-1.5 w-fit px-2 py-0.5 rounded-full bg-[#e39f32]/10 border border-[#e39f32]/20 order-3 sm:order-none basis-full sm:basis-auto justify-center sm:justify-start">
+          <i class="fa-solid fa-shield-check text-[9px] text-[#e39f32]"></i>
+          <span class="text-[10px] font-medium text-[#1D3C4A]/80">Inclusive of all taxes</span>
+          </div>
+          <div class="price-divider hidden sm:block w-px h-7 bg-[#e5e7eb]"></div>
+          <!-- RIGHT: Timer -->
+          <div class="timer-section flex items-center gap-1 flex-shrink-0">
+          <span class="text-[10px] text-[#1D3C4A]/70 hidden sm:block">Ends in</span>
+          <div class="flex items-center gap-[3px]">
+          <div class="bg-[#e39f32]/10 px-1 py-[2px] rounded text-[11px] font-mono font-bold text-[#1D3C4A]" id="timerHours">02</div>
+          <span class="text-[#e39f32] font-bold text-[10px]">:</span>
+          <div class="bg-[#e39f32]/10 px-1 py-[2px] rounded text-[11px] font-mono font-bold text-[#1D3C4A]" id="timerMinutes">45</div>
+          <span class="text-[#e39f32] font-bold text-[10px]">:</span>
+          <div class="bg-[#e39f32]/10 px-1 py-[2px] rounded text-[11px] font-mono font-bold text-[#1D3C4A]" id="timerSeconds">12</div>
+          </div>
+          </div>
+          </div>
+          
+            <!-- ⭐ TEASER COUPON CARD ⭐ -->
+          <div class="relative z-10 bg-[#FCF8F8] border border-[#e5e7eb] rounded-xl p-2.5 flex flex-col gap-2" id="teaserCouponCard" style="display:flex !important;">
+          <div class="flex items-start justify-between gap-2.5">
+          <div>
+          <p class="text-[9px] tracking-wide text-[#e39f32] uppercase font-semibold">SPECIAL OFFER!!</p>
+          <h3 class="text-base md:text-lg font-bold text-[#1D3C4A] leading-tight" id="teaserDiscountLabel">
+          <span class="inline-block w-16 h-4 bg-gray-200 rounded animate-pulse"></span>
+          </h3>
+          <p class="text-[10px] text-gray-500" id="teaserDescription">
+          <span class="inline-block w-28 h-3 bg-gray-100 rounded animate-pulse mt-1"></span>
+          </p>
+          </div>
+          <div class="font-mono text-[10px] bg-white border border-[#e5e7eb] px-2 py-[2px] rounded-md text-[#1D3C4A] shadow-sm" id="teaserCouponCode">
+                  ••••••
+          </div>
+          </div>
+          <div class="flex gap-2">
+          <button id="viewMoreBtn" class="flex-1 border border-[#e5e7eb] text-[#1D3C4A] text-xs py-1.5 rounded-lg hover:bg-[#e39f32]/5 transition flex items-center justify-center gap-1">
+                  View Offers <i class="fa-solid fa-arrow-right text-[9px] text-[#e39f32]"></i>
+          </button>
+          </div>
+          </div>
+          </div>
+          
+          
+            
 
-                    <!-- Tax info badge -->
-                    <div class="mt-1 inline-flex items-center gap-1.5 w-fit px-2 py-0.5 rounded-full bg-[#e39f32]/10 border border-[#e39f32]/20">
-                        <i class="fa-solid fa-shield-check text-[9px] text-[#e39f32]"></i>
-                              <span class="text-[10px] font-medium text-[#1D3C4A]/80">
-                                Inclusive of all taxes
-                              </span>
-                    </div>
-
-                </div>
-                <div class="hidden md:block w-px h-7 bg-[#e5e7eb]"></div>
-                <div class="flex items-center gap-1">
-                  <span class="text-[10px] text-[#1D3C4A]/70 hidden sm:block">Ends in</span>
-                  <div class="flex items-center gap-[3px]">
-                    <div class="bg-[#e39f32]/10 px-1 py-[2px] rounded text-[11px] font-mono font-bold text-[#1D3C4A]" id="timerHours">02</div>
-                    <span class="text-[#e39f32] font-bold text-[10px]">:</span>
-                    <div class="bg-[#e39f32]/10 px-1 py-[2px] rounded text-[11px] font-mono font-bold text-[#1D3C4A]" id="timerMinutes">45</div>
-                    <span class="text-[#e39f32] font-bold text-[10px]">:</span>
-                    <div class="bg-[#e39f32]/10 px-1 py-[2px] rounded text-[11px] font-mono font-bold text-[#1D3C4A]" id="timerSeconds">12</div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="relative z-10 bg-[#FCF8F8] border border-[#e5e7eb] rounded-xl p-2.5 flex flex-col gap-2" id="teaserCouponCard">
-                <div class="flex items-start justify-between gap-2.5">
-                  <div>
-                    <p class="text-[9px] tracking-wide text-[#e39f32] uppercase font-semibold">LIMITED TIME</p>
-                    <h3 class="text-base md:text-lg font-bold text-[#1D3C4A] leading-tight" id="teaserDiscountLabel">
-                      <span class="inline-block w-16 h-4 bg-gray-200 rounded animate-pulse"></span>
-                    </h3>
-                    <p class="text-[10px] text-gray-500" id="teaserDescription">
-                      <span class="inline-block w-28 h-3 bg-gray-100 rounded animate-pulse mt-1"></span>
-                    </p>
-                  </div>
-                  <div class="font-mono text-[10px] bg-white border border-[#e5e7eb] px-2 py-[2px] rounded-md text-[#1D3C4A] shadow-sm" id="teaserCouponCode">
-                    ••••••
-                  </div>
-                </div>
-                <div class="flex gap-2">
-                  <button id="viewMoreBtn" class="flex-1 border border-[#e5e7eb] text-[#1D3C4A] text-xs py-1.5 rounded-lg hover:bg-[#e39f32]/5 transition flex items-center justify-center gap-1">
-                    View Offers <i class="fa-solid fa-arrow-right text-[9px] text-[#e39f32]"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Offer Overlay (inline) -->
-            <div id="offerOverlay" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 opacity-0 pointer-events-none flex items-center justify-center transition-opacity duration-300">
-              <div id="offerModal" class="hidden flex flex-col bg-white w-full max-w-md mx-4 rounded-xl p-5 border border-[#e5e7eb] shadow-2xl scale-95 opacity-0 transition-all duration-300">
-                <button id="closeOffersBtn" class="absolute top-4 right-4 text-[#e39f32] hover:text-[#1D3C4A] transition-colors text-xl">✕</button>
-                <h3 class="text-[#1D3C4A] font-lexend text-lg mb-5 pb-2 border-b border-[#e5e7eb]">✨ Available Offers</h3>
-                
-                <div class="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
-                  <div class="text-center py-4 text-gray-400 text-sm">
-                    <i class="fa-solid fa-ticket text-2xl mb-2 block text-[#e39f32]/40"></i>
-                    Loading your offers…
-                  </div>
-                </div>
-
-              </div>
-            </div>
+          
+                      <!-- Offer Overlay (inline) -->
+          <div id="offerOverlay" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 opacity-0 pointer-events-none flex items-center justify-center transition-opacity duration-300">
+          <div id="offerModal" class="hidden flex flex-col bg-white w-full max-w-md mx-4 rounded-xl p-5 border border-[#e5e7eb] shadow-2xl scale-95 opacity-0 transition-all duration-300">
+          <button id="closeOffersBtn" class="absolute top-4 right-4 text-[#e39f32] hover:text-[#1D3C4A] transition-colors text-xl">✕</button>
+          <h3 class="text-[#1D3C4A] font-lexend text-lg mb-5 pb-2 border-b border-[#e5e7eb]">✨ Available Offers</h3>
+          <div class="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+          <div class="text-center py-4 text-gray-400 text-sm">
+          <i class="fa-solid fa-ticket text-2xl mb-2 block text-[#e39f32]/40"></i>
+                              Loading your offers…
+          </div>
+          </div>
+          
+                        </div>
+          </div>
 
             <!-- Variant Cards -->
             ${variantCardsHTML}
@@ -4811,64 +5539,62 @@ async function buyCustomizedNow() {
                 <p id="stockInfo" class="text-green-600 font-semibold">
                   Only ${safeProductData.currentStock} items left in stock
                 </p>
-                ${
-                  safeProductData.isCustomizable
-                    ? `<span class="text-gray-300">|</span>
+                ${safeProductData.isCustomizable
+        ? `<span class="text-gray-300">|</span>
                      <a href="https://wa.me/919876543210" target="_blank"
                         class="flex items-center gap-1.5 bg-green-50 border border-green-500 text-green-700 px-2.5 py-1 rounded-md font-medium hover:bg-green-100 transition">
                        <i class="fa-brands fa-whatsapp text-green-600 text-sm"></i>
                        Need bulk quantities? Chat with us
                      </a>`
-                    : ""
-                }
+        : ""
+      }
               </div>
             </div>
 
-            <!-- Delivery strip -->
-           <div class="flex flex-wrap items-center justify-center md:justify-between gap-x-4 gap-y-2 text-[11px] sm:text-xs text-[#1D3C4A] bg-[#faf8f4] border border-[#efe5d3] rounded-xl px-3 py-2.5">
-
-                <div class="flex items-center gap-1.5 whitespace-nowrap">
-                  <i class="fa-solid fa-box text-[#e39f32] text-[10px]"></i>
-                  <span>24–48h Dispatch</span>
-                </div>
-
-                <div class="flex items-center gap-1.5 whitespace-nowrap">
-                  <i class="fa-solid fa-calendar-check text-[#e39f32] text-[10px]"></i>
-                  <span>4–7d Delivery</span>
-                </div>
-
-                <div class="flex items-center gap-1.5 whitespace-nowrap">
-                  <i class="fa-solid fa-hand-holding-dollar text-[#e39f32] text-[10px]"></i>
-                  <span>COD Available</span>
-                </div>
-
-                <div class="flex items-center gap-1.5 whitespace-nowrap">
-                  <i class="fa-solid fa-truck text-[#e39f32] text-[10px]"></i>
-                  <span>Free Shipping</span>
-                </div>
-
-                <div class="flex items-center gap-1.5 whitespace-nowrap">
-                  <i class="fa-solid fa-shield-halved text-[#e39f32] text-[10px]"></i>
-                  <span>Secure Payment</span>
-                </div>
-
-                <div class="flex items-center gap-1.5 whitespace-nowrap">
-                  <i class="fa-solid fa-rotate-left text-[#e39f32] text-[10px]"></i>
-                  <span>Easy Returns</span>
-                </div>
-
-              </div>
+           <!-- Delivery Strip -->
+            <div class="flex flex-wrap md:flex-nowrap items-center justify-center md:justify-between gap-x-3 gap-y-2 text-[11px] text-[#1D3C4A] bg-[#faf8f4] border border-[#efe5d3] rounded-lg px-3 py-2">
+            
+              <div class="flex items-center gap-1 whitespace-nowrap">
+            <i class="fa-solid fa-box text-[#e39f32] text-[10px]"></i>
+            <span>24–48h Dispatch</span>
+            </div>
+            
+              <div class="flex items-center gap-1 whitespace-nowrap">
+            <i class="fa-solid fa-calendar-check text-[#e39f32] text-[10px]"></i>
+            <span>4–7d Delivery</span>
+            </div>
+            
+              <div class="flex items-center gap-1 whitespace-nowrap">
+            <i class="fa-solid fa-hand-holding-dollar text-[#e39f32] text-[10px]"></i>
+            <span>COD Available</span>
+            </div>
+            
+              <div class="flex items-center gap-1 whitespace-nowrap">
+            <i class="fa-solid fa-truck text-[#e39f32] text-[10px]"></i>
+            <span>Free Shipping</span>
+            </div>
+            
+              <div class="flex items-center gap-1 whitespace-nowrap">
+            <i class="fa-solid fa-shield-halved text-[#e39f32] text-[10px]"></i>
+            <span>Secure Payment</span>
+            </div>
+            
+              <div class="flex items-center gap-1 whitespace-nowrap">
+            <i class="fa-solid fa-rotate-left text-[#e39f32] text-[10px]"></i>
+            <span>Easy Returns</span>
+            </div>
+            
             </div>
 
              <!-- Accordion placeholder -->
-            <section class="max-w-4xl mx-auto pt-8 pb-0 font-sans text-[#1D3C4A]">
+            <section class="max-w-4xl mx-auto pb-0 font-sans text-[#1D3C4A]">
               <div class="border border-[#e5e7eb] rounded-xl divide-y divide-[#e5e7eb] bg-white" id="accordionContainer"></div>
             </section>
             
             <!-- Bought Together placeholder (async filled) -->
-            <section class="max-w-4xl mx-auto mt-4 mb-12 px-4" id="boughtTogetherSection">
+            <section class="max-w-4xl mx-auto mt-4 mb-12 px-1" id="boughtTogetherSection">
               <h2 class="text-xl font-normal font-lexend text-[#1D3C4A] mb-5">Frequently Bought Together</h2>
-              <div class="bg-[#1D3C4A]/5 border border-[#e5e7eb] rounded-2xl p-4 space-y-4" id="boughtTogether">
+              <div class="bg-[#1D3C4A]/5 border border-[#e5e7eb] rounded-2xl p-2 space-y-4" id="boughtTogether">
                 <!-- Loading skeleton -->
                 ${[1, 2].map(() => `
                   <div class="flex items-center justify-between bg-white border border-[#e5e7eb] rounded-xl p-3">
@@ -4888,7 +5614,7 @@ async function buyCustomizedNow() {
       </div>
 
       <!-- Recent Viewed + Suggestions (async filled) -->
-      <section id="recentSuggestionSection" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"></section>`;
+      <section id="recentSuggestionSection" class="max-w-7xl mx-auto px-4 sm:px-4 pt-8 lg:px-8"></section>`;
 
     // Wire up the initial thumb strip click handlers
     wireInitialThumbClicks(initialThumbItems);
@@ -5247,100 +5973,295 @@ async function buyCustomizedNow() {
   //       without bubbling conflicts.
   // ═══════════════════════════════════════════════════════════════════════════
 
-  async function fillRecentAndSuggestions() {
+  // async function fillRecentAndSuggestions() {
+  //   const [recentItems, suggestionItems] = await Promise.all([
+  //     fetchRecentViewed(USER_ID),
+  //     fetchSuggestions(
+  //       safeProductData.productId,
+  //       safeProductData.productCategory,
+  //       safeProductData.productSubCategory,
+  //       USER_ID
+  //     ),
+  //   ]);
+
+  //   const section = document.getElementById("recentSuggestionSection");
+  //   if (!section) return;
+
+  //   let html = "";
+
+  //   // ── Recently Viewed ────────────────────────────────────────────────────
+  //   if (recentItems.length > 0) {
+  //     html += `
+  //       <div class="mb-0">
+  //         <h2 class="text-2xl font-medium font-zain text-[#1D3C4A] mb-1">Recently Viewed</h2>
+  //         <div class="w-12 h-1 bg-[#e39f32] rounded-full mb-5"></div>
+  //         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+  //           ${recentItems.map((p) => productCardHTML(p)).join("")}
+  //         </div>
+  //       </div>`;
+  //   }
+
+  //   // ── Suggestions ────────────────────────────────────────────────────────
+  //   if (suggestionItems.length > 0) {
+  //     html += `
+  //       <div class="mb-0">
+  //         <h2 class="text-2xl font-medium font-zain text-[#1D3C4A] mb-1">You May Also Like</h2>
+  //         <div class="w-12 h-1 bg-[#e39f32] rounded-full mb-5"></div>
+  //         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+  //           ${suggestionItems.map((p) => productCardHTML(p)).join("")}
+  //         </div>
+  //       </div>`;
+  //   }
+
+  //   if (!html) {
+  //     section.style.display = "none";
+  //     return;
+  //   }
+
+  //   section.innerHTML = html;
+
+  //   syncCardCartStates(); // sync states for freshly rendered cards
+  //   syncCardWishlistStates();   // ← hearts sync on fresh card render too
+
+
+  //   // ── Event delegation on section — handles card click, wishlist, add-to-cart ──
+  //   // This replaces the broken inline onclick approach. One listener, no conflicts.
+  //   section.addEventListener("click", async function (e) {
+  //     const target = e.target;
+
+  //     // ── Add to cart button ───────────────────────────────────────────────
+  //     const cartBtn = target.closest(".card-add-cart");
+  //     if (cartBtn) {
+  //       e.stopPropagation();
+
+  //       // ── Already added → redirect ──────────────────────────────────────
+  //       if (cartBtn.dataset.added === "true") {
+  //         window.location.href = "/Cart/cart.html";
+  //         return;
+  //       }
+
+  //       const pid = parseInt(cartBtn.dataset.productId);
+  //       const price = parseFloat(cartBtn.dataset.price);
+  //       const sku = cartBtn.dataset.sku || "";
+  //       if (!pid) return;
+  //       const titleName = cartBtn.dataset.productName || "Artezo Product";
+  //       const payload = {
+  //         userId: USER_ID,
+  //         sessionId: null,
+  //         productId: pid,
+  //         variantId: null,
+  //         sku,
+  //         selectedColor: "",
+  //         selectedSize: null,
+  //         titleName,                 // ← was missing entirely
+  //         unitPrice: price,
+  //         mrpPrice: price,
+  //         quantity: 1,
+  //         customFieldsJson: null,
+  //       };
+  //       try {
+  //         await apiAddToCart(payload);
+  //         addedToCartSet.add(pid);
+  //         showToast("Added to cart! 🛒", "success");
+  //         // window.dispatchEvent(new CustomEvent('cart:updated'));
+  //         dispatchCartEvent();
+
+  //         cartBtn.innerHTML = '<i class="fa-solid fa-bag-shopping text-xs"></i> Go to Cart';
+  //         cartBtn.style.background = "#e39f32";
+  //         cartBtn.style.color = "#1D3C4A";
+  //         cartBtn.style.fontWeight = "600";
+  //         cartBtn.style.borderColor = "#e39f32";
+  //         cartBtn.dataset.added = "true";
+  //       } catch (err) {
+  //         showToast("Could not add to cart.", "error");
+  //       }
+  //       return;
+  //     }
+
+  //     // ── Wishlist icon button ─────────────────────────────────────────────
+  //     const wishlistBtn = target.closest(".wishlist-icon-btn");
+  //     if (wishlistBtn) {
+  //       e.stopPropagation();
+  //       const card = wishlistBtn.closest(".product-card-clickable"); // ← explicit class, not attr selector
+  //       const pid = card ? parseInt(card.dataset.productId) : null;
+  //       const price = card ? parseFloat(card.dataset.price) : 0;
+  //       const sku = card ? (card.dataset.sku || "") : "";
+  //       // Walk down to find the cart button which also carries the name
+  //       const cartBtnInCard = card ? card.querySelector(".card-add-cart") : null;
+  //       const productName = card?.dataset.productName
+  //         || cartBtnInCard?.dataset.productName
+  //         || "Artezo Premium Product";
+
+
+
+  //       if (!pid) return;
+  //       const titleName = card?.dataset.productName
+  //         || card?.querySelector(".card-add-cart")?.dataset.productName
+  //         || "Artezo Product";
+  //       const payload = {
+  //         userId: USER_ID,
+  //         wishlistName: "My Wishlist",
+  //         productId: pid,
+  //         variantId: null,
+  //         sku,
+  //         selectedColor: "",
+  //         selectedSize: null,
+  //         titleName,                  // ← now correctly sourced
+  //         wishlistedPrice: price,
+  //         customFieldsJson: null,
+  //       };
+  //       try {
+  //         await apiAddToWishlist(payload);
+  //         const icon = wishlistBtn.querySelector("i");
+  //         if (icon) {
+  //           const isFilled = icon.classList.contains("fa-solid");
+  //           icon.className = isFilled
+  //             ? "fa-regular fa-heart text-[#1D3C4A] text-xs"
+  //             : "fa-solid fa-heart text-red-500 text-xs";
+  //         }
+
+  //         // ── Keep set in sync ──────────────────────────────────────────
+  //         if (isFilled) {
+  //           addedToWishlistSet.delete(pid);
+  //         } else {
+  //           addedToWishlistSet.add(pid);
+  //         }
+  //         showToast("Wishlist updated ❤️", "info");
+  //         // window.dispatchEvent(new CustomEvent('wishlist:updated'));
+  //         dispatchWishlistEvent();
+  //       } catch (err) {
+  //         showToast("Could not update wishlist.", "error");
+  //       }
+  //       return;
+  //     }
+
+  //     // ── Card body click → navigate to product ───────────────────────────
+  //     const card = target.closest(".product-card-clickable");
+  //     if (card) {
+  //       const url = card.dataset.productUrl;
+  //       if (url) window.location.href = url;
+  //     }
+  //   });
+  // }
+
+
+async function fillRecentAndSuggestions() {
     const [recentItems, suggestionItems] = await Promise.all([
       fetchRecentViewed(USER_ID),
       fetchSuggestions(
         safeProductData.productId,
         safeProductData.productCategory,
         safeProductData.productSubCategory,
-        USER_ID
+        USER_ID,
       ),
     ]);
-
+ 
     const section = document.getElementById("recentSuggestionSection");
     if (!section) return;
-
+ 
     let html = "";
-
+ 
     // ── Recently Viewed ────────────────────────────────────────────────────
     if (recentItems.length > 0) {
       html += `
         <div class="mb-10">
           <h2 class="text-2xl font-medium font-zain text-[#1D3C4A] mb-1">Recently Viewed</h2>
           <div class="w-12 h-1 bg-[#e39f32] rounded-full mb-5"></div>
-          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            ${recentItems.map((p) => productCardHTML(p)).join("")}
-          </div>
+          <div class="slider-wrapper">
+<button class="slider-arrow slider-prev">
+<i class="fa-solid fa-chevron-left"></i>
+</button>
+ 
+  <div class="recent-mobile-slider grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+
+    ${recentItems.map((p) => productCardHTML(p)).join("")}
+</div>
+ 
+  <button class="slider-arrow slider-next">
+<i class="fa-solid fa-chevron-right"></i>
+</button>
+</div>
+ 
+<div class="slider-wrapper">
+<button class="slider-arrow slider-prev">
+<i class="fa-solid fa-chevron-left"></i>
+</button>
+ 
+  <div class="recent-mobile-slider grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+
+    ${suggestionItems.map((p) => productCardHTML(p)).join("")}
+</div>
+ 
+  <button class="slider-arrow slider-next">
+<i class="fa-solid fa-chevron-right"></i>
+</button>
+</div>
+ 
         </div>`;
     }
-
+ 
     // ── Suggestions ────────────────────────────────────────────────────────
     if (suggestionItems.length > 0) {
       html += `
-        <div class="mb-10">
+        <div>
           <h2 class="text-2xl font-medium font-zain text-[#1D3C4A] mb-1">You May Also Like</h2>
           <div class="w-12 h-1 bg-[#e39f32] rounded-full mb-5"></div>
-          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        <div class="recent-mobile-slider grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             ${suggestionItems.map((p) => productCardHTML(p)).join("")}
           </div>
         </div>`;
     }
-
+ 
     if (!html) {
       section.style.display = "none";
       return;
     }
-
+ 
     section.innerHTML = html;
-
-    syncCardCartStates(); // sync states for freshly rendered cards
-    syncCardWishlistStates();   // ← hearts sync on fresh card render too
-
-
+ 
     // ── Event delegation on section — handles card click, wishlist, add-to-cart ──
     // This replaces the broken inline onclick approach. One listener, no conflicts.
     section.addEventListener("click", async function (e) {
       const target = e.target;
-
+ 
       // ── Add to cart button ───────────────────────────────────────────────
       const cartBtn = target.closest(".card-add-cart");
       if (cartBtn) {
         e.stopPropagation();
-
+ 
         // ── Already added → redirect ──────────────────────────────────────
         if (cartBtn.dataset.added === "true") {
-            window.location.href = "/Cart/cart.html";
-            return;
+          window.location.href = "/Cart/cart.html";
+          return;
         }
-
+ 
         const pid = parseInt(cartBtn.dataset.productId);
         const price = parseFloat(cartBtn.dataset.price);
         const sku = cartBtn.dataset.sku || "";
+        const productName = cartBtn.dataset.productName;
+
         if (!pid) return;
-         const titleName = cartBtn.dataset.productName || "Artezo Product";
         const payload = {
           userId: USER_ID,
           sessionId: null,
           productId: pid,
           variantId: null,
           sku,
-          selectedColor: "",
-          selectedSize: null,
-          titleName,                 // ← was missing entirely
           unitPrice: price,
           mrpPrice: price,
+          selectedSize: null,
+          titleName: productName || "Artezo Premium Product",
           quantity: 1,
           customFieldsJson: null,
         };
-       try {
+        try {
           await apiAddToCart(payload);
           addedToCartSet.add(pid);
           showToast("Added to cart! 🛒", "success");
-          // window.dispatchEvent(new CustomEvent('cart:updated'));
-          dispatchCartEvent();
-
-          cartBtn.innerHTML = '<i class="fa-solid fa-bag-shopping text-xs"></i> Go to Cart';
+          window.dispatchEvent(new CustomEvent("cart:updated"));
+ 
+          cartBtn.innerHTML =
+            '<i class="fa-solid fa-bag-shopping text-xs"></i> Go to Cart';
           cartBtn.style.background = "#e39f32";
           cartBtn.style.color = "#1D3C4A";
           cartBtn.style.fontWeight = "600";
@@ -5351,27 +6272,18 @@ async function buyCustomizedNow() {
         }
         return;
       }
-
+ 
       // ── Wishlist icon button ─────────────────────────────────────────────
       const wishlistBtn = target.closest(".wishlist-icon-btn");
       if (wishlistBtn) {
         e.stopPropagation();
-        const card = wishlistBtn.closest(".product-card-clickable"); // ← explicit class, not attr selector
-        const pid   = card ? parseInt(card.dataset.productId)          : null;
-        const price = card ? parseFloat(card.dataset.price)            : 0;
-        const sku   = card ? (card.dataset.sku || "")                  : "";
-        // Walk down to find the cart button which also carries the name
-        const cartBtnInCard = card ? card.querySelector(".card-add-cart") : null;
-        const productName   = card?.dataset.productName
-                           || cartBtnInCard?.dataset.productName
-                           || "Artezo Premium Product";
-
-
+        const card = wishlistBtn.closest("[data-product-id]");
+        const pid = card ? parseInt(card.dataset.productId) : null;
+        const price = card ? parseFloat(card.dataset.price) : 0;
+        const sku = card ? card.dataset.sku || null : null;
+        const productName = card ? card.dataset.productName : "Artezo Premium Product";
 
         if (!pid) return;
-        const titleName = card?.dataset.productName
-                       || card?.querySelector(".card-add-cart")?.dataset.productName
-                       || "Artezo Product";
         const payload = {
           userId: USER_ID,
           wishlistName: "My Wishlist",
@@ -5380,7 +6292,7 @@ async function buyCustomizedNow() {
           sku,
           selectedColor: "",
           selectedSize: null,
-          titleName,                  // ← now correctly sourced
+          titleName: productName,
           wishlistedPrice: price,
           customFieldsJson: null,
         };
@@ -5393,22 +6305,14 @@ async function buyCustomizedNow() {
               ? "fa-regular fa-heart text-[#1D3C4A] text-xs"
               : "fa-solid fa-heart text-red-500 text-xs";
           }
-
-          // ── Keep set in sync ──────────────────────────────────────────
-          if (isFilled) {
-            addedToWishlistSet.delete(pid);
-          } else {
-            addedToWishlistSet.add(pid);
-          }
           showToast("Wishlist updated ❤️", "info");
-          // window.dispatchEvent(new CustomEvent('wishlist:updated'));
-          dispatchWishlistEvent();
+          window.dispatchEvent(new CustomEvent("wishlist:updated"));
         } catch (err) {
           showToast("Could not update wishlist.", "error");
         }
         return;
       }
-
+ 
       // ── Card body click → navigate to product ───────────────────────────
       const card = target.closest(".product-card-clickable");
       if (card) {
@@ -5417,6 +6321,7 @@ async function buyCustomizedNow() {
       }
     });
   }
+ 
 
   /**
    * Shared product card HTML for recent-viewed and suggestion grids.
@@ -5424,70 +6329,165 @@ async function buyCustomizedNow() {
    * using data-product-url on a wrapper with class "product-card-clickable".
    * Wishlist and add-to-cart buttons use data-product-id for delegation lookup.
    */
-  function productCardHTML(p) {
-    const img = absUrl(p.mainImage) || FALLBACK_IMG;
-    const price = p.currentSellingPrice;
-    const mrp = p.currentMrpPrice;
-    const discPct = calcDiscount(price, mrp);
-    // const url     = `../Product-Details/product-detail.html?id=${p.productPrimeId}`;
+  // function productCardHTML(p) {
+  //   const img = absUrl(p.mainImage) || FALLBACK_IMG;
+  //   const price = p.currentSellingPrice;
+  //   const mrp = p.currentMrpPrice;
+  //   const discPct = calcDiscount(price, mrp);
+  //   // const url     = `../Product-Details/product-detail.html?id=${p.productPrimeId}`;
 
-    // Generate SEO-friendly URL for product cards
-    const url = generateProductSEOUrl(p) || `/products/product-detail.html?id=${p.productPrimeId}`;
+  //   // Generate SEO-friendly URL for product cards
+  //   const url = generateProductSEOUrl(p) || `/products/product-detail.html?id=${p.productPrimeId}`;
 
-    return `
-      <div class="product-card-clickable group relative flex flex-col bg-white rounded-2xl border border-[#e5e7eb] shadow-sm
-                  hover:shadow-md transition-all duration-300 hover:-translate-y-1 overflow-hidden cursor-pointer"
-           data-product-id="${p.productPrimeId}"
-           data-price="${price}"
-           data-sku="${escapeHtml(p.currentSku || "")}"
-           data-product-name="${escapeHtml(p.productName || "")}"
-           data-product-url="${url}">
-        ${discPct > 0
-        ? `<span class="absolute top-2 left-2 z-10 bg-[#e39f32] text-white text-[9px] font-bold px-2 py-0.5 rounded-full">${discPct}% OFF</span>`
-        : ""}
-        <button class="wishlist-icon-btn absolute top-2 right-2 z-10 w-8 h-8 flex items-center justify-center
-                       bg-white border border-[#e5e7eb] rounded-full shadow-sm hover:border-[#e39f32] transition-all"
-                type="button">
+  //   return `
+  //     <div class="product-card-clickable group relative flex flex-col bg-white rounded-2xl border border-[#e5e7eb] shadow-sm
+  //                 hover:shadow-md transition-all duration-300 hover:-translate-y-1 overflow-hidden cursor-pointer"
+  //          data-product-id="${p.productPrimeId}"
+  //          data-price="${price}"
+  //          data-sku="${escapeHtml(p.currentSku || "")}"
+  //          data-product-name="${escapeHtml(p.productName || "")}"
+  //          data-product-url="${url}">
+  //       ${discPct > 0
+  //       ? `<span class="absolute top-2 left-2 z-10 bg-[#e39f32] text-white text-[9px] font-bold px-2 py-0.5 rounded-full">${discPct}% OFF</span>`
+  //       : ""}
+  //       <button class="wishlist-icon-btn absolute top-2 right-2 z-10 w-8 h-8 flex items-center justify-center
+  //                      bg-white border border-[#e5e7eb] rounded-full shadow-sm hover:border-[#e39f32] transition-all"
+  //               type="button">
+  //         <i class="fa-regular fa-heart text-[#1D3C4A] text-xs"></i>
+  //       </button>
+  //       <div class="aspect-square overflow-hidden bg-gray-50">
+  //         <img src="${img}" alt="${escapeHtml(p.productName)}"
+  //              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+  //              onerror="this.src='${FALLBACK_IMG}'"/>
+  //       </div>
+  //       <div class="flex flex-col flex-1 p-3">
+  //         <h3 class="text-sm font-medium font-lexend text-[#1D3C4A] line-clamp-2 mb-1">${escapeHtml(p.productName)}</h3>
+  //         <p class="text-xs text-gray-400 mb-1">${escapeHtml(p.productCategory || "")}</p>
+  //         <div class="flex items-baseline gap-2 mb-3">
+  //           <span class="text-sm font-semibold text-[#1D3C4A]">₹${price.toLocaleString("en-IN")}</span>
+  //           ${mrp > price ? `<span class="text-xs text-gray-400 line-through">₹${mrp.toLocaleString("en-IN")}</span>` : ""}
+  //         </div>
+  //         <button class="card-add-cart mt-auto py-2 rounded-lg border border-[#1D3C4A] text-[#1D3C4A] text-xs
+  //                        font-medium hover:bg-[#1D3C4A] hover:text-white transition"
+  //                 type="button"
+  //                 data-product-id="${p.productPrimeId}"
+  //                 data-price="${price}"
+  //                 data-product-name="${escapeHtml(p.productName || "")}"
+  //                 data-sku="${escapeHtml(p.currentSku || "")}">Add to Cart</button>
+  //       </div>
+  //     </div>`;
+  // }
+
+    function productCardHTML(p) {
+      const img = absUrl(p.mainImage) || FALLBACK_IMG;
+      const price = p.currentSellingPrice;
+      const productName = p.productName;
+      const mrp = p.currentMrpPrice;
+      const discPct = calcDiscount(price, mrp);
+
+      // Generate SEO-friendly URL for product cards
+      const url =
+        generateProductSEOUrl(p) ||
+        `/products/product-detail.html?id=${p.productPrimeId}`;
+
+      // Check if product is already in cart
+      const pid = Number(p.productPrimeId);
+      const isAdded = addedToCartSet.has(pid);
+      const isOOS = p.currentStock != null && p.currentStock <= 0;
+
+      // Determine button styles based on state
+      let buttonBgClass = "bg-[#1D3C4A]";
+      let buttonTextClass = "text-white";
+      let buttonHoverClass = "hover:bg-[#E39F32]";
+      let iconColorClass = "text-[#E39F32] group-hover:text-[#1D3C4A]";
+      let buttonText = "Add to Cart";
+      let iconHtml = `<i class="fa-solid fa-cart-shopping ${iconColorClass} transition-colors duration-300 text-[10px]"></i>`;
+
+      if (isOOS) {
+        buttonText = "Out of Stock";
+        buttonBgClass = "bg-gray-400";
+        buttonHoverClass = "hover:bg-gray-400";
+        iconHtml = `<i class="fa-solid fa-ban text-gray-200 text-[10px]"></i>`;
+      } else if (isAdded) {
+        buttonText = "Go to Cart";
+        buttonBgClass = "bg-[#E39F32]"; // Yellow/Gold background
+        buttonHoverClass = "hover:bg-[#d4892a]";
+        buttonTextClass = "text-[#1D3C4A]";
+        iconColorClass = "text-[#1D3C4A] group-hover:text-white";
+        iconHtml = `<i class="fa-solid fa-bag-shopping ${iconColorClass} transition-colors duration-300 text-[10px]"></i>`;
+      }
+
+      return `
+        <div class="product-card-clickable group relative flex flex-col bg-white rounded-2xl border border-[#e5e7eb] shadow-sm
+              hover:shadow-md transition-all duration-300 hover:-translate-y-1 overflow-hidden cursor-pointer"
+                    data-product-id="${p.productPrimeId}"
+                    data-product-name="${escapeHtml(p.productName || "")}"
+                    data-price="${price}"
+                    data-sku="${escapeHtml(p.currentSku || "")}"
+                    data-product-url="${url}">
+          
+          ${discPct > 0 ? `
+          <span class="absolute top-2 left-2 z-10 bg-[#e39f32] text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
+                      ${discPct}% OFF
+          </span> `: ""}
+          <!-- Wishlist Button -->
+          <button class="wishlist-icon-btn absolute top-2 right-2 z-10 w-8 h-8 flex items-center justify-center
+                                bg-white border border-[#e5e7eb] rounded-full shadow-sm hover:border-[#e39f32] transition-all"
+                          type="button">
           <i class="fa-regular fa-heart text-[#1D3C4A] text-xs"></i>
-        </button>
-        <div class="aspect-square overflow-hidden bg-gray-50">
+          </button>
+          <!-- Product Image -->
+          <div class="aspect-square overflow-hidden bg-gray-50">
           <img src="${img}" alt="${escapeHtml(p.productName)}"
-               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-               onerror="this.src='${FALLBACK_IMG}'"/>
-        </div>
-        <div class="flex flex-col flex-1 p-3">
-          <h3 class="text-sm font-medium font-lexend text-[#1D3C4A] line-clamp-2 mb-1">${escapeHtml(p.productName)}</h3>
-          <p class="text-xs text-gray-400 mb-1">${escapeHtml(p.productCategory || "")}</p>
-          <div class="flex items-baseline gap-2 mb-3">
-            <span class="text-sm font-semibold text-[#1D3C4A]">₹${price.toLocaleString("en-IN")}</span>
-            ${mrp > price ? `<span class="text-xs text-gray-400 line-through">₹${mrp.toLocaleString("en-IN")}</span>` : ""}
+                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        onerror="this.src='${FALLBACK_IMG}'"/>
           </div>
-          <button class="card-add-cart mt-auto py-2 rounded-lg border border-[#1D3C4A] text-[#1D3C4A] text-xs
-                         font-medium hover:bg-[#1D3C4A] hover:text-white transition"
-                  type="button"
-                  data-product-id="${p.productPrimeId}"
-                  data-price="${price}"
-                  data-product-name="${escapeHtml(p.productName || "")}"
-                  data-sku="${escapeHtml(p.currentSku || "")}">Add to Cart</button>
-        </div>
-      </div>`;
+          <!-- Product Details -->
+          <div class="flex flex-col flex-1 p-3">
+          <h3 class="text-sm font-medium font-lexend text-[#1D3C4A] line-clamp-2 mb-1">
+                      ${escapeHtml(p.productName)}
+          </h3>
+          <p class="text-xs text-gray-400 mb-1">${escapeHtml(p.productCategory || "")}</p>
+          <!-- Price -->
+          <div class="flex items-baseline gap-2 mb-3">
+          <span class="text-sm font-semibold text-[#1D3C4A]">₹${price.toLocaleString("en-IN")}</span>
+                      ${mrp > price ? `<span class="text-xs text-gray-400 line-through">₹${mrp.toLocaleString("en-IN")}</span>` : ""}
+          </div>
+          <!-- Add to Cart Button -->
+          <button class="card-add-cart group w-full mt-auto ${buttonBgClass} ${buttonTextClass} py-2 rounded-lg
+                                  flex items-center justify-center gap-2 text-xs font-medium
+                                  ${buttonHoverClass} transition-all duration-300 ${isOOS ? "cursor-not-allowed opacity-50" : ""}"
+                            type="button"
+                            data-product-id="${p.productPrimeId}"
+                            data-price="${price}"
+                            data-product-name="${p.productName || ""}"
+                            data-sku="${escapeHtml(p.currentSku || "")}"
+                            ${isOOS ? "disabled" : ""}
+                            ${isAdded ? 'data-added="true"' : ""}>
+                      ${iconHtml}
+            <span class="${isAdded ? "text-[#1D3C4A]" : "text-white"}">${buttonText}</span>
+          </button>
+      </div>
+    </div>`;
   }
+ 
+ 
 
   // ═══════════════════════════════════════════════════════════════════════════
   //  SIMILAR PRODUCTS  (hides section when no data)
   // ═══════════════════════════════════════════════════════════════════════════
 
-  function fillSimilarProducts() {
-    const sec = document.getElementById("similarSection");
-    if (!sec) return;
-    if (!transformedData.similarProducts?.length) {
-      sec.style.display = "none";
-      return;
-    }
-    sec.style.display = "block";
-    // (existing render logic preserved verbatim — omitted for brevity since
-    // similar products was never populated from API in the original code)
-  }
+  // function fillSimilarProducts() {
+  //   const sec = document.getElementById("similarSection");
+  //   if (!sec) return;
+  //   if (!transformedData.similarProducts?.length) {
+  //     sec.style.display = "none";
+  //     return;
+  //   }
+  //   sec.style.display = "block";
+  //   // (existing render logic preserved verbatim — omitted for brevity since
+  //   // similar products was never populated from API in the original code)
+  // }
 
   // ═══════════════════════════════════════════════════════════════════════════
   //  SOCIAL PROOF
@@ -5582,7 +6582,7 @@ async function buyCustomizedNow() {
 
     // Section heading
     html += `
-    <div class="mb-6">
+    <div class="mb-3">
       <h2 class="text-2xl md:text-3xl font-semibold font-zain text-[#1D3C4A]">
         Customer Reviews
       </h2>
@@ -5897,7 +6897,7 @@ async function buyCustomizedNow() {
     if (!sec || !transformedData.installSteps?.length) return;
 
     let html = `
-      <div class="max-w-6xl mx-auto px-6 space-y-12">
+      <div class="max-w-6xl mx-auto px-4 space-y-10">
         <div class="text-center max-w-3xl mx-auto mb-12">
           <span class="text-sm tracking-widest uppercase text-[#e39f32] font-medium">Installation Process</span>
           <h2 class="text-3xl md:text-4xl lg:text-5xl font-zain font-semibold text-[#1D3C4A] mt-4 mb-6 leading-tight">
@@ -5940,7 +6940,7 @@ async function buyCustomizedNow() {
                      <p class="text-sm font-lexend">Step ${step.step} visual</p>
                    </div>`}
             </div>
-            <div class="absolute -top-4 ${even ? "-left-4" : "-right-4"} bg-[#e39f32] text-white text-sm px-4 py-1 rounded-full shadow">
+            <div class="absolute -top-4 ${even ? "-left-1" : "-right-1"} bg-[#e39f32] text-white text-sm px-4 py-1 rounded-full shadow">
               Step 0${step.step}
             </div>
           </div>
@@ -6051,26 +7051,63 @@ bg-gray-100 px-2 py-0.5 rounded-md">
 
   function setupEventListeners() {
     // Share button
-    setTimeout(() => {
+      setTimeout(() => {
       const shareBtn = document.getElementById("shareButton");
       const sharePopup = document.getElementById("sharePopup");
-      if (shareBtn && sharePopup) {
-        shareBtn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          sharePopup.classList.toggle("hidden");
+ 
+      if (!shareBtn || !sharePopup) return;
+ 
+      shareBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        sharePopup.classList.toggle("hidden");
+      });
+ 
+      document.addEventListener("click", (e) => {
+        if (!shareBtn.contains(e.target) && !sharePopup.contains(e.target)) {
+          sharePopup.classList.add("hidden");
+        }
+      });
+ 
+      // Dynamic product details
+      const productUrl = window.location.href;
+      const productName =
+        safeProductData?.productName ||
+        document.title ||
+        "Check out this product";
+ 
+      // All share options
+      sharePopup.querySelectorAll(".share-option").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const shareType = btn.dataset.shareType;
+ 
+          switch (shareType) {
+            case "link":
+              try {
+                await navigator.clipboard.writeText(productUrl);
+                showToast("Product link copied!", "success");
+                sharePopup.classList.add("hidden");
+              } catch (err) {
+                console.error(err);
+                showToast("Failed to copy link", "error");
+              }
+              break;
+ 
+            case "whatsapp":
+              const whatsappText = `${productName}\n\n${productUrl}`;
+ 
+              window.open(
+                `https://wa.me/?text=${encodeURIComponent(whatsappText)}`,
+                "_blank",
+              );
+ 
+              sharePopup.classList.add("hidden");
+              break;
+ 
+            default:
+              break;
+          }
         });
-        document.addEventListener("click", (e) => {
-          if (!shareBtn.contains(e.target) && !sharePopup.contains(e.target))
-            sharePopup.classList.add("hidden");
-        });
-        // Copy link
-        const copyLinkBtn = sharePopup.querySelector(".share-copy-link");
-        copyLinkBtn?.addEventListener("click", () => {
-          navigator.clipboard?.writeText(window.location.href).then(() =>
-            showToast("Link copied!", "success")
-          );
-        });
-      }
+      });
     }, 100);
 
     // Quantity
@@ -6240,16 +7277,761 @@ bg-gray-100 px-2 py-0.5 rounded-md">
     }
   }
 
+  //Patch -3
+  function buildMobileCarousel(media) {
+    const displayArea = document.getElementById("mainDisplayArea");
+    const dotsContainer = document.getElementById("mobileNavDots");
+    if (!displayArea) return;
+ 
+    /* Build ordered media list */
+    const mediaItems = [];
+    mediaItems.push({ type: "image", url: media.mainImage || FALLBACK_IMG });
+    if (media.productVideoUrl) {
+      mediaItems.push({ type: "video", url: media.productVideoUrl });
+    }
+    (media.mockupImages || []).forEach((img) => {
+      if (img) mediaItems.push({ type: "image", url: img });
+    });
+ 
+    /* Store globally for lightbox access */
+    window._carouselMediaItems = mediaItems;
+ 
+    /* ── Build carousel track HTML ──────────────────────────── */
+    const slidesHTML = mediaItems
+      .map((item, idx) => {
+        if (item.type === "video") {
+          return `
+        <div class="carousel-slide" data-slide-idx="${idx}">
+          <video src="${item.url}"
+                 class="w-full h-full object-cover"
+                 muted preload="metadata"
+                 playsinline></video>
+          <div class="carousel-video-overlay">
+            <i class="fas fa-play"></i>
+          </div>
+        </div>`;
+        }
+        return `
+      <div class="carousel-slide" data-slide-idx="${idx}">
+        <img src="${item.url}"
+             alt="Product image ${idx + 1}"
+             loading="${idx === 0 ? "eager" : "lazy"}"
+             onerror="this.src='${FALLBACK_IMG}'"
+             style="width:100%;height:100%;object-fit:cover;display:block;"/>
+      </div>`;
+      })
+      .join("");
+ 
+    /* Tap hint badge */
+    const tapHintHTML = `
+    <div id="mobileTapHint">
+      <i class="fas fa-expand" style="font-size:10px;"></i>
+      Tap to expand
+    </div>`;
+ 
+    /* Discount badge — preserve from original render */
+    const existingBadge = displayArea.querySelector(".absolute.top-3.left-3");
+    const badgeHTML = existingBadge ? existingBadge.outerHTML : "";
+ 
+    /* Inject into displayArea */
+    displayArea.innerHTML = `
+    <div id="carouselTrack" style="display:flex;height:100%;will-change:transform;">
+      ${slidesHTML}
+    </div>
+    ${badgeHTML}
+    ${tapHintHTML}
+  `;
+ 
+    /* ── Build pill dots ─────────────────────────────────────── */
+    if (dotsContainer) {
+      dotsContainer.innerHTML = mediaItems
+        .map(
+          (_, idx) => `
+      <button class="mobile-nav-dot${idx === 0 ? " active-dot" : ""}"
+              data-index="${idx}"
+              aria-label="Go to image ${idx + 1}"></button>
+    `,
+        )
+        .join("");
+    }
+ 
+    /* ── Init carousel state ─────────────────────────────────── */
+    let currentIdx = 0;
+    const track = document.getElementById("carouselTrack");
+    const slides = track
+      ? Array.from(track.querySelectorAll(".carousel-slide"))
+      : [];
+    const dots = dotsContainer
+      ? Array.from(dotsContainer.querySelectorAll(".mobile-nav-dot"))
+      : [];
+ 
+    function getSlideWidth() {
+      const containerW = displayArea.offsetWidth;
+      return containerW * 0.92 + 8;
+    }
+ 
+    function goToSlide(idx, animate = true) {
+      if (!track || idx < 0 || idx >= mediaItems.length) return;
+      currentIdx = idx;
+ 
+      if (!animate) {
+        track.style.transition = "none";
+      } else {
+        track.style.transition =
+          "transform 0.38s cubic-bezier(0.25,0.46,0.45,0.94)";
+      }
+ 
+      /* For last slide, snap so it fills full width */
+      const offset =
+        idx < mediaItems.length - 1
+          ? idx * getSlideWidth()
+          : track.scrollWidth - displayArea.offsetWidth;
+ 
+      track.style.transform = `translateX(-${offset}px)`;
+ 
+      /* Update dots */
+      dots.forEach((dot, i) => {
+        dot.classList.toggle("active-dot", i === idx);
+      });
+ 
+      /* Show tap hint briefly on first image */
+      if (idx === 0) {
+        displayArea.classList.add("show-hint");
+        setTimeout(() => displayArea.classList.remove("show-hint"), 2200);
+      }
+    }
+ 
+    /* ── Dot click handler ───────────────────────────────────── */
+    dots.forEach((dot) => {
+      dot.addEventListener("click", () => {
+        goToSlide(parseInt(dot.dataset.index));
+      });
+    });
+ 
+    /* ── Touch/swipe handler ─────────────────────────────────── */
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchStartT = 0;
+    let isDragging = false;
+    let isScrolling =
+      null; /* null = undecided, true = vertical scroll, false = horiz swipe */
+    let dragOffsetX = 0;
+ 
+    function getBaseOffset() {
+      return currentIdx < mediaItems.length - 1
+        ? currentIdx * getSlideWidth()
+        : track.scrollWidth - displayArea.offsetWidth;
+    }
+ 
+    displayArea.addEventListener(
+      "touchstart",
+      (e) => {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        touchStartT = Date.now();
+        isDragging = true;
+        isScrolling = null;
+        dragOffsetX = 0;
+        track.style.transition = "none"; /* disable animation during drag */
+      },
+      { passive: true },
+    );
+ 
+    displayArea.addEventListener(
+      "touchmove",
+      (e) => {
+        if (!isDragging) return;
+ 
+        const dx = e.touches[0].clientX - touchStartX;
+        const dy = e.touches[0].clientY - touchStartY;
+ 
+        /* Decide on first significant movement whether user is scrolling or swiping */
+        if (isScrolling === null && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
+          isScrolling = Math.abs(dy) > Math.abs(dx);
+        }
+ 
+        if (isScrolling) return; /* let vertical scroll happen naturally */
+ 
+        e.preventDefault(); /* prevent page scroll when swiping horizontally */
+        dragOffsetX = dx;
+ 
+        /* Live-drag feedback: translate track in real time */
+        const base = getBaseOffset();
+        track.style.transform = `translateX(${-(base - dx)}px)`;
+      },
+      { passive: false },
+    );
+ 
+    displayArea.addEventListener(
+      "touchend",
+      (e) => {
+        if (!isDragging || isScrolling) {
+          isDragging = false;
+          return;
+        }
+        isDragging = false;
+ 
+        const elapsed = Date.now() - touchStartT;
+        const velocity = Math.abs(dragOffsetX) / elapsed; /* px/ms */
+ 
+        /* Swipe threshold: 60px or fast flick (>0.3 px/ms) */
+        const threshold = 60;
+        const isFlick = velocity > 0.3;
+ 
+        if (
+          (dragOffsetX < -threshold || (dragOffsetX < 0 && isFlick)) &&
+          currentIdx < mediaItems.length - 1
+        ) {
+          goToSlide(currentIdx + 1);
+        } else if (
+          (dragOffsetX > threshold || (dragOffsetX > 0 && isFlick)) &&
+          currentIdx > 0
+        ) {
+          goToSlide(currentIdx - 1);
+        } else {
+          goToSlide(currentIdx); /* snap back */
+        }
+      },
+      { passive: true },
+    );
+ 
+    /* ── Tap to open lightbox ────────────────────────────────── */
+    displayArea.addEventListener("click", (e) => {
+      /* Only open lightbox if it wasn't a swipe */
+      if (Math.abs(dragOffsetX) < 8) {
+        openMobileLightbox(currentIdx);
+      }
+    });
+ 
+    /* ── Wire video play overlays ────────────────────────────── */
+    slides.forEach((slide, idx) => {
+      const overlay = slide.querySelector(".carousel-video-overlay");
+      const video = slide.querySelector("video");
+      if (overlay && video) {
+        overlay.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (video.paused) {
+            video.play();
+            overlay.style.display = "none";
+          }
+        });
+        video.addEventListener("pause", () => {
+          overlay.style.display = "flex";
+        });
+        video.addEventListener("ended", () => {
+          overlay.style.display = "flex";
+        });
+      }
+    });
+ 
+    /* ── Initial state ───────────────────────────────────────── */
+    goToSlide(0, false);
+ 
+    /* Show tap hint on load after short delay */
+    setTimeout(() => {
+      displayArea.classList.add("show-hint");
+      setTimeout(() => displayArea.classList.remove("show-hint"), 2200);
+    }, 800);
+ 
+    /* Expose goToSlide for dot navigation */
+    window._carouselGoToSlide = goToSlide;
+  }
+
+    function buildMobileLightbox(mediaItems) {
+    /* Remove stale instance if variant changed */
+    document.getElementById("mobileLightbox")?.remove();
+ 
+    const thumbsHTML = mediaItems
+      .map((item, idx) => {
+        if (item.type === "video") {
+          return `
+        <div class="lb-thumb lb-thumb-video${idx === 0 ? " lb-active" : ""}"
+             data-lb-idx="${idx}"
+             style="position:relative;width:48px;height:48px;border-radius:6px;overflow:hidden;
+                    flex-shrink:0;cursor:pointer;border:2px solid transparent;
+                    opacity:${idx === 0 ? 1 : 0.55};transition:opacity 0.2s,border-color 0.2s;">
+          <video src="${item.url}" style="width:100%;height:100%;object-fit:cover;" muted preload="metadata"></video>
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.4);">
+            <i class="fas fa-play" style="color:#fff;font-size:12px;"></i>
+          </div>
+        </div>`;
+        }
+        return `
+      <img class="lb-thumb${idx === 0 ? " lb-active" : ""}"
+           src="${item.url}"
+           data-lb-idx="${idx}"
+           alt="Thumbnail ${idx + 1}"
+           onerror="this.style.display='none'"
+           style="flex-shrink:0;width:48px;height:48px;border-radius:6px;object-fit:cover;
+                  border:2px solid ${idx === 0 ? "#e39f32" : "transparent"};
+                  opacity:${idx === 0 ? 1 : 0.55};cursor:pointer;
+                  transition:opacity 0.2s,border-color 0.2s;"/>`;
+      })
+      .join("");
+ 
+    const slidesHTML = mediaItems
+      .map((item, idx) => {
+        if (item.type === "video") {
+          return `
+        <div class="lb-slide" data-lb-slide="${idx}">
+          <video src="${item.url}" controls playsinline
+                 style="max-width:100%;max-height:78vh;object-fit:contain;border-radius:4px;background:#000;">
+          </video>
+        </div>`;
+        }
+        return `
+      <div class="lb-slide" data-lb-slide="${idx}">
+        <img src="${item.url}"
+             alt="Product image ${idx + 1}"
+             onerror="this.src='${FALLBACK_IMG}'"
+             style="max-width:100%;max-height:78vh;object-fit:contain;border-radius:4px;"/>
+      </div>`;
+      })
+      .join("");
+ 
+    const lbHTML = `
+    <div id="mobileLightbox">
+ 
+      <!-- Top bar: counter + close -->
+      <div id="lbTopBar">
+        <span id="lbCounter" style="color:rgba(255,255,255,0.85);font-size:13px;font-family:Lexend,sans-serif;">
+          1 / ${mediaItems.length}
+        </span>
+        <button id="lbCloseBtn" aria-label="Close fullscreen view">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+ 
+      <!-- Slide track -->
+      <div style="width:100%;overflow:hidden;height:80vh;">
+        <div id="lbTrack">
+          ${slidesHTML}
+        </div>
+      </div>
+ 
+      <!-- Bottom thumbnail row -->
+      <div id="lbThumbRow">
+        ${thumbsHTML}
+      </div>
+ 
+    </div>`;
+ 
+    document.body.insertAdjacentHTML("beforeend", lbHTML);
+  }
+ 
+  /* ─────────────────────────────────────────────────────────────
+     PATCH JS-4: openMobileLightbox() / closeMobileLightbox()
+     ───────────────────────────────────────────────────────────── */
+  function openMobileLightbox(startIdx) {
+    /* Only on mobile */
+    if (window.innerWidth >= 768) {
+      /* Desktop uses existing openLightbox() */
+      if (typeof window.openLightbox === "function") {
+        window.openLightbox(startIdx);
+      }
+      return;
+    }
+ 
+    const mediaItems = window._carouselMediaItems || [];
+    if (!mediaItems.length) return;
+ 
+    /* Build lightbox if not already in DOM, or rebuild if variant changed */
+    if (!document.getElementById("mobileLightbox")) {
+      buildMobileLightbox(mediaItems); /* PATCH JS-3 */
+    }
+ 
+    const lb = document.getElementById("mobileLightbox");
+    const lbTrack = document.getElementById("lbTrack");
+    const lbCounter = document.getElementById("lbCounter");
+    const closeBtn = document.getElementById("lbCloseBtn");
+    const thumbRow = document.getElementById("lbThumbRow");
+ 
+    if (!lb || !lbTrack) return;
+ 
+    let lbCurrentIdx = startIdx;
+ 
+    function getLbSlideWidth() {
+      return lb.offsetWidth; /* each lb-slide is 100% width */
+    }
+ 
+    function goToLbSlide(idx, animate = true) {
+      if (idx < 0 || idx >= mediaItems.length) return;
+      lbCurrentIdx = idx;
+ 
+      lbTrack.style.transition = animate
+        ? "transform 0.35s cubic-bezier(0.25,0.46,0.45,0.94)"
+        : "none";
+      lbTrack.style.transform = `translateX(-${idx * getLbSlideWidth()}px)`;
+ 
+      /* Counter */
+      if (lbCounter)
+        lbCounter.textContent = `${idx + 1} / ${mediaItems.length}`;
+ 
+      /* Thumbs */
+      if (thumbRow) {
+        thumbRow
+          .querySelectorAll(".lb-thumb, .lb-thumb-video")
+          .forEach((t, i) => {
+            const isActive = i === idx;
+            t.style.borderColor = isActive ? "#e39f32" : "transparent";
+            t.style.opacity = isActive ? "1" : "0.55";
+          });
+        /* Scroll active thumb into view */
+        const activeThumb = thumbRow.querySelector(`[data-lb-idx="${idx}"]`);
+        if (activeThumb) {
+          activeThumb.scrollIntoView({
+            behavior: "smooth",
+            inline: "center",
+            block: "nearest",
+          });
+        }
+      }
+    }
+ 
+    /* Open */
+    lb.classList.add("lb-open");
+    document.body.style.overflow = "hidden";
+    goToLbSlide(lbCurrentIdx, false);
+ 
+    /* ── Lightbox touch/swipe ────────────────────────────────── */
+    let lbTouchStartX = 0;
+    let lbTouchStartT = 0;
+    let lbDragX = 0;
+ 
+    function lbTouchStart(e) {
+      lbTouchStartX = e.touches[0].clientX;
+      lbTouchStartT = Date.now();
+      lbDragX = 0;
+      lbTrack.style.transition = "none";
+    }
+ 
+    function lbTouchMove(e) {
+      lbDragX = e.touches[0].clientX - lbTouchStartX;
+      const base = lbCurrentIdx * getLbSlideWidth();
+      lbTrack.style.transform = `translateX(${-(base - lbDragX)}px)`;
+    }
+ 
+    function lbTouchEnd() {
+      const elapsed = Date.now() - lbTouchStartT;
+      const velocity = Math.abs(lbDragX) / elapsed;
+      const threshold = 50;
+ 
+      if (
+        (lbDragX < -threshold || velocity > 0.3) &&
+        lbCurrentIdx < mediaItems.length - 1
+      ) {
+        goToLbSlide(lbCurrentIdx + 1);
+      } else if (
+        (lbDragX > threshold || (lbDragX > 0 && velocity > 0.3)) &&
+        lbCurrentIdx > 0
+      ) {
+        goToLbSlide(lbCurrentIdx - 1);
+      } else {
+        goToLbSlide(lbCurrentIdx);
+      }
+    }
+ 
+    lbTrack.addEventListener("touchstart", lbTouchStart, { passive: true });
+    lbTrack.addEventListener("touchmove", lbTouchMove, { passive: true });
+    lbTrack.addEventListener("touchend", lbTouchEnd, { passive: true });
+ 
+    /* ── Thumb clicks ────────────────────────────────────────── */
+    if (thumbRow) {
+      thumbRow.querySelectorAll("[data-lb-idx]").forEach((thumb) => {
+        thumb.addEventListener("click", () => {
+          goToLbSlide(parseInt(thumb.dataset.lbIdx));
+        });
+      });
+    }
+ 
+    /* ── Close handlers ──────────────────────────────────────── */
+    function closeMobileLightbox() {
+      lb.classList.remove("lb-open");
+      document.body.style.overflow = "";
+ 
+      /* Pause any playing video */
+      lb.querySelectorAll("video").forEach((v) => v.pause());
+ 
+      /* Remove event listeners to avoid duplication on reopen */
+      lbTrack.removeEventListener("touchstart", lbTouchStart);
+      lbTrack.removeEventListener("touchmove", lbTouchMove);
+      lbTrack.removeEventListener("touchend", lbTouchEnd);
+    }
+ 
+    if (closeBtn) {
+      /* Remove old listeners before adding new one */
+      closeBtn.replaceWith(closeBtn.cloneNode(true));
+      document
+        .getElementById("lbCloseBtn")
+        .addEventListener("click", closeMobileLightbox);
+    }
+ 
+    /* Keyboard (for accessibility, even on mobile) */
+    function lbKeyHandler(e) {
+      if (!lb.classList.contains("lb-open")) return;
+      if (e.key === "Escape") {
+        closeMobileLightbox();
+        document.removeEventListener("keydown", lbKeyHandler);
+      }
+      if (e.key === "ArrowRight") goToLbSlide(lbCurrentIdx + 1);
+      if (e.key === "ArrowLeft") goToLbSlide(lbCurrentIdx - 1);
+    }
+    document.addEventListener("keydown", lbKeyHandler);
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     PATCH JS-5: wireInitialThumbClicks() REPLACEMENT
+     ───────────────────────────────────────────────────────────── */
+  function wireInitialThumbClicks(mediaItems) {
+    /* ── Mobile: carousel already built in buildCompleteHTML flow ─ */
+    if (window.innerWidth < 768) {
+      const initialMedia = {
+        mainImage: (mediaItems[0] && mediaItems[0].url) || FALLBACK_IMG,
+        productVideoUrl:
+          mediaItems.find((i) => i.type === "video")?.url || null,
+        mockupImages: mediaItems
+          .filter((i) => i.type === "image")
+          .slice(1)
+          .map((i) => i.url),
+      };
+      buildMobileCarousel(initialMedia);
+      return;
+    }
+ 
+    /* ── Desktop: ORIGINAL code ──────────────── */
+    setTimeout(() => {
+      const desktopThumbContainer = document.getElementById("thumbContainer");
+      const mobileThumbContainer = document.getElementById(
+        "mobileThumbContainer",
+      );
+      const mainImg = document.getElementById("mainProductImage");
+      const scrollContainer = document.getElementById("thumbScrollContainer");
+      const leftBtn = document.getElementById("thumbScrollLeft");
+      const rightBtn = document.getElementById("thumbScrollRight");
+ 
+      if (!desktopThumbContainer || !mainImg) return;
+ 
+      if (scrollContainer && leftBtn && rightBtn) {
+        const updateButtons = () => {
+          const scrollLeft = scrollContainer.scrollLeft;
+          const maxScroll =
+            scrollContainer.scrollWidth - scrollContainer.clientWidth;
+          leftBtn.disabled = scrollLeft <= 1;
+          rightBtn.disabled = maxScroll - scrollLeft <= 1;
+        };
+ 
+        leftBtn.addEventListener("click", () => {
+          scrollContainer.scrollBy({ left: -160, behavior: "smooth" });
+          setTimeout(updateButtons, 200);
+        });
+        rightBtn.addEventListener("click", () => {
+          scrollContainer.scrollBy({ left: 160, behavior: "smooth" });
+          setTimeout(updateButtons, 200);
+        });
+        scrollContainer.addEventListener("scroll", updateButtons);
+        window.addEventListener("resize", updateButtons);
+        setTimeout(updateButtons, 100);
+      }
+ 
+      desktopThumbContainer
+        .querySelectorAll("[data-media-index]")
+        .forEach((thumb) => {
+          thumb.addEventListener("click", function () {
+            const index = parseInt(this.dataset.mediaIndex);
+            const item = mediaItems[index];
+            if (item) {
+              setMainMedia(item, mainImg);
+              updateActiveStates(index);
+            }
+          });
+        });
+ 
+      if (mobileThumbContainer) {
+        mobileThumbContainer
+          .querySelectorAll(".mobile-thumb-item")
+          .forEach((thumb) => {
+            thumb.addEventListener("click", function () {
+              const index = parseInt(this.dataset.mediaIndex);
+              const item = mediaItems[index];
+              if (item) {
+                setMainMedia(item, mainImg);
+                updateActiveStates(index);
+              }
+            });
+          });
+      }
+ 
+      const mobileNavDots = document.getElementById("mobileNavDots");
+      if (mobileNavDots) {
+        mobileNavDots.querySelectorAll(".mobile-nav-dot").forEach((dot) => {
+          dot.addEventListener("click", function () {
+            const index = parseInt(this.dataset.index);
+            const item = mediaItems[index];
+            if (item) {
+              setMainMedia(item, mainImg);
+              updateActiveStates(index);
+              if (mobileThumbContainer && scrollContainer) {
+                const thumb = mobileThumbContainer.querySelector(
+                  `.mobile-thumb-item[data-media-index="${index}"]`,
+                );
+                if (thumb)
+                  thumb.scrollIntoView({
+                    behavior: "smooth",
+                    inline: "center",
+                    block: "nearest",
+                  });
+              }
+            }
+          });
+        });
+      }
+ 
+      function updateActiveStates(activeIndex) {
+        desktopThumbContainer
+          .querySelectorAll("[data-media-index]")
+          .forEach((el) => {
+            const idx = parseInt(el.dataset.mediaIndex);
+            el.classList.toggle("border-[#e39f32]", idx === activeIndex);
+            el.classList.toggle("border-transparent", idx !== activeIndex);
+          });
+        if (mobileThumbContainer) {
+          mobileThumbContainer
+            .querySelectorAll(".mobile-thumb-item")
+            .forEach((el) => {
+              const idx = parseInt(el.dataset.mediaIndex);
+              el.classList.toggle("border-[#e39f32]", idx === activeIndex);
+              el.classList.toggle("border-transparent", idx !== activeIndex);
+            });
+        }
+        if (mobileNavDots) {
+          mobileNavDots
+            .querySelectorAll(".mobile-nav-dot")
+            .forEach((el, idx) => {
+              el.classList.toggle("bg-[#E39F32]", idx === activeIndex);
+              el.classList.toggle("scale-125", idx === activeIndex);
+              el.classList.toggle("bg-gray-300", idx !== activeIndex);
+            });
+        }
+      }
+ 
+      updateActiveStates(0);
+    }, 50);
+  }
+
+   /* ─────────────────────────────────────────────────────────────
+     PATCH JS-6: Rebuild carousel on window resize
+     ───────────────────────────────────────────────────────────── */
+  (function initResizeHandler() {
+    let resizeTimer = null;
+    let lastWasMobile = window.innerWidth < 768;
+ 
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        const isMobileNow = window.innerWidth < 768;
+        if (isMobileNow !== lastWasMobile) {
+          lastWasMobile = isMobileNow;
+          /* Rebuild gallery for current breakpoint */
+          if (window._carouselMediaItems) {
+            const media = {
+              mainImage: window._carouselMediaItems[0]?.url || FALLBACK_IMG,
+              productVideoUrl:
+                window._carouselMediaItems.find((i) => i.type === "video")
+                  ?.url || null,
+              mockupImages: window._carouselMediaItems
+                .filter((i) => i.type === "image")
+                .slice(1)
+                .map((i) => i.url),
+            };
+            buildMediaStrip(media);
+          }
+        }
+      }, 250);
+    });
+  })();
+ 
+  // ─── ROBUST GALLERY RESIZE & CLEANUP HANDLER ─────────────────────────────
+  (function setupRobustGalleryResize() {
+    let resizeTimeout = null;
+    let previousWidth = window.innerWidth;
+ 
+    function cleanupMobileCarousel() {
+      const displayArea = document.getElementById("mainDisplayArea");
+      if (!displayArea) return;
+ 
+      // Remove mobile carousel elements
+      const track = document.getElementById("carouselTrack");
+      if (track) track.remove();
+ 
+      // Remove any leftover mobile-specific elements
+      displayArea
+        .querySelectorAll(".carousel-slide, #mobileTapHint")
+        .forEach((el) => el.remove());
+ 
+      // Restore main image element if missing
+      let mainImg = document.getElementById("mainProductImage");
+      if (!mainImg) {
+        mainImg = document.createElement("img");
+        mainImg.id = "mainProductImage";
+        mainImg.className =
+          "w-full h-full object-cover cursor-pointer transition-transform duration-300 hover:scale-105";
+        mainImg.onclick = () => window.openLightbox && window.openLightbox(0);
+        const wrapper = document.createElement("div");
+        wrapper.className = "relative w-full h-full overflow-hidden";
+        wrapper.appendChild(mainImg);
+        displayArea.innerHTML = "";
+        displayArea.appendChild(wrapper);
+      }
+    }
+ 
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimeout);
+ 
+      resizeTimeout = setTimeout(() => {
+        if (!safeProductData || !currentVariant) return;
+ 
+        const currentWidth = window.innerWidth;
+        const isMobileNow = currentWidth < 768;
+        const wasMobile = previousWidth < 768;
+ 
+        if (
+          isMobileNow !== wasMobile ||
+          Math.abs(currentWidth - previousWidth) > 150
+        ) {
+          console.log(
+            `[Gallery] Resize: ${wasMobile ? "Mobile" : "Desktop"} → ${isMobileNow ? "Mobile" : "Desktop"}`,
+          );
+ 
+          // Cleanup before rebuild
+          if (!isMobileNow) cleanupMobileCarousel();
+ 
+          const media = getVariantMedia(currentVariant);
+          buildMediaStrip(media);
+ 
+          previousWidth = currentWidth;
+        }
+      }, 180); // Debounced
+    });
+ 
+    // Initial run after load
+    setTimeout(() => {
+      const media = getVariantMedia(currentVariant);
+      buildMediaStrip(media);
+    }, 300);
+  })();
+ 
+
+
   // Add once during init / at bottom of your script
-["cart:updated", "cart:itemRemoved"].forEach(evt => {
-  window.addEventListener(evt, async () => {
-    await loadCartItems();   // refresh addedToCartSet
-    syncCardCartStates();    // revert any removed items
+  ["cart:updated", "cart:itemRemoved"].forEach(evt => {
+    window.addEventListener(evt, async () => {
+      await loadCartItems();   // refresh addedToCartSet
+      syncCardCartStates();    // revert any removed items
+    });
+    document.addEventListener(evt, async () => {
+      await loadCartItems();
+      syncCardCartStates();
+    });
   });
-  document.addEventListener(evt, async () => {
-    await loadCartItems();
-    syncCardCartStates();
-  });
-});
 
 })();

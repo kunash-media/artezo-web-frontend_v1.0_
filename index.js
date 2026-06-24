@@ -837,144 +837,114 @@ async function fetchAndRenderAddonSections() {
           </section>
 
           <!-- Discover Section -->
-          <section class="py-12 px-3 sm:px-6 lg:px-8 bg-white">
-              <div class="max-w-[1450px] mx-auto bg-teal-50 rounded-xl p-4 sm:p-6 -mt-6 md:-mt-4">
-            
-                <!-- Heading -->
-                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
-            
-                  <div>
-                    <div class="flex items-center gap-3 mb-1">
-                      <span class="w-1 h-8 bg-[#E39F32] rounded-full"></span>
-            
-                      <h2 class="text-2xl sm:text-3xl font-semibold text-[#1D3C4A] font-zain">
-                        ${data.discover.title}
-                      </h2>
-                    </div>
-            
-                    <p class="text-sm text-gray-500 ml-4">
-                      ${data.discover.subtitle}
-                    </p>
-                  </div>
-            
-                  <!-- <button
-                    class="flex items-center gap-2 border border-gray-300 px-5 py-2.5 rounded-full text-sm hover:bg-white transition w-fit view-all-btn">
-                    View All
-                    <i class="fa-solid fa-arrow-right text-xs"></i>
-                  </button>-->
-                </div>
-            
-                <div class="relative">
-            
-                  <!-- Previous -->
-                  <button
-                    id="discoverPrevBtn"
-                    class="absolute -left-2 sm:-left-5 md:-left-6 top-1/2 -translate-y-1/2 bg-white shadow-lg p-3 rounded-full z-30 hover:scale-105 active:scale-95 transition flex items-center justify-center border border-gray-100">
-                    <i class="fa-solid fa-chevron-left text-sm sm:text-base"></i>
-                  </button>
-            
-                  <!-- Slider -->
-                  <div
-                    id="discoverSlider"
-                    class="flex gap-3 sm:gap-5 overflow-x-auto scroll-smooth no-scrollbar pb-4 px-2 sm:px-10 md:px-10 snap-x snap-mandatory scrollbar-hide">
-            
-                    ${data.discover.products
-                    .map(
-                      (prod) => `
-            
-                    <div class="relative
-                                min-w-[48%]
-                                sm:min-w-[48%]
-                                md:min-w-[31%]
-                                lg:min-w-[250px]
-                                xl:min-w-[270px]
-                                bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 flex-shrink-0 snap-start">
-            
-                      <!-- Discount Badge -->
-                      <span class="absolute top-3 left-3 bg-[#E39F32] text-white text-[10px] font-semibold px-2 py-1 rounded-md z-20">
-                        ${prod.discount}
-                      </span>
-            
-                      <!-- Wishlist -->
-                      <button
-                        class="wishlist-btn absolute top-3 right-3 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:scale-110 transition z-20"
-                        data-product-id="${prod.id}"
-                        data-product-name="${prod.title}"
-                        data-price="${prod.price}"
-                        data-image="${prod.image}"
-                      >
-                        <i class="fa-regular fa-heart text-gray-500 text-sm"></i>
-                      </button>
-            
-                      <!-- Product Image -->
-                      <div class="">
-                        <div class="border border-gray-200 rounded-xl overflow-hidden h-[120px] sm:h-[150px] bg-gray-100">
-                          <img
-                            src="${prod.image}"
-                            class="w-full h-full object-cover"
-                            alt="${prod.title}"
-                          />
-                        </div>
-                      </div>
-            
-                      <!-- Content -->
-                      <div class="px-2.5 pb-2 pt-1">
-            
-                        <h3 class="text-sm text-gray-700 line-clamp-2 font-medium leading-tight min-h-[20px]">
-                          ${prod.title}
-                        </h3>
-            
-                        <!-- Rating -->
-                        <div class="flex items-center text-orange-500 text-xs mt-1">
-                          ${prod.starsHtml}
-                          <span class="text-gray-400 ml-1">
-                            (${prod.reviews})
-                          </span>
-                        </div>
-            
-                        <!-- Price -->
-                        <div class="flex items-center gap-1 mt-1 flex-wrap">
-                          <span class="font-semibold text-base text-[#1D3C4A]">
-                            ${prod.price}
-                          </span>
-            
-                          <span class="text-gray-400 line-through text-xs">
-                            ${prod.originalPrice}
-                          </span>
-                        </div>
-            
-                        <!-- Add To Cart -->
-                          <button
-                          class="group w-full mt-2 bg-[#1D3C4A] text-white py-2.5 rounded-lg flex items-center justify-center gap-2 text-xs font-medium hover:bg-[#E39F32] transition-all duration-300"
-                  data-product-id="${prod.id}"
-                >
-                  <i class="fa-solid fa-cart-shopping text-[#E39F32] group-hover:text-[#1D3C4A] transition-colors duration-300"></i>
-                  <span class="text-white">Add to Cart</span>
-                </button>
-            
-                      </div>
-            
-                    </div>
-            
-                    `,
-                    )
-                    .join("")}
-            
-                  </div>
-            
-                  <!-- Next -->
-                  <button
-                    id="discoverNextBtn"
-                    class="absolute -right-2 sm:-right-5 md:-right-6 top-1/2 -translate-y-1/2 bg-white shadow-lg p-3 rounded-full z-30 hover:scale-105 active:scale-95 transition flex items-center justify-center border border-gray-100">
-                    <i class="fa-solid fa-chevron-right text-sm sm:text-base"></i>
-                  </button>
-            
-                </div>
-            
-              </div>
-            </section>
+          <!-- Discover Section -->
+<section class="py-12 px-3 sm:px-6 lg:px-8 bg-white">
+<div class="max-w-[1450px] mx-auto bg-teal-50 rounded-xl p-4 sm:p-6 -mt-6 md:-mt-4">
+<!-- Heading -->
+<div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
+<div>
+<div class="flex items-center gap-3 mb-1">
+<span class="w-1 h-8 bg-[#E39F32] rounded-full"></span>
+<h2 class="text-2xl sm:text-3xl font-semibold text-[#1D3C4A] font-zain">
+            ${data.discover.title}
+</h2>
+</div>
+<p class="text-sm text-gray-500 ml-4">
+          ${data.discover.subtitle}
+</p>
+</div>
+</div>
+ 
+    <div class="relative">
+<!-- Previous Button -->
+<button
+        id="discoverPrevBtn"
+        class="absolute -left-2 sm:-left-5 md:-left-6 top-1/2 -translate-y-1/2 bg-white shadow-lg p-3 rounded-full z-30 hover:scale-105 active:scale-95 transition flex items-center justify-center border border-gray-100">
+<i class="fa-solid fa-chevron-left text-sm sm:text-base"></i>
+</button>
+<!-- Slider -->
+<div
+        id="discoverSlider"
+        class="flex gap-3 sm:gap-5 overflow-x-auto scroll-smooth no-scrollbar pb-4 px-2 sm:px-10 md:px-10 snap-x snap-mandatory scrollbar-hide">
+        ${data.discover.products.map((prod) => `
+<div class="relative w-[170px] sm:w-[200px] md:w-[220px] lg:w-[240px] xl:w-[260px] flex-shrink-0 snap-start bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 product-card">
+<!-- Discount Badge -->
+<span class="absolute top-3 left-3 bg-[#E39F32] text-white text-[10px] font-semibold px-2 py-1 rounded-md z-20">
+              ${prod.discount}
+</span>
+ 
+            <!-- Wishlist Button -->
+<button
+              class="wishlist-btn absolute top-3 right-3 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:scale-110 transition z-20"
+              data-product-id="${prod.id}"
+              data-product-name="${prod.title}"
+              data-price="${prod.price}"
+              data-image="${prod.image}"
+>
+<i class="fa-regular fa-heart text-gray-500 text-sm"></i>
+</button>
+ 
+            <!-- Product Image -->
+<div class="p-2">
+<div class="border border-gray-200 rounded-xl overflow-hidden h-[120px] sm:h-[150px] bg-gray-100">
+<img
+                  src="${prod.image}"
+                  class="w-full h-full object-cover"
+                  alt="${prod.title}"
+                />
+</div>
+</div>
+ 
+            <!-- Content -->
+<div class="px-3 pb-3 flex flex-col">
+<!-- Title -->
+<h3 class="text-sm text-gray-700 line-clamp-2 font-medium leading-tight h-[40px]">
+                ${prod.title}
+</h3>
+ 
+              <!-- Rating -->
+<div class="flex items-center text-orange-500 text-xs mt-1">
+                ${prod.starsHtml}
+<span class="text-gray-400 ml-1">
+                  (${prod.reviews})
+</span>
+</div>
+ 
+              <!-- Price -->
+<div class="flex items-center gap-1 mt-1 flex-wrap">
+<span class="font-semibold text-base text-[#1D3C4A]">
+                  ${prod.price}
+</span>
+<span class="text-gray-400 line-through text-xs">
+                  ${prod.originalPrice}
+</span>
+</div>
+ 
+              <!-- Add to Cart Button -->
+<button
+                class="product-button group bg-[#1D3C4A] text-white py-2.5 rounded-lg flex items-center justify-center gap-2 text-xs font-medium hover:bg-[#E39F32] transition-all duration-300 mt-2 w-full"
+                data-product-id="${prod.id}"
+>
+<i class="fa-solid fa-cart-shopping text-[#E39F32] group-hover:text-[#1D3C4A] transition-colors duration-300"></i>
+<span class="text-white">Add to Cart</span>
+</button>
+</div>
+ 
+          </div>
+        `).join("")}
+</div>
+<!-- Next Button -->
+<button
+        id="discoverNextBtn"
+        class="absolute -right-2 sm:-right-5 md:-right-6 top-1/2 -translate-y-1/2 bg-white shadow-lg p-3 rounded-full z-30 hover:scale-105 active:scale-95 transition flex items-center justify-center border border-gray-100">
+<i class="fa-solid fa-chevron-right text-sm sm:text-base"></i>
+</button>
+</div>
+</div>
+</section>
 
           <!-- Top Rated Section -->
+        <!-- Top Rated Section -->
           <section class="top-rated-section py-8 bg-gray-50">
           <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
  
@@ -1014,83 +984,90 @@ async function fetchAndRenderAddonSections() {
           class="flex gap-3 sm:gap-5 overflow-x-auto scroll-smooth no-scrollbar pb-4 px-2 sm:px-10 md:px-12 snap-x snap-mandatory scrollbar-hide">
  
               ${data.topRated
-        .map(
-          (prod) => `
- 
-        <div class="relative min-w-[48%] sm:min-w-[48%] md:min-w-[32%] lg:min-w-[250px] xl:min-w-[270px]
-                    bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 flex-shrink-0 snap-start">
- 
-          <!-- Discount Badge -->
-          <span class="absolute top-3 left-3 bg-[#E39F32] text-white text-[10px] font-semibold px-2 py-1 rounded-md z-20">
-            ${prod.discount}
-          </span>
- 
-          <!-- Wishlist Button -->
-          <button
-            class="wishlist-btn absolute top-3 right-3 bg-white/90 backdrop-blur rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:scale-110 transition z-20"
-            data-product-id="${prod.id}"
-            data-product-name="${prod.title}"
-            data-price="${prod.price}"
-            data-image="${prod.image}"
-          >
-            <i class="fa-regular fa-heart text-gray-500 text-sm"></i>
-          </button>
- 
-          <!-- Product Image -->
-          <div class="">
-            <div class="border border-gray-200 rounded-xl overflow-hidden h-[150px] sm:h-[180px] bg-gray-100">
-              <img
-                src="${prod.image}"
-                class="w-full h-full object-cover"
-                alt="${prod.title}"
-              />
-            </div>
-          </div>
- 
-          <!-- Product Details -->
-          <div class="px-2.5 pb-2 pt-1">
- 
-          <h3 class="text-sm text-gray-700 line-clamp-2 font-medium leading-tight min-h-[20px]">
-              ${prod.title}
-            </h3>
- 
-            <!-- Rating -->
-            <div class="flex items-center text-orange-500 text-xs mt-1.5">
-              ${prod.starsHtml}
-              <span class="text-gray-400 ml-1">
-                (${prod.reviews})
-              </span>
-            </div>
- 
-            <!-- Price -->
-            <div class="mt-1">
-              <div class="flex items-center gap-1 flex-wrap">
-                <span class="font-semibold text-base text-[#1D3C4A]">
-                  ${prod.price}
-                </span>
- 
-                <span class="text-gray-400 line-through text-xs">
-                  ${prod.originalPrice}
-                </span>
-              </div>
-            </div>
- 
-            <!-- Add To Cart Button -->
-          <button
-          class="group w-full mt-2 bg-[#1D3C4A] text-white py-2.5 rounded-lg flex items-center justify-center gap-2 text-xs font-medium hover:bg-[#E39F32] transition-all duration-300"
-          data-product-id="${prod.id}"
-        >
-          <i class="fa-solid fa-cart-shopping text-[#E39F32] group-hover:text-[#1D3C4A] transition-colors duration-300"></i>
-          <span class="text-white">Add to Cart</span>
-        </button>
- 
-          </div>
- 
-        </div>
- 
-        `,
-        )
-        .join("")}
+.map(
+  (prod) => `
+
+<div class="relative
+            min-w-[48%]
+            sm:min-w-[48%]
+            md:min-w-[32%]
+            lg:min-w-[250px]
+            xl:min-w-[270px]
+            bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 flex-shrink-0 snap-start
+            product-card">
+
+  <!-- Discount Badge -->
+  <span class="absolute top-3 left-3 bg-[#E39F32] text-white text-[10px] font-semibold px-2 py-1 rounded-md z-20">
+    ${prod.discount}
+  </span>
+
+  <!-- Wishlist Button -->
+  <button
+    class="wishlist-btn absolute top-3 right-3 bg-white/90 backdrop-blur rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:scale-110 transition z-20"
+    data-product-id="${prod.id}"
+    data-product-name="${prod.title}"
+    data-price="${prod.price}"
+    data-image="${prod.image}"
+  >
+    <i class="fa-regular fa-heart text-gray-500 text-sm"></i>
+  </button>
+
+  <!-- Product Image -->
+  <div class="flex-shrink-0">
+    <div class="border border-gray-200 rounded-xl overflow-hidden h-[150px] sm:h-[180px] bg-gray-100">
+      <img
+        src="${prod.image}"
+        class="w-full h-full object-cover"
+        alt="${prod.title}"
+      />
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="product-content">
+
+    <!-- Title -->
+    <h3 class="text-sm text-gray-700 line-clamp-2 font-medium leading-tight">
+      ${prod.title}
+    </h3>
+
+    <!-- Rating -->
+    <div class="flex items-center text-orange-500 text-xs mt-1 flex-shrink-0">
+      ${prod.starsHtml}
+      <span class="text-gray-400 ml-1">
+        (${prod.reviews})
+      </span>
+    </div>
+
+    <!-- Price -->
+    <div class="flex items-center gap-1 mt-1 flex-wrap flex-shrink-0">
+      <span class="font-semibold text-base text-[#1D3C4A]">
+        ${prod.price}
+      </span>
+      <span class="text-gray-400 line-through text-xs">
+        ${prod.originalPrice}
+      </span>
+    </div>
+
+    <!-- Spacer -->
+    <div class="product-spacer"></div>
+
+    <!-- Add to Cart Button -->
+    <button
+      class="product-button group bg-[#1D3C4A] text-white py-2.5 rounded-lg flex items-center justify-center gap-2 text-xs font-medium hover:bg-[#E39F32] transition-all duration-300"
+      data-product-id="${prod.id}"
+    >
+      <i class="fa-solid fa-cart-shopping text-[#E39F32] group-hover:text-[#1D3C4A] transition-colors duration-300"></i>
+      <span class="text-white">Add to Cart</span>
+    </button>
+
+  </div>
+
+</div>
+
+`,
+)
+.join("")}
               </div>
  
               <!-- NEXT BUTTON -->

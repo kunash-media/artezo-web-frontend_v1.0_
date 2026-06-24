@@ -1,3 +1,38 @@
+/* Add this to your CSS file or style tag */
+.equal-height-cards {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+}
+ 
+.equal-height-cards > div {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+}
+ 
+.equal-height-cards .card-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+ 
+.equal-height-cards .card-footer {
+  margin-top: auto;
+}
+ 
+/* Hide scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+ 
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+ 
+
+
 button.relative:hover span.absolute {
   transform: translateX(0);
 }

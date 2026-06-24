@@ -3,145 +3,357 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Artezo – Product Page</title>
+  <title>Artezo – Handcrafted Ceramic Art Vase</title>
+
+
+   <!-- Replace your old handleBuyNow() in the product page HTML with this. -->
+  <!-- Add these 2 tags in <head> (PROD URLs): -->
+  <link rel="stylesheet" href="https://checkout-ui.shiprocket.com/assets/styles/shopify.css">
+  <script src="https://checkout-ui.shiprocket.com/assets/js/channels/shopify.js"></script>
+
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    :root {
+      --brand:       #c8602a;
+      --brand-dark:  #a84e1f;
+      --brand-light: #fef6f2;
+      --brand-pale:  #fef2ec;
+      --ink:         #1a1a1a;
+      --ink-2:       #444;
+      --ink-3:       #777;
+      --border:      #e5e0da;
+      --bg:          #f8f6f3;
+      --white:       #fff;
+      --green:       #2e7d32;
+      --green-bg:    #e8f5e9;
+      --radius-sm:   8px;
+      --radius-md:   12px;
+      --radius-lg:   16px;
+      --shadow-sm:   0 1px 4px rgba(0,0,0,.07);
+      --shadow-md:   0 4px 20px rgba(0,0,0,.10);
+      --shadow-lg:   0 12px 40px rgba(0,0,0,.15);
+      --transition:  .18s cubic-bezier(.4,0,.2,1);
+    }
+
     body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: #f7f5f2;
-      color: #1a1a1a;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
       min-height: 100vh;
     }
 
-    /* ── Top bar ── */
+    /* ─── HEADER ─── */
     header {
-      background: #fff;
-      border-bottom: 1px solid #e8e4df;
-      padding: 14px 40px;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 0 40px;
+      height: 60px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
     }
-    .logo { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; color: #1a1a1a; }
-    .logo span { color: #c8602a; }
-    nav a { margin-left: 24px; text-decoration: none; color: #555; font-size: .9rem; }
+    .logo { font-size: 1.45rem; font-weight: 800; letter-spacing: -0.5px; }
+    .logo span { color: var(--brand); }
+    .header-right { display: flex; align-items: center; gap: 28px; }
+    nav a {
+      text-decoration: none;
+      color: var(--ink-2);
+      font-size: .875rem;
+      font-weight: 500;
+      transition: color var(--transition);
+    }
+    nav a:hover { color: var(--brand); }
+    .header-icons { display: flex; gap: 16px; }
+    .icon-btn {
+      position: relative;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--ink-2);
+      padding: 4px;
+      transition: color var(--transition);
+    }
+    .icon-btn:hover { color: var(--brand); }
+    .badge-dot {
+      position: absolute;
+      top: 0; right: 0;
+      width: 8px; height: 8px;
+      background: var(--brand);
+      border-radius: 50%;
+      border: 2px solid var(--white);
+    }
 
-    /* ── Product layout ── */
+    /* ─── BREADCRUMB ─── */
+    .breadcrumb {
+      max-width: 1100px;
+      margin: 20px auto 0;
+      padding: 0 24px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      font-size: .8rem;
+      color: var(--ink-3);
+    }
+    .breadcrumb a { color: var(--ink-3); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--brand); }
+    .breadcrumb svg { opacity: .5; }
+
+    /* ─── PRODUCT LAYOUT ─── */
     .product-page {
       max-width: 1100px;
-      margin: 48px auto;
+      margin: 20px auto 60px;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 48px;
+      gap: 52px;
       padding: 0 24px;
     }
 
-    .product-image {
-      border-radius: 16px;
+    /* ─── LEFT: IMAGE GALLERY ─── */
+    .gallery { display: flex; flex-direction: column; gap: 12px; }
+
+    .main-image {
+      border-radius: var(--radius-lg);
       overflow: hidden;
-      background: #e9e4de;
+      background: #ede8e1;
       aspect-ratio: 1 / 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      position: relative;
     }
-    .product-image img {
+    .main-image img {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      display: block;
     }
     .img-placeholder {
+      width: 100%;
+      height: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       gap: 12px;
-      color: #888;
+      color: #aaa;
     }
-    .img-placeholder svg { width: 80px; height: 80px; opacity: .4; }
+    .img-placeholder svg { width: 72px; height: 72px; opacity: .35; }
+    .img-placeholder span { font-size: .85rem; }
 
-    .product-info { display: flex; flex-direction: column; gap: 20px; }
+    .wishlist-btn {
+      position: absolute;
+      top: 14px; right: 14px;
+      width: 38px; height: 38px;
+      background: var(--white);
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: var(--shadow-md);
+      transition: transform var(--transition), box-shadow var(--transition);
+      color: var(--ink-3);
+    }
+    .wishlist-btn:hover { transform: scale(1.1); color: var(--brand); }
+    .wishlist-btn.active { color: var(--brand); }
+    .wishlist-btn.active svg { fill: var(--brand); }
 
+    .thumbnail-row { display: flex; gap: 10px; }
+    .thumbnail {
+      width: 72px; height: 72px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 2px solid transparent;
+      cursor: pointer;
+      background: #ede8e1;
+      transition: border-color var(--transition);
+      flex-shrink: 0;
+    }
+    .thumbnail:hover, .thumbnail.active { border-color: var(--brand); }
+    .thumbnail img { width: 100%; height: 100%; object-fit: cover; }
+    .thumb-placeholder {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      color: #bbb; font-size: .65rem;
+    }
+
+    /* ─── RIGHT: PRODUCT INFO ─── */
+    .product-info { display: flex; flex-direction: column; gap: 22px; padding-top: 4px; }
+
+    .top-badges { display: flex; gap: 8px; flex-wrap: wrap; }
     .badge {
-      display: inline-block;
-      background: #fef2ec;
-      color: #c8602a;
-      font-size: .75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: .72rem;
       font-weight: 600;
-      padding: 4px 12px;
+      padding: 4px 10px;
       border-radius: 99px;
-      letter-spacing: .5px;
+      letter-spacing: .4px;
       text-transform: uppercase;
-      width: fit-content;
+    }
+    .badge-bestseller { background: var(--brand-pale); color: var(--brand); }
+    .badge-handmade   { background: #fdf6e3; color: #8a6800; }
+
+    .product-title {
+      font-size: 1.9rem;
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -.5px;
+    }
+    .product-subtitle {
+      font-size: .925rem;
+      color: var(--ink-3);
+      line-height: 1.7;
     }
 
-    h1 { font-size: 2rem; font-weight: 700; line-height: 1.2; }
-    .subtitle { color: #666; font-size: 1rem; line-height: 1.6; }
+    .rating-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .stars { display: flex; gap: 2px; }
+    .stars svg { width: 15px; height: 15px; }
+    .rating-count { font-size: .8rem; color: var(--ink-3); }
 
-    .price-row {
+    /* ─── PRICE ─── */
+    .price-block {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
       display: flex;
       align-items: baseline;
       gap: 12px;
     }
-    .price { font-size: 2rem; font-weight: 700; color: #1a1a1a; }
-    .price-original { font-size: 1.1rem; color: #aaa; text-decoration: line-through; }
-    .price-off {
-      background: #e8f5e9;
-      color: #2e7d32;
-      font-size: .8rem;
-      font-weight: 600;
-      padding: 3px 8px;
+    .price-main { font-size: 2rem; font-weight: 800; color: var(--ink); }
+    .price-mrp  { font-size: 1rem; color: #bbb; text-decoration: line-through; }
+    .price-save {
+      background: var(--green-bg);
+      color: var(--green);
+      font-size: .78rem;
+      font-weight: 700;
+      padding: 3px 9px;
       border-radius: 6px;
     }
+    .price-gst { font-size: .75rem; color: var(--ink-3); margin-left: auto; align-self: center; }
 
-    .variant-label { font-size: .85rem; font-weight: 600; color: #444; margin-bottom: 8px; }
+    /* ─── VARIANTS ─── */
+    .field-group { display: flex; flex-direction: column; gap: 10px; }
+    .field-label {
+      font-size: .82rem;
+      font-weight: 700;
+      color: var(--ink-2);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+    .field-label span { font-weight: 400; color: var(--ink-3); text-transform: none; letter-spacing: 0; margin-left: 6px; }
+
     .variants { display: flex; gap: 10px; flex-wrap: wrap; }
     .variant-btn {
-      padding: 8px 18px;
-      border: 2px solid #e0dbd4;
-      border-radius: 8px;
-      background: #fff;
+      padding: 9px 20px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--white);
       cursor: pointer;
       font-size: .85rem;
-      font-weight: 500;
-      transition: all .15s;
+      font-weight: 600;
+      color: var(--ink-2);
+      transition: all var(--transition);
+      position: relative;
     }
-    .variant-btn:hover, .variant-btn.active {
-      border-color: #c8602a;
-      color: #c8602a;
-      background: #fef6f2;
+    .variant-btn:hover {
+      border-color: var(--brand);
+      color: var(--brand);
+      background: var(--brand-light);
+    }
+    .variant-btn.active {
+      border-color: var(--brand);
+      color: var(--brand);
+      background: var(--brand-light);
+      box-shadow: 0 0 0 3px rgba(200,96,42,.12);
+    }
+    .variant-btn.out-of-stock {
+      opacity: .45;
+      cursor: not-allowed;
+      text-decoration: line-through;
     }
 
-    .qty-row { display: flex; align-items: center; gap: 12px; }
-    .qty-label { font-size: .85rem; font-weight: 600; color: #444; }
+    /* ─── QUANTITY ─── */
+    .qty-row { display: flex; align-items: center; gap: 14px; }
     .qty-control {
       display: flex;
       align-items: center;
-      border: 1.5px solid #ddd;
-      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
       overflow: hidden;
+      background: var(--white);
     }
     .qty-control button {
-      width: 36px; height: 36px;
+      width: 38px; height: 38px;
       border: none;
-      background: #f5f2ee;
+      background: var(--bg);
       cursor: pointer;
       font-size: 1.1rem;
-      color: #555;
-      transition: background .1s;
+      color: var(--ink-2);
+      transition: background var(--transition), color var(--transition);
+      display: flex; align-items: center; justify-content: center;
     }
-    .qty-control button:hover { background: #eae6e0; }
+    .qty-control button:hover { background: var(--border); color: var(--ink); }
+    .qty-control button:disabled { opacity: .35; cursor: default; }
     .qty-control input {
-      width: 44px; height: 36px;
+      width: 46px; height: 38px;
       border: none;
+      border-left: 1.5px solid var(--border);
+      border-right: 1.5px solid var(--border);
       text-align: center;
       font-size: .95rem;
-      font-weight: 600;
+      font-weight: 700;
       outline: none;
-      background: #fff;
+      background: var(--white);
+      color: var(--ink);
     }
+    /* Remove spin buttons */
+    .qty-control input::-webkit-outer-spin-button,
+    .qty-control input::-webkit-inner-spin-button { -webkit-appearance: none; }
 
-    /* ── CTA Buttons ── */
+    /* ─── TRUST STRIP ─── */
+    .trust-strip {
+      display: flex;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: var(--white);
+    }
+    .trust-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      padding: 14px 10px;
+      text-align: center;
+      font-size: .74rem;
+      color: var(--ink-2);
+      border-right: 1px solid var(--border);
+      font-weight: 500;
+      line-height: 1.3;
+    }
+    .trust-item:last-child { border-right: none; }
+    .trust-icon {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .trust-icon.green  { background: var(--green-bg); color: var(--green); }
+    .trust-icon.blue   { background: #e3f2fd; color: #1565c0; }
+    .trust-icon.orange { background: var(--brand-pale); color: var(--brand); }
+    .trust-icon.purple { background: #f3e5f5; color: #7b1fa2; }
+
+    /* ─── CTA BUTTONS ─── */
     .cta-group { display: flex; flex-direction: column; gap: 12px; }
 
     .btn-buynow {
@@ -149,462 +361,732 @@
       align-items: center;
       justify-content: center;
       gap: 10px;
-      padding: 16px 24px;
-      background: #c8602a;
-      color: #fff;
+      padding: 17px 28px;
+      background: var(--brand);
+      color: var(--white);
       border: none;
-      border-radius: 12px;
+      border-radius: var(--radius-md);
       font-size: 1rem;
       font-weight: 700;
       cursor: pointer;
       letter-spacing: .3px;
-      transition: background .15s, transform .1s;
-      position: relative;
+      transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+      box-shadow: 0 4px 16px rgba(200,96,42,.3);
     }
-    .btn-buynow:hover { background: #b3521f; transform: translateY(-1px); }
-    .btn-buynow:active { transform: translateY(0); }
-    .btn-buynow .sr-logo {
-      background: #fff;
-      color: #c8602a;
+    .btn-buynow:hover {
+      background: var(--brand-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(200,96,42,.38);
+    }
+    .btn-buynow:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(200,96,42,.25); }
+    .btn-buynow:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-buynow .powered-badge {
+      background: rgba(255,255,255,.22);
+      border: 1px solid rgba(255,255,255,.35);
+      color: rgba(255,255,255,.9);
       font-size: .65rem;
-      font-weight: 800;
-      padding: 2px 6px;
-      border-radius: 4px;
-      letter-spacing: .5px;
+      font-weight: 700;
+      padding: 3px 7px;
+      border-radius: 5px;
+      letter-spacing: .6px;
+      white-space: nowrap;
     }
 
     .btn-addcart {
-      padding: 15px 24px;
+      padding: 16px 28px;
       background: transparent;
-      color: #1a1a1a;
-      border: 2px solid #1a1a1a;
-      border-radius: 12px;
+      color: var(--ink);
+      border: 2px solid var(--ink);
+      border-radius: var(--radius-md);
       font-size: 1rem;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
-      transition: background .15s;
+      transition: all var(--transition);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
     }
-    .btn-addcart:hover { background: #1a1a1a; color: #fff; }
+    .btn-addcart:hover { background: var(--ink); color: var(--white); }
+    .btn-addcart.added { background: var(--green); border-color: var(--green); color: var(--white); }
 
-    .trust-row {
-      display: flex;
-      gap: 20px;
-      padding: 14px 0;
-      border-top: 1px solid #eee;
-      border-bottom: 1px solid #eee;
-    }
-    .trust-item { display: flex; align-items: center; gap: 6px; font-size: .8rem; color: #666; }
-    .trust-item svg { color: #2e7d32; flex-shrink: 0; }
-
-    /* ── Debug / config panel ── */
-    .config-panel {
-      max-width: 1100px;
-      margin: 0 auto 48px;
-      padding: 0 24px;
-    }
-    .config-box {
-      background: #1a1a2e;
-      color: #e0e0e0;
-      border-radius: 12px;
-      padding: 24px 28px;
-    }
-    .config-box h3 { color: #7ec8e3; font-size: .85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
-    .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    .config-field label { display: block; font-size: .75rem; color: #aaa; margin-bottom: 4px; }
-    .config-field input, .config-field textarea {
-      width: 100%;
-      background: #12121f;
-      border: 1px solid #333;
-      border-radius: 6px;
-      color: #fff;
-      padding: 8px 10px;
-      font-size: .85rem;
-      font-family: monospace;
-      resize: vertical;
-    }
-    .config-field input:focus, .config-field textarea:focus {
-      outline: none;
-      border-color: #7ec8e3;
-    }
-    .config-field.full { grid-column: 1 / -1; }
-    .payload-preview {
-      background: #12121f;
-      border: 1px solid #333;
-      border-radius: 6px;
-      padding: 12px;
-      font-family: monospace;
-      font-size: .78rem;
-      line-height: 1.6;
-      color: #a8d8a8;
-      white-space: pre-wrap;
-      word-break: break-all;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-    .note {
-      background: #2a2a1a;
-      border: 1px solid #555;
-      border-radius: 6px;
-      padding: 10px 14px;
-      font-size: .78rem;
-      color: #d4c88a;
-      margin-top: 14px;
-      line-height: 1.6;
-    }
-
-    /* ── Modal overlay for loading ── */
+    /* ─── LOADING OVERLAY ─── */
     .overlay {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,.5);
-      z-index: 1000;
+      background: rgba(0,0,0,.6);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
       align-items: center;
       justify-content: center;
       flex-direction: column;
-      gap: 16px;
+      gap: 20px;
     }
     .overlay.show { display: flex; }
-    .spinner {
-      width: 48px; height: 48px;
-      border: 4px solid rgba(255,255,255,.2);
-      border-top-color: #fff;
+
+    .overlay-card {
+      background: var(--white);
+      border-radius: 20px;
+      padding: 36px 48px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      box-shadow: var(--shadow-lg);
+      min-width: 280px;
+      text-align: center;
+    }
+    .overlay-logo { font-size: 1.3rem; font-weight: 800; color: var(--ink); }
+    .overlay-logo span { color: var(--brand); }
+
+    .spinner-ring {
+      width: 52px; height: 52px;
+      position: relative;
+    }
+    .spinner-ring::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border: 4px solid var(--border);
+      border-top-color: var(--brand);
       border-radius: 50%;
-      animation: spin .8s linear infinite;
+      animation: spin .75s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .overlay-text { color: #fff; font-size: 1rem; font-weight: 500; }
 
-    @media (max-width: 700px) {
-      .product-page { grid-template-columns: 1fr; }
-      .config-grid { grid-template-columns: 1fr; }
-      header { padding: 14px 16px; }
+    .overlay-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .overlay-sub {
+      font-size: .82rem;
+      color: var(--ink-3);
+      line-height: 1.5;
+    }
+
+    .overlay-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+    }
+    .overlay-step {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: .82rem;
+      color: var(--ink-3);
+      padding: 6px 10px;
+      border-radius: 8px;
+      transition: background .3s, color .3s;
+    }
+    .overlay-step.active { background: var(--brand-light); color: var(--brand); font-weight: 600; }
+    .overlay-step.done   { color: var(--green); }
+    .overlay-step .step-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #ddd;
+      flex-shrink: 0;
+      transition: background .3s;
+    }
+    .overlay-step.active .step-dot { background: var(--brand); }
+    .overlay-step.done   .step-dot { background: var(--green); }
+
+    /* ─── TOAST ─── */
+    .toast {
+      position: fixed;
+      bottom: 28px; right: 28px;
+      background: var(--ink);
+      color: var(--white);
+      padding: 12px 20px;
+      border-radius: var(--radius-md);
+      font-size: .875rem;
+      font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      display: flex; align-items: center; gap: 10px;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all .35s cubic-bezier(.4,0,.2,1);
+      z-index: 3000;
+      max-width: 320px;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.toast-success { background: var(--green); }
+    .toast.toast-error   { background: #c62828; }
+    .toast.toast-info    { background: var(--brand); }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 760px) {
+      header { padding: 0 16px; }
       nav { display: none; }
+      .product-page { grid-template-columns: 1fr; gap: 24px; margin-top: 16px; }
+      .product-title { font-size: 1.5rem; }
+      .price-main { font-size: 1.6rem; }
+      .trust-strip { flex-wrap: wrap; }
+      .trust-item { flex: 0 0 50%; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+      .trust-item:nth-child(2n) { border-right: none; }
+      .trust-item:nth-child(3), .trust-item:nth-child(4) { border-bottom: none; }
+      .overlay-card { padding: 28px 24px; margin: 0 20px; min-width: unset; }
     }
   </style>
 </head>
 <body>
 
+<!-- ─── HEADER ─── -->
 <header>
   <div class="logo">Arte<span>zo</span></div>
-  <nav>
-    <a href="#">Home</a>
-    <a href="#">Shop</a>
-    <a href="#">About</a>
-    <a href="#">Contact</a>
-  </nav>
+  <div class="header-right">
+    <nav>
+      <a href="#">Home</a>
+      <a href="#">Shop</a>
+      <a href="#">About</a>
+      <a href="#">Contact</a>
+    </nav>
+    <div class="header-icons">
+      <button class="icon-btn" title="Wishlist">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
+      </button>
+      <button class="icon-btn" title="Cart" style="position:relative;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+        </svg>
+        <span class="badge-dot"></span>
+      </button>
+    </div>
+  </div>
 </header>
 
-<!-- ── Product Section ── -->
+<!-- ─── BREADCRUMB ─── -->
+<div class="breadcrumb">
+  <a href="#">Home</a>
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+  <a href="#">Home Décor</a>
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+  <span>Handcrafted Ceramic Art Vase</span>
+</div>
+
+<!-- ─── PRODUCT PAGE ─── -->
 <div class="product-page">
 
-  <div class="product-image">
-    <!-- Replace src with your actual product image -->
-    <div class="img-placeholder">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
-        <path d="M21 15l-5-5L5 21"/>
-      </svg>
-      <span>Product Image</span>
+  <!-- LEFT: GALLERY -->
+  <div class="gallery">
+    <div class="main-image">
+      <!-- Replace with <img src="your-image.jpg" alt="Product"> -->
+      <div class="img-placeholder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <path d="M21 15l-5-5L5 21"/>
+        </svg>
+        <span>Product Image</span>
+      </div>
+      <button class="wishlist-btn" id="wishlistBtn" onclick="toggleWishlist()" title="Add to Wishlist">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
+      </button>
+    </div>
+    <div class="thumbnail-row">
+      <div class="thumbnail active"><div class="thumb-placeholder">Front</div></div>
+      <div class="thumbnail"><div class="thumb-placeholder">Side</div></div>
+      <div class="thumbnail"><div class="thumb-placeholder">Top</div></div>
+      <div class="thumbnail"><div class="thumb-placeholder">Detail</div></div>
     </div>
   </div>
 
+  <!-- RIGHT: PRODUCT INFO -->
   <div class="product-info">
-    <span class="badge">Best Seller</span>
-    <h1>Handcrafted Ceramic Art Vase</h1>
-    <p class="subtitle">
-      A stunning hand-thrown ceramic vase with a matte glaze finish. 
-      Each piece is uniquely crafted by our artisans — no two are alike. 
-      Perfect for home décor or gifting.
-    </p>
 
-    <div class="price-row">
-      <span class="price">₹1,299</span>
-      <span class="price-original">₹1,799</span>
-      <span class="price-off">28% OFF</span>
+    <div class="top-badges">
+      <span class="badge badge-bestseller">⭐ Best Seller</span>
+      <span class="badge badge-handmade">🖐 Handmade</span>
     </div>
 
     <div>
-      <div class="variant-label">Size</div>
+      <h1 class="product-title">Handcrafted Ceramic Art Vase</h1>
+      <p class="product-subtitle" style="margin-top:10px;">
+        Hand-thrown on a potter's wheel with a matte glaze finish. Every piece is uniquely crafted 
+        by our artisans — no two are exactly alike. A timeless addition to any home.
+      </p>
+    </div>
+
+    <div class="rating-row">
+      <div class="stars">
+        <!-- 4.5 stars -->
+        <svg viewBox="0 0 24 24" fill="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <svg viewBox="0 0 24 24" fill="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <svg viewBox="0 0 24 24" fill="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <svg viewBox="0 0 24 24" fill="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <svg viewBox="0 0 24 24" fill="#e5e7eb"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      </div>
+      <span class="rating-count">4.4 · 238 reviews</span>
+      <span class="rating-count">|</span>
+      <span class="rating-count" style="color:var(--green); font-weight:600;">✓ 94% positive</span>
+    </div>
+
+    <!-- PRICE BLOCK -->
+    <div class="price-block">
+      <span class="price-main" id="displayPrice">₹1,299</span>
+      <span class="price-mrp" id="displayMrp">₹1,799</span>
+      <span class="price-save" id="displaySave">28% OFF</span>
+      <span class="price-gst">Incl. all taxes</span>
+    </div>
+
+    <!-- SIZE VARIANT -->
+    <div class="field-group">
+      <div class="field-label">Size <span id="selectedVariantLabel">— Medium (9")</span></div>
       <div class="variants">
-        <button class="variant-btn" onclick="selectVariant(this, 'Small')">Small (6")</button>
-        <button class="variant-btn active" onclick="selectVariant(this, 'Medium')">Medium (9")</button>
-        <button class="variant-btn" onclick="selectVariant(this, 'Large')">Large (12")</button>
+        <button class="variant-btn" onclick="selectVariant(this,'Small','Small (6&quot;)',999,1399)">Small (6")</button>
+        <button class="variant-btn active" onclick="selectVariant(this,'Medium','Medium (9&quot;)',1299,1799)">Medium (9")</button>
+        <button class="variant-btn" onclick="selectVariant(this,'Large','Large (12&quot;)',1699,2399)">Large (12")</button>
+        <button class="variant-btn out-of-stock" disabled title="Out of Stock">XL (15") — Out of Stock</button>
       </div>
     </div>
 
-    <div class="qty-row">
-      <span class="qty-label">Quantity</span>
-      <div class="qty-control">
-        <button onclick="changeQty(-1)">−</button>
-        <input type="number" id="qtyInput" value="1" min="1" max="10" readonly />
-        <button onclick="changeQty(1)">+</button>
+    <!-- QUANTITY -->
+    <div class="field-group">
+      <div class="field-label">Quantity</div>
+      <div class="qty-row">
+        <div class="qty-control">
+          <button id="qtyMinus" onclick="changeQty(-1)">−</button>
+          <input type="number" id="qtyInput" value="1" min="1" max="10" readonly />
+          <button id="qtyPlus" onclick="changeQty(1)">+</button>
+        </div>
+        <span style="font-size:.8rem; color:var(--ink-3);">Max 10 per order · <span style="color:var(--green); font-weight:600;">In Stock</span></span>
       </div>
     </div>
 
-    <div class="trust-row">
+    <!-- TRUST STRIP -->
+    <div class="trust-strip">
       <div class="trust-item">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <div class="trust-icon green">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8zM5.5 21a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm13 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/></svg>
+        </div>
         Free Delivery above ₹499
       </div>
       <div class="trust-item">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <div class="trust-icon blue">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+        </div>
         Easy 7-day Returns
       </div>
       <div class="trust-item">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <div class="trust-icon orange">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        </div>
         COD Available
       </div>
+      <div class="trust-item">
+        <div class="trust-icon purple">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        Secure Payments
+      </div>
     </div>
 
+    <!-- CTA BUTTONS -->
     <div class="cta-group">
-      <button class="btn-buynow" onclick="handleBuyNow()">
+      <button class="btn-buynow" id="buyNowBtn" onclick="handleBuyNow()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
         <span>Buy Now</span>
-        <span class="sr-logo">POWERED BY SR</span>
+        <span class="powered-badge">SR CHECKOUT</span>
       </button>
-      <button class="btn-addcart">Add to Cart</button>
+      <button class="btn-addcart" id="addCartBtn" onclick="handleAddToCart()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+          <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
+        </svg>
+        <span id="addCartLabel">Add to Cart</span>
+      </button>
     </div>
+
   </div>
 </div>
 
-<!-- ── Config / Debug Panel ── -->
-<div class="config-panel">
-  <div class="config-box">
-    <h3>⚙ Integration Config (replace with your real values)</h3>
-    <div class="config-grid">
-      <div class="config-field">
-        <label>Company ID (from SR Checkout Dashboard)</label>
-        <input type="text" id="cfg_companyId" value="8041717" />
-      </div>
-      <div class="config-field">
-        <label>Return URL (after order placed)</label>
-        <input type="text" id="cfg_returnUrl" value="https://www.artezo.in/order-success" />
-      </div>
-      <div class="config-field">
-        <label>Cancel URL</label>
-        <input type="text" id="cfg_cancelUrl" value="https://www.artezo.in/checkout-cancelled" />
-      </div>
-      <div class="config-field">
-        <label>Your Backend Sync Endpoint (Spring Boot)</label>
-        <input type="text" id="cfg_backendUrl" value="https://api.artezo.in/orders/shiprocket-sync" />
-      </div>
-      <div class="config-field full">
-        <label>Checkout URL Preview (auto-generated)</label>
-        <div class="payload-preview" id="urlPreview">Click "Buy Now" to see the generated URL here...</div>
-      </div>
-    </div>
-    <div class="note">
-      ⚠ <strong>Important:</strong> The <code>companyId</code> is what ties your SR Checkout store to this page. 
-      Find it in SR Checkout Dashboard → Settings → General Settings → Company ID.<br/>
-      The <strong>Custom Endpoint</strong> (Settings → Custom Endpoints) is your Spring Boot URL — SR will POST order data there after payment.<br/>
-      The <strong>Webhook</strong> (Settings → Webhooks → Real Time) is for real-time order status updates to your backend.
-    </div>
-  </div>
-</div>
-
-<!-- Loading overlay -->
+<!-- ─── LOADING OVERLAY (polished) ─── -->
 <div class="overlay" id="loadingOverlay">
-  <div class="spinner"></div>
-  <div class="overlay-text">Opening Shiprocket Checkout...</div>
+  <div class="overlay-card">
+    <div class="overlay-logo">Arte<span>zo</span></div>
+    <div class="spinner-ring"></div>
+    <div class="overlay-title" id="overlayTitle">Preparing your order…</div>
+    <div class="overlay-sub" id="overlaySub">Please wait a moment</div>
+    <div class="overlay-steps">
+      <div class="overlay-step active" id="step1"><span class="step-dot"></span> Saving order details</div>
+      <div class="overlay-step" id="step2"><span class="step-dot"></span> Opening secure checkout</div>
+      <div class="overlay-step" id="step3"><span class="step-dot"></span> Redirecting to payment</div>
+    </div>
+  </div>
 </div>
+
+<!-- ─── TOAST ─── -->
+<div class="toast" id="toast"></div>
 
 <script>
-  // ─────────────────────────────────────────────
-  //  STATE
-  // ─────────────────────────────────────────────
-  let selectedVariant = 'Medium';
-  let qty = 1;
 
-  // ─────────────────────────────────────────────
-  //  PRODUCT DATA  ← replace with dynamic data
-  // ─────────────────────────────────────────────
-  const product = {
-    id: 'ART-VASE-001',
-    name: 'Handcrafted Ceramic Art Vase',
-    category: 'Home Decor',
-    mrp: 1799,
-    price: 1299,
-    weight: 0.5,     // kg
-    hsn: '69120090', // ceramics HSN
-    sku: 'VASE-MED-001',
-    image: 'https://www.artezo.in/images/vase-001.jpg', // your image URL
+  (async function onSuccessPage() {
+    const params = new URLSearchParams(window.location.search);
+    const oid = params.get('oid');
+    const ost = params.get('ost');
+ 
+    if (!oid || ost !== 'SUCCESS') return;
+ 
+    try {
+        const res = await fetch('https://api.artezo.in/api/shiprocket/order-details', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ oid })
+        });
+        const order = await res.json();
+        console.log('Order confirmed:', order);
+        // Render order summary from `order` object
+    } catch (err) {
+        console.error('Order details fetch failed:', err);
+    }
+})();
+
+  // ════════════════════════════════════════════════
+  //  CONFIG — Update these for your environment
+  // ════════════════════════════════════════════════
+  const CONFIG = {
+    companyId:   '8041717',                             // Your SR Checkout Company ID
+    backendUrl:  'http://localhost:8085',               // Spring Boot base URL (no trailing slash)
+    returnUrl:   'https://www.artezo.in/order-success', // SR redirects here on success
+    cancelUrl:   'https://www.artezo.in/checkout-cancelled',
   };
 
-  // ─────────────────────────────────────────────
-  //  UI HELPERS
-  // ─────────────────────────────────────────────
-  function selectVariant(btn, variant) {
-    document.querySelectorAll('.variant-btn').forEach(b => b.classList.remove('active'));
+  // ════════════════════════════════════════════════
+  //  PRODUCT DATA — Replace with your dynamic data
+  //  (pulled from API or page data attributes)
+  // ════════════════════════════════════════════════
+  const product = {
+    id:       'ART-VASE-001',
+    name:     'Handcrafted Ceramic Art Vase',
+    category: 'Home Decor',
+    weight:   0.5,       // kg
+    hsn:      '69120090',
+    sku:      'VASE-MED-001',
+    image:    'https://www.artezo.in/images/vase-001.jpg',
+  };
+
+  // ════════════════════════════════════════════════
+  //  STATE
+  // ════════════════════════════════════════════════
+  let selectedVariant = { label: 'Medium', display: 'Medium (9")', price: 1299, mrp: 1799 };
+  let qty = 1;
+  let wishlisted = false;
+
+  // ════════════════════════════════════════════════
+  //  VARIANT SELECTION
+  // ════════════════════════════════════════════════
+  function selectVariant(btn, label, display, price, mrp) {
+    document.querySelectorAll('.variant-btn:not(.out-of-stock)').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    selectedVariant = variant;
+    selectedVariant = { label, display, price, mrp };
+
+    // Update price display
+    const save = Math.round((1 - price / mrp) * 100);
+    document.getElementById('displayPrice').textContent  = '₹' + price.toLocaleString('en-IN');
+    document.getElementById('displayMrp').textContent    = '₹' + mrp.toLocaleString('en-IN');
+    document.getElementById('displaySave').textContent   = save + '% OFF';
+    document.getElementById('selectedVariantLabel').textContent = '— ' + display;
   }
 
+  // ════════════════════════════════════════════════
+  //  QUANTITY
+  // ════════════════════════════════════════════════
   function changeQty(delta) {
-    qty = Math.max(1, Math.min(10, qty + delta));
+    const newQty = Math.max(1, Math.min(10, qty + delta));
+    if (newQty === qty) return;
+    qty = newQty;
     document.getElementById('qtyInput').value = qty;
+    document.getElementById('qtyMinus').disabled = qty === 1;
+    document.getElementById('qtyPlus').disabled  = qty === 10;
   }
 
-  // ─────────────────────────────────────────────
-  //  CORE: BUILD SHIPROCKET CHECKOUT URL
-  // ─────────────────────────────────────────────
-  function buildCheckoutUrl() {
-    const companyId  = document.getElementById('cfg_companyId').value.trim();
-    const returnUrl  = document.getElementById('cfg_returnUrl').value.trim();
-    const cancelUrl  = document.getElementById('cfg_cancelUrl').value.trim();
-
-    // ── Order payload sent to Shiprocket
-    // SR Checkout (headless) reads cart details via:
-    //   1. URL query params (simple mode)   — used here
-    //   2. postMessage after iframe loads    — advanced mode
-    const orderRef = 'ORD-' + Date.now();
-
-    const params = new URLSearchParams({
-      // ── Required
-      company_id:    companyId,
-      order_id:      orderRef,            // your internal order reference
-
-      // ── Product line items (SR supports multiple via indexed params)
-      'product[0][id]':       product.id,
-      'product[0][name]':     product.name + ' – ' + selectedVariant,
-      'product[0][sku]':      product.sku,
-      'product[0][quantity]': qty,
-      'product[0][price]':    product.price,
-      'product[0][mrp]':      product.mrp,
-      'product[0][weight]':   product.weight,
-      'product[0][category]': product.category,
-      'product[0][hsn]':      product.hsn,
-      'product[0][image]':    product.image,
-
-      // ── Order totals
-      total:          product.price * qty,
-      total_mrp:      product.mrp * qty,
-
-      // ── Redirect
-      return_url: returnUrl,
-      cancel_url: cancelUrl,
-
-      // ── Mode
-      source: 'headless_web',
-    });
-
-    // ── Shiprocket Checkout URL structure (headless / hot-checkout)
-    const checkoutUrl = `https://checkout.shiprocket.in/checkout?${params.toString()}`;
-    return { checkoutUrl, orderRef };
+  // ════════════════════════════════════════════════
+  //  WISHLIST TOGGLE
+  // ════════════════════════════════════════════════
+  function toggleWishlist() {
+    wishlisted = !wishlisted;
+    const btn = document.getElementById('wishlistBtn');
+    btn.classList.toggle('active', wishlisted);
+    showToast(wishlisted ? '❤️ Added to Wishlist' : 'Removed from Wishlist', wishlisted ? 'success' : '');
   }
 
-  // ─────────────────────────────────────────────
-  //  BUY NOW HANDLER
-  // ─────────────────────────────────────────────
-  function handleBuyNow() {
-    const companyId = document.getElementById('cfg_companyId').value.trim();
+  // ════════════════════════════════════════════════
+  //  ADD TO CART (stub — wire to your cart API)
+  // ════════════════════════════════════════════════
+  async function handleAddToCart() {
+    const btn   = document.getElementById('addCartBtn');
+    const label = document.getElementById('addCartLabel');
 
-    if (!companyId || companyId === 'YOUR_COMPANY_ID') {
-      alert('⚠ Please enter your Shiprocket Company ID in the config panel below before testing.');
-      return;
-    }
-
-    const { checkoutUrl, orderRef } = buildCheckoutUrl();
-
-    // Show URL in preview panel
-    document.getElementById('urlPreview').textContent = checkoutUrl;
-
-    // ── Optional: notify your Spring Boot backend BEFORE opening checkout
-    // This lets you create a "pending" order record in your DB
-    notifyBackendPreCheckout(orderRef);
-
-    // ── Show brief loading state
-    const overlay = document.getElementById('loadingOverlay');
-    overlay.classList.add('show');
-
-    setTimeout(() => {
-      overlay.classList.remove('show');
-
-      // ── Open Shiprocket Checkout
-      // Option A: same tab (recommended for mobile)
-      window.location.href = checkoutUrl;
-
-      // Option B: popup window (comment out option A and use this for desktop)
-      // openCheckoutPopup(checkoutUrl);
-    }, 600);
-  }
-
-  // ─────────────────────────────────────────────
-  //  OPTION B: POPUP MODE
-  // ─────────────────────────────────────────────
-  function openCheckoutPopup(url) {
-    const w = 500, h = 700;
-    const left = (screen.width - w) / 2;
-    const top  = (screen.height - h) / 2;
-    const popup = window.open(
-      url,
-      'sr_checkout',
-      `width=${w},height=${h},top=${top},left=${left},scrollbars=yes,resizable=yes`
-    );
-
-    // Listen for order success message from the popup
-    window.addEventListener('message', function onMessage(e) {
-      if (e.origin !== 'https://checkout.shiprocket.in') return;
-      if (e.data?.event === 'order_placed' || e.data?.status === 'success') {
-        window.removeEventListener('message', onMessage);
-        popup?.close();
-        handleOrderSuccess(e.data);
-      }
-    });
-  }
-
-  // ─────────────────────────────────────────────
-  //  PRE-CHECKOUT: tell your Spring Boot backend
-  //  to create a PENDING order so you can track it
-  // ─────────────────────────────────────────────
-  async function notifyBackendPreCheckout(orderRef) {
-    const backendUrl = 'http://localhost:8085';
-    if (!backendUrl || backendUrl.includes('api.artezo.in')) return; // skip if still dummy
+    btn.disabled = true;
+    label.textContent = 'Adding…';
 
     try {
-      await fetch(backendUrl + '/pre-checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          orderRef,
-          productId:   product.id,
-          productName: product.name + ' – ' + selectedVariant,
-          qty,
-          price:       product.price,
-          total:       product.price * qty,
-          status:      'PENDING',
-          source:      'shiprocket_checkout',
-          timestamp:   new Date().toISOString(),
-        }),
-      });
+      // ── POST to your Spring Boot cart endpoint ──
+      // await fetch(`${CONFIG.backendUrl}/api/v1/cart/add`, {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   credentials: 'include',
+      //   body: JSON.stringify({
+      //     productId: product.id,
+      //     variantLabel: selectedVariant.label,
+      //     qty,
+      //     price: selectedVariant.price,
+      //   }),
+      // });
+
+      // Simulate network delay for demo
+      await new Promise(r => setTimeout(r, 800));
+
+      btn.classList.add('added');
+      label.textContent = '✓ Added to Cart';
+      showToast('Added to cart!', 'success');
+
+      // Dispatch event so header badge updates
+      window.dispatchEvent(new CustomEvent('cartUpdated', { detail: { qty } }));
+
+      setTimeout(() => {
+        btn.classList.remove('added');
+        label.textContent = 'Add to Cart';
+        btn.disabled = false;
+      }, 2500);
+
     } catch (err) {
-      console.warn('Pre-checkout notify failed (non-blocking):', err);
+      label.textContent = 'Add to Cart';
+      btn.disabled = false;
+      showToast('Could not add to cart. Try again.', 'error');
     }
   }
 
-  // ─────────────────────────────────────────────
-  //  POST-CHECKOUT: handle success (popup mode)
-  // ─────────────────────────────────────────────
-  function handleOrderSuccess(data) {
-    console.log('Order placed via Shiprocket:', data);
-    // Redirect to your success page or show a modal
-    window.location.href = document.getElementById('cfg_returnUrl').value;
+  // ════════════════════════════════════════════════
+  //  BUY NOW — FULL FLOW
+  //
+  //  Flow:
+  //  1. Validate config
+  //  2. Generate unique orderRef
+  //  3. POST to Spring Boot /api/v1/orders/pre-checkout  ← saves PENDING record
+  //  4. Build SR Hot Checkout URL with all product params
+  //  5. Show animated overlay (steps)
+  //  6. Redirect to SR Checkout (same tab)
+  //
+  //  On return, SR appends: ?status=success&sr_order_id=xxx&order_id=ORD-xxx
+  //  Your Spring Boot webhook (Custom Endpoint in SR Dashboard) receives POST with full order data
+  // ════════════════════════════════════════════════
+
+async function handleBuyNow() {
+    const btn = document.getElementById('buyNowBtn');
+    btn.disabled = true;
+    showOverlay();
+ 
+    const orderRef = 'ORD-' + Date.now() + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
+ 
+    try {
+        // Step 1: Call YOUR Spring Boot backend → it calls SR access-token API
+        const res = await fetch('https://api.artezo.in/api/shiprocket/access-token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+                orderRef:     orderRef,
+                productStrId: product.id,           // e.g. "PRD00042"
+                productName:  product.name + ' — ' + selectedVariant.display,
+                variantId:    String(selectedVariant.srVariantId),  // ProductVariantEntity.id
+                variantLabel: selectedVariant.display,
+                sku:          product.sku,
+                quantity:     qty,
+                unitPrice:    selectedVariant.price,
+                mrp:          selectedVariant.mrp,
+                imageUrl:     product.image,
+                redirectUrl:  'https://www.artezo.in/order-success',
+                // couponCode: 'SAVE100',       // optional
+                // couponDiscount: 100.0        // optional
+            })
+        });
+ 
+        if (!res.ok) throw new Error('Token generation failed: ' + res.status);
+        const data = await res.json();
+ 
+        // SR returns { token: "xxx" } or similar — field name TBC with SR team
+        const token = data.token || data.access_token || data.checkout_token;
+        if (!token) throw new Error('No token in SR response');
+ 
+        hideOverlay();
+        btn.disabled = false;
+ 
+        // Step 2: Open SR checkout window using their JS SDK
+        // SR handles: mobile OTP → address autofill → payment → redirect to redirectUrl
+        HeadlessCheckout.addToCart(event, token, {
+            fallbackUrl: 'https://www.artezo.in/checkout',  // fallback if SR server down
+            isInitiatedFromApp: false
+        });
+ 
+    } catch (err) {
+        hideOverlay();
+        btn.disabled = false;
+        console.error('Buy Now error:', err);
+        showToast('Something went wrong. Please try again.', 'error');
+    }
+}
+
+  // ════════════════════════════════════════════════
+  //  PRE-CHECKOUT: Spring Boot call
+  //  Creates a PENDING order in your DB before
+  //  redirecting to SR, so you can track drop-offs
+  // ════════════════════════════════════════════════
+  async function preCheckout(orderRef) {
+    const payload = {
+      orderRef,
+      productId:     product.id,
+      productName:   product.name + ' — ' + selectedVariant.display,
+      variantLabel:  selectedVariant.label,
+      sku:           product.sku,
+      qty,
+      unitPrice:     selectedVariant.price,
+      mrp:           selectedVariant.mrp,
+      totalAmount:   selectedVariant.price * qty,
+      status:        'PENDING',
+      source:        'SR_HOT_CHECKOUT',
+      timestamp:     new Date().toISOString(),
+    };
+
+    // ── Uncomment when your endpoint is ready ──
+    // const res = await fetch(`${CONFIG.backendUrl}/api/v1/orders/pre-checkout`, {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   credentials: 'include',  // sends session cookie / JWT cookie
+    //   body: JSON.stringify(payload),
+    // });
+    // if (!res.ok) throw new Error('Pre-checkout failed: ' + res.status);
+
+    // Simulate for demo (remove when wired to real backend)
+    console.log('[Artezo] Pre-checkout payload:', payload);
+    await sleep(700);
   }
 
-  // ─────────────────────────────────────────────
-  //  PARSE SUCCESS PARAMS (same-tab return)
-  //  When SR redirects back to return_url it appends:
-  //  ?order_id=xxx&sr_order_id=xxx&status=success
-  // ─────────────────────────────────────────────
-  (function checkReturnParams() {
+  // ════════════════════════════════════════════════
+  //  BUILD SR HOT CHECKOUT URL
+  //
+  //  Docs: SR Checkout Dashboard → Settings → Custom Endpoints
+  //  URL:  https://checkout.shiprocket.in/checkout?<params>
+  //
+  //  SR reads mobile → fetches saved address from its network
+  //  (same address autofill you see on Vaaree / Shopify stores)
+  // ════════════════════════════════════════════════
+  function buildSRCheckoutUrl(orderRef) {
+    const p = new URLSearchParams();
+
+    // ── Required ──
+    p.set('company_id', CONFIG.companyId);
+    p.set('order_id',   orderRef);
+
+    // ── Product line item (supports multiple: product[0], product[1]...) ──
+    p.set('product[0][id]',       product.id);
+    p.set('product[0][name]',     product.name + ' — ' + selectedVariant.display);
+    p.set('product[0][sku]',      product.sku);
+    p.set('product[0][quantity]', qty);
+    p.set('product[0][price]',    selectedVariant.price);   // selling price
+    p.set('product[0][mrp]',      selectedVariant.mrp);     // original / MRP
+    p.set('product[0][weight]',   product.weight);           // kg
+    p.set('product[0][category]', product.category);
+    p.set('product[0][hsn]',      product.hsn);
+    p.set('product[0][image]',    product.image);
+
+    // ── Order totals ──
+    p.set('total',     selectedVariant.price * qty);
+    p.set('total_mrp', selectedVariant.mrp   * qty);
+
+    // ── Redirects ──
+    p.set('return_url', CONFIG.returnUrl);
+    p.set('cancel_url', CONFIG.cancelUrl);
+
+    // ── Source identifier ──
+    p.set('source', 'headless_web');
+
+    const url = `https://checkout.shiprocket.in/checkout?${p.toString()}`;
+    console.log('[Artezo] SR Checkout URL:', url);
+    return url;
+  }
+
+  // ════════════════════════════════════════════════
+  //  HANDLE RETURN FROM SR CHECKOUT
+  //  SR appends: ?status=success&sr_order_id=xxx&order_id=ORD-xxx
+  //  Your Spring Boot Custom Endpoint already received the full order
+  //  via POST webhook — this just handles the UX side
+  // ════════════════════════════════════════════════
+  (function handleReturnParams() {
     const p = new URLSearchParams(window.location.search);
-    const status = p.get('status');
+    const status    = p.get('status');
     const srOrderId = p.get('sr_order_id');
+    const orderRef  = p.get('order_id');
+
     if (status === 'success' && srOrderId) {
-      console.log('SR Order ID:', srOrderId);
-      // You'd normally redirect to a dedicated success page
-      // Or your Spring Boot webhook already saved it
+      console.log('[Artezo] Order confirmed — SR Order ID:', srOrderId, '| Internal Ref:', orderRef);
+      // Normally you'd redirect to a dedicated order-success page here
+      // window.location.href = `/order-success?sr_order_id=${srOrderId}&ref=${orderRef}`;
+      showToast('🎉 Order placed successfully!', 'success');
+    }
+
+    if (status === 'cancelled') {
+      showToast('Checkout was cancelled. Your cart is saved.', '');
     }
   })();
+
+  // ════════════════════════════════════════════════
+  //  OVERLAY HELPERS
+  // ════════════════════════════════════════════════
+  function showOverlay() {
+    // Reset steps
+    ['step1','step2','step3'].forEach(id => {
+      const el = document.getElementById(id);
+      el.className = 'overlay-step';
+    });
+    markStep('step1', 'active');
+    document.getElementById('overlayTitle').textContent = 'Preparing your order…';
+    document.getElementById('overlaySub').textContent   = 'Please wait a moment';
+    document.getElementById('loadingOverlay').classList.add('show');
+  }
+
+  function hideOverlay() {
+    document.getElementById('loadingOverlay').classList.remove('show');
+  }
+
+  function markStep(id, state) {
+    const el = document.getElementById(id);
+    el.className = 'overlay-step ' + state;
+  }
+
+  // ════════════════════════════════════════════════
+  //  TOAST
+  // ════════════════════════════════════════════════
+  let toastTimer;
+  function showToast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show' + (type ? ' toast-' + type : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.classList.remove('show'); }, 3200);
+  }
+
+  // ════════════════════════════════════════════════
+  //  UTIL
+  // ════════════════════════════════════════════════
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  // Init qty button states
+  document.getElementById('qtyMinus').disabled = true;
 </script>
 
 </body>
