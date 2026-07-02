@@ -92,80 +92,58 @@
 // // ═══════════════════════════════════════════════════════════════════════════
 // //  SHIPROCKET SDK INITIALIZATION CHECKER
 // // ═══════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
+//  SHIPROCKET HEADLESS CHECKOUT SDK LOADER
+// ═══════════════════════════════════════════════════════════════════════════
 
-// L.info("🔍 Checking Shiprocket SDK availability...");
+// Load Shiprocket HeadlessCheckout SDK
+(function loadShiprocketSDK() {
+  // Check if already loaded
+  if (typeof HeadlessCheckout !== 'undefined') {
+    console.log('[SR] HeadlessCheckout SDK already loaded');
+    return;
+  }
 
-// // Add a global flag to track if script loaded
-// window.shiprocketScriptLoaded = false;
+  // Load CSS
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = 'https://checkout-ui.shiprocket.com/assets/styles/shopify.css';
+  document.head.appendChild(link);
 
-// (function initializeShiprocketCheck() {
-//   let checkCount = 0;
-//   const maxChecks = 50;
+  // Load JS
+  const script = document.createElement('script');
+  script.src = 'https://checkout-ui.shiprocket.com/assets/js/channels/shopify.js';
+  script.async = true;
+  script.onload = () => {
+    console.log('[SR] HeadlessCheckout SDK loaded successfully');
+    window.shiprocketSDKLoaded = true;
+  };
+  script.onerror = () => {
+    console.error('[SR] Failed to load HeadlessCheckout SDK');
+    window.shiprocketSDKLoaded = false;
+  };
+  document.head.appendChild(script);
+})();
 
-//   const checkSRSDK = setInterval(() => {
-//     checkCount++;
-
-//     L.debug("SR SDK Check #{}: window.Shiprocket = {}",
-//       checkCount,
-//       typeof window.Shiprocket);
-
-//     if (typeof window.Shiprocket !== "undefined") {
-//       clearInterval(checkSRSDK);
-//       window.shiprocketScriptLoaded = true;
-
-//       L.info("✅ SHIPROCKET SDK LOADED SUCCESSFULLY!");
-//       L.info("  window.Shiprocket type: {}", typeof window.Shiprocket);
-//       L.info("  window.Shiprocket.checkout type: {}", typeof window.Shiprocket.checkout);
-//       L.debug("  Available methods: {}", Object.keys(window.Shiprocket).join(", "));
-
-//       return;
-//     }
-
-//     if (checkCount >= maxChecks) {
-//       clearInterval(checkSRSDK);
-//       window.shiprocketScriptLoaded = false;
-
-//       L.error("❌ SHIPROCKET SDK FAILED TO LOAD AFTER 5 SECONDS");
-//       L.error("Checking script tag status...");
-
-//       const scriptTag = document.querySelector('script[src*="shiprocket-checkout"]');
-//       if (scriptTag) {
-//         L.error("  ✅ Script tag found");
-//         L.error("  Script src: {}", scriptTag.src);
-//         L.error("  Script async: {}", scriptTag.async);
-//         L.error("  Script loaded: {}", scriptTag.loaded);
-//         L.error("  ⚠️ Script tag exists but window.Shiprocket is undefined");
-//         L.error("  Possible causes:");
-//         L.error("    → CORS blocking (check Network tab)");
-//         L.error("    → Script didn't execute/initialize");
-//         L.error("    → Wrong URL");
-//         L.error("    → Third-party script error");
-//       } else {
-//         L.error("  ❌ NO SCRIPT TAG FOUND!");
-//         L.error("  Make sure <script src=\"https://checkout.shiprocket.in/js/shiprocket-checkout.js\"></script> is in <head>");
-//       }
-//     }
-//   }, 100);
-// })();
-
-// // Check on page load events
-// document.addEventListener('DOMContentLoaded', () => {
-//   L.debug("DOMContentLoaded: window.Shiprocket = {}", typeof window.Shiprocket);
-// });
-
-// window.addEventListener('load', () => {
-//   L.debug("Window load: window.Shiprocket = {}", typeof window.Shiprocket);
-
-//   // If still not loaded, it's definitely a script issue
-//   if (typeof window.Shiprocket === "undefined") {
-//     L.error("❌ CRITICAL: Shiprocket still not loaded at window.load");
-//     L.error("This means the script failed to execute. Check:");
-//     L.error("  1. Network tab - did shiprocket-checkout.js load with 200 status?");
-//     L.error("  2. Console - any CORS errors?");
-//     L.error("  3. Is your internet connection working?");
-//   }
-// });
-
+// Helper to wait for SDK
+function waitForShiprocketSDK(maxWaitMs = 5000) {
+  return new Promise((resolve) => {
+    if (typeof HeadlessCheckout !== 'undefined') {
+      resolve(true);
+      return;
+    }
+    const start = Date.now();
+    const check = setInterval(() => {
+      if (typeof HeadlessCheckout !== 'undefined') {
+        clearInterval(check);
+        resolve(true);
+      } else if (Date.now() - start > maxWaitMs) {
+        clearInterval(check);
+        resolve(false);
+      }
+    }, 100);
+  });
+}
 
 (function () {
   "use strict";
@@ -1042,7 +1020,7 @@
       // product: slugify(safeProductData.productName),
     });
 
-    if (variantSku && variantSku !== `VAR-${safeProductData.productId}`) {
+    if (variantSku !== null) {
       params.set("variant", variantSku);
     }
 
@@ -1178,6 +1156,19 @@
 
   async function apiAddToCart(payload) {
     const res = await fetch(`${BASE_URL}/api/v1/cart/add`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  }
+
+  //=======================================//
+  //  Bought togather cart api
+ //=======================================//
+  async function apiAddMultipleToCart(payload) {
+    const res = await fetch(`${BASE_URL}/api/v1/cart/add-multiple`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -1543,37 +1534,24 @@
     };
   }
 
-  /**
-   * Returns the effective media (mainImage, mockupImages, productVideoUrl)
-   * for a given variant — applying product-level fallbacks where variant
-   * fields are absent.
-   */
-  // function getVariantMedia(variant) {
-  //   return {
-  //     mainImage:       variant.mainImage,
-  //     mockupImages:    variant.mockupImages !== null
-  //       ? variant.mockupImages
-  //       : safeProductData.mockupImages,   // inherit product-level mockups
-  //     productVideoUrl: variant.productVideoUrl || safeProductData.productVideoUrl || null,
-  //   };
-  // }
+
 
   // PATCH 4 — Media resolver with proper merge logic
   // Rule: variant mainImage null → use product mainImage
   // Rule: mockups = variant mockups first, then product mockups (deduped)
   function getVariantMedia(variant) {
     if (!variant) return {
-      mainImage: safeProductData.mainImage,
-      mockupImages: safeProductData.mockupImages,
-      productVideoUrl: safeProductData.productVideoUrl || null,
+      mainImage: safeProductData?.mainImage || FALLBACK_IMG,
+      mockupImages: safeProductData?.mockupImages || [],
+      productVideoUrl: safeProductData?.productVideoUrl || null,
     };
 
     // Resolve main image
-    const mainImage = variant.mainImage || safeProductData.mainImage || FALLBACK_IMG;
+    const mainImage = variant.mainImage || safeProductData?.mainImage || FALLBACK_IMG;
 
     // Merge mockups: variant first, then product-level, deduped by URL
     const variantMockups = Array.isArray(variant.mockupImages) ? variant.mockupImages : [];
-    const productMockups = safeProductData.mockupImages || [];
+    const productMockups = safeProductData?.mockupImages || [];
     const seen = new Set();
     const mergedMockups = [];
     [...variantMockups, ...productMockups].forEach((url) => {
@@ -1583,9 +1561,9 @@
     return {
       mainImage,
       mockupImages: mergedMockups,
-      productVideoUrl: variant.productVideoUrl || safeProductData.productVideoUrl || null,
+      productVideoUrl: variant.productVideoUrl || safeProductData?.productVideoUrl || null,
     };
-  }
+  } 
   // END PATCH 4 media resolver
 
   function buildSafeProductData(p) {
@@ -1752,7 +1730,8 @@
     };
 
     // ── 6. Set initial active variant — always base first ─────────────────
-    currentVariant = allVariants[0];
+    // currentVariant = allVariants[0];
+        currentVariant = variants.length ? variants[0] : baseVariant;
 
     document.title = `Artezo · ${safeProductData.productName}`;
   }
@@ -1785,57 +1764,7 @@
 
     buildCompleteHTML();
 
-    // loadCartItems().then(() => {
-    //   const pid = Number(safeProductData.productPrimeId);
-    //   if (addedToCartSet.has(pid)) {
-    //     // ── Update ALL add-to-cart buttons (main + sticky) ──────────────
-    //     document.querySelectorAll(".add-to-cart-btn").forEach(addBtn => {
-    //       addBtn.innerHTML = `<i class="fa-solid fa-bag-shopping"></i> <span class="text-sm whitespace-nowrap">Go to Cart</span>`;
-    //       addBtn.style.background = "#e39f32";
-    //       addBtn.style.color = "#1D3C4A";
-    //       addBtn.style.fontWeight = "600";
-    //       addBtn.style.borderColor = "#e39f32";
-    //     });
-    //   }
-    //   syncCardCartStates(); // ← ADD: sync suggestion/recent cards too
-    //   syncCardWishlistStates();  // ← hearts restored on page load
-
-
-    // });
-
-    // fillAccordion();
-    // fillInstallation();
-    // fillHeroBanner();
-    // fillStickyBar();
-    // setupEventListeners();
-    // // initWishlistIcon();
-
-    // // Async fills
-    // fillBoughtTogether();
-    // fillRecentAndSuggestions();
-    // fillReviews(); // PATCH 3 — async, non-blocking
-
-
-    // setTimeout(() => {
-
-    //   setupVariantSelection();
-    //   setupDynamicVariants();
-
-    //   document.querySelectorAll(".add-to-cart-btn")
-    //     .forEach((btn) => btn.addEventListener("click", handleAddToCart));
-    //   document.querySelectorAll(".buy-now-btn")
-    //     .forEach((btn) => btn.addEventListener("click", handleBuyNow));
-     
-    //   document.querySelectorAll(".apply-coupon-btn").forEach((btn) =>
-    //     btn.addEventListener("click", (e) => {
-    //       e.preventDefault();
-    //       const code = btn.dataset.couponCode;
-    //       if (code) applyCoupon(code);
-    //     })
-    //   );
-    //   initWishlistIcon();   // ← runs LAST, after all DOM mutations are done
-
-    // }, 100);
+   
 
     // === PATCH-2 Critical: Wait for DOM to be ready before building media gallery
     setTimeout(() => {
@@ -1876,10 +1805,12 @@
         document
           .querySelectorAll(".add-to-cart-btn")
           .forEach((btn) => btn.addEventListener("click", handleAddToCart));
-        document
-          .querySelectorAll(".buy-now-btn")
-          .forEach((btn) => btn.addEventListener("click", handleBuyNow));
-        document.querySelectorAll(".apply-coupon-btn").forEach((btn) =>
+        
+      // ── Buy Now event listener ──
+      document.querySelectorAll(".buy-now-btn")
+        .forEach((btn) => btn.addEventListener("click", handleBuyNow));
+        
+          document.querySelectorAll(".apply-coupon-btn").forEach((btn) =>
           btn.addEventListener("click", (e) => {
             e.preventDefault();
             const code = btn.dataset.couponCode;
@@ -1969,7 +1900,6 @@
 
 
 
-
   // ═══════════════════════════════════════════════════════════════════════════
   //  DISCOUNT HELPER
   // ═══════════════════════════════════════════════════════════════════════════
@@ -2031,77 +1961,6 @@
     }
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  //  THUMBNAIL STRIP  —  shared builder used by both initial render + variant switch
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  /**
-   * Rebuild the full thumbnail strip (vertical column + main image).
-   * Accepts the media object returned by getVariantMedia().
-   */
-  // function buildMediaStrip(media) {
-  //   const thumbContainer = document.getElementById("thumbContainer");
-  //   const mainImg = document.getElementById("mainProductImage");
-  //   if (!thumbContainer || !mainImg) return;
-
-  //   // Build ordered media list: mainImage first, then video (if any), then mockups
-  //   const mediaItems = [];
-
-  //   // 1. Main image
-  //   mediaItems.push({ type: "image", url: media.mainImage || FALLBACK_IMG });
-
-  //   // 2. Product / variant video — shown as a thumb with a play icon
-  //   if (media.productVideoUrl) {
-  //     mediaItems.push({ type: "video", url: media.productVideoUrl });
-  //   }
-
-  //   // 3. Mockup images
-  //   (media.mockupImages || []).forEach((img) => {
-  //     if (img) mediaItems.push({ type: "image", url: img });
-  //   });
-
-  //   // Render thumbs
-  //   thumbContainer.innerHTML = mediaItems
-  //     .map((item, idx) => {
-  //       if (item.type === "video") {
-  //         return `
-  //           <div class="thumb-video-wrap relative w-full h-16 rounded-md overflow-hidden border-2 cursor-pointer
-  //                       ${idx === 0 ? "border-[#e39f32]" : "border-transparent hover:border-[#e39f32]"}"
-  //                data-media-index="${idx}" data-media-type="video" data-media-url="${item.url}">
-  //             <video src="${item.url}" class="w-full h-full object-cover" muted preload="metadata"></video>
-  //             <div class="absolute inset-0 flex items-center justify-center bg-black/30">
-  //               <i class="fas fa-play text-white text-xs"></i>
-  //             </div>
-  //           </div>`;
-  //       }
-  //       return `
-  //         <img src="${item.url}"
-  //              data-media-index="${idx}" data-media-type="image" data-media-url="${item.url}"
-  //              class="w-full h-16 object-cover rounded-md cursor-pointer border-2
-  //                     ${idx === 0 ? "border-[#e39f32]" : "border-transparent hover:border-[#e39f32]"}"
-  //              onerror="this.src='${FALLBACK_IMG}'"/>`;
-  //     })
-  //     .join("");
-
-  //   // Set main display to first item
-  //   setMainMedia(mediaItems[0], mainImg);
-
-  //   // Wire thumb clicks
-  //   thumbContainer.querySelectorAll("[data-media-index]").forEach((thumb) => {
-  //     thumb.addEventListener("click", function () {
-  //       // Remove active from all
-  //       thumbContainer.querySelectorAll("[data-media-index]").forEach((t) => {
-  //         t.classList.remove("border-[#e39f32]");
-  //         t.classList.add("border-transparent");
-  //       });
-  //       this.classList.remove("border-transparent");
-  //       this.classList.add("border-[#e39f32]");
-
-  //       const item = mediaItems[parseInt(this.dataset.mediaIndex)];
-  //       setMainMedia(item, mainImg);
-  //     });
-  //   });
-  // }
 
   // ══════════════════════════════════════════════════════════════
   //  THUMBNAIL STRIP  —  shared builder used by both initial render + variant switch
@@ -2187,35 +2046,6 @@
         });
       });
   }
-
-
-  /** Swap the main display area between image and video. */
-  // function setMainMedia(item, container) {
-  //   if (!container || !item) return;
-
-  //   if (item.type === "video") {
-  //     // Replace the <img> with a <video> if not already a video
-  //     const existing = container.parentElement.querySelector("#mainProductVideo");
-  //     if (existing) existing.remove();
-
-  //     container.style.display = "none";
-  //     const vid = document.createElement("video");
-  //     vid.id = "mainProductVideo";
-  //     vid.src = item.url;
-  //     vid.controls = true;
-  //     vid.autoplay = false;
-  //     vid.muted = false;
-  //     vid.className = "max-h-full max-w-full object-contain rounded-lg";
-  //     container.parentElement.appendChild(vid);
-  //   } else {
-  //     // Remove any video element
-  //     const existing = container.parentElement.querySelector("#mainProductVideo");
-  //     if (existing) existing.remove();
-
-  //     container.style.display = "";
-  //     container.src = item.url;
-  //   }
-  // }
 
 
   // ══════════════════════════════════════════════════════════════
@@ -2757,8 +2587,6 @@
   }
  
 
-
-
   // ═══════════════════════════════════════════════════════════════════════════
   //  VARIANT SELECTION
   // ═══════════════════════════════════════════════════════════════════════════
@@ -2779,44 +2607,29 @@
   // Single unified handler — size pills filter color cards,
   // color card click updates all product display.
 
-  function setupVariantSelection() {
+function setupVariantSelection() {
     const sizePills = document.querySelectorAll(".size-pill");
     const variantSection = document.getElementById("variantSection");
     if (!sizePills.length || !variantSection) return;
-
     // ── Wire size pills ────────────────────────────────────────────────────
     sizePills.forEach((pill) => {
       pill.addEventListener("click", function () {
         const selectedSize = this.dataset.size;
-
         // Update pill active state
         sizePills.forEach((pill) => {
-
           pill.addEventListener("click", function () {
-
             sizePills.forEach((p) => {
-
               p.className =
-
                 "size-pill px-4 py-2 rounded-lg border-2 text-xs font-medium transition-all duration-200 rounded-xl border-gray-200 text-gray-600 hover:border-[#E6A62C]";
-
             });
-
             this.className =
-
               "size-pill px-4 py-2 rounded-lg border-2 text-xs font-medium transition-all duration-200 rounded-xl border-[#E6A62C] bg-[#1D3C4A] text-white shadow-sm";
-
             filterColorsBySize(this.dataset.size);
-
           });
-
         });
-
-
         // Update active size label
         const activeSizeLabel = document.getElementById("activeSizeLabel");
         if (activeSizeLabel) activeSizeLabel.textContent = selectedSize;
-
         // Show only cards matching this size
         const allCards = document.querySelectorAll(".variant-card");
         let firstVisible = null;
@@ -2825,17 +2638,14 @@
           card.style.display = matches ? "" : "none";
           if (matches && !firstVisible) firstVisible = card;
         });
-
         // Auto-select first visible color card
         if (firstVisible) firstVisible.click();
       });
     });
-
     // ── Wire color cards via delegation ───────────────────────────────────
     variantSection.addEventListener("click", function (e) {
       const card = e.target.closest(".variant-card");
       if (!card) return;
-
       // Active ring
       document.querySelectorAll(".variant-card").forEach((c) => {
         c.classList.remove("border-[#1D3C4A]", "shadow-md");
@@ -2843,25 +2653,78 @@
       });
       card.classList.add("border-[#1D3C4A]", "shadow-md");
       card.classList.remove("border-gray-200");
-
       // Find variant
       const variantId = card.dataset.variantId;
       const newVariant = safeProductData.availableVariants.find(
         (v) => v.variantId === variantId
       );
-
       if (!newVariant) return;
-
       currentVariant = newVariant;
-
       // Update active color label
       const activeColorLabel = document.getElementById("activeColorLabel");
       if (activeColorLabel) activeColorLabel.textContent = newVariant.color;
-
       // Full display update
       updateProductDisplay();
     });
+    // ── Auto-trigger first size pill on init ──────────────────────────────
+    if (sizePills[0]) sizePills[0].click();
+  }
 
+
+  function setupVariantSelection() {
+    const sizePills = document.querySelectorAll(".size-pill");
+    const variantSection = document.getElementById("variantSection");
+    if (!sizePills.length || !variantSection) return;
+    // ── Wire size pills (single listener each, no nested re-attachment) ───
+    sizePills.forEach((pill) => {
+      pill.addEventListener("click", function () {
+        const selectedSize = this.dataset.size;
+        // Update pill active state
+        sizePills.forEach((p) => {
+          p.className =
+            "size-pill px-4 py-2 rounded-lg border-2 text-xs font-medium transition-all duration-200 rounded-xl border-gray-200 text-gray-600 hover:border-[#E6A62C]";
+        });
+        this.className =
+          "size-pill px-4 py-2 rounded-lg border-2 text-xs font-medium transition-all duration-200 rounded-xl border-[#E6A62C] bg-[#1D3C4A] text-white shadow-sm";
+        // Update active size label
+        const activeSizeLabel = document.getElementById("activeSizeLabel");
+        if (activeSizeLabel) activeSizeLabel.textContent = selectedSize;
+        // Show only cards matching this size
+        const allCards = document.querySelectorAll(".variant-card");
+        let firstVisible = null;
+        allCards.forEach((card) => {
+          const matches = card.dataset.size === selectedSize;
+          card.style.display = matches ? "" : "none";
+          if (matches && !firstVisible) firstVisible = card;
+        });
+        // Auto-select first visible color card
+        if (firstVisible) firstVisible.click();
+      });
+    });
+    // ── Wire color cards via delegation ───────────────────────────────────
+    variantSection.addEventListener("click", function (e) {
+      const card = e.target.closest(".variant-card");
+      if (!card) return;
+      // Active ring — use ring-2 so it matches getSelectedVariant()'s query
+      document.querySelectorAll(".variant-card").forEach((c) => {
+        c.classList.remove("border-[#1D3C4A]", "shadow-md", "ring-1", "ring-[#1D3C4A]");
+        c.classList.add("border-gray-200");
+      });
+      card.classList.add("border-[#1D3C4A]", "shadow-md", "ring-1", "ring-[#1D3C4A]");
+      card.classList.remove("border-gray-200");
+      // Find variant
+      const variantId = card.dataset.variantId;
+      const newVariant = safeProductData.availableVariants.find(
+        (v) => v.variantId === variantId
+      );
+      if (!newVariant) return;
+      currentVariant = newVariant;
+      // Update active color label
+      const activeColorLabel = document.getElementById("activeColorLabel");
+      if (activeColorLabel) activeColorLabel.textContent = newVariant.color;
+      // Full display update
+      updateProductDisplay();
+    });
     // ── Auto-trigger first size pill on init ──────────────────────────────
     if (sizePills[0]) sizePills[0].click();
   }
@@ -2953,20 +2816,7 @@
       b.textContent = discPct > 0 ? `${discPct}% OFF` : "";
       b.style.display = discPct > 0 ? "" : "none";
     });
-
-    // ── 4. Stock ───────────────────────────────────────────────────────────
-    // const qty      = parseInt(document.getElementById("quantity")?.textContent || 1);
-    // const stockEl  = document.getElementById("stockInfo");
-    // const remaining = currentVariant.stock - qty;
-    // if (stockEl) {
-    //   stockEl.textContent = remaining > 0
-    //     ? `Only ${remaining} items left in stock`
-    //     : "Out of stock";
-    //   stockEl.className = remaining > 0
-    //     ? "text-xs text-green-600 font-semibold"
-    //     : "text-xs text-red-600 font-semibold";
-    // }
-
+  
     // ── 4. Stock — delegate entirely to syncStockUI (PATCH 2) ─────────────
     syncStockUI(currentVariant.stock);
 
@@ -2980,17 +2830,7 @@
     // ── 6. Update customization overlay preview if open ────────────────────
     const customPreview = document.getElementById("customPreviewImage");
     if (customPreview) customPreview.src = currentVariant.mainImage;
-
-    // ─── UPDATE URL WHEN VARIANT CHANGES (NEW) ──────────────────────────────
-    // if (safeProductData && safeProductData.productId) {
-    //     updateBrowserURLToSEO({
-    //         brandName: safeProductData.brandName,
-    //         productName: safeProductData.productName,
-    //         currentSku: safeProductData.currentSku,
-    //         productId: safeProductData.productId
-    //     }, currentVariant);
-    // }
-
+ 
     // Update URL to reflect selected variant using the shared rewriteURLToSEO helper
     if (safeProductData && currentVariant) {
       const variantSku = currentVariant.sku || currentVariant.variantId || null;
@@ -3043,227 +2883,184 @@
     }
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  //  BUY NOW — SHIPROCKET CHECKOUT INTEGRATION
-  // ═══════════════════════════════════════════════════════════════════════════
 
 
+// ═══════════════════════════════════════════════════════════════════════════
+//  BUY NOW — SHIPROCKET HEADLESS CHECKOUT INTEGRATION
+// ═══════════════════════════════════════════════════════════════════════════
+async function handleBuyNow(e) {
+  e.preventDefault();
+  e.stopPropagation();
 
+  console.log('[BuyNow] Initiated');
 
-  /**
-   * HANDLE SHIPROCKET CHECKOUT SUCCESS
-   * Called when user completes payment in SR widget
-   */
-  // async function handleBuyNowSuccess(srData, variant, quantity, itemTotal) {
-  //     log.info("═══════════════════════════════════════════════════════");
-  //     log.info("  SHIPROCKET CHECKOUT SUCCESS");
-  //     log.info("═══════════════════════════════════════════════════════");
+  // ── 1. CUSTOMIZABLE CHECK ──────────────────────────────────────────
+  if (safeProductData?.isCustomizable) {
+    console.log('[BuyNow] Customizable product — opening overlay');
+    openCustomizationOverlay();
+    return;
+  }
 
-  //     log.info("Received SR callback data:");
-  //     log.info("  SR Order ID: {}", srData.order_id);
-  //     log.info("  SR Shipment ID: {}", srData.shipment_id);
-  //     log.info("  Payment ID: {}", srData.payment_id);
-  //     log.info("  Customer Name: {}", srData.customer_name);
-  //     log.info("  Customer Email: {}", srData.customer_email);
-  //     log.info("  Customer Phone: {}", srData.customer_phone);
-  //     log.info("  Shipping Address: {}, {}, {} - {}",
-  //         srData.shipping_address,
-  //         srData.shipping_city,
-  //         srData.shipping_state,
-  //         srData.shipping_pincode);
+  // ── 2. AUTH CHECK ──────────────────────────────────────────────────
+  if (!USER_ID) {
+    console.error('[BuyNow] User not authenticated');
+    showToast('Please login to continue.', 'error');
+    return;
+  }
 
-  //     showToast("Payment successful! Confirming your order…", "success");
+ // ── 3. VARIANT & QTY CHECK ────────────────────────────────────────
+// console.log('[BuyNow-DEBUG] ── Variant resolution trace ──');
+// console.log('[BuyNow-DEBUG] currentVariant (global):', JSON.stringify(currentVariant));
+// console.log('[BuyNow-DEBUG] getSelectedVariant() returned:', JSON.stringify(getSelectedVariant()));
+// console.log('[BuyNow-DEBUG] ring-2 card element:', document.querySelector("[data-variant-id].ring-2"));
+// console.log('[BuyNow-DEBUG] ring-2 card data-variant-id:', document.querySelector("[data-variant-id].ring-2")?.dataset?.variantId);
+// console.log('[BuyNow-DEBUG] safeProductData.productPrimeId:', safeProductData.productPrimeId);
+// console.log('[BuyNow-DEBUG] safeProductData.availableVariants[0]:', JSON.stringify(safeProductData.availableVariants?.[0]));
 
-  //     try {
-  //         log.debug("Building BuyNowConfirmRequest payload...");
-  //         const confirmPayload = buildBuyNowConfirmPayload(srData, variant, quantity, itemTotal);
+ const variant = getSelectedVariant() 
+  || safeProductData.availableVariants?.[0]  // ✅ fall back to the FIRST REAL variant, not productPrimeId
+  || null;
 
-  //         log.info("Sending order confirmation to backend...");
-  //         log.debug("Payload: {}", JSON.stringify(confirmPayload, null, 2));
+// console.log('[BuyNow-DEBUG] FINAL resolved variant:', JSON.stringify(variant));
+// console.log('[BuyNow-DEBUG] FINAL variant.variantId:', variant?.variantId, '| typeof:', typeof variant?.variantId);
 
-  //         const response = await apiConfirmBuyNow(confirmPayload);
+ const quantity = parseInt(document.getElementById('quantity')?.textContent || 1);
+const unitPrice = variant?.price || safeProductData.currentSellingPrice;
 
-  //         log.info("✅ Backend response received:");
-  //         log.info("  Order ID: {}", response.data?.orderStrId);
-  //         log.info("  Final Amount: ₹{}", response.data?.finalAmount);
-  //         log.info("  Status: {}", response.data?.orderStatus);
+  if (safeProductData.hasVariants && !variant?.variantId) {
+  console.error('[BuyNow] Product has variants but no real variantId resolved (got baseVariant/null):', variant);
+  showToast('Please select a variant (color/size) before buying.', 'error');
+  return;
+}
 
-  //         showToast("Order placed successfully! 🎉", "success");
+if (variant?.stock <= 0) {
+  showToast('Selected variant is out of stock.', 'error');
+  return;
+}
 
-  //         const orderId = response?.data?.orderStrId || "";
-  //         log.debug("Redirecting to success page with order ID: {}", orderId);
+  // ── 4. CHECK SDK LOADED ────────────────────────────────────────────
+  const sdkReady = await waitForShiprocketSDK(5000);
+  if (!sdkReady || typeof HeadlessCheckout === 'undefined') {
+    console.error('[BuyNow] Shiprocket SDK not loaded');
+    showToast('Checkout system loading. Please try again in a moment.', 'error');
+    return;
+  }
 
-  //         setTimeout(() => {
-  //             window.location.href = `/Order-Success/order-success.html${orderId ? "?orderId=" + encodeURIComponent(orderId) : ""}`;
-  //         }, 1500);
+  // ── 5. BUILD ORDER REFERENCE ──────────────────────────────────────
+  const orderRef = 'ORD-' + Date.now() + '-' + 
+                   Math.random().toString(36).slice(2, 6).toUpperCase();
 
-  //     } catch (err) {
-  //         log.error("❌ Order confirmation failed");
-  //         log.error("  Error: {}", err.message);
-  //         log.error("  Stack: {}", err.stack);
-  //         showToast("Payment received but order confirmation failed. Contact support with payment ID: " + srData.payment_id, "error");
-  //     }
-  // }
+  // ✅ NEW — store globally so handleBuyNowSuccess can retrieve it later
+  window.__currentBuyNowOrderRef = orderRef;
+  
+  // ── 6. SHOW LOADING OVERLAY ───────────────────────────────────────
+  showBuyNowOverlay();
 
-  // /**
-  //  * WAIT FOR SHIPROCKET SDK TO LOAD
-  //  * Checks every 100ms up to maxWaitTime
-  //  */
-  // /**
-  //  * WAIT FOR SHIPROCKET SDK TO LOAD
-  //  * Polls every 100ms with updated logging
-  //  */
-  // async function waitForShiprocketSDK(maxWaitTime = 5000) {
-  //     L.info("⏳ Waiting for Shiprocket SDK (max {}ms)...", maxWaitTime);
+  try {
+    // ── 7. BUILD PAYLOAD WITH FALLBACK VARIANT ID ────────────────────
+    // CRITICAL: Shiprocket requires variantId - never send null
+    // Fallback chain: variantId → productPrimeId → productStrId → 'default'
+   const variantId = variant?.variantId || null;   // ✅ real variant ID string, e.g. "150" — never productPrimeId
 
-  //     const startTime = Date.now();
-  //     let checkCount = 0;
+   const variantLabel = variant?.titleName 
+      || variant?.color 
+      || safeProductData.productName 
+      || 'Default';
 
-  //     while (Date.now() - startTime < maxWaitTime) {
-  //         checkCount++;
+    const sku = variant?.sku 
+      || safeProductData.currentSku 
+      || safeProductData.productStrId 
+      || 'SKU-DEFAULT';
 
-  //         L.debug("  Retry #{}: typeof window.Shiprocket = {}", 
-  //             checkCount,
-  //             typeof window.Shiprocket);
-
-  //         if (typeof window.Shiprocket !== "undefined" && 
-  //             typeof window.Shiprocket.checkout === "function") {
-
-  //             const timeElapsed = Date.now() - startTime;
-  //             L.info("✅ Shiprocket SDK loaded in {}ms", timeElapsed);
-  //             return true;
-  //         }
-
-  //         await new Promise(resolve => setTimeout(resolve, 100));
-  //     }
-
-  //     L.error("❌ Shiprocket SDK failed to load after {}ms", maxWaitTime);
-  //     return false;
-  // }
-
-
-  /**
-   * FIXED handleBuyNow() — Shiprocket Hot Checkout integration
-   * All inline checks, proper error handling, confirmed SDK loading
-   */
-  async function handleBuyNow(e) {
-    e.preventDefault();
-    e.stopPropagation();
-
-    L.info("═══════════════════════════════════════════════════════");
-    L.info("  HEADLESS BUY NOW INITIATED");
-    L.info("═══════════════════════════════════════════════════════");
-
-    // ── 1. CUSTOMIZABLE CHECK ──────────────────────────────────────────
-    if (safeProductData?.isCustomizable) {
-      L.info("✅ Product is customizable, opening overlay");
-      openCustomizationOverlay();
-      return;
-    }
-
-    // ── 2. AUTH CHECK ──────────────────────────────────────────────────
-    if (!USER_ID) {
-      L.error("❌ User not authenticated");
-      showToast("Please login to continue.", "error");
-      return;
-    }
-
-    // ── 3. VERIFY SHIPROCKET SDK IS LOADED ─────────────────────────────
-    if (typeof window.ShiprocketCheckout === 'undefined') {
-      L.error("❌ Shiprocket SDK not loaded");
-      showToast("Payment system loading. Please try again in a moment.", "error");
-      return;
-    }
-
-    // ── 4. EXTRACT CORE UI SELECTIONS ──────────────────────────────────
-    const variant = getSelectedVariant();
-    const quantity = parseInt(document.getElementById("quantity")?.textContent || 1);
-    const unitPrice = variant?.price || safeProductData.currentSellingPrice;
-
-    if (!unitPrice || unitPrice <= 0) {
-      L.error("❌ Invalid price: {}", unitPrice);
-      showToast("Price information unavailable. Please refresh and try again.", "error");
-      return;
-    }
-
-    // ── 5. DISPATCH TO SPRING BOOT BACKEND ─────────────────────────────
     const payload = {
+      orderRef: orderRef,
       productStrId: safeProductData.productStrId,
-      productName: safeProductData.productName,
-      variantId: variant?.id || null,
-      sku: variant?.sku || safeProductData.currentSku,
+      productName: safeProductData.productName + ' — ' + variantLabel,
+      variantId: variantId,   // ✅ real variant PK string, or null — never a fabricated substitute
+      variantLabel: variantLabel,
+      sku: sku,
       quantity: quantity,
-      unitPrice: parseFloat(unitPrice)
+      unitPrice: parseFloat(unitPrice),
+      mrp: variant?.mrp || safeProductData.currentMrpPrice || unitPrice,
+      imageUrl: variant?.mainImage || safeProductData.mainImage || '',
+      redirectUrl: window.location.origin + '/Checkout/order-confirm.html',
     };
+    console.log('[BuyNow] Payload with variantId:', payload);
+    console.log('[BuyNow] variantId used:', variantId, '| Type:', typeof variantId);
+
+    // ── 8. CALL BACKEND ───────────────────────────────────────────────
+    const response = await fetch(`${BASE_URL}/api/shiprocket/access-token`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-User-Id': USER_ID,
+      },
+      credentials: 'include',
+      body: JSON.stringify(payload),
+    });
+
+    // ── 9. PARSE RESPONSE ─────────────────────────────────────────────
+    let data;
+    const responseText = await response.text();
+    // console.log('[BuyNow] Raw response:', responseText);
 
     try {
-      showToast("Preparing secure checkout...", "info");
-      L.info("Requesting checkout URL from Spring Boot backend...");
-
-      const response = await fetch('http://localhost:8085/api/checkout/initiate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-Id': USER_ID
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        L.error("Backend error response: {} | Details: {}", response.status, errorData);
-
-        if (response.status === 500) {
-          showToast("Server error initiating checkout. Please contact support.", "error");
-        } else if (response.status === 400) {
-          showToast("Invalid product or pricing information.", "error");
-        } else {
-          showToast("Failed to initialize payment. Status: " + response.status, "error");
-        }
-        return;
-      }
-
-      const data = await response.json();
-
-      if (!data?.checkoutUrl) {
-        L.error("❌ Backend returned success but no checkoutUrl");
-        L.error("Response: {}", JSON.stringify(data));
-        showToast("Checkout URL not received. Please try again.", "error");
-        return;
-      }
-
-      L.info("✅ Checkout URL received from backend");
-      L.info("Opening Shiprocket Hot Checkout modal...");
-
-      // ── 6. LAUNCH SHIPROCKET HOT CHECKOUT MODAL ────────────────────
-      window.ShiprocketCheckout.open({
-        url: data.checkoutUrl,
-        fallback: false, // Opens as modal, not tab redirect
-
-        // Fired when customer completes payment
-        success: async function (callbackData) {
-          L.info("✅ Shiprocket checkout success callback received");
-          await handleBuyNowSuccess(callbackData, variant, quantity, (unitPrice * quantity));
-        },
-
-        // Fired when customer closes the checkout without paying
-        cancel: function () {
-          L.warn("User dismissed the checkout modal");
-          showToast("Checkout cancelled. Your cart is saved.", "info");
-        },
-
-        // Fired on iframe/SDK errors
-        error: function (err) {
-          L.error("Shiprocket iframe error: {}", err);
-          showToast("Payment system error. Please try again.", "error");
-        }
-      });
-
-    } catch (err) {
-      L.error("❌ Checkout initiation failed: {}", err.message);
-      showToast("Unable to start payment. Please check your connection and try again.", "error");
+      data = responseText ? JSON.parse(responseText) : {};
+    } catch (parseError) {
+      console.error('[BuyNow] Failed to parse JSON:', parseError);
+      hideBuyNowOverlay();
+      showToast('Checkout service error. Please try again.', 'error');
+      return;
     }
+
+    if (!response.ok) {
+      console.error('[BuyNow] Token request failed:', response.status, data);
+      hideBuyNowOverlay();
+      
+      // Show specific error messages
+      let errorMessage = 'Failed to open checkout. Please try again.';
+      if (response.status === 503) {
+        errorMessage = 'Checkout service unavailable. Please try again shortly.';
+      } else if (response.status === 500) {
+        errorMessage = data?.error?.message || 'Server error. Please try again later.';
+      } else if (response.status === 400 || response.status === 422) {
+        errorMessage = data?.error?.message || 'Invalid product configuration. Please contact support.';
+      }
+      
+      showToast(errorMessage, 'error');
+      return;
+    }
+
+    // ── 10. EXTRACT TOKEN ─────────────────────────────────────────────
+    const token = data?.result?.token || data.token || data.access_token || data.checkout_token;
+    
+    if (!token) {
+      console.error('[BuyNow] No token in response:', data);
+      hideBuyNowOverlay();
+      showToast('Checkout configuration error. Please try again.', 'error');
+      return;
+    }
+
+    console.log('[BuyNow] Token received successfully:', token);
+
+    // ── 11. HIDE OVERLAY ──────────────────────────────────────────────
+    hideBuyNowOverlay();
+
+    // ── 12. LAUNCH HEADLESS CHECKOUT ──────────────────────────────────
+    const checkoutEvent = new Event('checkout', { bubbles: true, cancelable: true });
+    
+    console.log('[BuyNow] Launching HeadlessCheckout');
+    HeadlessCheckout.addToCart(checkoutEvent, token, {
+      fallbackUrl: window.location.origin + '/checkout-cancelled',
+      isInitiatedFromApp: false,
+    });
+
+  } catch (err) {
+    console.error('[BuyNow] Error:', err);
+    hideBuyNowOverlay();
+    showToast('Something went wrong. Please try again.', 'error');
   }
+}
 
   /**
    * FIXED handleBuyNowSuccess() — Maps Shiprocket callback → backend order confirmation
@@ -3272,6 +3069,9 @@
     L.info("═══════════════════════════════════════════════════════");
     L.info("  SHIPROCKET CHECKOUT SUCCESS (CALLBACK)");
     L.info("═══════════════════════════════════════════════════════");
+
+     const orderRef = window.__currentBuyNowOrderRef || null; // ✅ NEW
+
 
     // Validate we have the required fields from Shiprocket
     if (!srData?.order_id || !srData?.payment_id) {
@@ -3289,7 +3089,7 @@
       razorpayPaymentId: String(srData.payment_id),
       amount: parseFloat(itemTotal),
       productStrId: safeProductData.productStrId,
-      variantId: variant?.id || null,
+      variantId: variant?.id || safeProductData.productPrimeId,
       quantity: parseInt(quantity),
       customerName: srData.customer_name || "",
       customerPhone: srData.customer_phone || "",
@@ -3342,9 +3142,9 @@
       showToast("Order placed successfully! 🎉", "success");
 
       // Redirect to order success page with order ID
-      setTimeout(() => {
-        window.location.href = `/Order-Success/order-success.html?orderId=${encodeURIComponent(orderStrId)}`;
-      }, 1500);
+      // setTimeout(() => {
+      //   window.location.href = `/Order-Success/order-success.html?orderId=${encodeURIComponent(orderStrId)}`;
+      // }, 1500);
 
     } catch (err) {
       L.error("❌ Order confirmation request failed: {}", err.message);
@@ -3353,6 +3153,9 @@
         "error"
       );
     }
+
+    // after success + redirect, clean up:
+  window.__currentBuyNowOrderRef = null; // ✅ NEW — avoid stale reuse on next Buy Now
   }
 
 
@@ -3370,17 +3173,18 @@
    * BUILD BUYNOW CONFIRM REQUEST
    * Maps SR Checkout callback → Backend DTO
    */
-  function buildBuyNowConfirmPayload(srData, variant, quantity, itemTotal) {
+  function buildBuyNowConfirmPayload(srData, variant, quantity, itemTotal, orderRef) {
     log.info("Building BuyNowConfirmRequest payload...");
 
     const payload = {
+      orderRef: orderRef || null,
       shiprocketOrderId: srData.order_id ? String(srData.order_id) : null,
       shiprocketShipmentId: srData.shipment_id ? String(srData.shipment_id) : null,
       razorpayPaymentId: srData.payment_id || null,
       amount: itemTotal,
 
       productStrId: safeProductData.productStrId,
-      variantId: variant?.variantId || null,
+      variantId: variant?.variantId || null,   // ✅ real variant PK — no fallback to product-level IDs
       quantity: quantity,
 
       customerName: srData.customer_name || "",
@@ -3394,21 +3198,8 @@
       shippingPincode: srData.shipping_pincode || "",
     };
 
-    log.info("✅ Payload built:");
-    log.info("  SR Order: {}", payload.shiprocketOrderId);
-    log.info("  Product: {}", payload.productStrId);
-    log.info("  Variant: {}", payload.variantId);
-    log.info("  Quantity: {}", payload.quantity);
-    log.info("  Amount: ₹{}", payload.amount);
-    log.info("  Customer: {}", payload.customerName);
-    log.info("  Address: {}, {}, {} - {}",
-      payload.shippingAddress1,
-      payload.shippingCity,
-      payload.shippingState,
-      payload.shippingPincode);
-
     return payload;
-  }
+}
 
   function buildCartPayload(variant, quantity, customFieldsJson) {
 
@@ -3607,7 +3398,7 @@
                     Enter your WhatsApp number so we can send you the preview of your customized design.
                   </p>
 
-                  <div class="mt-4 flex items-center border border-[#e5e7eb] rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-green-500">
+                  <div class="mt-4 flex items-center border border-[#e5e7eb] rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-green-500">
 
                     <span class="px-3 bg-gray-50 text-gray-600 text-sm border-r">
                       +91
@@ -3805,7 +3596,7 @@
           html += `
             <select id="${fieldId}" name="${fieldName}"
                     class="custom-input w-full border border-gray-300 rounded-lg p-3 text-sm
-                           focus:border-[#e39f32] focus:ring-2 focus:ring-[#e39f32] outline-none transition"
+                           focus:border-[#e39f32] focus:ring-1 focus:ring-[#e39f32] outline-none transition"
                     ${field.required ? "required" : ""}>
               <option value="">-- Select ${escapeHtml(fieldLabel)} --</option>
               ${options
@@ -5009,12 +4800,6 @@
   }
 
 
-
-
-
-
-
-
   // ═══════════════════════════════════════════════════════════════════════════
   //  STARS + TOAST
   // ═══════════════════════════════════════════════════════════════════════════
@@ -5048,6 +4833,73 @@
     clearTimeout(toastEl._timeout);
     toastEl._timeout = setTimeout(() => { toastEl.style.opacity = "0"; }, 2500);
   }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+//  BUY NOW OVERLAY
+// ═══════════════════════════════════════════════════════════════════════════
+
+function showBuyNowOverlay() {
+  // Remove any existing overlay first
+  const existing = document.getElementById('buyNowOverlay');
+  if (existing) existing.remove();
+
+  const overlayHTML = `
+    <div id="buyNowOverlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[2000] flex items-center justify-center">
+      <div class="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 shadow-2xl">
+        <div class="text-center">
+          <div class="flex justify-center mb-4">
+            <div class="w-12 h-12 border-4 border-[#e39f32] border-t-transparent rounded-full animate-spin"></div>
+          </div>
+          <h3 class="text-lg font-semibold text-[#1D3C4A] mb-2" id="overlayTitle">Preparing your order…</h3>
+          <p class="text-sm text-gray-500" id="overlaySub">Please wait a moment</p>
+          <div class="mt-4 space-y-2 text-left">
+            <div class="flex items-center gap-3 text-sm text-gray-400" id="step1">
+              <span class="w-2 h-2 rounded-full bg-gray-300"></span>
+              <span>Saving order details</span>
+            </div>
+            <div class="flex items-center gap-3 text-sm text-gray-400" id="step2">
+              <span class="w-2 h-2 rounded-full bg-gray-300"></span>
+              <span>Opening secure checkout</span>
+            </div>
+            <div class="flex items-center gap-3 text-sm text-gray-400" id="step3">
+              <span class="w-2 h-2 rounded-full bg-gray-300"></span>
+              <span>Redirecting to payment</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML('beforeend', overlayHTML);
+
+  // Update step 1 to active
+  const step1 = document.getElementById('step1');
+  if (step1) {
+    step1.querySelector('span:first-child').className = 'w-2 h-2 rounded-full bg-[#e39f32] animate-pulse';
+    step1.className = 'flex items-center gap-3 text-sm text-[#1D3C4A] font-medium';
+  }
+}
+
+function hideBuyNowOverlay() {
+  const overlay = document.getElementById('buyNowOverlay');
+  if (overlay) overlay.remove();
+}
+
+function updateOverlayStep(stepNumber, state) {
+  // state: 'active', 'done'
+  const step = document.getElementById('step' + stepNumber);
+  if (!step) return;
+
+  const dot = step.querySelector('span:first-child');
+  if (state === 'active') {
+    dot.className = 'w-2 h-2 rounded-full bg-[#e39f32] animate-pulse';
+    step.className = 'flex items-center gap-3 text-sm text-[#1D3C4A] font-medium';
+  } else if (state === 'done') {
+    dot.className = 'w-2 h-2 rounded-full bg-green-500';
+    step.className = 'flex items-center gap-3 text-sm text-green-600';
+  }
+}
 
   // ═══════════════════════════════════════════════════════════════════════════
   //  TRENDING BADGE  (shown when underTrendCategory === true)
@@ -5133,7 +4985,7 @@
       const defaultSize = sizeOrder[0];
       const defaultVariant = sizeMap[defaultSize][0];
 
-      variantCardsHTML = `
+    variantCardsHTML = `
     <div class="mt-5 space-y-5" id="variantSection">
 
       <!-- SIZE SELECTOR -->
@@ -5172,7 +5024,7 @@
             const isDefault = idx === 0;
             return `
             <button class="variant-card group flex flex-col items-center gap-1.5
-               rounded-xl border-2 transition-all duration-200
+               rounded-xl border border-gray-400 transition-all duration-200
                w-[90px] cursor-pointer overflow-hidden
                ${isDefault
                 ? "border-[#1D3C4A] shadow-md"
@@ -5500,7 +5352,7 @@
             
 
           
-                      <!-- Offer Overlay (inline) -->
+          <!-- Offer Overlay (inline) -->
           <div id="offerOverlay" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 opacity-0 pointer-events-none flex items-center justify-center transition-opacity duration-300">
           <div id="offerModal" class="hidden flex flex-col bg-white w-full max-w-md mx-4 rounded-xl p-5 border border-[#e5e7eb] shadow-2xl scale-95 opacity-0 transition-all duration-300">
           <button id="closeOffersBtn" class="absolute top-4 right-4 text-[#e39f32] hover:text-[#1D3C4A] transition-colors text-xl">✕</button>
@@ -5540,14 +5392,12 @@
                   Only ${safeProductData.currentStock} items left in stock
                 </p>
                 ${safeProductData.isCustomizable
-        ? `<span class="text-gray-300">|</span>
+                     ? `<span class="text-gray-300">|</span>
                      <a href="https://wa.me/919876543210" target="_blank"
                         class="flex items-center gap-1.5 bg-green-50 border border-green-500 text-green-700 px-2.5 py-1 rounded-md font-medium hover:bg-green-100 transition">
                        <i class="fa-brands fa-whatsapp text-green-600 text-sm"></i>
                        Need bulk quantities? Chat with us
-                     </a>`
-        : ""
-      }
+                     </a>` : ""}
               </div>
             </div>
 
@@ -5963,6 +5813,89 @@
     }
     checkboxes.forEach((c) => c.addEventListener("change", updateTotal));
     updateTotal();
+
+    if (btn) {
+      btn.addEventListener("click", () => handleBoughtTogetherAddToCart(cappedProducts));
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  //  BOUGHT TOGETHER — add current product + checked addons in one call
+  // ═══════════════════════════════════════════════════════════════════════════
+  async function handleBoughtTogetherAddToCart(addonProducts) {
+    const btn = document.getElementById("addToCartBtn");
+    const div = document.getElementById("boughtTogether");
+    if (!div) return;
+
+    const checkedBoxes = Array.from(div.querySelectorAll(".product-check:checked"));
+    const checkedIds = checkedBoxes.map((c) => Number(c.dataset.productId));
+    const checkedAddons = addonProducts.filter((p) => checkedIds.includes(p.productPrimeId));
+
+    if (!checkedAddons.length) {
+      showToast("Select at least one item", "error");
+      return;
+    }
+
+    // ── Current product (same variant/quantity rules as single add-to-cart) ──
+    const variant = getSelectedVariant();
+    const quantity = parseInt(document.getElementById("quantity")?.textContent || 1);
+    const currentProductPayload = buildCartPayload(variant, quantity, null);
+
+    // ── Addon products: flat/base products, no variant split ────────────────
+    const addonPayloads = checkedAddons.map((p) => ({
+      userId: currentProductPayload.userId,
+      sessionId: currentProductPayload.sessionId,
+      productId: p.productPrimeId,
+      variantId: null,
+      sku: p.currentSku,
+      selectedColor: p.selectedColor || null,
+      selectedSize: p.productSize || null,
+      titleName: p.productName,
+      unitPrice: p.currentSellingPrice,
+      mrpPrice: p.currentMrpPrice,
+      quantity: 1,
+      customFieldsJson: null,
+    }));
+
+    const items = [currentProductPayload, ...addonPayloads];
+
+    const originalBtnHtml = btn ? btn.innerHTML : "";
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Adding...`;
+    }
+
+    try {
+      const res = await apiAddMultipleToCart({ items });
+      const failed = res?.data?.failedItems || res?.failedItems || [];
+
+      if (failed.length) {
+        showToast(`Added ${items.length - failed.length} of ${items.length} items. Some items could not be added.`, "error");
+      } else {
+        showToast("Added to cart! 🛒", "success");
+      }
+
+      dispatchCartEvent();
+
+      // Keep current product's own add-to-cart button in sync, same as single-add flow
+      const pid = Number(safeProductData.productPrimeId);
+      addedToCartSet.add(pid);
+      document.querySelectorAll(".add-to-cart-btn").forEach((addBtn) => {
+        addBtn.innerHTML = `<i class="fa-solid fa-bag-shopping"></i> <span class="text-sm whitespace-nowrap">Go to Cart</span>`;
+        addBtn.style.background = "#e39f32";
+        addBtn.style.color = "#1D3C4A";
+        addBtn.style.fontWeight = "600";
+        addBtn.style.borderColor = "#e39f32";
+      });
+    } catch (err) {
+      console.error("[BoughtTogether] add error:", err);
+      showToast("Could not add items to cart. Please try again.", "error");
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = originalBtnHtml;
+      }
+    }
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -8033,5 +7966,31 @@ bg-gray-100 px-2 py-0.5 rounded-md">
       syncCardCartStates();
     });
   });
+
+
+  // ═══════════════════════════════════════════════════════════════════════════
+//  HANDLE SHIPROCKET RETURN PARAMETERS
+//  SR appends ?oid=xxx&ost=SUCCESS when customer completes payment
+// ═══════════════════════════════════════════════════════════════════════════
+
+(function handleShiprocketReturn() {
+  const params = new URLSearchParams(window.location.search);
+  const orderId = params.get('oid');
+  const status = params.get('ost');
+
+  if (orderId && status === 'SUCCESS') {
+    console.log('[SR] Order confirmed — SR oid:', orderId);
+    showToast('🎉 Order placed successfully!', 'success');
+    
+    // Optionally redirect to order success page
+    // setTimeout(() => {
+    //   window.location.href = `/Order-Success/order-success.html?orderId=${orderId}`;
+    // }, 2000);
+  }
+
+  if (status === 'FAILED') {
+    showToast('Payment failed. Please try again.', 'error');
+  }
+})();
 
 })();
